@@ -1,8 +1,8 @@
 import React, { useState, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Navbar          from '../components/Navbar';
-import Socials         from '../components/Socials';
-import PizzaCanvas     from '../components/PizzaCanvas';
+import Navbar from '../components/Navbar';
+import Socials from '../components/Socials';
+import PizzaCanvas from '../components/PizzaCanvas';
 import CategoryToolbar from '../components/CategoryToolbar';
 import { usePizzaStore } from '../context/PizzaContext';
 
@@ -22,8 +22,8 @@ const LABEL = {
 
 const BASE_PRICE = 10.99;
 const CHEESE_ADD = 1.50;
-const MEAT_ADD   = 1.20;
-const VEG_ADD    = 0.80;
+const MEAT_ADD = 1.20;
+const VEG_ADD = 0.80;
 
 function calcPrice(pizza) {
   return BASE_PRICE + CHEESE_ADD + pizza.meats.length * MEAT_ADD + pizza.vegetables.length * VEG_ADD;
@@ -38,8 +38,8 @@ function buildCompleted(dough, sauce, cheese, meats, vegs) {
 }
 
 function lockMessage(dough, sauce, cheese) {
-  if (!dough)  return 'Please select a dough first';
-  if (!sauce)  return 'Please select a sauce first';
+  if (!dough) return 'Please select a dough first';
+  if (!sauce) return 'Please select a sauce first';
   if (!cheese) return 'Please select a cheese first';
   return 'Complete the previous step first';
 }
@@ -74,7 +74,7 @@ function SavedPizzaCard({ pizza, onEdit, onDelete, onRename, exiting }) {
             onChange={e => setNameDraft(e.target.value)}
             onBlur={commitRename}
             onKeyDown={e => {
-              if (e.key === 'Enter')  { commitRename(); }
+              if (e.key === 'Enter') { commitRename(); }
               if (e.key === 'Escape') { setNameDraft(pizza.name); setRenaming(false); }
             }}
             autoFocus
@@ -105,17 +105,17 @@ function SavedPizzaCard({ pizza, onEdit, onDelete, onRename, exiting }) {
       <div className="spc-actions">
         <button className="spc-edit-btn" onClick={() => onEdit(pizza)} aria-label="Edit pizza">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
           </svg>
           Edit
         </button>
         <button className="spc-delete-btn" onClick={() => onDelete(pizza.id)} aria-label="Remove pizza">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="3 6 5 6 21 6"/>
-            <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
-            <path d="M10 11v6"/><path d="M14 11v6"/>
-            <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+            <polyline points="3 6 5 6 21 6" />
+            <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+            <path d="M10 11v6" /><path d="M14 11v6" />
+            <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
           </svg>
           Remove
         </button>
@@ -140,14 +140,14 @@ export default function PizzaBuilder() {
     draftName, editingId, editingName,
   } = draft;
 
-  const [lockMsg,    setLockMsg]    = useState('');
+  const [lockMsg, setLockMsg] = useState('');
   const [exitingIds, setExitingIds] = useState([]);
   const lockTimer = useRef(null);
 
-  const canAddToCart    = !!selectedDough && !!selectedSauce && !!selectedCheese;
-  const hasPizzas       = canAddToCart || pizzas.length > 0;
-  const totalCount      = pizzas.length + (canAddToCart ? 1 : 0);
-  const isEditing       = editingId !== null;
+  const canAddToCart = !!selectedDough && !!selectedSauce && !!selectedCheese;
+  const hasPizzas = canAddToCart || pizzas.length > 0;
+  const totalCount = pizzas.length + (canAddToCart ? 1 : 0);
+  const isEditing = editingId !== null;
   const nextPizzaNumber = pizzas.length + 1;
 
   const handleBuildAnother = useCallback(() => {
@@ -176,7 +176,7 @@ export default function PizzaBuilder() {
     }, 400);
   }, [removePizza]);
 
-  const unlocked  = buildUnlocked(selectedDough, selectedSauce, selectedCheese);
+  const unlocked = buildUnlocked(selectedDough, selectedSauce, selectedCheese);
   const completed = buildCompleted(selectedDough, selectedSauce, selectedCheese, selectedMeats, selectedVegetables);
 
   const handleCategoryChange = useCallback((id) => {
@@ -190,8 +190,8 @@ export default function PizzaBuilder() {
     setDraft({ activeCategory: id });
   }, [unlocked, selectedDough, selectedSauce, selectedCheese, setDraft]);
 
-  const handleDoughSelect  = useCallback((id) => { setDraft({ selectedDough:  id }); }, [setDraft]);
-  const handleSauceSelect  = useCallback((id) => { setDraft({ selectedSauce:  id }); }, [setDraft]);
+  const handleDoughSelect = useCallback((id) => { setDraft({ selectedDough: id }); }, [setDraft]);
+  const handleSauceSelect = useCallback((id) => { setDraft({ selectedSauce: id }); }, [setDraft]);
   const handleCheeseSelect = useCallback((id) => { setDraft({ selectedCheese: id }); }, [setDraft]);
 
   const handleMeatToggle = useCallback((id) => {
@@ -199,7 +199,7 @@ export default function PizzaBuilder() {
       const cur = prev.selectedMeats;
       const next = cur.includes(id) ? cur.filter(m => m !== id)
         : cur.length >= 4 ? cur
-        : [...cur, id];
+          : [...cur, id];
       return { selectedMeats: next };
     });
   }, [setDraft]);
@@ -209,7 +209,7 @@ export default function PizzaBuilder() {
       const cur = prev.selectedVegetables;
       const next = cur.includes(id) ? cur.filter(v => v !== id)
         : cur.length >= 6 ? cur
-        : [...cur, id];
+          : [...cur, id];
       return { selectedVegetables: next };
     });
   }, [setDraft]);
@@ -284,7 +284,7 @@ export default function PizzaBuilder() {
         {canAddToCart && (
           <button className="build-another-btn" onClick={handleBuildAnother} aria-label="Build another pizza">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+              <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
             </svg>
             BUILD ANOTHER
           </button>
@@ -297,8 +297,8 @@ export default function PizzaBuilder() {
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
             style={{ flexShrink: 0 }}>
-            <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
-            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+            <circle cx="9" cy="21" r="1" /><circle cx="20" cy="21" r="1" />
+            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
           </svg>
           IN DEN WARENKORB
           {totalCount > 1 && <span className="cart-btn-badge">{totalCount}</span>}
