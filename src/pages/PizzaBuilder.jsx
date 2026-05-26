@@ -5,29 +5,7 @@ import Socials from '../components/Socials';
 import PizzaCanvas from '../components/PizzaCanvas';
 import CategoryToolbar from '../components/CategoryToolbar';
 import { usePizzaStore } from '../context/PizzaContext';
-
-const LABEL = {
-  american: 'Würstchenrand', americanp: 'Käserand', thin: 'Dünn',
-  bbq: 'BBQ', garlic: 'Knoblauch', ketchup: 'Ketchup', pestos: 'Pesto', spicy: 'Spicy',
-  mozzarella: 'Mozzarella', chedar: 'Cheddar', gouda: 'Gouda',
-  pepperoni: 'Pepperoni', salami: 'Salami', bacon: 'Bacon', chicken: 'Chicken',
-  meatball: 'Meatball', beefhum: 'Beef Ham', fleisch: 'Fleisch',
-  turkeyhum: 'Turkey Ham', cheesesausage: 'Cheese Sausage',
-  mushroom: 'Mushroom', bellpepper: 'Bell Pepper', sweetcorn: 'Sweet Corn',
-  cherrytomato: 'Cherry Tomato', redonion: 'Red Onion', broccoli: 'Broccoli',
-  eggplant: 'Eggplant', zucchini: 'Zucchini', dicedtomato: 'Diced Tomato',
-  greenolives: 'Green Olives', blackolive: 'Black Olive', babyspinach: 'Baby Spinach',
-  bluecheese: 'Blue Cheese', pestocheese: 'Pesto Cheese',
-};
-
-const BASE_PRICE = 10.99;
-const CHEESE_ADD = 1.50;
-const MEAT_ADD = 1.20;
-const VEG_ADD = 0.80;
-
-function calcPrice(pizza) {
-  return BASE_PRICE + CHEESE_ADD + pizza.meats.length * MEAT_ADD + pizza.vegetables.length * VEG_ADD;
-}
+import { LABEL, calcPrice } from '../utils/pizzaUtils';
 
 function buildUnlocked(dough, sauce, cheese) {
   return { dough: true, sauces: !!dough, cheese: !!sauce, meat: !!cheese, vegetables: !!cheese };

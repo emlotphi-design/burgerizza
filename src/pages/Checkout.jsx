@@ -5,6 +5,8 @@ import Socials from '../components/Socials';
 import { usePizzaStore } from '../context/PizzaContext';
 import { useAuth } from '../context/AuthContext';
 import { useCheckoutStore } from '../store/checkoutStore';
+import { calcPrice } from '../utils/pizzaUtils';
+import GlassInput from '../components/GlassInput';
 
 /* ─── Delivery profile helpers ─────────────────────────── */
 const REQUIRED_DELIVERY = ['fullName', 'street', 'houseNumber', 'postalCode', 'city', 'phone', 'email'];
@@ -43,12 +45,6 @@ function saveGuestProfile(p) {
   try { localStorage.setItem('bz_profile', JSON.stringify(p)); } catch {}
 }
 
-/* ─── Price calc ────────────────────────────────────────── */
-const BASE_PRICE = 10.99, CHEESE_ADD = 1.50, MEAT_ADD = 1.20, VEG_ADD = 0.80;
-function calcPrice(p) {
-  return BASE_PRICE + CHEESE_ADD + p.meats.length * MEAT_ADD + p.vegetables.length * VEG_ADD;
-}
-
 /* ─── Step indicator (dynamic) ─────────────────────────── */
 function StepDots({ step, labels }) {
   return (
@@ -70,23 +66,6 @@ function StepDots({ step, labels }) {
   );
 }
 
-/* ─── Glass Input ───────────────────────────────────────── */
-function GlassInput({ label, name, value, onChange, type = 'text', placeholder, required }) {
-  return (
-    <div className="co-field">
-      <label className="co-label">{label}{required && <span className="co-required">*</span>}</label>
-      <input
-        className="co-input"
-        type={type}
-        name={name}
-        value={value}
-        onChange={onChange}
-        placeholder={placeholder}
-        autoComplete={name}
-      />
-    </div>
-  );
-}
 
 /* ═══════════════════════════════════════════════════════
    STEP 1 — Delivery form
