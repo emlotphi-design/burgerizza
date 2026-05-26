@@ -1,0 +1,195 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@700,800,900&display=swap');
+
+/* ══════════════════════════════════════════
+   GLOBAL CUSTOM PROPERTIES
+══════════════════════════════════════════ */
+:root {
+  --nav-h: 72px;
+}
+
+@media (max-width: 900px) {
+  :root {
+    --nav-h: 68px;
+  }
+}
+
+/* ══════════════════════════════════════════
+   RESET
+══════════════════════════════════════════ */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ══════════════════════════════════════════
+   PAGE
+══════════════════════════════════════════ */
+.page {
+  min-height: 100vh;
+  background-image: url('/background.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+}
+
+/* ── Grain texture ─────────────────────── */
+.grain {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0.065;
+  mix-blend-mode: multiply;
+}
+
+/* ══════════════════════════════════════════
+   BACKGROUND SCATTER ICONS
+══════════════════════════════════════════ */
+.scatter {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.sc {
+  position: absolute;
+  display: block;
+  color: rgba(26, 10, 0, 0.10);
+}
+
+.sc svg {
+  display: block;
+}
+
+/* Positions mirroring the reference layout */
+.sa {
+  width: 82px;
+  top: 2%;
+  left: 1%;
+  transform: rotate(-18deg);
+}
+
+.sb {
+  width: 100px;
+  top: 4%;
+  left: 12%;
+  transform: rotate(10deg);
+}
+
+.sc_ {
+  width: 54px;
+  top: 10%;
+  left: 6%;
+  transform: rotate(5deg);
+}
+
+.sd {
+  width: 64px;
+  top: 2%;
+  left: 26%;
+  transform: rotate(-12deg);
+}
+
+.se {
+  width: 72px;
+  top: 4%;
+  right: 4%;
+  transform: rotate(22deg);
+}
+
+.sf {
+  width: 98px;
+  top: 36%;
+  right: 0%;
+  transform: rotate(-8deg);
+}
+
+.sg {
+  width: 56px;
+  top: 52%;
+  right: 8%;
+  transform: rotate(16deg);
+}
+
+.sh {
+  width: 68px;
+  top: 70%;
+  right: 2%;
+  transform: rotate(-20deg);
+}
+
+.si {
+  width: 78px;
+  bottom: 18%;
+  left: 0%;
+  transform: rotate(8deg);
+}
+
+.sj {
+  width: 106px;
+  bottom: 10%;
+  left: 12%;
+  transform: rotate(-22deg);
+}
+
+.sk {
+  width: 58px;
+  bottom: 24%;
+  right: 4%;
+  transform: rotate(18deg);
+}
+
+.sl {
+  width: 82px;
+  top: 65%;
+  left: 6%;
+  transform: rotate(-6deg);
+}
+
+body {
+  background-image: url('../assets/backgrounds/bg.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  min-height: 100vh;
+}
+
+/* ══════════════════════════════════════════
+   PAGE ENTER TRANSITION
+══════════════════════════════════════════ */
+@keyframes pageEnter {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.page-enter {
+  animation: pageEnter 0.42s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
