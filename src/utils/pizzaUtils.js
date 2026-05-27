@@ -1,3 +1,6 @@
+import { calculatePizzaPrice } from './pizzaPriceUtils';
+import { calcBurgerPrice } from '../features/burger/utils/burgerUtils';
+
 export const LABEL = {
   american: 'Würstchenrand', americanp: 'Käserand', thin: 'Dünn',
   bbq: 'BBQ', garlic: 'Knoblauch', ketchup: 'Ketchup', pestos: 'Pesto', spicy: 'Spicy',
@@ -12,11 +15,7 @@ export const LABEL = {
   bluecheese: 'Blue Cheese', pestocheese: 'Pesto Cheese',
 };
 
-export const BASE_PRICE = 10.99;
-export const CHEESE_ADD = 1.50;
-export const MEAT_ADD   = 1.20;
-export const VEG_ADD    = 0.80;
-
-export function calcPrice(pizza) {
-  return BASE_PRICE + CHEESE_ADD + pizza.meats.length * MEAT_ADD + pizza.vegetables.length * VEG_ADD;
+export function calcPrice(item) {
+  if (item?.type === 'burger') return calcBurgerPrice(item);
+  return calculatePizzaPrice(item);
 }

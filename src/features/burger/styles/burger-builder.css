@@ -1,0 +1,576 @@
+/* ═══════════════════════════════════════════════
+   BURGER BUILDER — feature styles
+   Clean foundation for step-by-step rebuild.
+════════════════════════════════════════════════ */
+
+
+/* ── Stage ──────────────────────────────────────
+   Fixed viewport height — mirrors pizza builder.
+   overflow: hidden prevents any page scroll.
+─────────────────────────────────────────────── */
+.bb-stage {
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  padding-top: var(--nav-h, 72px);
+}
+
+
+/* ── Workspace (centered content area) ─────────
+   Asymmetric padding shifts center up ~90px:
+   adding 200px bottom (vs original 60px) moves
+   the justify-content:center midpoint upward.
+─────────────────────────────────────────────── */
+.bb-workspace {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 32px;
+  padding: 0 24px 120px;
+}
+
+.bb-workspace__eyebrow {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 900;
+  font-size: 13px;
+  letter-spacing: 3.5px;
+  text-transform: uppercase;
+  color: rgba(26, 10, 0, 0.40);
+  margin: 0;
+}
+
+
+/* ── Builder canvas — square orbital stage ─────
+   Mirrors PizzaCanvas: square aspect-ratio,
+   all children absolutely positioned by %.
+─────────────────────────────────────────────── */
+.bb-builder-canvas {
+  position: relative;
+  width: min(520px, 85vw, calc(100vh - 240px));
+  aspect-ratio: 1;
+  transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+  contain: layout style;
+  isolation: isolate;
+}
+
+.bb-builder-canvas:hover {
+  transform: scale(1.015);
+}
+
+
+/* ── Wrapper paper — centered, slight tilt ─────*/
+.bb-wrapper-img {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(-2deg);
+  width: 68%;
+  height: auto;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+
+/* ── Bun base — same anchor, ~34% narrower ─────*/
+.bb-bun-img {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(-2deg);
+  width: 36%;
+  height: auto;
+  object-fit: contain;
+  z-index: 2;
+  pointer-events: none;
+  animation: bunFadeIn 0.32s ease forwards;
+}
+
+@keyframes bunFadeIn {
+  from { opacity: 0; scale: 0.90; }
+  to   { opacity: 1; scale: 1;    }
+}
+
+
+/* ── Orbital preview wrapper ────────────────── */
+.bb-preview-wrap {
+  animation: previewItemIn 0.26s cubic-bezier(0.22, 1, 0.36, 1) both;
+  will-change: transform, opacity;
+}
+
+@keyframes previewItemIn {
+  from { opacity: 0; scale: 0.72; }
+  to   { opacity: 1; scale: 1;    }
+}
+
+
+/* ── Selection halo — radial ring behind item ── */
+.bb-preview-wrap::before {
+  content: '';
+  position: absolute;
+  width: 190%;
+  height: 190%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.7);
+  border-radius: 50%;
+  background: radial-gradient(circle at center,
+      transparent 0%,
+      transparent 36%,
+      rgba(255, 215, 50, 0.18) 46%,
+      rgba(255, 215, 50, 0.32) 54%,
+      rgba(255, 200, 30, 0.12) 65%,
+      transparent 76%);
+  opacity: 0;
+  pointer-events: none;
+  will-change: transform, opacity;
+  transition:
+    opacity  0.28s ease,
+    transform 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.bb-preview-wrap--selected::before {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+
+/* ── Disabled preview wrap — mirrors pizza .preview-wrapper--disabled */
+.bb-preview-wrap--disabled {
+  opacity: 0.28;
+  pointer-events: none;
+  animation: none;
+  will-change: auto;
+}
+
+.bb-preview-wrap--disabled .bb-preview-btn {
+  transform: none;
+  transition: none;
+  cursor: not-allowed;
+}
+
+.bb-preview-wrap--disabled::before {
+  opacity: 0 !important;
+  transition: none;
+}
+
+
+/* ── Preview button ─────────────────────────── */
+.bb-preview-btn {
+  transition: transform 0.2s ease;
+  will-change: transform;
+}
+
+.bb-preview-btn:hover {
+  transform: scale(1.12);
+}
+
+.bb-preview-wrap--selected .bb-preview-btn {
+  transform: scale(1.08);
+}
+
+
+/* ── Preview label — tooltip, shown on hover ── */
+.bb-preview-label {
+  position: absolute;
+  bottom: calc(100% + 7px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(26, 10, 0, 0.70);
+  color: #fff;
+  font-family: 'Nunito', sans-serif;
+  font-size: clamp(9px, 1.4vw, 11px);
+  font-weight: 800;
+  letter-spacing: 0.3px;
+  padding: 4px 10px;
+  border-radius: 8px;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 20;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.22);
+  opacity: 0;
+  transition: opacity 0.22s ease;
+}
+
+.bb-preview-wrap:hover .bb-preview-label {
+  opacity: 1;
+}
+
+
+/* ── Meat layer — stacks above bun, below sauces */
+.bb-meat-img {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 36%;
+  height: auto;
+  object-fit: contain;
+  pointer-events: none;
+  animation: meatFadeIn 0.28s ease forwards;
+}
+
+@keyframes meatFadeIn {
+  from { opacity: 0; scale: 0.92; }
+  to   { opacity: 1; scale: 1;    }
+}
+
+
+/* ── Top bun — drops in above all layers on ORDER ─
+   Uses individual translate/scale properties so the
+   inline transform: translate(-50%,-50%) rotate(-2deg)
+   stays authoritative (same pattern as bunFadeIn).
+─────────────────────────────────────────────────── */
+.bb-top-bun-img {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(-2deg);
+  height: auto;
+  object-fit: contain;
+  pointer-events: none;
+  z-index: 15;
+  animation: topBunDrop 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes topBunDrop {
+  from { opacity: 0; translate: 0 -52px; scale: 0.82; }
+  to   { opacity: 1; translate: 0 0;     scale: 1;    }
+}
+
+
+/* ── Sauce layer — stacks above bun, no rotation */
+.bb-sauce-img {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 36%;
+  height: auto;
+  object-fit: contain;
+  pointer-events: none;
+  animation: sauceFadeIn 0.28s ease forwards;
+}
+
+@keyframes sauceFadeIn {
+  from { opacity: 0; scale: 0.92; }
+  to   { opacity: 1; scale: 1;    }
+}
+
+
+/* ── Meat quantity bar — inside selected preview */
+.bb-qty-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(26, 10, 0, 0.72);
+  border-radius: 0 0 10px 10px;
+  padding: 3px 5px;
+  z-index: 2;
+}
+
+.bb-qty-btn {
+  width: 17px;
+  height: 17px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.92);
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 900;
+  color: #1A0A00;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.15s ease;
+  padding: 0;
+}
+
+.bb-qty-btn:hover {
+  background: #F5C518;
+}
+
+.bb-qty-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.bb-qty-count {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 900;
+  font-size: 11px;
+  color: #fff;
+  min-width: 12px;
+  text-align: center;
+  line-height: 1;
+}
+
+
+/* ── Ingredient card base ──────────────────────
+   Retained for selector components and
+   BurgerCartCard (used in Cart.jsx).
+─────────────────────────────────────────────── */
+.bb-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  gap: 10px;
+}
+
+.bb-limit-note {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 700;
+  font-size: 12px;
+  color: rgba(26, 10, 0, 0.45);
+  margin-bottom: 12px;
+}
+
+.bb-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+  padding: 14px 8px;
+  border-radius: 14px;
+  border: 2px solid rgba(26, 10, 0, 0.08);
+  background: rgba(255, 250, 235, 0.62);
+  backdrop-filter: blur(8px);
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.bb-card:hover {
+  border-color: #F5C518;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(245, 197, 24, 0.18);
+}
+
+.bb-card--selected {
+  border-color: #F5C518;
+  background: rgba(245, 197, 24, 0.12);
+  box-shadow: 0 4px 14px rgba(245, 197, 24, 0.22);
+}
+
+.bb-card--selected::after {
+  content: '✓';
+  position: absolute;
+  top: 5px;
+  right: 7px;
+  font-size: 11px;
+  font-weight: 900;
+  color: #1A0A00;
+}
+
+.bb-card--disabled {
+  opacity: 0.38;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.bb-card__dot {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18);
+}
+
+.bb-card__name {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
+  font-size: 11px;
+  color: #1A0A00;
+  text-align: center;
+  line-height: 1.3;
+}
+
+.bb-card__price {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 700;
+  font-size: 11px;
+  color: rgba(26, 10, 0, 0.45);
+}
+
+
+/* ── Burger cart card ──────────────────────────
+   Used in Cart.jsx — must remain intact.
+─────────────────────────────────────────────── */
+.bcc-card {
+  background: rgba(255, 250, 235, 0.62);
+  backdrop-filter: blur(12px);
+  border-radius: 20px;
+  border: 1.5px solid rgba(26, 10, 0, 0.08);
+  padding: 20px;
+  animation: cart-card-in 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.bcc-card--exit {
+  animation: cart-card-out 0.4s ease forwards;
+}
+
+@keyframes cart-card-out {
+  to { opacity: 0; transform: scale(0.92); }
+}
+
+.bcc-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.bcc-name {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 900;
+  font-size: 17px;
+  color: #1A0A00;
+}
+
+.bcc-tag {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
+  font-size: 10px;
+  color: #C8001E;
+  background: rgba(200, 0, 30, 0.08);
+  padding: 3px 9px;
+  border-radius: 20px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.bcc-ingredients {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 14px;
+}
+
+.bcc-row {
+  display: flex;
+  gap: 8px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 13px;
+}
+
+.bcc-row__cat {
+  font-weight: 800;
+  color: rgba(26, 10, 0, 0.45);
+  min-width: 72px;
+  flex-shrink: 0;
+}
+
+.bcc-row__vals {
+  font-weight: 700;
+  color: #1A0A00;
+}
+
+.bcc-divider {
+  height: 1px;
+  background: rgba(26, 10, 0, 0.08);
+  margin: 12px 0;
+}
+
+
+/* ── ORDER NOW button ───────────────────────────
+   Fixed pill, invisible until meat is selected.
+   position: fixed keeps it out of flex flow so
+   it never shifts the canvas when it appears.
+─────────────────────────────────────────────── */
+.bb-order-btn {
+  position: fixed;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%) translateY(14px);
+  z-index: 150;
+
+  padding: 15px 56px;
+  border-radius: 100px;
+  border: 1.5px solid rgba(255, 255, 255, 0.60);
+  cursor: pointer;
+  overflow: hidden;
+
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.96) 0%,
+    #FFD700 30%,
+    #FFC000 62%,
+    rgba(255, 248, 195, 0.98) 100%
+  );
+
+  box-shadow:
+    0 8px 32px rgba(255, 185, 0, 0.40),
+    0 2px 0   rgba(255, 255, 255, 0.60) inset,
+    0 -1px 0  rgba(180, 110, 0, 0.18) inset;
+
+  font-family: 'Nunito', sans-serif;
+  font-size: 14px;
+  font-weight: 900;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: #1A0A00;
+
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    opacity  0.40s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.40s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.22s ease;
+}
+
+/* Glass highlight streak */
+.bb-order-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 52%;
+  border-radius: 100px 100px 0 0;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.52) 0%,
+    rgba(255, 255, 255, 0.00) 100%
+  );
+  pointer-events: none;
+}
+
+.bb-order-btn--visible {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateX(-50%) translateY(0);
+}
+
+.bb-order-btn--visible:hover {
+  transform: translateX(-50%) translateY(-3px);
+  box-shadow:
+    0 16px 48px rgba(255, 185, 0, 0.58),
+    0 2px 0   rgba(255, 255, 255, 0.75) inset,
+    0 -1px 0  rgba(180, 110, 0, 0.18) inset;
+}
+
+.bb-order-btn--visible:active {
+  transform: translateX(-50%) translateY(-1px);
+}
+
+
+/* ── Responsive ─────────────────────────────── */
+@media (max-width: 600px) {
+  .bb-builder-canvas:hover {
+    transform: none;
+  }
+
+  .bb-order-btn {
+    bottom: 20px;
+    padding: 13px 42px;
+    font-size: 13px;
+    letter-spacing: 2.5px;
+  }
+}

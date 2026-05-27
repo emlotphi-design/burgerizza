@@ -5,6 +5,7 @@ import Socials     from '../components/Socials';
 import PizzaCanvas from '../components/PizzaCanvas';
 import { usePizzaStore } from '../context/PizzaContext';
 import { LABEL, calcPrice } from '../utils/pizzaUtils';
+import BurgerCartCard from '../features/burger/components/BurgerCartCard';
 
 function EmptyCart({ onBuild }) {
   return (
@@ -63,6 +64,18 @@ export default function Cart() {
 
         <div className="cart-pizzas-list">
           {pizzas.map((pizza, idx) => {
+            if (pizza.type === 'burger') {
+              return (
+                <BurgerCartCard
+                  key={pizza.id}
+                  burger={pizza}
+                  isExiting={exitingIds.includes(pizza.id)}
+                  animDelay={idx * 80}
+                  onRemove={handleRemove}
+                />
+              );
+            }
+
             const qty       = pizza.quantity || 1;
             const unitPrice = calcPrice(pizza);
             const subtotal  = unitPrice * qty;

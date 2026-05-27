@@ -1,6 +1,8 @@
+import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { usePizzaStore } from '../context/PizzaContext.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
+import MobileMenu from './MobileMenu.jsx';
 
 /* Pages where the Home button is NOT shown */
 const HOME_ROUTES = new Set(['/', '/build-pizza']);
@@ -57,8 +59,10 @@ export default function Navbar() {
   const { isLoggedIn } = useAuth() as any;
 
   const showHome = !HOME_ROUTES.has(location.pathname);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   return (
+    <>
     <nav className="nav">
       {/* Brand — navigates to home without hard reload */}
       <button className="brand" aria-label="Zur Startseite" onClick={() => navigate('/')}>
@@ -105,8 +109,10 @@ export default function Navbar() {
           <IconUser />
         </button>
 
-        <button className="nav-btn" aria-label="Menü"><IconMenu /></button>
+        <button className="nav-btn" aria-label="Menü" onClick={() => setMenuOpen(true)}><IconMenu /></button>
       </div>
     </nav>
+    {menuOpen && <MobileMenu onClose={() => setMenuOpen(false)} />}
+    </>
   );
 }

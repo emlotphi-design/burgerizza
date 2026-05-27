@@ -164,6 +164,27 @@ export function PizzaProvider({ children }) {
     writeLS('bz_draft', newDraft);
   }, []);
 
+  const addBurger = useCallback((burgerDraft) => {
+    const id = nextId();
+    setPizzas(prev => {
+      const burger = {
+        id,
+        type: 'burger',
+        name: burgerDraft.name?.trim() || `Custom Burger #${prev.length + 1}`,
+        bun: burgerDraft.bun,
+        topBun: burgerDraft.bun,
+        meats: burgerDraft.meats ?? {},
+        cheese: burgerDraft.cheese ?? null,
+        sauces: burgerDraft.sauces ?? [],
+        vegetables: burgerDraft.vegetables ?? [],
+        quantity: 1,
+      };
+      const next = [...prev, burger];
+      writeLS('bz_pizzas', next);
+      return next;
+    });
+  }, []);
+
   const clearCart = useCallback(() => {
     setPizzas([]);
     writeLS('bz_pizzas', []);
@@ -184,6 +205,7 @@ export function PizzaProvider({ children }) {
       setDraft, clearDraft, saveDraftAsPizza,
       removePizza, setQuantity, renamePizza,
       startEditing, clearCart, replaceCart,
+      addBurger,
     }}>
       {children}
     </Ctx.Provider>
