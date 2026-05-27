@@ -156,6 +156,13 @@
   transform: rotate(-6deg);
 }
 
+html {
+  /* Always reserve the scrollbar gutter so its appearance/disappearance
+     never shifts page width during route transitions. */
+  overflow-y: scroll;
+  scrollbar-gutter: stable;
+}
+
 body {
   background-image: url('../assets/backgrounds/bg.png');
   background-size: cover;

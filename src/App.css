@@ -3,9 +3,12 @@
 @import './styles/navbar.css';
 @import './styles/hero.css';
 @import './styles/social.css';
+@import './styles/builder-card.css';
 @import './styles/pizza-builder.css';
 @import './styles/cart.css';
 @import './styles/checkout.css';
 @import './styles/auth.css';
 @import './styles/profile.css';
+@import './styles/menu-modal.css';
+@import './styles/category-page.css';
 @import './features/burger/styles/burger-builder.css';

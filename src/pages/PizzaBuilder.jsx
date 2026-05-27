@@ -45,11 +45,11 @@ function SavedPizzaCard({ pizza, onEdit, onDelete, onRename, exiting }) {
   ].filter(Boolean);
 
   return (
-    <div className={`saved-pizza-card${exiting ? ' saved-pizza-card--exit' : ''}`}>
-      <div className="spc-header">
+    <div className={`bpc-card${exiting ? ' bpc-card--exit' : ''}`}>
+      <div className="bpc-header">
         {renaming ? (
           <input
-            className="spc-name-input"
+            className="bpc-name-input"
             value={nameDraft}
             onChange={e => setNameDraft(e.target.value)}
             onBlur={commitRename}
@@ -61,13 +61,13 @@ function SavedPizzaCard({ pizza, onEdit, onDelete, onRename, exiting }) {
             maxLength={28}
           />
         ) : (
-          <span className="spc-name spc-name--editable" onClick={() => { setNameDraft(pizza.name); setRenaming(true); }} title="Click to rename">
+          <span className="bpc-name bpc-name--editable" onClick={() => { setNameDraft(pizza.name); setRenaming(true); }} title="Click to rename">
             {pizza.name}
           </span>
         )}
-        <span className="spc-price">€{price.toFixed(2)}</span>
+        <span className="bpc-price">€{price.toFixed(2)}</span>
       </div>
-      <div className="spc-preview">
+      <div className="bpc-image-wrap">
         <PizzaCanvas
           activeCategory=""
           selectedDough={pizza.dough}
@@ -78,19 +78,19 @@ function SavedPizzaCard({ pizza, onEdit, onDelete, onRename, exiting }) {
           size="88px"
         />
       </div>
-      <p className="spc-ingredients">
+      <p className="bpc-summary">
         {ingredients.slice(0, 3).join(' · ')}
-        {ingredients.length > 3 && <span className="spc-more"> +{ingredients.length - 3}</span>}
+        {ingredients.length > 3 && <span className="bpc-more"> +{ingredients.length - 3}</span>}
       </p>
-      <div className="spc-actions">
-        <button className="spc-edit-btn" onClick={() => onEdit(pizza)} aria-label="Edit pizza">
+      <div className="bpc-actions">
+        <button className="bpc-edit-btn" onClick={() => onEdit(pizza)} aria-label="Edit pizza">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
             <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
           </svg>
           Edit
         </button>
-        <button className="spc-delete-btn" onClick={() => onDelete(pizza.id)} aria-label="Remove pizza">
+        <button className="bpc-remove-btn" onClick={() => onDelete(pizza.id)} aria-label="Remove pizza">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <polyline points="3 6 5 6 21 6" />
             <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
@@ -245,9 +245,9 @@ export default function PizzaBuilder() {
       </main>
 
       {pizzaItems.length > 0 && (
-        <div className="saved-pizzas-panel">
-          <p className="saved-pizzas-label">YOUR PIZZAS</p>
-          <div className="saved-pizzas-list">
+        <div className="bpc-panel">
+          <p className="bpc-panel-label">YOUR PIZZAS</p>
+          <div className="bpc-panel-list">
             {pizzaItems.map(pizza => (
               <SavedPizzaCard
                 key={pizza.id}

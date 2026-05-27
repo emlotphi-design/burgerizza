@@ -2,12 +2,10 @@ import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const MENU_ITEMS = [
-  { label: 'Build Your Pizza', path: '/build-pizza'  },
-  { label: 'American Pizza',   path: '/menu'         },
-  { label: 'Italian Pizza',    path: '/menu'         },
   { label: 'Appetizers',       path: '/coming-soon'  },
   { label: 'Drinks',           path: '/menu'         },
-  { label: 'My Pizzas',        path: '/cart'         },
+  { label: 'My Pizzas',        path: '/my-pizzas'    },
+  { label: 'My Burgers',       path: '/my-burgers'   },
   { label: 'Contact Us',       path: '/coming-soon'  },
   { label: 'About Us',         path: '/coming-soon'  },
   { label: 'Support',          path: '/coming-soon'  },

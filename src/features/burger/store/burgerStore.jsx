@@ -2,8 +2,8 @@ import { createContext, useContext, useState, useCallback } from 'react';
 
 export const DEFAULT_BURGER_DRAFT = {
   bun: null,
-  meats: {},   // { [meatId]: quantity }
-  cheese: null,
+  meats: {},    // { [meatId]: quantity }
+  cheeses: {},  // { [cheeseId]: quantity }
   sauces: [],
   vegetables: [],
   wrapper: null,
@@ -28,6 +28,11 @@ export function BurgerProvider({ children }) {
     // Migrate old array format to object map
     if (Array.isArray(stored.meats)) {
       stored.meats = Object.fromEntries((stored.meats).map(id => [id, 1]));
+    }
+    // Migrate old scalar cheese to object map
+    if (stored.cheese != null && !stored.cheeses) {
+      stored.cheeses = { [stored.cheese]: 1 };
+      delete stored.cheese;
     }
     return { ...DEFAULT_BURGER_DRAFT, ...stored };
   });

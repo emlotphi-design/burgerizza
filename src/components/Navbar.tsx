@@ -4,8 +4,8 @@ import { usePizzaStore } from '../context/PizzaContext.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 import MobileMenu from './MobileMenu.jsx';
 
-/* Pages where the Home button is NOT shown */
-const HOME_ROUTES = new Set(['/', '/build-pizza']);
+/* Pages where the Home button IS shown */
+const HOME_ROUTES = new Set(['/cart']);
 
 function IconHome() {
   return (
@@ -88,7 +88,7 @@ export default function Navbar() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { isLoggedIn } = useAuth() as any;
 
-  const showHome = !HOME_ROUTES.has(location.pathname);
+  const showHome = HOME_ROUTES.has(location.pathname);
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (

@@ -16,9 +16,9 @@ export const BURGER_MEATS = [
 ];
 
 export const BURGER_CHEESES = [
-  { id: 'cheddar', name: 'Cheddar', price: 1.49, category: 'cheese', color: '#F5B800' },
-  { id: 'edam',    name: 'Edam',    price: 1.49, category: 'cheese', color: '#E8B040' },
-  { id: 'gouda',   name: 'Gouda',   price: 1.49, category: 'cheese', color: '#E8C060' },
+  { id: 'cheddar', name: 'Cheddar', price: 1.49, category: 'cheese', color: '#F5B800', hasQty: true },
+  { id: 'edam',    name: 'Edam',    price: 1.49, category: 'cheese', color: '#E8B040', hasQty: true },
+  { id: 'gouda',   name: 'Gouda',   price: 1.49, category: 'cheese', color: '#E8C060', hasQty: true },
 ];
 
 export const BURGER_SAUCES = [

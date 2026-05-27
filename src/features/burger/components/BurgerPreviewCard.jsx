@@ -10,12 +10,23 @@ export default function BurgerPreviewCard({ burger, isExiting, onEdit, onRemove 
     return Object.entries(m).map(([id, qty]) => ({ id, qty }));
   })();
 
+  const cheeseEntries = (() => {
+    const c = burger.cheeses;
+    if (c && typeof c === 'object' && !Array.isArray(c)) {
+      return Object.entries(c).map(([id, qty]) => ({ id, qty }));
+    }
+    if (burger.cheese) return [{ id: burger.cheese, qty: 1 }];
+    return [];
+  })();
+
   const parts = [
-    burger.bun    && (BURGER_LABEL[burger.bun]    ?? burger.bun),
+    burger.bun && (BURGER_LABEL[burger.bun] ?? burger.bun),
     ...meatEntries.map(({ id, qty }) =>
       qty > 1 ? `${BURGER_LABEL[id] ?? id} ×${qty}` : (BURGER_LABEL[id] ?? id)
     ),
-    burger.cheese && (BURGER_LABEL[burger.cheese] ?? burger.cheese),
+    ...cheeseEntries.map(({ id, qty }) =>
+      qty > 1 ? `${BURGER_LABEL[id] ?? id} ×${qty}` : (BURGER_LABEL[id] ?? id)
+    ),
     ...(burger.sauces     ?? []).map(id => BURGER_LABEL[id] ?? id),
     ...(burger.vegetables ?? []).map(id => BURGER_LABEL[id] ?? id),
   ].filter(Boolean);
@@ -28,8 +39,8 @@ export default function BurgerPreviewCard({ burger, isExiting, onEdit, onRemove 
       </div>
 
       {burger.image && (
-        <div className="bpc-thumb-wrap">
-          <img className="bpc-thumb" src={burger.image} alt={burger.name} />
+        <div className="bpc-image-wrap">
+          <img className="bpc-image" src={burger.image} alt={burger.name} />
         </div>
       )}
 
@@ -40,14 +51,14 @@ export default function BurgerPreviewCard({ burger, isExiting, onEdit, onRemove 
 
       <div className="bpc-actions">
         <button className="bpc-edit-btn" onClick={() => onEdit(burger)} aria-label="Edit burger">
-          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
             <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
           </svg>
           Edit
         </button>
         <button className="bpc-remove-btn" onClick={() => onRemove(burger.id)} aria-label="Remove burger">
-          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <polyline points="3 6 5 6 21 6"/>
             <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
             <path d="M10 11v6"/><path d="M14 11v6"/>

@@ -13,23 +13,31 @@ const SIDEBAR_ITEMS = [
   { id: 'vegetables', label: 'VEGETABLES', icon: vegetablesIcon },
 ];
 
-export default function BurgerSidebar({ activeItem, onSelect }) {
+export default function BurgerSidebar({ activeItem, onSelect, bunSelected }) {
   return (
     <nav className="bs-rail" aria-label="Burger categories">
-      {SIDEBAR_ITEMS.map(item => (
-        <button
-          key={item.id}
-          className={`bs-item${activeItem === item.id ? ' bs-item--active' : ''}`}
-          onClick={() => onSelect(item.id)}
-          aria-label={item.label}
-          aria-pressed={activeItem === item.id}
-        >
-          <div className="bs-item__icon">
-            <img src={item.icon} alt="" className="bs-item__icon-img" />
-          </div>
-          <span className="bs-item__label">{item.label}</span>
-        </button>
-      ))}
+      {SIDEBAR_ITEMS.map(item => {
+        const locked = !bunSelected && item.id !== 'bun';
+        return (
+          <button
+            key={item.id}
+            className={[
+              'bs-item',
+              activeItem === item.id ? 'bs-item--active' : '',
+              locked ? 'bs-item--locked' : '',
+            ].filter(Boolean).join(' ')}
+            onClick={() => { if (!locked) onSelect(item.id); }}
+            aria-label={item.label}
+            aria-pressed={activeItem === item.id}
+            aria-disabled={locked}
+          >
+            <div className="bs-item__icon">
+              <img src={item.icon} alt="" className="bs-item__icon-img" />
+            </div>
+            <span className="bs-item__label">{item.label}</span>
+          </button>
+        );
+      })}
     </nav>
   );
 }

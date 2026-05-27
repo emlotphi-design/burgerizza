@@ -8,11 +8,21 @@ import { useBurgerStore } from '../features/burger/store/burgerStore.jsx';
 import { LABEL, calcPrice } from '../utils/pizzaUtils';
 import BurgerCartCard from '../features/burger/components/BurgerCartCard';
 
+// Correct unit price for all item types
+function getUnitPrice(item) {
+  if (item.type === 'menu') return item.price ?? 0;
+  return calcPrice(item);
+}
+
 function EmptyCart({ onBuild }) {
+  const navigate = useNavigate();
   return (
     <main className="cart-empty">
       <p className="cart-empty-msg">Dein Warenkorb ist leer.</p>
-      <button className="btn" onClick={onBuild}>PIZZA BAUEN</button>
+      <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', justifyContent: 'center' }}>
+        <button className="btn" onClick={onBuild}>PIZZA BAUEN</button>
+        <button className="btn" onClick={() => navigate('/menu')}>MENÜ</button>
+      </div>
     </main>
   );
 }
@@ -39,13 +49,13 @@ export default function Cart() {
 
   const handleEditBurger = useCallback((burger) => {
     setBurgerDraft({
-      bun: burger.bun,
-      meats: burger.meats ?? {},
-      cheese: burger.cheese ?? null,
-      sauces: burger.sauces ?? [],
+      bun:        burger.bun,
+      meats:      burger.meats   ?? {},
+      cheeses:    burger.cheeses ?? (burger.cheese ? { [burger.cheese]: 1 } : {}),
+      sauces:     burger.sauces  ?? [],
       vegetables: burger.vegetables ?? [],
-      name: burger.name,
-      editingId: burger.id,
+      name:       burger.name,
+      editingId:  burger.id,
     });
     removePizza(burger.id);
     navigate('/build-burger');
@@ -61,12 +71,21 @@ export default function Cart() {
     );
   }
 
-  // Exclude exiting pizzas from the total so it updates instantly
-  const grandTotal = pizzas
-    .filter(p => !exitingIds.includes(p.id))
-    .reduce((sum, p) => sum + calcPrice(p) * (p.quantity || 1), 0);
+  const hasMenuItems = pizzas.some(p => p.type === 'menu');
+  const visibleItems = pizzas.filter(p => !exitingIds.includes(p.id));
+  const visibleCount = visibleItems.length;
 
-  const visibleCount = pizzas.filter(p => !exitingIds.includes(p.id)).length;
+  const grandTotal = visibleItems.reduce(
+    (sum, p) => sum + getUnitPrice(p) * (p.quantity || 1),
+    0
+  );
+
+  // Cart heading adapts to item types
+  const cartLabel = hasMenuItems ? 'WARENKORB' : (visibleCount > 1 ? 'PIZZEN' : 'PIZZA');
+  const cartPrefix = hasMenuItems ? 'DEIN' : 'DEINE';
+  const itemWord = hasMenuItems ? 'Artikel' : 'Pizzen';
+  const backLabel = hasMenuItems ? '← Zurück zum Menü' : '← Zurück zum Builder';
+  const backPath  = hasMenuItems ? '/menu' : '/build-pizza';
 
   return (
     <div className="cart-page page-enter">
@@ -74,12 +93,14 @@ export default function Cart() {
 
       <main className="cart-main">
         <h1 className="heading" style={{ marginBottom: '28px' }}>
-          <span className="h-dark">DEINE </span>
-          <span className="h-red">{visibleCount > 1 ? 'PIZZEN' : 'PIZZA'}</span>
+          <span className="h-dark">{cartPrefix} </span>
+          <span className="h-red">{cartLabel}</span>
         </h1>
 
         <div className="cart-pizzas-list">
           {pizzas.map((pizza, idx) => {
+
+            // ── Burger card ─────────────────────────────
             if (pizza.type === 'burger') {
               return (
                 <BurgerCartCard
@@ -95,6 +116,83 @@ export default function Cart() {
               );
             }
 
+            // ── Menu item card ───────────────────────────
+            if (pizza.type === 'menu') {
+              const qty      = pizza.quantity || 1;
+              const unitPrice = pizza.price ?? 0;
+              const subtotal  = unitPrice * qty;
+              const exiting   = exitingIds.includes(pizza.id);
+
+              return (
+                <div
+                  key={pizza.id}
+                  className={`cart-pizza-card${exiting ? ' cart-pizza-card--exit' : ''}`}
+                  style={{ animationDelay: `${idx * 80}ms` }}
+                >
+                  <div className="cart-layout">
+
+                    <div className="cart-preview menu-item-emoji-area">
+                      <span className="menu-item-cart-emoji" aria-hidden="true">
+                        {pizza.emoji}
+                      </span>
+                    </div>
+
+                    <div className="cart-details">
+                      <div className="cart-pizza-name-row">
+                        <span className="cart-pizza-name">{pizza.name}</span>
+                      </div>
+
+                      {pizza.description && (
+                        <p className="menu-item-cart-desc">{pizza.description}</p>
+                      )}
+
+                      <div className="cart-divider" />
+
+                      <div className="cart-qty-row">
+                        <span className="cart-qty-label">Menge</span>
+                        <div className="qty-ctrl">
+                          <button className="qty-btn" onClick={() => setQuantity(pizza.id, qty - 1)} aria-label="Weniger">−</button>
+                          <span className="qty-val">{qty}</span>
+                          <button className="qty-btn" onClick={() => setQuantity(pizza.id, qty + 1)} aria-label="Mehr">+</button>
+                        </div>
+                      </div>
+
+                      <div className="cart-price-block">
+                        <div className="cart-price-row">
+                          <span>Stückpreis</span>
+                          <span>€{unitPrice.toFixed(2)}</span>
+                        </div>
+                        <div className="cart-price-row cart-price-total">
+                          <span>Subtotal</span>
+                          <span>€{subtotal.toFixed(2)}</span>
+                        </div>
+                      </div>
+
+                      <div className="cart-divider" />
+
+                      <div className="cart-card-actions">
+                        <button
+                          className="cart-delete-btn"
+                          onClick={() => handleRemove(pizza.id)}
+                          aria-label="Artikel entfernen"
+                        >
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                            <polyline points="3 6 5 6 21 6"/>
+                            <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+                            <path d="M10 11v6"/><path d="M14 11v6"/>
+                            <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+                          </svg>
+                          Entfernen
+                        </button>
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+              );
+            }
+
+            // ── Pizza card ───────────────────────────────
             const qty       = pizza.quantity || 1;
             const unitPrice = calcPrice(pizza);
             const subtotal  = unitPrice * qty;
@@ -199,7 +297,7 @@ export default function Cart() {
         <div className="cart-summary">
           {visibleCount > 1 && (
             <div className="cart-summary-total">
-              <span>Gesamtbetrag ({visibleCount} Pizzen)</span>
+              <span>Gesamtbetrag ({visibleCount} {itemWord})</span>
               <span>€{grandTotal.toFixed(2)}</span>
             </div>
           )}
@@ -213,8 +311,8 @@ export default function Cart() {
           </button>
         </div>
 
-        <button className="cart-back-btn" onClick={() => navigate('/build-pizza')}>
-          ← Zurück zum Builder
+        <button className="cart-back-btn" onClick={() => navigate(backPath)}>
+          {backLabel}
         </button>
       </main>
 

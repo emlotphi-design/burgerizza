@@ -14,6 +14,15 @@ export default function BurgerCartCard({ burger, isExiting, animDelay, onRemove,
     return Object.entries(m).map(([id, qty]) => ({ id, qty }));
   })();
 
+  const cheeseEntries = (() => {
+    const c = burger.cheeses;
+    if (c && typeof c === 'object' && !Array.isArray(c)) {
+      return Object.entries(c).map(([id, qty]) => ({ id, qty }));
+    }
+    if (burger.cheese) return [{ id: burger.cheese, qty: 1 }];
+    return [];
+  })();
+
   const rows = [
     burger.bun             && { cat: 'Brötchen', vals: [BURGER_LABEL[burger.bun] ?? burger.bun] },
     meatEntries.length > 0 && {
@@ -22,9 +31,14 @@ export default function BurgerCartCard({ burger, isExiting, animDelay, onRemove,
         qty > 1 ? `${BURGER_LABEL[id] ?? id} ×${qty}` : (BURGER_LABEL[id] ?? id)
       ),
     },
-    burger.cheese              && { cat: 'Käse',    vals: [BURGER_LABEL[burger.cheese] ?? burger.cheese] },
-    burger.sauces?.length > 0  && { cat: 'Sauce',   vals: burger.sauces.map(id => BURGER_LABEL[id] ?? id) },
-    burger.vegetables?.length > 0 && { cat: 'Gemüse', vals: burger.vegetables.map(id => BURGER_LABEL[id] ?? id) },
+    cheeseEntries.length > 0 && {
+      cat: 'Käse',
+      vals: cheeseEntries.map(({ id, qty }) =>
+        qty > 1 ? `${BURGER_LABEL[id] ?? id} ×${qty}` : (BURGER_LABEL[id] ?? id)
+      ),
+    },
+    burger.sauces?.length > 0     && { cat: 'Sauce',   vals: burger.sauces.map(id => BURGER_LABEL[id] ?? id) },
+    burger.vegetables?.length > 0 && { cat: 'Gemüse',  vals: burger.vegetables.map(id => BURGER_LABEL[id] ?? id) },
   ].filter(Boolean);
 
   return (

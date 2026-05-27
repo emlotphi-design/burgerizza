@@ -23,7 +23,15 @@ export function calcBurgerPrice(burger) {
     );
   }
 
-  if (burger.cheese) sum += getBurgerIngredientPrice(burger.cheese);
+  const cheeses = burger.cheeses;
+  if (cheeses && typeof cheeses === 'object' && !Array.isArray(cheeses)) {
+    sum += Object.entries(cheeses).reduce(
+      (s, [id, qty]) => s + getBurgerIngredientPrice(id) * (qty || 1), 0
+    );
+  } else if (burger.cheese) {
+    // backward compat: old scalar format
+    sum += getBurgerIngredientPrice(burger.cheese);
+  }
   sum += (burger.sauces     ?? []).reduce((s, id) => s + getBurgerIngredientPrice(id), 0);
   sum += (burger.vegetables ?? []).reduce((s, id) => s + getBurgerIngredientPrice(id), 0);
   return sum;

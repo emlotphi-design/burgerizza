@@ -211,8 +211,9 @@ const VEGETABLE_POSITIONS = {
   pickle:   { top: '37%', left: '10.1%', transform: 'translate(-50%, -50%)' },
 };
 
-const MAX_VEG_QTY  = 5;
-const MAX_MEAT_QTY = 5;
+const MAX_VEG_QTY    = 5;
+const MAX_MEAT_QTY   = 5;
+const MAX_CHEESE_QTY = 5;
 
 const previewBtn = {
   width: '100%',
@@ -268,7 +269,9 @@ async function captureToDataURL(snapshot) {
   for (const [id, qty] of Object.entries(snapshot.meats ?? {})) {
     for (let i = 0; i < qty; i++) await drawCentered(MEAT_BASES[id], ingSize);
   }
-  if (snapshot.cheese) await drawCentered(CHEESE_BASES[snapshot.cheese], ingSize);
+  for (const [id, qty] of Object.entries(snapshot.cheeses ?? {})) {
+    for (let i = 0; i < qty; i++) await drawCentered(CHEESE_BASES[id], ingSize);
+  }
   for (const id of (snapshot.vegetables ?? [])) {
     await drawCentered(VEGETABLE_BASES[id], ingSize);
   }
@@ -311,11 +314,16 @@ export default function BurgerBuilder() {
   const bunWidth      = selectedBun?.baseWidth ?? '36%';
   const topBunSrc     = draft.bun ? BUN_TOPS[draft.bun] : null;
 
-  const selectedMeats  = draft.meats  ?? {};
-  const selectedSauces = draft.sauces ?? [];
+  const selectedMeats   = draft.meats   ?? {};
+  const selectedCheeses = draft.cheeses ?? {};
+  const selectedSauces  = draft.sauces  ?? [];
 
   const meatLayers = Object.entries(selectedMeats).flatMap(([meatId, qty]) =>
     Array.from({ length: qty }, (_, j) => ({ meatId, layerKey: `${meatId}-${j}` }))
+  );
+
+  const cheeseLayers = Object.entries(selectedCheeses).flatMap(([cheeseId, qty]) =>
+    Array.from({ length: qty }, (_, j) => ({ cheeseId, layerKey: `${cheeseId}-${j}` }))
   );
 
   const hasMeat = meatLayers.length > 0;
@@ -325,7 +333,7 @@ export default function BurgerBuilder() {
     setDraft({
       bun: burger.bun,
       meats: burger.meats ?? {},
-      cheese: burger.cheese ?? null,
+      cheeses: burger.cheeses ?? (burger.cheese ? { [burger.cheese]: 1 } : {}),
       sauces: burger.sauces ?? [],
       vegetables: burger.vegetables ?? [],
       name: burger.name,
@@ -390,7 +398,7 @@ export default function BurgerBuilder() {
   return (
     <div className="bb-stage">
       <Navbar />
-      <BurgerSidebar activeItem={activeItem} onSelect={setActiveItem} />
+      <BurgerSidebar activeItem={activeItem} onSelect={setActiveItem} bunSelected={!!draft.bun} />
 
       <div className="bb-workspace">
         <div className="bb-builder-canvas">
@@ -459,23 +467,26 @@ export default function BurgerBuilder() {
             ) : null
           )}
 
-          {/* Cheese layer — z-index 12 */}
-          {draft.cheese && CHEESE_BASES[draft.cheese] && (
-            <img
-              className="bb-cheese-img"
-              src={CHEESE_BASES[draft.cheese]}
-              alt={draft.cheese}
-              style={{
-                position: 'absolute',
-                left: '50%',
-                top: '50%',
-                transform: 'translate(-50%, -50%)',
-                zIndex: 12,
-              }}
-            />
+          {/* Cheese layers — z-index 12+ */}
+          {cheeseLayers.map(({ cheeseId, layerKey }, idx) =>
+            CHEESE_BASES[cheeseId] ? (
+              <img
+                key={layerKey}
+                className="bb-cheese-img"
+                src={CHEESE_BASES[cheeseId]}
+                alt={cheeseId}
+                style={{
+                  position: 'absolute',
+                  left: '50%',
+                  top: '50%',
+                  transform: 'translate(-50%, -50%)',
+                  zIndex: 12 + idx,
+                }}
+              />
+            ) : null
           )}
 
-          {/* Vegetable layers — z-index 13+ */}
+          {/* Vegetable layers — z-index above max cheese (12 + MAX_CHEESE_QTY) */}
           {(draft.vegetables ?? []).map((vegId, idx) =>
             VEGETABLE_BASES[vegId] ? (
               <img
@@ -488,7 +499,7 @@ export default function BurgerBuilder() {
                   left: '50%',
                   top: '50%',
                   transform: 'translate(-50%, -50%)',
-                  zIndex: 13 + idx,
+                  zIndex: 12 + MAX_CHEESE_QTY + idx,
                 }}
               />
             ) : null
@@ -651,7 +662,8 @@ export default function BurgerBuilder() {
           })}
 
           {!isOrdering && activeItem === 'cheese' && BURGER_CHEESES.map((cheese, i) => {
-            const isSelected = draft.cheese === cheese.id;
+            const qty        = (draft.cheeses ?? {})[cheese.id] ?? 0;
+            const isSelected = qty > 0;
             return (
               <div
                 key={cheese.id}
@@ -664,9 +676,11 @@ export default function BurgerBuilder() {
               >
                 <button
                   className="bb-preview-btn"
-                  onClick={() => setDraft(prev => ({
-                    cheese: prev.cheese === cheese.id ? null : cheese.id,
-                  }))}
+                  onClick={() => setDraft(prev => {
+                    const cheeses = { ...prev.cheeses };
+                    if (cheeses[cheese.id]) { delete cheeses[cheese.id]; } else { cheeses[cheese.id] = 1; }
+                    return { cheeses };
+                  })}
                   aria-label={cheese.name}
                   aria-pressed={isSelected}
                   style={previewBtn}
@@ -679,6 +693,39 @@ export default function BurgerBuilder() {
                     />
                   )}
                 </button>
+
+                {isSelected && (
+                  <div className="bb-qty-bar">
+                    <button
+                      className="bb-qty-btn"
+                      aria-label={`Remove one ${cheese.name}`}
+                      onClick={e => {
+                        e.stopPropagation();
+                        setDraft(prev => {
+                          const cheeses = { ...prev.cheeses };
+                          if ((cheeses[cheese.id] ?? 0) <= 1) { delete cheeses[cheese.id]; }
+                          else { cheeses[cheese.id] -= 1; }
+                          return { cheeses };
+                        });
+                      }}
+                    >−</button>
+                    <span className="bb-qty-count">{qty}</span>
+                    <button
+                      className="bb-qty-btn"
+                      aria-label={`Add one ${cheese.name}`}
+                      disabled={qty >= MAX_CHEESE_QTY}
+                      onClick={e => {
+                        e.stopPropagation();
+                        setDraft(prev => {
+                          const current = (prev.cheeses ?? {})[cheese.id] ?? 0;
+                          if (current >= MAX_CHEESE_QTY) return prev;
+                          return { cheeses: { ...prev.cheeses, [cheese.id]: current + 1 } };
+                        });
+                      }}
+                    >+</button>
+                  </div>
+                )}
+
                 <span className="bb-preview-label">{cheese.name}</span>
               </div>
             );
@@ -743,9 +790,9 @@ export default function BurgerBuilder() {
       </button>
 
       {burgerItems.length > 0 && (
-        <div className="bb-orders-panel">
-          <p className="bb-orders-label">YOUR BURGERS</p>
-          <div className="bb-orders-list">
+        <div className="bpc-panel">
+          <p className="bpc-panel-label">YOUR BURGERS</p>
+          <div className="bpc-panel-list">
             {burgerItems.map(burger => (
               <BurgerPreviewCard
                 key={burger.id}

@@ -4,6 +4,7 @@ import Navbar from '../components/Navbar';
 import Socials from '../components/Socials';
 import { useAuth } from '../context/AuthContext';
 import { usePizzaStore } from '../context/PizzaContext';
+import { calcPrice } from '../utils/pizzaUtils';
 
 // ─── Always-available fallback — page never goes blank ───────
 const MOCK_USER = {
@@ -184,6 +185,36 @@ function OrderHistorySection({ orders }) {
   );
 }
 
+// ─── Saved-items summary ──────────────────────────────────────
+function SavedSummarySection({ items, linkPath, emptyText }) {
+  const navigate = useNavigate();
+  return (
+    <div className="pf-saved-summary">
+      {items.length === 0 ? (
+        <p className="pf-empty-hint">{emptyText}</p>
+      ) : (
+        <div className="pf-saved-preview-list">
+          {items.slice(0, 3).map(item => (
+            <div key={item.id} className="pf-saved-preview-row">
+              <span className="pf-saved-preview-name">{item.name}</span>
+              <span className="pf-saved-preview-price">€{calcPrice(item).toFixed(2)}</span>
+            </div>
+          ))}
+          {items.length > 3 && (
+            <p className="pf-saved-preview-more">+{items.length - 3} more</p>
+          )}
+        </div>
+      )}
+      <button
+        className="pf-view-all-btn"
+        onClick={() => navigate(linkPath)}
+      >
+        {items.length === 0 ? 'Create one now →' : 'View all →'}
+      </button>
+    </div>
+  );
+}
+
 // ─── Payment placeholder ──────────────────────────────────────
 function PaymentSection() {
   return (
@@ -207,6 +238,11 @@ function ProfileContent() {
   const currentUser = auth?.currentUser ?? null;
   const isLoggedIn  = auth?.isLoggedIn  ?? false;
   const logout      = auth?.logout;
+
+  const store      = usePizzaStore();
+  const savedItems = store?.savedItems ?? [];
+  const savedPizzas  = savedItems.filter(i => i.type !== 'burger');
+  const savedBurgers = savedItems.filter(i => i.type === 'burger');
 
   // Always render with real or mock data — no redirect, no blank page
   const user       = currentUser ?? MOCK_USER;
@@ -284,6 +320,44 @@ function ProfileContent() {
               </ProfileErrorBoundary>
             </SectionCard>
           </div>
+
+          <SectionCard
+            title={`My Pizzas${savedPizzas.length ? ` (${savedPizzas.length})` : ''}`}
+            icon={
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 2 2.5 21.5h19L12 2z"/>
+                <path d="M3 21 Q12 16.5 21 21"/>
+                <circle cx="12" cy="15.5" r="1.1" fill="currentColor" stroke="none"/>
+              </svg>
+            }
+          >
+            <ProfileErrorBoundary>
+              <SavedSummarySection
+                items={savedPizzas}
+                linkPath="/my-pizzas"
+                emptyText="No saved pizzas yet — build one!"
+              />
+            </ProfileErrorBoundary>
+          </SectionCard>
+
+          <SectionCard
+            title={`My Burgers${savedBurgers.length ? ` (${savedBurgers.length})` : ''}`}
+            icon={
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M4 11a8 8 0 0 1 16 0H4z"/>
+                <rect x="3" y="11" width="18" height="3" rx="1"/>
+                <path d="M3 14h18v1.5A1.5 1.5 0 0 1 19.5 17h-15A1.5 1.5 0 0 1 3 15.5V14z"/>
+              </svg>
+            }
+          >
+            <ProfileErrorBoundary>
+              <SavedSummarySection
+                items={savedBurgers}
+                linkPath="/my-burgers"
+                emptyText="No saved burgers yet — build one!"
+              />
+            </ProfileErrorBoundary>
+          </SectionCard>
 
           <SectionCard
             title={`Bestellhistorie${orderCount ? ` (${orderCount})` : ''}`}
