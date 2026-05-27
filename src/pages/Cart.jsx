@@ -4,6 +4,7 @@ import Navbar      from '../components/Navbar';
 import Socials     from '../components/Socials';
 import PizzaCanvas from '../components/PizzaCanvas';
 import { usePizzaStore } from '../context/PizzaContext';
+import { useBurgerStore } from '../features/burger/store/burgerStore.jsx';
 import { LABEL, calcPrice } from '../utils/pizzaUtils';
 import BurgerCartCard from '../features/burger/components/BurgerCartCard';
 
@@ -19,6 +20,7 @@ function EmptyCart({ onBuild }) {
 export default function Cart() {
   const navigate = useNavigate();
   const { pizzas, setQuantity, removePizza, startEditing } = usePizzaStore();
+  const { setDraft: setBurgerDraft } = useBurgerStore();
 
   const [exitingIds, setExitingIds] = useState([]);
 
@@ -34,6 +36,20 @@ export default function Cart() {
     startEditing(pizza);
     navigate('/build-pizza');
   }, [startEditing, navigate]);
+
+  const handleEditBurger = useCallback((burger) => {
+    setBurgerDraft({
+      bun: burger.bun,
+      meats: burger.meats ?? {},
+      cheese: burger.cheese ?? null,
+      sauces: burger.sauces ?? [],
+      vegetables: burger.vegetables ?? [],
+      name: burger.name,
+      editingId: burger.id,
+    });
+    removePizza(burger.id);
+    navigate('/build-burger');
+  }, [setBurgerDraft, removePizza, navigate]);
 
   if (pizzas.length === 0) {
     return (
@@ -72,6 +88,9 @@ export default function Cart() {
                   isExiting={exitingIds.includes(pizza.id)}
                   animDelay={idx * 80}
                   onRemove={handleRemove}
+                  onEdit={handleEditBurger}
+                  idx={idx}
+                  visibleCount={visibleCount}
                 />
               );
             }

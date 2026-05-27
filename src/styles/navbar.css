@@ -116,6 +116,15 @@
   background: rgba(245, 197, 24, 0.38) !important;
 }
 
+/* Builder shortcut — subtle warm tint */
+.nav-builder-btn {
+  background: rgba(245, 197, 24, 0.12);
+}
+
+.nav-builder-btn:hover {
+  background: rgba(245, 197, 24, 0.30) !important;
+}
+
 /* ── Cart icon badge ── */
 .nav-cart-btn {
   position: relative;

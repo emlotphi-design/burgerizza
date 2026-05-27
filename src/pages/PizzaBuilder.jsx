@@ -34,13 +34,15 @@ function SavedPizzaCard({ pizza, onEdit, onDelete, onRename, exiting }) {
   }
 
   const price = calcPrice(pizza);
+  const meats = Array.isArray(pizza.meats) ? pizza.meats : [];
+  const vegetables = Array.isArray(pizza.vegetables) ? pizza.vegetables : [];
   const ingredients = [
     LABEL[pizza.dough],
     LABEL[pizza.sauce],
     LABEL[pizza.cheese],
-    ...pizza.meats.map(id => LABEL[id]),
-    ...pizza.vegetables.map(id => LABEL[id]),
-  ];
+    ...meats.map(id => LABEL[id]),
+    ...vegetables.map(id => LABEL[id]),
+  ].filter(Boolean);
 
   return (
     <div className={`saved-pizza-card${exiting ? ' saved-pizza-card--exit' : ''}`}>
@@ -71,8 +73,8 @@ function SavedPizzaCard({ pizza, onEdit, onDelete, onRename, exiting }) {
           selectedDough={pizza.dough}
           selectedSauce={pizza.sauce}
           selectedCheese={pizza.cheese}
-          selectedMeats={pizza.meats}
-          selectedVegetables={pizza.vegetables}
+          selectedMeats={meats}
+          selectedVegetables={vegetables}
           size="88px"
         />
       </div>
@@ -122,8 +124,10 @@ export default function PizzaBuilder() {
   const [exitingIds, setExitingIds] = useState([]);
   const lockTimer = useRef(null);
 
+  const pizzaItems = pizzas.filter(p => p.type !== 'burger');
+
   const canAddToCart = !!selectedDough && !!selectedSauce && !!selectedCheese;
-  const hasPizzas = canAddToCart || pizzas.length > 0;
+  const hasPizzas = canAddToCart || pizzaItems.length > 0;
   const totalCount = pizzas.length + (canAddToCart ? 1 : 0);
   const isEditing = editingId !== null;
   const nextPizzaNumber = pizzas.length + 1;
@@ -240,11 +244,11 @@ export default function PizzaBuilder() {
         </div>
       </main>
 
-      {pizzas.length > 0 && (
+      {pizzaItems.length > 0 && (
         <div className="saved-pizzas-panel">
           <p className="saved-pizzas-label">YOUR PIZZAS</p>
           <div className="saved-pizzas-list">
-            {pizzas.map(pizza => (
+            {pizzaItems.map(pizza => (
               <SavedPizzaCard
                 key={pizza.id}
                 pizza={pizza}

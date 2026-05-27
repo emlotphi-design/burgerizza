@@ -177,6 +177,7 @@ export function PizzaProvider({ children }) {
         cheese: burgerDraft.cheese ?? null,
         sauces: burgerDraft.sauces ?? [],
         vegetables: burgerDraft.vegetables ?? [],
+        image: burgerDraft.image ?? null,
         quantity: 1,
       };
       const next = [...prev, burger];

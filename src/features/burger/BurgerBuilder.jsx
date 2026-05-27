@@ -1,12 +1,13 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { flushSync } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../../components/Navbar';
 import Socials from '../../components/Socials';
 import BurgerSidebar from './components/BurgerSidebar';
+import BurgerPreviewCard from './components/BurgerPreviewCard';
 import { useBurgerStore } from './store/burgerStore.jsx';
 import { usePizzaStore } from '../../context/PizzaContext';
-import { BURGER_BUNS, BURGER_MEATS, BURGER_SAUCES } from './utils/burgerData';
+import { BURGER_BUNS, BURGER_MEATS, BURGER_CHEESES, BURGER_SAUCES, BURGER_VEGETABLES } from './utils/burgerData';
 
 import blackWrapper from '../../assets/burgers/wrappers/black-wrapper.png';
 import classicPaper from '../../assets/burgers/wrappers/classic-paper.png';
@@ -43,6 +44,26 @@ import friedchickenPreview from '../../assets/burgers/meats/meat-preview/friedch
 import beefPreview         from '../../assets/burgers/meats/meat-preview/beef-preview.png';
 import beefpattyPreview    from '../../assets/burgers/meats/meat-preview/beefpatty-preview.png';
 import eggPreview          from '../../assets/burgers/meats/meat-preview/egg-preview.png';
+
+import cheddarBase    from '../../assets/burgers/cheeses/cheese-base/cheddar-base.png';
+import edamBase       from '../../assets/burgers/cheeses/cheese-base/edam-base.png';
+import goudaBase      from '../../assets/burgers/cheeses/cheese-base/gouda-base.png';
+
+import cheddarPreview from '../../assets/burgers/cheeses/cheese-preview/cheddar-preview.png';
+import edamPreview    from '../../assets/burgers/cheeses/cheese-preview/edam-preview.png';
+import goudaPreview   from '../../assets/burgers/cheeses/cheese-preview/gouda-preview.png';
+
+import tomatoBase    from '../../assets/burgers/vegetables/vegetable-base/tomato-base.png';
+import onionBase     from '../../assets/burgers/vegetables/vegetable-base/onion-base.png';
+import lettuceBase   from '../../assets/burgers/vegetables/vegetable-base/lettuce-base.png';
+import mushroomVegBase from '../../assets/burgers/vegetables/vegetable-base/mushroom-base..png';
+import pickleBase    from '../../assets/burgers/vegetables/vegetable-base/pickle-base.png';
+
+import tomatoPreview    from '../../assets/burgers/vegetables/vegetable-preview/tomato-preview.png';
+import onionPreview     from '../../assets/burgers/vegetables/vegetable-preview/onion-preview.png';
+import lettucePreview   from '../../assets/burgers/vegetables/vegetable-preview/lettuce-preview.png';
+import mushroomVegPreview from '../../assets/burgers/vegetables/vegetable-preview/mushroom-preview.png';
+import picklePreview    from '../../assets/burgers/vegetables/vegetable-preview/pickle-preview.png';
 
 import ketchupBase        from '../../assets/burgers/sauces/sauce-base/ketchup-base.png';
 import mayonnaiseBase     from '../../assets/burgers/sauces/sauce-base/mayonnaise-base.png';
@@ -146,6 +167,51 @@ const SAUCE_POSITIONS = {
   mushroomsauce: { top: '37%', left: '10.1%', transform: 'translate(-50%, -50%)' },
 };
 
+const CHEESE_BASES = {
+  cheddar: cheddarBase,
+  edam:    edamBase,
+  gouda:   goudaBase,
+};
+
+const CHEESE_PREVIEWS = {
+  cheddar: cheddarPreview,
+  edam:    edamPreview,
+  gouda:   goudaPreview,
+};
+
+// Triangle r=42%, 120° steps from top
+const CHEESE_POSITIONS = {
+  cheddar: { top: '8%',  left: '50%',   transform: 'translate(-50%, -50%)' },
+  edam:    { top: '71%', left: '86.4%', transform: 'translate(-50%, -50%)' },
+  gouda:   { top: '71%', left: '13.6%', transform: 'translate(-50%, -50%)' },
+};
+
+const VEGETABLE_BASES = {
+  tomato:   tomatoBase,
+  onion:    onionBase,
+  lettuce:  lettuceBase,
+  mushroom: mushroomVegBase,
+  pickle:   pickleBase,
+};
+
+const VEGETABLE_PREVIEWS = {
+  tomato:   tomatoPreview,
+  onion:    onionPreview,
+  lettuce:  lettucePreview,
+  mushroom: mushroomVegPreview,
+  pickle:   picklePreview,
+};
+
+// Pentagon r=42%, 72° steps from top
+const VEGETABLE_POSITIONS = {
+  tomato:   { top: '8%',  left: '50%',   transform: 'translate(-50%, -50%)' },
+  onion:    { top: '37%', left: '89.9%', transform: 'translate(-50%, -50%)' },
+  lettuce:  { top: '84%', left: '74.7%', transform: 'translate(-50%, -50%)' },
+  mushroom: { top: '84%', left: '25.3%', transform: 'translate(-50%, -50%)' },
+  pickle:   { top: '37%', left: '10.1%', transform: 'translate(-50%, -50%)' },
+};
+
+const MAX_VEG_QTY  = 5;
 const MAX_MEAT_QTY = 5;
 
 const previewBtn = {
@@ -159,6 +225,59 @@ const previewBtn = {
   overflow: 'visible',
 };
 
+// ─── Canvas capture ─────────────────────────────────────────────────────────
+// Composites all ingredient layers onto an offscreen canvas and returns a PNG
+// data URL. All lookup maps are module-level so this plain function can read them.
+
+async function captureToDataURL(snapshot) {
+  const SIZE = 240;
+  const canvas = document.createElement('canvas');
+  canvas.width  = SIZE;
+  canvas.height = SIZE;
+  const ctx = canvas.getContext('2d');
+
+  const loadImg = src => new Promise(resolve => {
+    const img = new Image();
+    img.onload  = () => resolve(img);
+    img.onerror = () => resolve(null);
+    img.src = src;
+  });
+
+  const drawCentered = async (src, drawSize, rotateDeg = 0) => {
+    if (!src) return;
+    const img = await loadImg(src);
+    if (!img) return;
+    const cx = SIZE / 2;
+    const cy = SIZE / 2;
+    ctx.save();
+    ctx.translate(cx, cy);
+    if (rotateDeg) ctx.rotate(rotateDeg * Math.PI / 180);
+    ctx.drawImage(img, -drawSize / 2, -drawSize / 2, drawSize, drawSize);
+    ctx.restore();
+  };
+
+  const ingSize = SIZE * 0.36;
+  const bunData = BURGER_BUNS.find(b => b.id === snapshot.bun);
+  const bunSize = SIZE * (parseFloat(bunData?.baseWidth ?? '36') / 100);
+
+  // Render order matches the live canvas: bun → sauces → meats → cheese → vegetables → top bun
+  await drawCentered(BUN_BASES[snapshot.bun], bunSize, -2);
+  for (const id of (snapshot.sauces ?? [])) {
+    await drawCentered(SAUCE_BASES[id], ingSize);
+  }
+  for (const [id, qty] of Object.entries(snapshot.meats ?? {})) {
+    for (let i = 0; i < qty; i++) await drawCentered(MEAT_BASES[id], ingSize);
+  }
+  if (snapshot.cheese) await drawCentered(CHEESE_BASES[snapshot.cheese], ingSize);
+  for (const id of (snapshot.vegetables ?? [])) {
+    await drawCentered(VEGETABLE_BASES[id], ingSize);
+  }
+  // Top bun is always included in the final captured image
+  await drawCentered(BUN_TOPS[snapshot.bun], bunSize, -2);
+
+  try { return canvas.toDataURL('image/png'); } catch { return null; }
+}
+
 // ─── Component ──────────────────────────────────────────────────────────────
 
 export default function BurgerBuilder() {
@@ -166,10 +285,14 @@ export default function BurgerBuilder() {
   const [activeItem, setActiveItem]   = useState('bun');
   const [isOrdering, setIsOrdering]   = useState(false);
   const { draft, setDraft, clearDraft } = useBurgerStore();
-  const { addBurger }                 = usePizzaStore();
+  const { addBurger, pizzas, removePizza } = usePizzaStore();
+
+  const [exitingBurgerIds, setExitingBurgerIds] = useState([]);
 
   // Snapshot captured at click time so the timer commit uses the correct data
   const orderSnapshotRef = useRef(null);
+
+  const burgerItems = pizzas.filter(p => p.type === 'burger');
 
   // ── Wrapper persistence ──────────────────────────────────────────────────
   const initWrapperIdx = useRef(Math.floor(Math.random() * wrappers.length));
@@ -197,40 +320,70 @@ export default function BurgerBuilder() {
 
   const hasMeat = meatLayers.length > 0;
 
+  // ── Burger panel handlers ────────────────────────────────────────────────
+  const handleEditBurger = useCallback((burger) => {
+    setDraft({
+      bun: burger.bun,
+      meats: burger.meats ?? {},
+      cheese: burger.cheese ?? null,
+      sauces: burger.sauces ?? [],
+      vegetables: burger.vegetables ?? [],
+      name: burger.name,
+      editingId: burger.id,
+    });
+    removePizza(burger.id);
+  }, [setDraft, removePizza]);
+
+  const handleRemoveBurger = useCallback((id) => {
+    setExitingBurgerIds(prev => [...prev, id]);
+    setTimeout(() => {
+      removePizza(id);
+      setExitingBurgerIds(prev => prev.filter(x => x !== id));
+    }, 400);
+  }, [removePizza]);
+
   // ── Order flow ───────────────────────────────────────────────────────────
+  // Always set isOrdering=true immediately so the double-click guard fires
+  // for BOTH the bun-animation path and the no-bun path.
   const handleOrder = () => {
     if (!hasMeat || isOrdering) return;
-    const snapshot = { ...draft };
-    if (topBunSrc) {
-      orderSnapshotRef.current = snapshot;
-      setIsOrdering(true);  // mounts top-bun img, starts CSS animation
-    } else {
-      // No bun selected — commit immediately, no animation
-      flushSync(() => { addBurger(snapshot); clearDraft(); });
-      navigate('/cart');
-    }
+    orderSnapshotRef.current = { ...draft };
+    setIsOrdering(true);
   };
 
-  // After top-bun animation (550ms) + 100ms buffer → commit atomically
   useEffect(() => {
     if (!isOrdering) return;
-    const timer = setTimeout(() => {
+    let cancelled = false;
+
+    const commit = () => {
       const snapshot = orderSnapshotRef.current;
       orderSnapshotRef.current = null;
-      if (snapshot) {
-        // All state mutations in one flushSync so Cart.jsx renders with
-        // the burger already in the list — no empty-cart flash
+      if (!snapshot) { setIsOrdering(false); return; }
+
+      captureToDataURL(snapshot).then(image => {
+        if (cancelled) return;
+        flushSync(() => {
+          addBurger({ ...snapshot, image });
+          clearDraft();
+          setIsOrdering(false);
+        });
+        navigate('/cart');
+      }).catch(() => {
+        if (cancelled) return;
         flushSync(() => {
           addBurger(snapshot);
           clearDraft();
           setIsOrdering(false);
         });
         navigate('/cart');
-      } else {
-        setIsOrdering(false);
-      }
-    }, 650);
-    return () => clearTimeout(timer);
+      });
+    };
+
+    // If there's a bun, wait for the drop animation (550ms + 100ms buffer).
+    // If there's no bun, commit after one tick so isOrdering render completes first.
+    const delay = orderSnapshotRef.current?.bun ? 650 : 0;
+    const timer = setTimeout(commit, delay);
+    return () => { cancelled = true; clearTimeout(timer); };
   }, [isOrdering]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Render ───────────────────────────────────────────────────────────────
@@ -301,6 +454,41 @@ export default function BurgerBuilder() {
                   top: '50%',
                   transform: 'translate(-50%, -50%)',
                   zIndex: 5 + idx,
+                }}
+              />
+            ) : null
+          )}
+
+          {/* Cheese layer — z-index 12 */}
+          {draft.cheese && CHEESE_BASES[draft.cheese] && (
+            <img
+              className="bb-cheese-img"
+              src={CHEESE_BASES[draft.cheese]}
+              alt={draft.cheese}
+              style={{
+                position: 'absolute',
+                left: '50%',
+                top: '50%',
+                transform: 'translate(-50%, -50%)',
+                zIndex: 12,
+              }}
+            />
+          )}
+
+          {/* Vegetable layers — z-index 13+ */}
+          {(draft.vegetables ?? []).map((vegId, idx) =>
+            VEGETABLE_BASES[vegId] ? (
+              <img
+                key={vegId}
+                className="bb-vegetable-img"
+                src={VEGETABLE_BASES[vegId]}
+                alt={vegId}
+                style={{
+                  position: 'absolute',
+                  left: '50%',
+                  top: '50%',
+                  transform: 'translate(-50%, -50%)',
+                  zIndex: 13 + idx,
                 }}
               />
             ) : null
@@ -462,6 +650,86 @@ export default function BurgerBuilder() {
             );
           })}
 
+          {!isOrdering && activeItem === 'cheese' && BURGER_CHEESES.map((cheese, i) => {
+            const isSelected = draft.cheese === cheese.id;
+            return (
+              <div
+                key={cheese.id}
+                className={`bb-preview-wrap${isSelected ? ' bb-preview-wrap--selected' : ''}`}
+                style={{
+                  position: 'absolute', width: '16%', height: '16%',
+                  zIndex: 30, animationDelay: `${i * 55}ms`,
+                  ...CHEESE_POSITIONS[cheese.id],
+                }}
+              >
+                <button
+                  className="bb-preview-btn"
+                  onClick={() => setDraft(prev => ({
+                    cheese: prev.cheese === cheese.id ? null : cheese.id,
+                  }))}
+                  aria-label={cheese.name}
+                  aria-pressed={isSelected}
+                  style={previewBtn}
+                >
+                  {CHEESE_PREVIEWS[cheese.id] && (
+                    <img
+                      src={CHEESE_PREVIEWS[cheese.id]}
+                      alt={cheese.name}
+                      style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }}
+                    />
+                  )}
+                </button>
+                <span className="bb-preview-label">{cheese.name}</span>
+              </div>
+            );
+          })}
+
+          {!isOrdering && activeItem === 'vegetables' && BURGER_VEGETABLES.map((veg, i) => {
+            const selectedVegetables = draft.vegetables ?? [];
+            const isSelected = selectedVegetables.includes(veg.id);
+            const atLimit    = selectedVegetables.length >= MAX_VEG_QTY;
+            const isDisabled = atLimit && !isSelected;
+            return (
+              <div
+                key={veg.id}
+                className={`bb-preview-wrap${isSelected ? ' bb-preview-wrap--selected' : ''}${isDisabled ? ' bb-preview-wrap--disabled' : ''}`}
+                style={{
+                  position: 'absolute', width: '16%', height: '16%',
+                  zIndex: 30, animationDelay: `${i * 55}ms`,
+                  ...VEGETABLE_POSITIONS[veg.id],
+                }}
+              >
+                <button
+                  className="bb-preview-btn"
+                  disabled={isDisabled}
+                  onClick={() => {
+                    if (isDisabled) return;
+                    setDraft(prev => {
+                      const vegs = prev.vegetables ?? [];
+                      return {
+                        vegetables: vegs.includes(veg.id)
+                          ? vegs.filter(v => v !== veg.id)
+                          : [...vegs, veg.id],
+                      };
+                    });
+                  }}
+                  aria-label={veg.name}
+                  aria-pressed={isSelected}
+                  style={previewBtn}
+                >
+                  {VEGETABLE_PREVIEWS[veg.id] && (
+                    <img
+                      src={VEGETABLE_PREVIEWS[veg.id]}
+                      alt={veg.name}
+                      style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }}
+                    />
+                  )}
+                </button>
+                <span className="bb-preview-label">{veg.name}</span>
+              </div>
+            );
+          })}
+
         </div>
       </div>
 
@@ -473,6 +741,23 @@ export default function BurgerBuilder() {
       >
         ORDER NOW
       </button>
+
+      {burgerItems.length > 0 && (
+        <div className="bb-orders-panel">
+          <p className="bb-orders-label">YOUR BURGERS</p>
+          <div className="bb-orders-list">
+            {burgerItems.map(burger => (
+              <BurgerPreviewCard
+                key={burger.id}
+                burger={burger}
+                isExiting={exitingBurgerIds.includes(burger.id)}
+                onEdit={handleEditBurger}
+                onRemove={handleRemoveBurger}
+              />
+            ))}
+          </div>
+        </div>
+      )}
 
       <Socials />
     </div>

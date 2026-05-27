@@ -49,6 +49,36 @@ function IconMenu() {
   );
 }
 
+function IconPizza() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
+      stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      {/* Slice outline */}
+      <path d="M12 2 2.5 21.5h19L12 2z" />
+      {/* Crust arc */}
+      <path d="M3 21 Q12 16.5 21 21" />
+      {/* Toppings */}
+      <circle cx="12" cy="15.5" r="1.1" fill="currentColor" stroke="none" />
+      <circle cx="8.8"  cy="19.2" r="1"   fill="currentColor" stroke="none" />
+      <circle cx="15.2" cy="19.2" r="1"   fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+
+function IconBurger() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
+      stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      {/* Top bun dome */}
+      <path d="M4 11a8 8 0 0 1 16 0H4z" />
+      {/* Patty / filling */}
+      <rect x="3" y="11" width="18" height="3" rx="1" />
+      {/* Bottom bun */}
+      <path d="M3 14h18v1.5A1.5 1.5 0 0 1 19.5 17h-15A1.5 1.5 0 0 1 3 15.5V14z" />
+    </svg>
+  );
+}
+
 export default function Navbar() {
   const navigate   = useNavigate();
   const location   = useLocation();
@@ -87,6 +117,28 @@ export default function Navbar() {
             title="Pizza Builder"
           >
             <IconHome />
+          </button>
+        )}
+
+        {/* Cross-builder shortcut — pizza↔burger */}
+        {location.pathname === '/build-pizza' && (
+          <button
+            className="nav-btn nav-builder-btn"
+            aria-label="Zum Burger Builder"
+            title="Burger Builder"
+            onClick={() => navigate('/build-burger')}
+          >
+            <IconBurger />
+          </button>
+        )}
+        {location.pathname === '/build-burger' && (
+          <button
+            className="nav-btn nav-builder-btn"
+            aria-label="Zum Pizza Builder"
+            title="Pizza Builder"
+            onClick={() => navigate('/build-pizza')}
+          >
+            <IconPizza />
           </button>
         )}
 

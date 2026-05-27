@@ -16,11 +16,9 @@ export const BURGER_MEATS = [
 ];
 
 export const BURGER_CHEESES = [
-  { id: 'b-cheddar',    name: 'Cheddar',     price: 1.49, category: 'cheese', color: '#F5B800', layerColor: 'linear-gradient(180deg, #FFCC00 0%, #E5A800 100%)', image: null },
-  { id: 'b-mozzarella', name: 'Mozzarella',  price: 1.49, category: 'cheese', color: '#F0EAD6', layerColor: 'linear-gradient(180deg, #FAF4E0 0%, #E0DAC6 100%)', image: null },
-  { id: 'b-gouda',      name: 'Gouda',       price: 1.49, category: 'cheese', color: '#E8C060', layerColor: 'linear-gradient(180deg, #F8D070 0%, #D8B050 100%)', image: null },
-  { id: 'b-bluecheese', name: 'Blue Cheese', price: 1.99, category: 'cheese', color: '#7B88CC', layerColor: 'linear-gradient(180deg, #8B98DC 0%, #6B78BC 100%)', image: null },
-  { id: 'b-swiss',      name: 'Swiss',       price: 1.49, category: 'cheese', color: '#F5F0C0', layerColor: 'linear-gradient(180deg, #FFFADA 0%, #E5E0AA 100%)', image: null },
+  { id: 'cheddar', name: 'Cheddar', price: 1.49, category: 'cheese', color: '#F5B800' },
+  { id: 'edam',    name: 'Edam',    price: 1.49, category: 'cheese', color: '#E8B040' },
+  { id: 'gouda',   name: 'Gouda',   price: 1.49, category: 'cheese', color: '#E8C060' },
 ];
 
 export const BURGER_SAUCES = [
@@ -32,15 +30,11 @@ export const BURGER_SAUCES = [
 ];
 
 export const BURGER_VEGETABLES = [
-  { id: 'b-lettuce',    name: 'Lettuce',     price: 0.79, category: 'vegetable', color: '#4A8C3F', layerColor: 'rgba(74,140,63,0.75)',   image: null },
-  { id: 'b-tomato',     name: 'Tomato',      price: 0.79, category: 'vegetable', color: '#CC3300', layerColor: 'rgba(204,51,0,0.75)',    image: null },
-  { id: 'b-onion',      name: 'Onion',       price: 0.79, category: 'vegetable', color: '#C8A8D8', layerColor: 'rgba(200,168,216,0.75)', image: null },
-  { id: 'b-pickles',    name: 'Pickles',     price: 0.79, category: 'vegetable', color: '#5D8A3C', layerColor: 'rgba(93,138,60,0.75)',   image: null },
-  { id: 'b-red-onion',  name: 'Red Onion',   price: 0.79, category: 'vegetable', color: '#9B3060', layerColor: 'rgba(155,48,96,0.75)',   image: null },
-  { id: 'b-jalapeno',   name: 'Jalapeño',    price: 0.99, category: 'vegetable', color: '#2A8A2A', layerColor: 'rgba(42,138,42,0.75)',   image: null },
-  { id: 'b-mushroom',   name: 'Mushroom',    price: 0.99, category: 'vegetable', color: '#8B7355', layerColor: 'rgba(139,115,85,0.75)', image: null },
-  { id: 'b-bellpepper', name: 'Bell Pepper', price: 0.99, category: 'vegetable', color: '#D44020', layerColor: 'rgba(212,64,32,0.75)',   image: null },
-  { id: 'b-avocado',    name: 'Avocado',     price: 1.49, category: 'vegetable', color: '#5A8A3A', layerColor: 'rgba(90,138,58,0.75)',   image: null },
+  { id: 'tomato',   name: 'Tomato',   price: 0.79, category: 'vegetable', color: '#CC3300' },
+  { id: 'onion',    name: 'Onion',    price: 0.79, category: 'vegetable', color: '#C8A8D8' },
+  { id: 'lettuce',  name: 'Lettuce',  price: 0.79, category: 'vegetable', color: '#4A8C3F' },
+  { id: 'mushroom', name: 'Mushroom', price: 0.99, category: 'vegetable', color: '#8B7355' },
+  { id: 'pickle',   name: 'Pickle',   price: 0.79, category: 'vegetable', color: '#5D8A3C' },
 ];
 
 export const ALL_BURGER_INGREDIENTS = [

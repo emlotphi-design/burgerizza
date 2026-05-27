@@ -1,0 +1,162 @@
+/* ══════════════════════════════════════════
+   MOBILE MENU  (RTL sidebar, slides from right)
+   Uses conditional rendering — no class toggling needed.
+══════════════════════════════════════════ */
+
+/* ── Overlay ── */
+.mm-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(26, 10, 0, 0.52);
+  z-index: 200;
+  animation: mmFadeIn 0.25s ease both;
+}
+
+@keyframes mmFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ── Sidebar ── */
+.mm-sidebar {
+  position: fixed;
+  top: 0;
+  right: 0;
+  height: 100dvh;
+  width: min(300px, 82vw);
+  background: #FFF9EC;
+  z-index: 201;
+  display: flex;
+  flex-direction: column;
+  box-shadow: -6px 0 36px rgba(26, 10, 0, 0.16);
+  border-radius: 20px 0 0 20px;
+  overflow: hidden;
+  animation: mmSlideIn 0.32s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes mmSlideIn {
+  from { transform: translateX(100%); }
+  to   { transform: translateX(0); }
+}
+
+/* ── Header ── */
+.mm-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 16px 14px;
+  border-bottom: 1px solid rgba(26, 10, 0, 0.08);
+  flex-shrink: 0;
+}
+
+.mm-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.mm-brand-name {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 900;
+  font-size: 15px;
+  letter-spacing: 2px;
+  color: #1A0A00;
+}
+
+.mm-close-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(26, 10, 0, 0.07);
+  color: #1A0A00;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.15s ease, transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.mm-close-btn:hover {
+  background: rgba(26, 10, 0, 0.13);
+  transform: scale(1.1);
+}
+
+.mm-close-btn:active {
+  transform: scale(0.92);
+}
+
+/* ── Nav list ── */
+.mm-nav {
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.mm-nav::-webkit-scrollbar { width: 3px; }
+.mm-nav::-webkit-scrollbar-thumb {
+  background: rgba(26, 10, 0, 0.15);
+  border-radius: 2px;
+}
+
+.mm-item {
+  width: 100%;
+  text-align: left;
+  padding: 13px 14px;
+  border: none;
+  border-radius: 12px;
+  background: transparent;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 700;
+  font-size: 15px;
+  color: #1A0A00;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.15s ease;
+  line-height: 1.4;
+}
+
+.mm-item:hover {
+  background: rgba(245, 197, 24, 0.18);
+  transform: translateX(3px);
+}
+
+.mm-item:active {
+  background: rgba(245, 197, 24, 0.30);
+  transform: scale(0.97);
+}
+
+/* ── Footer CTA ── */
+.mm-footer {
+  padding: 14px 16px 26px;
+  border-top: 1px solid rgba(26, 10, 0, 0.08);
+  flex-shrink: 0;
+}
+
+.mm-cta {
+  width: 100%;
+  padding: 15px;
+  border: none;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #F5C518 0%, #FFA722 100%);
+  font-family: 'Nunito', sans-serif;
+  font-weight: 900;
+  font-size: 16px;
+  color: #1A0A00;
+  cursor: pointer;
+  letter-spacing: 0.8px;
+  box-shadow: 0 4px 16px rgba(245, 197, 24, 0.38);
+  transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.18s ease;
+}
+
+.mm-cta:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(245, 197, 24, 0.52);
+}
+
+.mm-cta:active {
+  transform: scale(0.97);
+}
