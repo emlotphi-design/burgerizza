@@ -94,7 +94,7 @@
   padding: 10px 12px;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 4px;
 }
 
 .mm-nav::-webkit-scrollbar { width: 3px; }
@@ -106,7 +106,8 @@
 .mm-item {
   width: 100%;
   text-align: left;
-  padding: 13px 14px;
+  padding: 14px 16px;
+  min-height: 50px;
   border: none;
   border-radius: 12px;
   background: transparent;
@@ -117,6 +118,8 @@
   cursor: pointer;
   transition: background 0.15s ease, transform 0.15s ease;
   line-height: 1.4;
+  display: flex;
+  align-items: center;
 }
 
 .mm-item:hover {
@@ -131,14 +134,15 @@
 
 /* ── Footer CTA ── */
 .mm-footer {
-  padding: 14px 16px 26px;
+  padding: 14px 16px calc(20px + env(safe-area-inset-bottom, 0px));
   border-top: 1px solid rgba(26, 10, 0, 0.08);
   flex-shrink: 0;
 }
 
 .mm-cta {
   width: 100%;
-  padding: 15px;
+  padding: 16px;
+  min-height: 54px;
   border: none;
   border-radius: 14px;
   background: linear-gradient(135deg, #F5C518 0%, #FFA722 100%);

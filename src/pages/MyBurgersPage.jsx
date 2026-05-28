@@ -4,6 +4,8 @@ import Navbar from '../components/Navbar';
 import Socials from '../components/Socials';
 import { usePizzaStore } from '../context/PizzaContext';
 import { calcBurgerPrice, BURGER_LABEL } from '../features/burger/utils/burgerUtils';
+import SkeletonImage from '../components/SkeletonImage';
+import { useMountDelay } from '../hooks/useMountDelay';
 
 function fmt(iso) {
   try { return new Date(iso).toLocaleDateString('de-DE', { day: '2-digit', month: 'long', year: 'numeric' }); }
@@ -45,14 +47,15 @@ function SavedBurgerCard({ burger, isExiting, onEdit, onReorder, onDelete }) {
 
         <div className="cart-preview">
           {burger.image ? (
-            <img
+            <SkeletonImage
               src={burger.image}
               alt={burger.name}
-              style={{
+              skeletonRadius="16px"
+              wrapperStyle={{ width: 'min(200px, 48vw)', height: 'min(200px, 48vw)' }}
+              imgStyle={{
                 width: 'min(200px, 48vw)',
                 height: 'min(200px, 48vw)',
                 objectFit: 'contain',
-                display: 'block',
                 filter: 'drop-shadow(0 6px 18px rgba(0,0,0,0.15))',
               }}
             />
@@ -129,10 +132,46 @@ function SavedBurgerCard({ burger, isExiting, onEdit, onReorder, onDelete }) {
   );
 }
 
+function BurgersSkeleton() {
+  return (
+    <main className="saved-page-main">
+      <div className="saved-page-hero">
+        <div className="saved-page-hero-icon">
+          <div className="sk" style={{ width: 22, height: 22, borderRadius: 5 }} />
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
+          <div className="sk sk-line sk-line--title" style={{ width: 110 }} />
+          <div className="sk sk-line sk-line--half" />
+        </div>
+      </div>
+
+      <div className="cart-pizzas-list saved-items-list">
+        {[0, 1].map(i => (
+          <div key={i} className="cart-pizza-card glass-card" style={{ padding: '28px 30px' }}>
+            <div style={{ display: 'flex', gap: 32, alignItems: 'flex-start' }}>
+              <div className="sk" style={{ width: 160, height: 160, borderRadius: 16, flexShrink: 0 }} />
+              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 14 }}>
+                <div className="sk sk-line sk-line--title sk-line--long" />
+                <div className="sk sk-line sk-line--short" />
+                {[80, 68, 74].map((w, j) => (
+                  <div key={j} className="sk sk-line" style={{ width: `${w}%` }} />
+                ))}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </main>
+  );
+}
+
 export default function MyBurgersPage() {
   const navigate = useNavigate();
   const { savedItems, removeSavedItem, addToCart } = usePizzaStore();
   const [exitingIds, setExitingIds] = useState([]);
+  const ready = useMountDelay(280);
+
+  if (!ready) return <BurgersSkeleton />;
 
   const burgers = (savedItems ?? []).filter(i => i.type === 'burger');
 

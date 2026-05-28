@@ -25,7 +25,7 @@ export default function SauceSelector() {
           return (
             <button
               key={sauce.id}
-              className={`bb-card${isSelected ? ' bb-card--selected' : ''}${isDisabled ? ' bb-card--disabled' : ''}`}
+              className={`bb-card ing-card${isSelected ? ' bb-card--selected' : ''}${isDisabled ? ' bb-card--disabled' : ''}`}
               onClick={() => toggle(sauce.id)}
               disabled={isDisabled}
             >

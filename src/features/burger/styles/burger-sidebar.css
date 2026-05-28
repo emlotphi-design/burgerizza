@@ -47,6 +47,10 @@
   transform: scale(1.12);
 }
 
+.bs-item:hover .bs-item__icon-img {
+  filter: drop-shadow(0 3px 10px rgba(245, 155, 0, 0.42));
+}
+
 /* ── Locked state (no bun selected yet) ────── */
 .bs-item--locked {
   opacity: 0.32;
@@ -87,7 +91,8 @@
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.18));
 }
 
-.bs-item--active .bs-item__icon-img {
+.bs-item--active .bs-item__icon-img,
+.bs-item--active:hover .bs-item__icon-img {
   transform: scale(1.12);
   filter: drop-shadow(0 3px 8px rgba(245, 155, 0, 0.45));
 }

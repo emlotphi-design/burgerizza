@@ -39,7 +39,7 @@ export default function MeatSelector() {
         return (
           <button
             key={meat.id}
-            className={`bb-card${isSelected ? ' bb-card--selected' : ''}`}
+            className={`bb-card ing-card${isSelected ? ' bb-card--selected' : ''}`}
             onClick={() => toggle(meat.id)}
           >
             <div className="bb-card__dot" style={{ background: meat.color }} />

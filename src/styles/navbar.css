@@ -208,8 +208,41 @@
   }
 
   .brand {
-    gap: 4px;
-    padding: 3px 2px;
+    gap: 5px;
+    padding: 4px 2px;
+  }
+
+  .brand-logo {
+    width: 26px;
+    height: 26px;
+  }
+
+  .brand-name {
+    font-size: 12px;
+    letter-spacing: 1px;
+  }
+
+  /* 40px keeps the pill compact while meeting minimum touch target */
+  .nav-btn {
+    width: 40px;
+    height: 40px;
+  }
+
+  .nav-btn svg {
+    width: 15px;
+    height: 15px;
+  }
+
+  .nav-icons {
+    gap: 0;
+    padding: 3px;
+  }
+}
+
+/* ── Tiny phone ≤ 360px ── */
+@media (max-width: 360px) {
+  .nav {
+    padding: 0 10px;
   }
 
   .brand-logo {
@@ -219,21 +252,16 @@
 
   .brand-name {
     font-size: 11px;
-    letter-spacing: 0.8px;
+    letter-spacing: 0.6px;
   }
 
   .nav-btn {
-    width: 34px;
-    height: 34px;
+    width: 36px;
+    height: 36px;
   }
 
   .nav-btn svg {
-    width: 13px;
-    height: 13px;
-  }
-
-  .nav-icons {
-    gap: 0;
-    padding: 2px;
+    width: 14px;
+    height: 14px;
   }
 }

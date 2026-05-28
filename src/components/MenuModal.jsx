@@ -53,7 +53,7 @@ export default function MenuModal({ onClose }) {
           {CATEGORIES.map((cat) => (
             <button
               key={cat.id}
-              className="menu-cat-card"
+              className="menu-cat-card glass-card"
               onClick={() => handleCategory(cat.path)}
             >
               <span className="menu-cat-emoji" aria-hidden="true">{cat.emoji}</span>

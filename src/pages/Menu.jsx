@@ -31,7 +31,7 @@ export default function MenuPage() {
           {CATEGORIES.map((cat, idx) => (
             <button
               key={cat.id}
-              className="menu-cat-card"
+              className="menu-cat-card glass-card"
               onClick={() => navigate(cat.path)}
               style={{ animationDelay: `${idx * 70}ms` }}
             >

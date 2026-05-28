@@ -395,11 +395,12 @@
   text-align: center;
   padding: 12px 4px 0;
   letter-spacing: 0.3px;
-  transition: color 0.18s ease;
+  transition: color 0.18s ease, transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .co-back-link:hover {
   color: #1A0A00;
+  transform: translateY(-1px);
 }
 
 /* ── Verification ── */
@@ -424,7 +425,13 @@
   font-size: 13px;
   color: rgba(26, 10, 0, 0.50);
   cursor: pointer;
-  transition: background 0.2s, border-color 0.2s, color 0.2s;
+  transition: background 0.2s, border-color 0.2s, color 0.2s, transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.co-method-tab:hover:not(.co-method-tab--active) {
+  background: rgba(255, 255, 255, 0.80);
+  border-color: rgba(26, 10, 0, 0.22);
+  transform: translateY(-2px);
 }
 
 .co-method-tab--active {
@@ -588,6 +595,106 @@
   font-size: 12px;
   font-weight: 700;
   color: rgba(26, 10, 0, 0.38);
+}
+
+/* ══════════════════════════════════════════
+   CHECKOUT — responsive
+══════════════════════════════════════════ */
+@media (max-width: 640px) {
+  .co-main {
+    padding: calc(var(--nav-h) + 18px) 16px 60px;
+  }
+
+  .co-panel {
+    padding: 24px 20px;
+    border-radius: 22px;
+  }
+
+  .co-form-title {
+    font-size: 19px;
+  }
+}
+
+@media (max-width: 520px) {
+  .co-main {
+    padding: calc(var(--nav-h) + 12px) 12px 56px;
+  }
+
+  .co-wrap {
+    gap: 20px;
+  }
+
+  .co-panel {
+    padding: 20px 16px;
+    border-radius: 20px;
+  }
+
+  .co-steps {
+    gap: 4px;
+  }
+
+  .co-step-label {
+    font-size: 10px;
+  }
+
+  .co-step-dot {
+    width: 28px;
+    height: 28px;
+    font-size: 12px;
+  }
+
+  /* Stack two-column field rows on narrow screens */
+  .co-row {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .co-field--shrink {
+    min-width: 0;
+  }
+
+  .co-next-btn {
+    padding: 14px 20px;
+    font-size: 13px;
+    min-height: 50px;
+  }
+
+  .co-next-btn--pay {
+    font-size: 14px;
+    padding: 15px 20px;
+  }
+
+  .co-method-tab {
+    font-size: 12px;
+    padding: 10px 8px;
+    gap: 5px;
+  }
+}
+
+/* OTP boxes must never overflow on small phones */
+@media (max-width: 420px) {
+  .co-otp-row {
+    gap: 6px;
+  }
+
+  .co-otp-box {
+    width: 40px;
+    height: 50px;
+    font-size: 20px;
+    border-radius: 12px;
+  }
+}
+
+@media (max-width: 360px) {
+  .co-main {
+    padding: calc(var(--nav-h) + 10px) 10px 48px;
+  }
+
+  .co-otp-box {
+    width: 36px;
+    height: 46px;
+    font-size: 18px;
+  }
 }
 
 /* ── Payment ── */

@@ -396,7 +396,7 @@ export default function BurgerBuilder() {
 
   // ── Render ───────────────────────────────────────────────────────────────
   return (
-    <div className="bb-stage">
+    <div className="bb-stage page-enter">
       <Navbar />
       <BurgerSidebar activeItem={activeItem} onSelect={setActiveItem} bunSelected={!!draft.bun} />
 

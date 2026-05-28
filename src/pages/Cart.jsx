@@ -44,7 +44,7 @@ function PizzaCartCard({ pizza, idx, visibleCount, isExiting, animDelay, onEdit,
 
   return (
     <div
-      className={`cart-pizza-card${isExiting ? ' cart-pizza-card--exit' : ''}`}
+      className={`cart-pizza-card glass-card${isExiting ? ' cart-pizza-card--exit' : ''}`}
       style={{ animationDelay: `${animDelay}ms` }}
     >
       {/* Corner delete — mobile-only, hidden on desktop via CSS */}
@@ -86,47 +86,7 @@ function PizzaCartCard({ pizza, idx, visibleCount, isExiting, animDelay, onEdit,
             {qty > 1 && <span className="cart-price-compact__unit">€{unitPrice.toFixed(2)} / Stk.</span>}
           </div>
 
-          {/* 3 — Ingredient body: normal flow on desktop, accordion on mobile */}
-          <div className={`cart-ing-body${ingredientsOpen ? ' cart-ing-body--open' : ''}`}>
-            <div className="cart-ing-body__inner">
-              <p className="cart-section-label">Zutaten</p>
-              <div className="cart-ingredients">
-                {rows.map(row => (
-                  <div key={row.cat} className="ingredient-row">
-                    <span className="ingredient-cat">{row.cat}</span>
-                    <span className="ingredient-vals">{row.vals.join(', ')}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Divider after ingredients (desktop-only, hidden on mobile) */}
-          <div className="cart-divider cart-divider--ing" />
-
-          {/* 4 — Quantity */}
-          <div className="cart-qty-row">
-            <span className="cart-qty-label">Menge</span>
-            <div className="qty-ctrl">
-              <button className="qty-btn" onClick={() => setQuantity(pizza.id, qty - 1)} aria-label="Weniger">−</button>
-              <span className="qty-val">{qty}</span>
-              <button className="qty-btn" onClick={() => setQuantity(pizza.id, qty + 1)} aria-label="Mehr">+</button>
-            </div>
-          </div>
-
-          {/* 5 — Price block (desktop-only, hidden on mobile) */}
-          <div className="cart-price-block">
-            <div className="cart-price-row">
-              <span>Stückpreis</span>
-              <span>€{unitPrice.toFixed(2)}</span>
-            </div>
-            <div className="cart-price-row cart-price-total">
-              <span>Subtotal</span>
-              <span>€{subtotal.toFixed(2)}</span>
-            </div>
-          </div>
-
-          {/* 6 — Ingredient toggle (mobile-only, hidden on desktop) */}
+          {/* 3 — Ingredient toggle: accordion header at all breakpoints */}
           <button
             className={`cart-ing-toggle${ingredientsOpen ? ' cart-ing-toggle--open' : ''}`}
             onClick={() => setIngredientsOpen(o => !o)}
@@ -142,6 +102,45 @@ function PizzaCartCard({ pizza, idx, visibleCount, isExiting, animDelay, onEdit,
               <polyline points="6 9 12 15 18 9" />
             </svg>
           </button>
+
+          {/* 4 — Ingredient body: accordion at all breakpoints */}
+          <div className={`cart-ing-body${ingredientsOpen ? ' cart-ing-body--open' : ''}`}>
+            <div className="cart-ing-body__inner">
+              <div className="cart-ingredients">
+                {rows.map(row => (
+                  <div key={row.cat} className="ingredient-row">
+                    <span className="ingredient-cat">{row.cat}</span>
+                    <span className="ingredient-vals">{row.vals.join(', ')}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Divider after ingredients */}
+          <div className="cart-divider cart-divider--ing" />
+
+          {/* 5 — Quantity */}
+          <div className="cart-qty-row">
+            <span className="cart-qty-label">Menge</span>
+            <div className="qty-ctrl">
+              <button className="qty-btn" onClick={() => setQuantity(pizza.id, qty - 1)} aria-label="Weniger">−</button>
+              <span className="qty-val">{qty}</span>
+              <button className="qty-btn" onClick={() => setQuantity(pizza.id, qty + 1)} aria-label="Mehr">+</button>
+            </div>
+          </div>
+
+          {/* 6 — Price block (desktop-only, hidden on mobile) */}
+          <div className="cart-price-block">
+            <div className="cart-price-row">
+              <span>Stückpreis</span>
+              <span>€{unitPrice.toFixed(2)}</span>
+            </div>
+            <div className="cart-price-row cart-price-total">
+              <span>Subtotal</span>
+              <span>€{subtotal.toFixed(2)}</span>
+            </div>
+          </div>
 
           {/* Divider before actions */}
           <div className="cart-divider cart-divider--actions" />

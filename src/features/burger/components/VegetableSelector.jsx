@@ -25,7 +25,7 @@ export default function VegetableSelector() {
           return (
             <button
               key={veg.id}
-              className={`bb-card${isSelected ? ' bb-card--selected' : ''}${isDisabled ? ' bb-card--disabled' : ''}`}
+              className={`bb-card ing-card${isSelected ? ' bb-card--selected' : ''}${isDisabled ? ' bb-card--disabled' : ''}`}
               onClick={() => toggle(veg.id)}
               disabled={isDisabled}
             >

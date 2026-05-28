@@ -45,7 +45,7 @@ function SavedPizzaCard({ pizza, onEdit, onDelete, onRename, exiting }) {
   ].filter(Boolean);
 
   return (
-    <div className={`bpc-card${exiting ? ' bpc-card--exit' : ''}`}>
+    <div className={`bpc-card preview-card${exiting ? ' bpc-card--exit' : ''}`}>
       <div className="bpc-header">
         {renaming ? (
           <input

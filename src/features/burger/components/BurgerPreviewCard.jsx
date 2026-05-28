@@ -1,4 +1,5 @@
 import { calcBurgerPrice, BURGER_LABEL } from '../utils/burgerUtils';
+import SkeletonImage from '../../../components/SkeletonImage';
 
 export default function BurgerPreviewCard({ burger, isExiting, onEdit, onRemove }) {
   const price = calcBurgerPrice(burger);
@@ -32,7 +33,7 @@ export default function BurgerPreviewCard({ burger, isExiting, onEdit, onRemove 
   ].filter(Boolean);
 
   return (
-    <div className={`bpc-card${isExiting ? ' bpc-card--exit' : ''}`}>
+    <div className={`bpc-card preview-card${isExiting ? ' bpc-card--exit' : ''}`}>
       <div className="bpc-header">
         <span className="bpc-name">{burger.name}</span>
         <span className="bpc-price">€{price.toFixed(2)}</span>
@@ -40,7 +41,14 @@ export default function BurgerPreviewCard({ burger, isExiting, onEdit, onRemove 
 
       {burger.image && (
         <div className="bpc-image-wrap">
-          <img className="bpc-image" src={burger.image} alt={burger.name} />
+          <SkeletonImage
+            src={burger.image}
+            alt={burger.name}
+            className="bpc-image"
+            skeletonRadius="12px"
+            wrapperStyle={{ width: 88, height: 88 }}
+            imgStyle={{ width: 88, height: 88, objectFit: 'contain' }}
+          />
         </div>
       )}
 

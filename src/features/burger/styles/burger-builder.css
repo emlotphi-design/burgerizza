@@ -338,12 +338,13 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  transition: background 0.15s ease;
+  transition: background 0.15s ease, transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
   padding: 0;
 }
 
 .bb-qty-btn:hover {
   background: #F5C518;
+  transform: scale(1.22);
 }
 
 .bb-qty-btn:disabled {
@@ -387,18 +388,14 @@
   align-items: center;
   gap: 7px;
   padding: 14px 8px;
-  border-radius: 14px;
-  border: 2px solid rgba(26, 10, 0, 0.08);
-  background: rgba(255, 250, 235, 0.62);
-  backdrop-filter: blur(8px);
   cursor: pointer;
-  transition: all 0.18s ease;
+  transition: border-color 0.18s ease, transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.22s ease;
 }
 
 .bb-card:hover {
   border-color: #F5C518;
-  transform: translateY(-2px);
-  box-shadow: 0 6px 18px rgba(245, 197, 24, 0.18);
+  transform: translateY(-3px) scale(1.03);
+  box-shadow: 0 8px 26px rgba(245, 197, 24, 0.28);
 }
 
 .bb-card--selected {
@@ -575,9 +572,31 @@
   }
 
   .bb-order-btn {
-    bottom: 18px;
+    bottom: calc(18px + env(safe-area-inset-bottom, 0px));
     padding: 11px 28px;
     font-size: 11px;
     letter-spacing: 2px;
+  }
+}
+
+@media (max-width: 360px) {
+  .bb-workspace {
+    padding: 0 10px 130px;
+    gap: 6px;
+  }
+
+  .bb-builder-canvas {
+    width: min(340px, 90vw, calc(100vh - 240px));
+  }
+
+  .bb-order-btn {
+    padding: 10px 22px;
+    font-size: 10px;
+    letter-spacing: 1.6px;
+  }
+
+  .bb-grid {
+    grid-template-columns: repeat(auto-fill, minmax(88px, 1fr));
+    gap: 8px;
   }
 }

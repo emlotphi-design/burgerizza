@@ -293,6 +293,10 @@
   transform: scale(1.18);
 }
 
+.cat-btn:hover .cat-icon-img {
+  filter: drop-shadow(0 2px 8px rgba(255, 140, 0, 0.42));
+}
+
 .cat-btn--active {
   background: rgba(255, 210, 63, 0.22);
   box-shadow:
@@ -324,7 +328,8 @@
   transition: filter 0.22s ease;
 }
 
-.cat-btn--active .cat-icon-img {
+.cat-btn--active .cat-icon-img,
+.cat-btn--active:hover .cat-icon-img {
   filter: drop-shadow(0 0 6px rgba(255, 140, 0, 0.80));
 }
 
@@ -471,6 +476,33 @@
     gap: 6px;
     margin-top: -16px;
   }
+
+  /* Name input must never overflow the viewport */
+  .builder-name-input {
+    width: min(220px, calc(100vw - 48px));
+  }
+
+  .builder-name-input:focus {
+    width: min(260px, calc(100vw - 40px));
+  }
+}
+
+@media (max-width: 360px) {
+  .category-toolbar {
+    gap: 0;
+    padding: 6px;
+  }
+
+  .cat-btn {
+    width: 44px;
+    height: 44px;
+  }
+
+  .cat-icon,
+  .cat-icon-img {
+    width: 32px;
+    height: 32px;
+  }
 }
 
 /* ══════════════════════════════════════════
@@ -589,33 +621,40 @@
   line-height: 1;
 }
 
-/* ── Build Another button ── */
+/* ── Build Another button — identical style family to add-to-cart-btn ── */
 .build-another-btn {
   position: relative;
   overflow: hidden;
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  background: rgba(255, 255, 255, 0.94);
+  gap: 10px;
+
+  background: linear-gradient(148deg,
+      rgba(255, 255, 230, 0.96) 0%,
+      rgba(255, 228, 120, 0.95) 58%,
+      rgba(255, 210, 80, 0.96) 100%);
   color: #1A0A00;
-  border: 1px solid rgba(26, 10, 0, 0.12);
+  border: 1px solid rgba(255, 215, 75, 0.55);
   border-radius: 50px;
   padding: 14px 26px;
   font-family: 'Nunito', sans-serif;
   font-weight: 900;
-  font-size: 12px;
-  letter-spacing: 1.4px;
+  font-size: 13px;
+  letter-spacing: 1.6px;
   text-transform: uppercase;
   cursor: pointer;
   white-space: nowrap;
+
   box-shadow:
-    0 6px 24px rgba(0, 0, 0, 0.12),
-    0 2px 8px rgba(0, 0, 0, 0.08),
-    inset 0 1.5px 0 rgba(255, 255, 255, 0.95);
+    0 8px 32px rgba(155, 105, 0, 0.26),
+    0 2px 10px rgba(0, 0, 0, 0.14),
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.80),
+    inset 0 -1px 0 rgba(175, 115, 0, 0.12);
+
   transition:
     transform 0.26s cubic-bezier(0.34, 1.56, 0.64, 1),
     box-shadow 0.26s ease,
-    background 0.2s ease;
+    filter 0.26s ease;
 }
 
 .build-another-btn::before {
@@ -625,22 +664,32 @@
   left: 8%;
   right: 8%;
   height: 46%;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.55) 0%, rgba(255, 255, 255, 0.01) 100%);
+  background: linear-gradient(180deg,
+      rgba(255, 255, 255, 0.60) 0%,
+      rgba(255, 255, 255, 0.02) 100%);
   border-radius: 0 0 50% 50%;
   pointer-events: none;
 }
 
 .build-another-btn:hover {
   transform: translateY(-4px) scale(1.05);
-  background: rgba(255, 255, 255, 1);
+  filter: brightness(1.07);
   box-shadow:
-    0 12px 36px rgba(0, 0, 0, 0.16),
-    0 4px 14px rgba(0, 0, 0, 0.10),
-    inset 0 1.5px 0 rgba(255, 255, 255, 1);
+    0 14px 44px rgba(155, 105, 0, 0.32),
+    0 5px 18px rgba(0, 0, 0, 0.16),
+    0 0 26px rgba(255, 200, 55, 0.30),
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.88),
+    inset 0 -1px 0 rgba(175, 115, 0, 0.15);
 }
 
 .build-another-btn:active {
   transform: translateY(-1px) scale(0.97);
+  filter: brightness(1.0);
+  box-shadow:
+    0 3px 16px rgba(155, 105, 0, 0.20),
+    0 1px 6px rgba(0, 0, 0, 0.12),
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.72),
+    inset 0 -1px 0 rgba(175, 115, 0, 0.10);
 }
 
 
@@ -750,10 +799,10 @@
   }
 
   .build-another-btn {
-    padding: 13px 12px;
+    padding: 13px 14px;
     font-size: 11px;
     letter-spacing: 0.9px;
-    gap: 6px;
+    gap: 8px;
     text-overflow: ellipsis;
   }
 }
@@ -779,15 +828,15 @@
   }
 
   .build-another-btn {
-    padding: 11px 8px;
+    padding: 11px 10px;
     font-size: 10px;
     letter-spacing: 0.7px;
-    gap: 5px;
+    gap: 6px;
   }
 
   .build-another-btn svg {
-    width: 12px;
-    height: 12px;
+    width: 14px;
+    height: 14px;
     flex-shrink: 0;
   }
 }

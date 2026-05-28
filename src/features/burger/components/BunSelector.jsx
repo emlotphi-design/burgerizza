@@ -20,7 +20,7 @@ export default function BunSelector() {
       {BURGER_BUNS.map(bun => (
         <button
           key={bun.id}
-          className={`bb-card${draft.bun === bun.id ? ' bb-card--selected' : ''}`}
+          className={`bb-card ing-card${draft.bun === bun.id ? ' bb-card--selected' : ''}`}
           onClick={() => setDraft({ bun: bun.id })}
         >
           <img src={BUN_PREVIEWS[bun.id]} alt={bun.name} className="bb-card__preview-img" />

@@ -5,6 +5,7 @@ import Socials from '../components/Socials';
 import PizzaCanvas from '../components/PizzaCanvas';
 import { usePizzaStore } from '../context/PizzaContext';
 import { calcPrice, LABEL } from '../utils/pizzaUtils';
+import { useMountDelay } from '../hooks/useMountDelay';
 
 function fmt(iso) {
   try { return new Date(iso).toLocaleDateString('de-DE', { day: '2-digit', month: 'long', year: 'numeric' }); }
@@ -100,10 +101,46 @@ function SavedPizzaCard({ pizza, isExiting, onEdit, onReorder, onDelete }) {
   );
 }
 
+function PizzasSkeleton() {
+  return (
+    <main className="saved-page-main">
+      <div className="saved-page-hero">
+        <div className="saved-page-hero-icon">
+          <div className="sk" style={{ width: 22, height: 22, borderRadius: 5 }} />
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
+          <div className="sk sk-line sk-line--title" style={{ width: 110 }} />
+          <div className="sk sk-line sk-line--half" />
+        </div>
+      </div>
+
+      <div className="cart-pizzas-list saved-items-list">
+        {[0, 1].map(i => (
+          <div key={i} className="cart-pizza-card glass-card" style={{ padding: '28px 30px' }}>
+            <div style={{ display: 'flex', gap: 32, alignItems: 'flex-start' }}>
+              <div className="sk sk-circle" style={{ width: 160, height: 160, flexShrink: 0 }} />
+              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 14 }}>
+                <div className="sk sk-line sk-line--title sk-line--long" />
+                <div className="sk sk-line sk-line--short" />
+                {[80, 68, 74].map((w, j) => (
+                  <div key={j} className="sk sk-line" style={{ width: `${w}%` }} />
+                ))}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </main>
+  );
+}
+
 export default function MyPizzasPage() {
   const navigate = useNavigate();
   const { savedItems, removeSavedItem, addToCart, startEditing } = usePizzaStore();
   const [exitingIds, setExitingIds] = useState([]);
+  const ready = useMountDelay(280);
+
+  if (!ready) return <PizzasSkeleton />;
 
   const pizzas = (savedItems ?? []).filter(i => i.type !== 'burger');
 

@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useCallback, useRef } from 'react';
+import { api, setToken } from '../utils/api';
 
 /* ─── SHA-256 via Web Crypto (auth-backend-ready) ──────── */
 async function sha256(str) {
@@ -82,6 +83,13 @@ export function AuthProvider({ children }) {
     const user = makeUser({ fullName, email, phone, passwordHash, address });
     persistAccounts([...accs, user]);
     openSession(user);
+
+    // Sync with backend (fire-and-forget — localStorage works even if API is down)
+    try {
+      const res = await api.auth.register({ email, password, fullName, phone, address });
+      setToken(res.token);
+    } catch { /* offline or server not ready */ }
+
     return { user };
   }, []);
 
@@ -94,6 +102,13 @@ export function AuthProvider({ children }) {
     const passwordHash = await sha256(password);
     if (user.passwordHash !== passwordHash) return { error: 'Falsches Passwort.' };
     openSession(user);
+
+    // Sync JWT from backend (fire-and-forget)
+    try {
+      const res = await api.auth.login({ email, password });
+      setToken(res.token);
+    } catch { /* offline or server not ready */ }
+
     return { user };
   }, []);
 
@@ -101,6 +116,7 @@ export function AuthProvider({ children }) {
   const logout = useCallback(() => {
     setCurrentUser(null);
     removeLS('bz_session');
+    setToken(null);
   }, []);
 
   /* ── updateProfile ────────────────────────────────────── */

@@ -68,7 +68,7 @@ export default function CategoryPage() {
             return (
               <div
                 key={product.id}
-                className="menu-product-card"
+                className="menu-product-card glass-card"
                 style={{ animationDelay: `${idx * 55}ms` }}
               >
                 <div className="menu-product-emoji-wrap" aria-hidden="true">

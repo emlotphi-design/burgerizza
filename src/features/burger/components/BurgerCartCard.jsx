@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { usePizzaStore } from '../../../context/PizzaContext';
 import { calcBurgerPrice, BURGER_LABEL } from '../utils/burgerUtils';
+import SkeletonImage from '../../../components/SkeletonImage';
 
 export default function BurgerCartCard({ burger, isExiting, animDelay, onRemove, onEdit, idx, visibleCount }) {
   const { setQuantity } = usePizzaStore();
@@ -46,7 +47,7 @@ export default function BurgerCartCard({ burger, isExiting, animDelay, onRemove,
 
   return (
     <div
-      className={`cart-pizza-card${isExiting ? ' cart-pizza-card--exit' : ''}`}
+      className={`cart-pizza-card glass-card${isExiting ? ' cart-pizza-card--exit' : ''}`}
       style={{ animationDelay: `${animDelay}ms` }}
     >
       {/* Corner delete — mobile-only, hidden on desktop via CSS */}
@@ -65,15 +66,16 @@ export default function BurgerCartCard({ burger, isExiting, animDelay, onRemove,
       <div className="cart-layout">
         <div className="cart-preview">
           {burger.image && (
-            <img
-              className="cart-burger-img"
+            <SkeletonImage
               src={burger.image}
               alt={burger.name}
-              style={{
+              className="cart-burger-img"
+              skeletonRadius="18px"
+              wrapperStyle={{ width: 'min(240px, 60vw)', height: 'min(240px, 60vw)' }}
+              imgStyle={{
                 width: 'min(240px, 60vw)',
                 height: 'min(240px, 60vw)',
                 objectFit: 'contain',
-                display: 'block',
                 filter: 'drop-shadow(0 8px 24px rgba(0,0,0,0.18))',
               }}
             />
@@ -95,47 +97,7 @@ export default function BurgerCartCard({ burger, isExiting, animDelay, onRemove,
             {qty > 1 && <span className="cart-price-compact__unit">€{unitPrice.toFixed(2)} / Stk.</span>}
           </div>
 
-          {/* 3 — Ingredient body: normal flow on desktop, accordion on mobile */}
-          <div className={`cart-ing-body${ingredientsOpen ? ' cart-ing-body--open' : ''}`}>
-            <div className="cart-ing-body__inner">
-              <p className="cart-section-label">Zutaten</p>
-              <div className="cart-ingredients">
-                {rows.map(row => (
-                  <div key={row.cat} className="ingredient-row">
-                    <span className="ingredient-cat">{row.cat}</span>
-                    <span className="ingredient-vals">{row.vals.join(', ')}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Divider after ingredients (desktop-only, hidden on mobile) */}
-          <div className="cart-divider cart-divider--ing" />
-
-          {/* 4 — Quantity */}
-          <div className="cart-qty-row">
-            <span className="cart-qty-label">Menge</span>
-            <div className="qty-ctrl">
-              <button className="qty-btn" onClick={() => setQuantity(burger.id, qty - 1)} aria-label="Weniger">−</button>
-              <span className="qty-val">{qty}</span>
-              <button className="qty-btn" onClick={() => setQuantity(burger.id, qty + 1)} aria-label="Mehr">+</button>
-            </div>
-          </div>
-
-          {/* 5 — Price block (desktop-only, hidden on mobile via CSS) */}
-          <div className="cart-price-block" style={{ marginTop: '14px' }}>
-            <div className="cart-price-row">
-              <span>Stückpreis</span>
-              <span>€{unitPrice.toFixed(2)}</span>
-            </div>
-            <div className="cart-price-row cart-price-total">
-              <span>Subtotal</span>
-              <span>€{subtotal.toFixed(2)}</span>
-            </div>
-          </div>
-
-          {/* 6 — Ingredient toggle (mobile-only, hidden on desktop via CSS) */}
+          {/* 3 — Ingredient toggle: accordion header at all breakpoints */}
           <button
             className={`cart-ing-toggle${ingredientsOpen ? ' cart-ing-toggle--open' : ''}`}
             onClick={() => setIngredientsOpen(o => !o)}
@@ -151,6 +113,45 @@ export default function BurgerCartCard({ burger, isExiting, animDelay, onRemove,
               <polyline points="6 9 12 15 18 9" />
             </svg>
           </button>
+
+          {/* 4 — Ingredient body: accordion at all breakpoints */}
+          <div className={`cart-ing-body${ingredientsOpen ? ' cart-ing-body--open' : ''}`}>
+            <div className="cart-ing-body__inner">
+              <div className="cart-ingredients">
+                {rows.map(row => (
+                  <div key={row.cat} className="ingredient-row">
+                    <span className="ingredient-cat">{row.cat}</span>
+                    <span className="ingredient-vals">{row.vals.join(', ')}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Divider after ingredients */}
+          <div className="cart-divider cart-divider--ing" />
+
+          {/* 5 — Quantity */}
+          <div className="cart-qty-row">
+            <span className="cart-qty-label">Menge</span>
+            <div className="qty-ctrl">
+              <button className="qty-btn" onClick={() => setQuantity(burger.id, qty - 1)} aria-label="Weniger">−</button>
+              <span className="qty-val">{qty}</span>
+              <button className="qty-btn" onClick={() => setQuantity(burger.id, qty + 1)} aria-label="Mehr">+</button>
+            </div>
+          </div>
+
+          {/* 6 — Price block (desktop-only, hidden on mobile via CSS) */}
+          <div className="cart-price-block" style={{ marginTop: '14px' }}>
+            <div className="cart-price-row">
+              <span>Stückpreis</span>
+              <span>€{unitPrice.toFixed(2)}</span>
+            </div>
+            <div className="cart-price-row cart-price-total">
+              <span>Subtotal</span>
+              <span>€{subtotal.toFixed(2)}</span>
+            </div>
+          </div>
 
           {/* Divider before actions */}
           <div className="cart-divider cart-divider--actions" />
