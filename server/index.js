@@ -14,6 +14,9 @@ const PORT = process.env.PORT || 3001;
 const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:4173',
+  // Hardcoded production frontend — Railway's FRONTEND_URL env var is optional
+  // but this ensures CORS never blocks the live Vercel deployment.
+  'https://burgerizza-iota.vercel.app',
   process.env.FRONTEND_URL,
 ].filter(Boolean);
 
