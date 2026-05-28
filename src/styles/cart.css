@@ -34,6 +34,13 @@
   justify-content: center;
 }
 
+/* Burger image wrapper — mirrors .pizza-canvas-wrap sizing at every breakpoint */
+.cart-burger-wrap {
+  flex-shrink: 0;
+  width: 240px;
+  height: 240px;
+}
+
 /* ── Details card ── */
 .cart-details {
   flex: 1;
@@ -651,6 +658,12 @@
   .cart-preview .pizza-canvas-wrap {
     width: min(220px, 60vw) !important;
   }
+
+  /* Burger in stacked column layout (tablet) */
+  .cart-burger-wrap {
+    width: min(220px, 60vw);
+    height: min(220px, 60vw);
+  }
 }
 
 /* ══════════════════════════════════════════
@@ -725,10 +738,10 @@
     width: 148px !important;
   }
 
-  /* Burger thumbnail */
-  .cart-burger-img {
-    width: 148px !important;
-    height: 148px !important;
+  /* Burger thumbnail — wrapper drives size, not the img directly */
+  .cart-burger-wrap {
+    width: 148px;
+    height: 148px;
   }
 
   /* Details: flex column so order-based reflow works */
@@ -917,9 +930,9 @@
     width: 120px !important;
   }
 
-  .cart-burger-img {
-    width: 120px !important;
-    height: 120px !important;
+  .cart-burger-wrap {
+    width: 120px;
+    height: 120px;
   }
 
   .menu-item-emoji-area {

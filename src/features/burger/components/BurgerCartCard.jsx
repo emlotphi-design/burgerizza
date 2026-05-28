@@ -66,19 +66,21 @@ export default function BurgerCartCard({ burger, isExiting, animDelay, onRemove,
       <div className="cart-layout">
         <div className="cart-preview">
           {burger.image && (
-            <SkeletonImage
-              src={burger.image}
-              alt={burger.name}
-              className="cart-burger-img"
-              skeletonRadius="18px"
-              wrapperStyle={{ width: 'min(240px, 60vw)', height: 'min(240px, 60vw)' }}
-              imgStyle={{
-                width: 'min(240px, 60vw)',
-                height: 'min(240px, 60vw)',
-                objectFit: 'contain',
-                filter: 'drop-shadow(0 8px 24px rgba(0,0,0,0.18))',
-              }}
-            />
+            <div className="cart-burger-wrap">
+              <SkeletonImage
+                src={burger.image}
+                alt={burger.name}
+                className="cart-burger-img"
+                skeletonRadius="18px"
+                wrapperStyle={{ width: '100%', height: '100%' }}
+                imgStyle={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'contain',
+                  filter: 'drop-shadow(0 8px 24px rgba(0,0,0,0.18))',
+                }}
+              />
+            </div>
           )}
         </div>
 
