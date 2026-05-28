@@ -1,10 +1,10 @@
 let supabaseClient;
 try {
   const { createClient } = require('@supabase/supabase-js');
-  if (process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) {
+  if (process.env.SUPABASE_URL && process.env.SUPABASE_ANON_KEY) {
     supabaseClient = createClient(
       process.env.SUPABASE_URL,
-      process.env.SUPABASE_SERVICE_ROLE_KEY
+      process.env.SUPABASE_ANON_KEY
     );
   }
 } catch {}
