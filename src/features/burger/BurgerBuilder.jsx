@@ -1,6 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { flushSync } from 'react-dom';
-import { useNavigate } from 'react-router-dom';
 import Navbar from '../../components/Navbar';
 import Socials from '../../components/Socials';
 import BurgerSidebar from './components/BurgerSidebar';
@@ -287,9 +286,9 @@ async function captureToDataURL(snapshot) {
 // ─── Component ──────────────────────────────────────────────────────────────
 
 export default function BurgerBuilder() {
-  const navigate = useNavigate();
   const [activeItem, setActiveItem]   = useState('bun');
   const [isOrdering, setIsOrdering]   = useState(false);
+  const [toastVisible, setToastVisible] = useState(false);
   const { draft, setDraft, clearDraft } = useBurgerStore();
   const { addBurger, pizzas, removePizza } = usePizzaStore();
   const { isLoggedIn } = useAuth();
@@ -298,6 +297,7 @@ export default function BurgerBuilder() {
 
   // Snapshot captured at click time so the timer commit uses the correct data
   const orderSnapshotRef = useRef(null);
+  const toastTimerRef    = useRef(null);
 
   const burgerItems = pizzas.filter(p => p.type === 'burger');
 
@@ -372,6 +372,12 @@ export default function BurgerBuilder() {
       orderSnapshotRef.current = null;
       if (!snapshot) { setIsOrdering(false); return; }
 
+      const showAddedToast = () => {
+        clearTimeout(toastTimerRef.current);
+        setToastVisible(true);
+        toastTimerRef.current = setTimeout(() => setToastVisible(false), 2800);
+      };
+
       captureToDataURL(snapshot).then(image => {
         if (cancelled) return;
         flushSync(() => {
@@ -392,7 +398,7 @@ export default function BurgerBuilder() {
             image:      image ?? null,
           }).catch(() => {});
         }
-        navigate('/cart');
+        showAddedToast();
       }).catch(() => {
         if (cancelled) return;
         flushSync(() => {
@@ -413,7 +419,7 @@ export default function BurgerBuilder() {
             image:      null,
           }).catch(() => {});
         }
-        navigate('/cart');
+        showAddedToast();
       });
     };
 
@@ -847,6 +853,18 @@ export default function BurgerBuilder() {
               />
             ))}
           </div>
+        </div>
+      )}
+
+      {/* Toast: shown after burger is added to cart */}
+      {toastVisible && (
+        <div className="bb-toast" role="status" aria-live="polite">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" strokeWidth="3"
+            strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+          Burger added to cart
         </div>
       )}
 

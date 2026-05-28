@@ -447,6 +447,45 @@
 
 
 
+/* ── Toast — success feedback after adding to cart ──
+   Uses CSS `translate` property (not transform) so the
+   base transform: translateX(-50%) centering is kept.
+─────────────────────────────────────────────────── */
+.bb-toast {
+  position: fixed;
+  top: calc(var(--nav-h, 72px) + 12px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 300;
+  pointer-events: none;
+
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  background: rgba(26, 10, 0, 0.88);
+  color: #fff;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-radius: 50px;
+  padding: 10px 20px 10px 14px;
+
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
+  font-size: 12px;
+  letter-spacing: 0.4px;
+  white-space: nowrap;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.28);
+
+  animation: bbToastIn 0.32s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes bbToastIn {
+  from { opacity: 0; translate: 0 -12px; }
+  to   { opacity: 1; translate: 0 0;     }
+}
+
+
 /* ── ORDER NOW button ───────────────────────────
    Fixed pill, invisible until meat is selected.
    position: fixed keeps it out of flex flow so
