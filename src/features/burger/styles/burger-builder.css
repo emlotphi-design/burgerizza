@@ -533,24 +533,24 @@
 
 /* ── Responsive ─────────────────────────────── */
 
-/* Tablet / mobile — pill toolbar is now fixed at bottom, sidebar off left */
+/* Tablet / mobile — sidebar now in-flow below canvas, mirrors pizza layout */
 @media (max-width: 900px) {
   .bb-builder-canvas:hover {
     transform: none;
   }
 
-  /* Full horizontal space now that the left sidebar is gone */
+  /* Canvas sized to leave room for: name(40) + sidebar(72) + gaps + button clearance */
   .bb-builder-canvas {
-    width: min(500px, 88vw, calc(100vh - 260px));
+    width: min(500px, 88vw, calc(100vh - 300px));
   }
 
-  /* Bottom padding clears fixed pill + order button */
+  /* Mirrors pizza builder <main>: small top, generous bottom for fixed order button */
   .bb-workspace {
-    padding: 0 16px 140px;
+    padding: 6px 16px 100px;
     gap: 10px;
   }
 
-  /* Reposition order button: safe-area aware, keep horizontal centering for tablet */
+  /* Order button: safe-area aware */
   .bb-order-btn {
     bottom: calc(env(safe-area-inset-bottom, 0px) + 12px);
   }
@@ -566,12 +566,12 @@
 
 @media (max-width: 480px) {
   .bb-workspace {
-    padding: 0 12px 140px;
-    gap: 8px;
+    padding: 6px 12px 90px;
+    gap: 6px;
   }
 
   .bb-builder-canvas {
-    width: min(380px, 88vw, calc(100vh - 250px));
+    width: min(380px, 88vw, calc(100vh - 280px));
   }
 
   /* Full-width pill for iPhone — clears Safari bottom chrome via safe-area */
@@ -601,12 +601,12 @@
 
 @media (max-width: 360px) {
   .bb-workspace {
-    padding: 0 10px 140px;
-    gap: 6px;
+    padding: 4px 10px 90px;
+    gap: 4px;
   }
 
   .bb-builder-canvas {
-    width: min(340px, 90vw, calc(100vh - 240px));
+    width: min(340px, 90vw, calc(100vh - 270px));
   }
 
   .bb-order-btn {

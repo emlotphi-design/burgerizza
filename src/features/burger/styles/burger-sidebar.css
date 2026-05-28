@@ -118,16 +118,12 @@
 
 /* ── Responsive ─────────────────────────────── */
 
-/* Tablet / mobile — horizontal pill below canvas, matches pizza category-toolbar */
+/* Tablet / mobile — horizontal pill in flow below canvas, mirrors pizza category-toolbar */
 @media (max-width: 900px) {
   .bs-rail {
-    /* Reposition: centered at bottom, above order button.
-       Offset = button-bottom(12) + button-height(~44) + gap(12) = 68px above safe area */
-    position: fixed;
-    left: 50%;
-    top: auto;
-    bottom: calc(env(safe-area-inset-bottom, 0px) + 68px);
-    transform: translateX(-50%);
+    /* In-flow (not fixed) — sits naturally below name input, same as pizza toolbar */
+    position: static;
+    transform: none;
 
     width: auto;
     flex-direction: row;
@@ -171,17 +167,9 @@
   }
 }
 
-/* Medium phone */
-@media (max-width: 600px) {
-  .bs-rail {
-    bottom: calc(env(safe-area-inset-bottom, 0px) + 68px);
-  }
-}
-
 /* Small phone — iPhone SE and similar */
 @media (max-width: 480px) {
   .bs-rail {
-    bottom: calc(env(safe-area-inset-bottom, 0px) + 68px);
     gap: 2px;
     padding: 7px 8px;
   }

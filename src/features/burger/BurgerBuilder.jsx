@@ -428,7 +428,6 @@ export default function BurgerBuilder() {
   return (
     <div className="bb-stage page-enter">
       <Navbar />
-      <BurgerSidebar activeItem={activeItem} onSelect={setActiveItem} bunSelected={!!draft.bun} />
 
       <div className="bb-workspace">
         <div className="bb-builder-canvas">
@@ -821,6 +820,8 @@ export default function BurgerBuilder() {
             spellCheck={false}
           />
         </div>
+
+        <BurgerSidebar activeItem={activeItem} onSelect={setActiveItem} bunSelected={!!draft.bun} />
       </div>
 
       {/* ORDER NOW — fixed pill, visible only when meat selected and not ordering */}
