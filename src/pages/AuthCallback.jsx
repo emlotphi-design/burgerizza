@@ -35,8 +35,9 @@ export default function AuthCallback() {
       if (done) return;
       done = true;
       clearTimeout(timeout);
-      console.log('[auth/callback] onAuthStateChange → session:', !!session);
-      navigate(session ? '/profile' : '/auth', { replace: true });
+      const confirmed = session?.user?.email_confirmed_at || session?.user?.confirmed_at;
+      console.log('[auth/callback] onAuthStateChange → session:', !!session, '| confirmed:', !!confirmed);
+      navigate(session && confirmed ? '/profile' : '/auth', { replace: true });
     });
 
     async function handle() {
@@ -50,7 +51,8 @@ export default function AuthCallback() {
           if (!done) {
             done = true;
             clearTimeout(timeout);
-            navigate(session ? '/profile' : '/auth', { replace: true });
+            const confirmed = session?.user?.email_confirmed_at || session?.user?.confirmed_at;
+            navigate(session && confirmed ? '/profile' : '/auth', { replace: true });
           }
           return;
         }
@@ -77,7 +79,8 @@ export default function AuthCallback() {
         if (!done) {
           done = true;
           clearTimeout(timeout);
-          navigate(session ? '/profile' : '/auth', { replace: true });
+          const confirmed = session?.user?.email_confirmed_at || session?.user?.confirmed_at;
+          navigate(session && confirmed ? '/profile' : '/auth', { replace: true });
         }
       } catch (err) {
         console.error('[auth/callback]', err?.message);

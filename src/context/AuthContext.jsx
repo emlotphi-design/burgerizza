@@ -153,7 +153,22 @@ export function AuthProvider({ children }) {
         console.warn('[auth] login error:', error.message);
         return { error: mapError(error.message) };
       }
-      console.log('[auth] login ok:', data.user?.id);
+
+      const confirmed = data.user?.email_confirmed_at || data.user?.confirmed_at;
+      console.log('[auth] login result:', {
+        userId:         data.user?.id       ?? null,
+        emailConfirmed: confirmed           ?? null,
+      });
+
+      // Enforce email confirmation regardless of Supabase server-side setting.
+      // signInWithPassword normally blocks unconfirmed users, but this guard
+      // ensures the frontend never grants access even if that check is bypassed.
+      if (!confirmed) {
+        console.warn('[auth] login blocked — email not confirmed:', email);
+        await supabase.auth.signOut();
+        return { error: 'Bitte bestätige zuerst deine E-Mail-Adresse.' };
+      }
+
       return { user: toAppUser(data.user) };
     } catch (err) {
       console.error('[auth] login threw:', err?.message);
