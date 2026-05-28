@@ -276,19 +276,19 @@
 
     margin-top: -90px;
   }
-}
 
-.btn {
-  padding: 14px 28px;
-  font-size: 13px;
-}
+  .btn {
+    padding: 14px 28px;
+    font-size: 13px;
+  }
 
-/* thin out scatter */
-.sg,
-.sh,
-.sk,
-.sl {
-  display: none;
+  /* thin out scatter */
+  .sg,
+  .sh,
+  .sk,
+  .sl {
+    display: none;
+  }
 }
 
 /* ══════════════════════════════════════════
@@ -351,5 +351,19 @@
   .sk,
   .sl {
     display: none;
+  }
+}
+
+/* ══════════════════════════════════════════
+   REDUCED MOTION — ensure elements are
+   always visible when animations are off
+══════════════════════════════════════════ */
+@media (prefers-reduced-motion: reduce) {
+  .heading,
+  .food-wrap,
+  .ctas {
+    animation: none;
+    opacity: 1;
+    transform: none;
   }
 }
