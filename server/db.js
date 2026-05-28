@@ -9,15 +9,9 @@ const pool = new Pool({
 });
 
 async function createTables() {
-  await pool.query(`
-    CREATE TABLE IF NOT EXISTS users (
-      id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-      email       VARCHAR(255) UNIQUE NOT NULL,
-      password_hash VARCHAR(255) NOT NULL,
-      created_at  TIMESTAMPTZ DEFAULT NOW()
-    )
-  `);
-  console.log('[db] tables ready');
+  // Auth users are managed by Supabase — no custom users table needed.
+  // Burger, Pizza, and Order tables are created via: npx prisma db push
+  console.log('[db] PostgreSQL connected');
 }
 
 module.exports = { pool, createTables };

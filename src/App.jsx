@@ -15,6 +15,8 @@ import MyPizzasPage from './pages/MyPizzasPage';
 import MyBurgersPage from './pages/MyBurgersPage';
 import ComingSoon from './pages/ComingSoon';
 import CategoryPage from './pages/CategoryPage';
+import ProtectedRoute from './components/ProtectedRoute';
+import AuthCallback from './pages/AuthCallback';
 
 const BUILDER_ROUTES = new Set(['/build-pizza', '/build-burger']);
 
@@ -59,10 +61,11 @@ function AnimatedRoutes() {
         <Route path="/build-burger" element={<BurgerPage />} />
         <Route path="/cart"         element={<CartPage />} />
         <Route path="/checkout"     element={<CheckoutPage />} />
-        <Route path="/auth"         element={<AuthPage />} />
-        <Route path="/profile"      element={<ProfileDashboard />} />
-        <Route path="/my-pizzas"    element={<MyPizzasPage />} />
-        <Route path="/my-burgers"   element={<MyBurgersPage />} />
+        <Route path="/auth"          element={<AuthPage />} />
+        <Route path="/auth/callback" element={<AuthCallback />} />
+        <Route path="/profile"      element={<ProtectedRoute><ProfileDashboard /></ProtectedRoute>} />
+        <Route path="/my-pizzas"    element={<ProtectedRoute><MyPizzasPage /></ProtectedRoute>} />
+        <Route path="/my-burgers"   element={<ProtectedRoute><MyBurgersPage /></ProtectedRoute>} />
         <Route path="/coming-soon"  element={<ComingSoon />} />
 
         {/* Food menu category pages */}

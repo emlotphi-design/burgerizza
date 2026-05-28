@@ -8,6 +8,9 @@ import BurgerPreviewCard from './components/BurgerPreviewCard';
 import { useBurgerStore } from './store/burgerStore.jsx';
 import { usePizzaStore } from '../../context/PizzaContext';
 import { BURGER_BUNS, BURGER_MEATS, BURGER_CHEESES, BURGER_SAUCES, BURGER_VEGETABLES } from './utils/burgerData';
+import { calcBurgerPrice } from './utils/burgerUtils';
+import { useAuth } from '../../context/AuthContext';
+import { api } from '../../utils/api';
 
 import blackWrapper from '../../assets/burgers/wrappers/black-wrapper.png';
 import classicPaper from '../../assets/burgers/wrappers/classic-paper.png';
@@ -289,6 +292,7 @@ export default function BurgerBuilder() {
   const [isOrdering, setIsOrdering]   = useState(false);
   const { draft, setDraft, clearDraft } = useBurgerStore();
   const { addBurger, pizzas, removePizza } = usePizzaStore();
+  const { isLoggedIn } = useAuth();
 
   const [exitingBurgerIds, setExitingBurgerIds] = useState([]);
 
@@ -375,6 +379,19 @@ export default function BurgerBuilder() {
           clearDraft();
           setIsOrdering(false);
         });
+        // Persist to database for logged-in users (fire-and-forget)
+        if (isLoggedIn) {
+          api.burgers.save({
+            name:       (snapshot.name ?? '').trim() || 'Custom Burger',
+            bun:        snapshot.bun,
+            sauces:     snapshot.sauces     ?? [],
+            meats:      snapshot.meats      ?? {},
+            cheeses:    snapshot.cheeses    ?? {},
+            vegetables: snapshot.vegetables ?? [],
+            totalPrice: calcBurgerPrice(snapshot),
+            image:      image ?? null,
+          }).catch(() => {});
+        }
         navigate('/cart');
       }).catch(() => {
         if (cancelled) return;
@@ -383,6 +400,19 @@ export default function BurgerBuilder() {
           clearDraft();
           setIsOrdering(false);
         });
+        // Persist to database for logged-in users (fire-and-forget, no image)
+        if (isLoggedIn) {
+          api.burgers.save({
+            name:       (snapshot.name ?? '').trim() || 'Custom Burger',
+            bun:        snapshot.bun,
+            sauces:     snapshot.sauces     ?? [],
+            meats:      snapshot.meats      ?? {},
+            cheeses:    snapshot.cheeses    ?? {},
+            vegetables: snapshot.vegetables ?? [],
+            totalPrice: calcBurgerPrice(snapshot),
+            image:      null,
+          }).catch(() => {});
+        }
         navigate('/cart');
       });
     };

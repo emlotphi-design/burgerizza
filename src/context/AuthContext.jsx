@@ -1,242 +1,239 @@
-import { createContext, useContext, useState, useCallback, useRef } from 'react';
-import { api, setToken } from '../utils/api';
+import { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react';
+import { supabase } from '../lib/supabase';
 
-/* ─── SHA-256 via Web Crypto (auth-backend-ready) ──────── */
-async function sha256(str) {
-  const buf = await crypto.subtle.digest(
-    'SHA-256',
-    new TextEncoder().encode(str + '__bz_2025_salt')
-  );
-  return Array.from(new Uint8Array(buf))
-    .map(b => b.toString(16).padStart(2, '0'))
-    .join('');
-}
+/* ─── Per-user localStorage helpers ────────────────────── */
+function uKey(uid, suffix) { return `bz_${suffix}_${uid}`; }
 
-/* ─── localStorage helpers ─────────────────────────────── */
-function readLS(key, fallback) {
-  try { return JSON.parse(localStorage.getItem(key) ?? 'null') ?? fallback; }
+function readULS(uid, suffix, fallback) {
+  try { return JSON.parse(localStorage.getItem(uKey(uid, suffix)) ?? 'null') ?? fallback; }
   catch { return fallback; }
 }
-function writeLS(key, val) {
-  try { localStorage.setItem(key, JSON.stringify(val)); } catch {}
-}
-function removeLS(key) {
-  try { localStorage.removeItem(key); } catch {}
+function writeULS(uid, suffix, val) {
+  try { localStorage.setItem(uKey(uid, suffix), JSON.stringify(val)); } catch {}
 }
 
-/* ─── User factory ─────────────────────────────────────── */
-export function makeUser({ fullName, email, phone = '', passwordHash, address = {} }) {
+/* ─── Map Supabase user → app user shape ───────────────── */
+function toAppUser(supaUser) {
+  if (!supaUser) return null;
+  const m = supaUser.user_metadata ?? {};
   return {
-    id: crypto.randomUUID(),
-    fullName,
-    email: email.toLowerCase().trim(),
-    phone,
-    passwordHash,
-    address: {
-      street: '', houseNumber: '', postalCode: '',
-      city: '', floor: '', doorbellName: '',
-      ...address,
-    },
-    savedPizzas:  [],
-    orderHistory: [],
-    createdAt: new Date().toISOString(),
+    id:           supaUser.id,
+    email:        supaUser.email,
+    fullName:     m.fullName    ?? '',
+    phone:        m.phone       ?? '',
+    address:      m.address     ?? {},
+    createdAt:    supaUser.created_at,
+    savedPizzas:  readULS(supaUser.id, 'saved',  []),
+    orderHistory: readULS(supaUser.id, 'orders', []),
   };
+}
+
+/* ─── German error messages ─────────────────────────────── */
+function mapError(msg = '') {
+  if (msg.includes('Invalid login credentials'))        return 'Falsche E-Mail oder Passwort.';
+  if (msg.includes('Email not confirmed'))              return 'Bitte bestätige zuerst deine E-Mail-Adresse.';
+  if (msg.includes('User already registered')
+   || msg.includes('already registered'))               return 'Diese E-Mail ist bereits registriert. Bitte melde dich an.';
+  if (msg.includes('Password should be'))               return 'Passwort muss mindestens 6 Zeichen haben.';
+  if (msg.includes('over_email_send_rate_limit')
+   || msg.includes('email rate limit')
+   || msg.includes('rate limit'))                       return 'Zu viele Versuche. Bitte warte einige Minuten.';
+  if (msg.includes('Unable to validate'))               return 'Ungültige E-Mail-Adresse.';
+  if (msg.includes('network') || msg.includes('fetch')) return 'Netzwerkfehler. Bitte prüfe deine Verbindung.';
+  return msg || 'Ein unbekannter Fehler ist aufgetreten.';
 }
 
 /* ─── Context ──────────────────────────────────────────── */
 const AuthCtx = createContext(null);
 
 export function AuthProvider({ children }) {
-  const [accounts, setAccounts] = useState(() => readLS('bz_accounts', []));
-  const [currentUser, setCurrentUser] = useState(() => {
-    const session = readLS('bz_session', null);
-    if (!session?.userId) return null;
-    const accs = readLS('bz_accounts', []);
-    return accs.find(a => a.id === session.userId) ?? null;
-  });
+  const [currentUser, setCurrentUser] = useState(null);
+  const [loading,     setLoading]     = useState(true);
+  const registerInFlight = useRef(false);
+  const loginInFlight    = useRef(false);
 
-  const accountsRef = useRef(accounts);
-  accountsRef.current = accounts;
+  /* Restore session on mount, listen for auth changes */
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setCurrentUser(toAppUser(session?.user ?? null));
+      setLoading(false);
+    });
 
-  /* keep currentUser in sync inside callbacks */
-  const currentUserRef = useRef(currentUser);
-  currentUserRef.current = currentUser;
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        setCurrentUser(toAppUser(session?.user ?? null));
+        setLoading(false);
+      }
+    );
 
-  function persistAccounts(next) {
-    setAccounts(next);
-    writeLS('bz_accounts', next);
-  }
-
-  function openSession(user) {
-    setCurrentUser(user);
-    writeLS('bz_session', { userId: user.id });
-  }
+    return () => subscription.unsubscribe();
+  }, []);
 
   /* ── register ─────────────────────────────────────────── */
-  const register = useCallback(async ({ fullName, email, phone, password, address }) => {
-    const accs = accountsRef.current;
-    const norm = email.toLowerCase().trim();
-    if (accs.find(a => a.email === norm)) {
-      return { error: 'Diese E-Mail ist bereits registriert.' };
-    }
-    const passwordHash = await sha256(password);
-    const user = makeUser({ fullName, email, phone, passwordHash, address });
-    persistAccounts([...accs, user]);
-    openSession(user);
+  const register = useCallback(async ({ fullName, email, phone, password }) => {
+    if (registerInFlight.current) return {};
+    registerInFlight.current = true;
 
-    // Sync with backend (fire-and-forget — localStorage works even if API is down)
+    const redirectTo = window.location.origin;
+    console.log('[auth] signUp →', email, '| redirectTo:', redirectTo);
+
     try {
-      const res = await api.auth.register({ email, password, fullName, phone, address });
-      setToken(res.token);
-    } catch { /* offline or server not ready */ }
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: { fullName, phone, address: {} },
+          emailRedirectTo: redirectTo,
+        },
+      });
 
-    return { user };
+      console.log('[auth] signUp result:', {
+        userId:     data?.user?.id     ?? null,
+        hasSession: !!data?.session,
+        identities: data?.user?.identities?.length ?? 'n/a',
+        errorCode:  error?.code        ?? null,
+        errorMsg:   error?.message     ?? null,
+      });
+
+      if (error) return { error: mapError(error.message) };
+
+      // Supabase "fake success": email already registered — identities array is empty,
+      // no email is sent (email enumeration protection).
+      if (data.user && data.user.identities?.length === 0) {
+        console.warn('[auth] fake success — email already exists:', email);
+        return { error: 'Diese E-Mail ist bereits registriert. Bitte melde dich an oder setze dein Passwort zurück.' };
+      }
+
+      // Email confirmation required → confirmation email dispatched
+      if (!data.session) {
+        console.log('[auth] confirmation email dispatched to:', email);
+        return { needsVerification: true };
+      }
+
+      // Email confirmation disabled in Supabase → immediately logged in
+      return { user: toAppUser(data.user) };
+    } catch (err) {
+      console.error('[auth] signUp threw:', err?.message);
+      return { error: mapError(err?.message ?? '') };
+    } finally {
+      registerInFlight.current = false;
+    }
   }, []);
 
   /* ── login ────────────────────────────────────────────── */
   const login = useCallback(async (email, password) => {
-    const accs = accountsRef.current;
-    const norm = email.toLowerCase().trim();
-    const user = accs.find(a => a.email === norm);
-    if (!user) return { error: 'Kein Konto mit dieser E-Mail gefunden.' };
-    const passwordHash = await sha256(password);
-    if (user.passwordHash !== passwordHash) return { error: 'Falsches Passwort.' };
-    openSession(user);
-
-    // Sync JWT from backend (fire-and-forget)
+    if (loginInFlight.current) return {};
+    loginInFlight.current = true;
+    console.log('[auth] login →', email);
     try {
-      const res = await api.auth.login({ email, password });
-      setToken(res.token);
-    } catch { /* offline or server not ready */ }
-
-    return { user };
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) {
+        console.warn('[auth] login error:', error.message);
+        return { error: mapError(error.message) };
+      }
+      console.log('[auth] login ok:', data.user?.id);
+      return { user: toAppUser(data.user) };
+    } catch (err) {
+      console.error('[auth] login threw:', err?.message);
+      return { error: mapError(err?.message ?? '') };
+    } finally {
+      loginInFlight.current = false;
+    }
   }, []);
 
   /* ── logout ───────────────────────────────────────────── */
-  const logout = useCallback(() => {
-    setCurrentUser(null);
-    removeLS('bz_session');
-    setToken(null);
+  const logout = useCallback(async () => {
+    await supabase.auth.signOut();
+    localStorage.removeItem('bz_jwt');
   }, []);
 
   /* ── updateProfile ────────────────────────────────────── */
   const updateProfile = useCallback(async (partial, newPassword) => {
-    const uid = currentUserRef.current?.id;
-    if (!uid) return;
+    if (!currentUser) return;
 
-    let passwordHash = currentUserRef.current.passwordHash;
-    if (newPassword) passwordHash = await sha256(newPassword);
+    const updates = {};
+    if (newPassword) updates.password = newPassword;
+    updates.data = {
+      fullName: currentUser.fullName,
+      phone:    currentUser.phone,
+      address:  currentUser.address,
+      ...partial,
+    };
 
-    setAccounts(prev => {
-      const next = prev.map(a => {
-        if (a.id !== uid) return a;
-        const updated = { ...a, ...partial, passwordHash };
-        setCurrentUser(updated);
-        currentUserRef.current = updated;
-        return updated;
-      });
-      writeLS('bz_accounts', next);
-      return next;
-    });
-  }, []);
+    const { data, error } = await supabase.auth.updateUser(updates);
+    if (!error && data.user) {
+      setCurrentUser(prev => ({ ...toAppUser(data.user), savedPizzas: prev.savedPizzas, orderHistory: prev.orderHistory }));
+    }
+  }, [currentUser]);
 
   /* ── addOrder ─────────────────────────────────────────── */
   const addOrder = useCallback((order) => {
-    const uid = currentUserRef.current?.id;
+    const uid = currentUser?.id;
     if (!uid) return;
-    setAccounts(prev => {
-      const next = prev.map(a => {
-        if (a.id !== uid) return a;
-        const updated = { ...a, orderHistory: [order, ...a.orderHistory] };
-        setCurrentUser(updated);
-        currentUserRef.current = updated;
-        return updated;
-      });
-      writeLS('bz_accounts', next);
-      return next;
+    setCurrentUser(prev => {
+      const orderHistory = [order, ...prev.orderHistory];
+      writeULS(uid, 'orders', orderHistory);
+      return { ...prev, orderHistory };
     });
-  }, []);
+  }, [currentUser?.id]);
 
   /* ── savePizzaToProfile ───────────────────────────────── */
   const savePizzaToProfile = useCallback((pizza) => {
-    const uid = currentUserRef.current?.id;
+    const uid = currentUser?.id;
     if (!uid) return;
-    setAccounts(prev => {
-      const next = prev.map(a => {
-        if (a.id !== uid) return a;
-        if (a.savedPizzas.find(p => p.id === pizza.id)) return a;
-        const saved = { ...pizza, savedAt: new Date().toISOString(), isFavorite: false };
-        const updated = { ...a, savedPizzas: [...a.savedPizzas, saved] };
-        setCurrentUser(updated);
-        currentUserRef.current = updated;
-        return updated;
-      });
-      writeLS('bz_accounts', next);
-      return next;
+    setCurrentUser(prev => {
+      if (prev.savedPizzas.find(p => p.id === pizza.id)) return prev;
+      const savedPizzas = [
+        ...prev.savedPizzas,
+        { ...pizza, savedAt: new Date().toISOString(), isFavorite: false },
+      ];
+      writeULS(uid, 'saved', savedPizzas);
+      return { ...prev, savedPizzas };
     });
-  }, []);
+  }, [currentUser?.id]);
 
   /* ── removeSavedPizza ─────────────────────────────────── */
   const removeSavedPizza = useCallback((pizzaId) => {
-    const uid = currentUserRef.current?.id;
+    const uid = currentUser?.id;
     if (!uid) return;
-    setAccounts(prev => {
-      const next = prev.map(a => {
-        if (a.id !== uid) return a;
-        const updated = { ...a, savedPizzas: a.savedPizzas.filter(p => p.id !== pizzaId) };
-        setCurrentUser(updated);
-        currentUserRef.current = updated;
-        return updated;
-      });
-      writeLS('bz_accounts', next);
-      return next;
+    setCurrentUser(prev => {
+      const savedPizzas = prev.savedPizzas.filter(p => p.id !== pizzaId);
+      writeULS(uid, 'saved', savedPizzas);
+      return { ...prev, savedPizzas };
     });
-  }, []);
+  }, [currentUser?.id]);
 
   /* ── toggleFavorite ───────────────────────────────────── */
   const toggleFavorite = useCallback((pizzaId) => {
-    const uid = currentUserRef.current?.id;
+    const uid = currentUser?.id;
     if (!uid) return;
-    setAccounts(prev => {
-      const next = prev.map(a => {
-        if (a.id !== uid) return a;
-        const savedPizzas = a.savedPizzas.map(p =>
-          p.id === pizzaId ? { ...p, isFavorite: !p.isFavorite } : p
-        );
-        const updated = { ...a, savedPizzas };
-        setCurrentUser(updated);
-        currentUserRef.current = updated;
-        return updated;
-      });
-      writeLS('bz_accounts', next);
-      return next;
+    setCurrentUser(prev => {
+      const savedPizzas = prev.savedPizzas.map(p =>
+        p.id === pizzaId ? { ...p, isFavorite: !p.isFavorite } : p
+      );
+      writeULS(uid, 'saved', savedPizzas);
+      return { ...prev, savedPizzas };
     });
-  }, []);
+  }, [currentUser?.id]);
 
   /* ── renameSavedPizza ─────────────────────────────────── */
   const renameSavedPizza = useCallback((pizzaId, name) => {
-    const uid = currentUserRef.current?.id;
+    const uid = currentUser?.id;
     if (!uid) return;
-    setAccounts(prev => {
-      const next = prev.map(a => {
-        if (a.id !== uid) return a;
-        const savedPizzas = a.savedPizzas.map(p =>
-          p.id === pizzaId ? { ...p, name } : p
-        );
-        const updated = { ...a, savedPizzas };
-        setCurrentUser(updated);
-        currentUserRef.current = updated;
-        return updated;
-      });
-      writeLS('bz_accounts', next);
-      return next;
+    setCurrentUser(prev => {
+      const savedPizzas = prev.savedPizzas.map(p =>
+        p.id === pizzaId ? { ...p, name } : p
+      );
+      writeULS(uid, 'saved', savedPizzas);
+      return { ...prev, savedPizzas };
     });
-  }, []);
+  }, [currentUser?.id]);
 
   return (
     <AuthCtx.Provider value={{
       currentUser,
       isLoggedIn: !!currentUser,
+      loading,
       register,
       login,
       logout,

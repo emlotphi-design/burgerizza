@@ -1,8 +1,8 @@
-const router      = require('express').Router();
-const ctrl        = require('../controllers/ordersController');
-const requireAuth = require('../middleware/auth');
+const router       = require('express').Router();
+const ctrl         = require('../controllers/ordersController');
+const optionalAuth = require('../middleware/optionalAuth');
 
-router.use(requireAuth);
+router.use(optionalAuth);
 
 router.post('/',    ctrl.create);
 router.get('/',     ctrl.list);
