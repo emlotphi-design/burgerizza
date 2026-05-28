@@ -7,19 +7,8 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  password  String
-  fullName  String?
-  phone     String?
-  address   Json?
-  createdAt DateTime @default(now())
-
-  burgers Burger[]
-  pizzas  Pizza[]
-  orders  Order[]
-}
+// Users are managed by raw pg (see db.js / authController.js).
+// userId here is the UUID string from the pg users table.
 
 model Burger {
   id         String   @id @default(cuid())
@@ -32,7 +21,6 @@ model Burger {
   totalPrice Float    @default(0)
   image      String?
   userId     String
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt  DateTime @default(now())
 }
 
@@ -47,14 +35,12 @@ model Pizza {
   totalPrice Float    @default(0)
   image      String?
   userId     String
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt  DateTime @default(now())
 }
 
 model Order {
   id         String   @id @default(cuid())
   userId     String
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   items      Json
   totalPrice Float
   status     String   @default("pending")

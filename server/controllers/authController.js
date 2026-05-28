@@ -1,16 +1,11 @@
 const bcrypt = require('bcryptjs');
 const jwt    = require('jsonwebtoken');
-const prisma = require('../utils/prisma');
+const { pool } = require('../db');
 
 const SALT_ROUNDS = 12;
 
 function signToken(userId) {
   return jwt.sign({ userId }, process.env.JWT_SECRET, { expiresIn: '30d' });
-}
-
-function safeUser(user) {
-  const { password, ...rest } = user;
-  return rest;
 }
 
 /* ── POST /api/auth/register ────────────────────────────── */
@@ -25,23 +20,20 @@ exports.register = async (req, res) => {
   }
 
   const norm = email.toLowerCase().trim();
-  const existing = await prisma.user.findUnique({ where: { email: norm } });
-  if (existing) {
+
+  const existing = await pool.query('SELECT id FROM users WHERE email = $1', [norm]);
+  if (existing.rows.length > 0) {
     return res.status(409).json({ error: 'Diese E-Mail ist bereits registriert.' });
   }
 
-  const hashed = await bcrypt.hash(password, SALT_ROUNDS);
-  const user   = await prisma.user.create({
-    data: {
-      email:    norm,
-      password: hashed,
-      fullName: fullName ?? null,
-      phone:    phone    ?? null,
-      address:  address  ?? null,
-    },
-  });
+  const hash   = await bcrypt.hash(password, SALT_ROUNDS);
+  const result = await pool.query(
+    'INSERT INTO users (email, password_hash) VALUES ($1, $2) RETURNING id, email, created_at',
+    [norm, hash],
+  );
+  const user = result.rows[0];
 
-  res.status(201).json({ token: signToken(user.id), user: safeUser(user) });
+  res.status(201).json({ token: signToken(user.id), user });
 };
 
 /* ── POST /api/auth/login ───────────────────────────────── */
@@ -52,23 +44,30 @@ exports.login = async (req, res) => {
     return res.status(400).json({ error: 'E-Mail und Passwort sind erforderlich.' });
   }
 
-  const norm = email.toLowerCase().trim();
-  const user = await prisma.user.findUnique({ where: { email: norm } });
-  if (!user) {
+  const norm   = email.toLowerCase().trim();
+  const result = await pool.query('SELECT * FROM users WHERE email = $1', [norm]);
+  if (result.rows.length === 0) {
     return res.status(401).json({ error: 'Kein Konto mit dieser E-Mail gefunden.' });
   }
 
-  const match = await bcrypt.compare(password, user.password);
+  const user  = result.rows[0];
+  const match = await bcrypt.compare(password, user.password_hash);
   if (!match) {
     return res.status(401).json({ error: 'Falsches Passwort.' });
   }
 
-  res.json({ token: signToken(user.id), user: safeUser(user) });
+  const { password_hash, ...safeUser } = user;
+  res.json({ token: signToken(user.id), user: safeUser });
 };
 
 /* ── GET /api/auth/me ───────────────────────────────────── */
 exports.me = async (req, res) => {
-  const user = await prisma.user.findUnique({ where: { id: req.userId } });
-  if (!user) return res.status(404).json({ error: 'Benutzer nicht gefunden.' });
-  res.json({ user: safeUser(user) });
+  const result = await pool.query(
+    'SELECT id, email, created_at FROM users WHERE id = $1',
+    [req.userId],
+  );
+  if (result.rows.length === 0) {
+    return res.status(404).json({ error: 'Benutzer nicht gefunden.' });
+  }
+  res.json({ user: result.rows[0] });
 };
