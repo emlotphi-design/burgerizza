@@ -535,15 +535,49 @@
 
 
 /* ── Responsive ─────────────────────────────── */
-@media (max-width: 600px) {
+
+/* Tablet / mobile — pill toolbar is now fixed at bottom, sidebar off left */
+@media (max-width: 900px) {
   .bb-builder-canvas:hover {
     transform: none;
   }
 
+  /* Full horizontal space now that the left sidebar is gone */
+  .bb-builder-canvas {
+    width: min(500px, 88vw, calc(100vh - 260px));
+  }
+
+  /* Bottom padding clears fixed pill (bottom: 88px, ~72px tall) + order button */
+  .bb-workspace {
+    padding: 0 16px 170px;
+    gap: 10px;
+  }
+}
+
+@media (max-width: 600px) {
   .bb-order-btn {
     bottom: 20px;
-    padding: 13px 42px;
-    font-size: 13px;
-    letter-spacing: 2.5px;
+    padding: 12px 36px;
+    font-size: 12px;
+    letter-spacing: 2.2px;
+  }
+}
+
+@media (max-width: 480px) {
+  /* Bottom padding clears fixed pill (bottom: 72px, ~62px tall) + order button */
+  .bb-workspace {
+    padding: 0 12px 140px;
+    gap: 8px;
+  }
+
+  .bb-builder-canvas {
+    width: min(380px, 88vw, calc(100vh - 250px));
+  }
+
+  .bb-order-btn {
+    bottom: 18px;
+    padding: 11px 28px;
+    font-size: 11px;
+    letter-spacing: 2px;
   }
 }

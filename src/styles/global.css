@@ -161,6 +161,29 @@ html {
      never shifts page width during route transitions. */
   overflow-y: scroll;
   scrollbar-gutter: stable;
+  overflow-x: hidden;
+  /* Fills iOS overscroll bounce area with brand yellow instead of white */
+  background-color: #F5C518;
+  /* iOS viewport fill — ensures html covers the full screen height */
+  height: -webkit-fill-available;
+}
+
+@media (max-width: 900px) {
+  html {
+    /* Mobile has no visible scrollbar — remove the reserved gutter column */
+    scrollbar-gutter: auto;
+  }
+
+  /* ── iOS Safari mobile fixes ────────────────────────────────────────
+     background-attachment: fixed breaks on iOS — background fails to
+     render or shows white. Switch to scroll on mobile.
+     padding-bottom covers the home-indicator safe area on notched
+     iPhones (active when viewport-fit=cover is set).
+  ──────────────────────────────────────────────────────────────────── */
+  body {
+    background-attachment: scroll;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
 }
 
 body {
@@ -169,7 +192,18 @@ body {
   background-position: center;
   background-repeat: no-repeat;
   background-attachment: fixed;
+  /* Solid fallback shown when image hasn't loaded + fills overscroll area */
+  background-color: #F5C518;
   min-height: 100vh;
+  min-height: -webkit-fill-available; /* older iOS Safari */
+  min-height: 100dvh;                 /* modern mobile-safe unit */
+  overflow-x: hidden;
+}
+
+/* ── App root — fills the full mobile screen ── */
+#root {
+  min-height: 100vh;
+  min-height: 100dvh;
 }
 
 /* ══════════════════════════════════════════

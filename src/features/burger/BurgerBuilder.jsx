@@ -778,6 +778,19 @@ export default function BurgerBuilder() {
           })}
 
         </div>
+
+        <div className="builder-name-wrap">
+          <input
+            className="builder-name-input"
+            type="text"
+            value={draft.name}
+            onChange={e => setDraft({ name: e.target.value })}
+            placeholder={`Custom Burger #${burgerItems.length + 1}`}
+            maxLength={32}
+            aria-label="Burger name"
+            spellCheck={false}
+          />
+        </div>
       </div>
 
       {/* ORDER NOW — fixed pill, visible only when meat selected and not ordering */}

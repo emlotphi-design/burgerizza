@@ -771,7 +771,7 @@
   }
 
   .co-main {
-    padding: 20px 14px 60px;
+    padding: calc(var(--nav-h) + 16px) 14px 60px;
   }
 
   .co-step-label {

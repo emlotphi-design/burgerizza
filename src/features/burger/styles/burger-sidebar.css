@@ -112,37 +112,81 @@
 
 
 /* ── Responsive ─────────────────────────────── */
+
+/* Tablet / mobile — horizontal pill below canvas, matches pizza category-toolbar */
 @media (max-width: 900px) {
   .bs-rail {
-    left: 20px;
-    width: 66px;
+    /* Reposition: centered at bottom, above order button */
+    position: fixed;
+    left: 50%;
+    top: auto;
+    bottom: 88px;
+    transform: translateX(-50%);
+
+    width: auto;
+    flex-direction: row;
     gap: 8px;
+    padding: 8px 12px;
+
+    /* Same glassmorphism pill as pizza toolbar */
+    background: rgba(255, 255, 255, 0.82);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-radius: 50px;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.12);
+  }
+
+  .bs-item {
+    width: 56px;
+    height: 56px;
+    padding: 0;
+    flex-direction: row;
+    justify-content: center;
+    gap: 0;
+  }
+
+  /* Labels hidden in horizontal pill mode */
+  .bs-item__label {
+    display: none;
   }
 
   .bs-item__icon-img {
-    width: 34px;
-    height: 34px;
+    width: 42px;
+    height: 42px;
   }
 
-  .bs-item__label {
-    font-size: 8px;
-    letter-spacing: 0.5px;
+  /* Active glow — matches pizza cat-btn--active */
+  .bs-item--active {
+    background: rgba(255, 210, 63, 0.22);
+    box-shadow:
+      0 0 22px rgba(255, 200, 0, 0.50),
+      0 4px 14px rgba(255, 155, 0, 0.22);
+    border-radius: 18px;
   }
 }
 
+/* Medium phone — tuck pill closer to shrunk order button */
+@media (max-width: 600px) {
+  .bs-rail {
+    bottom: 76px;
+  }
+}
+
+/* Small phone — iPhone SE and similar */
 @media (max-width: 480px) {
   .bs-rail {
-    left: 12px;
-    width: 56px;
-    gap: 6px;
+    bottom: 72px;
+    gap: 2px;
+    padding: 7px 8px;
+  }
+
+  .bs-item {
+    width: 48px;
+    height: 48px;
   }
 
   .bs-item__icon-img {
-    width: 28px;
-    height: 28px;
-  }
-
-  .bs-item__label {
-    font-size: 7px;
+    width: 36px;
+    height: 36px;
   }
 }

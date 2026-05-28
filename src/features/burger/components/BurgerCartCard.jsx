@@ -1,8 +1,11 @@
+import { useState } from 'react';
 import { usePizzaStore } from '../../../context/PizzaContext';
 import { calcBurgerPrice, BURGER_LABEL } from '../utils/burgerUtils';
 
 export default function BurgerCartCard({ burger, isExiting, animDelay, onRemove, onEdit, idx, visibleCount }) {
   const { setQuantity } = usePizzaStore();
+  const [ingredientsOpen, setIngredientsOpen] = useState(false);
+
   const qty       = burger.quantity || 1;
   const unitPrice = calcBurgerPrice(burger);
   const subtotal  = unitPrice * qty;
@@ -37,8 +40,8 @@ export default function BurgerCartCard({ burger, isExiting, animDelay, onRemove,
         qty > 1 ? `${BURGER_LABEL[id] ?? id} ×${qty}` : (BURGER_LABEL[id] ?? id)
       ),
     },
-    burger.sauces?.length > 0     && { cat: 'Sauce',   vals: burger.sauces.map(id => BURGER_LABEL[id] ?? id) },
-    burger.vegetables?.length > 0 && { cat: 'Gemüse',  vals: burger.vegetables.map(id => BURGER_LABEL[id] ?? id) },
+    burger.sauces?.length > 0     && { cat: 'Sauce',  vals: burger.sauces.map(id => BURGER_LABEL[id] ?? id) },
+    burger.vegetables?.length > 0 && { cat: 'Gemüse', vals: burger.vegetables.map(id => BURGER_LABEL[id] ?? id) },
   ].filter(Boolean);
 
   return (
@@ -46,11 +49,24 @@ export default function BurgerCartCard({ burger, isExiting, animDelay, onRemove,
       className={`cart-pizza-card${isExiting ? ' cart-pizza-card--exit' : ''}`}
       style={{ animationDelay: `${animDelay}ms` }}
     >
-      <div className="cart-layout">
+      {/* Corner delete — mobile-only, hidden on desktop via CSS */}
+      <button
+        className="cart-delete-corner"
+        onClick={() => onRemove(burger.id)}
+        aria-label="Burger entfernen"
+      >
+        <svg width="9" height="9" viewBox="0 0 18 18" fill="none"
+          stroke="currentColor" strokeWidth="3" strokeLinecap="round">
+          <line x1="3" y1="3" x2="15" y2="15" />
+          <line x1="15" y1="3" x2="3" y2="15" />
+        </svg>
+      </button>
 
+      <div className="cart-layout">
         <div className="cart-preview">
           {burger.image && (
             <img
+              className="cart-burger-img"
               src={burger.image}
               alt={burger.name}
               style={{
@@ -65,6 +81,7 @@ export default function BurgerCartCard({ burger, isExiting, animDelay, onRemove,
         </div>
 
         <div className="cart-details">
+          {/* 1 — Name */}
           <div className="cart-pizza-name-row">
             <span className="cart-pizza-name">{burger.name}</span>
             {visibleCount > 1 && idx != null && (
@@ -72,18 +89,31 @@ export default function BurgerCartCard({ burger, isExiting, animDelay, onRemove,
             )}
           </div>
 
-          <p className="cart-section-label">Zutaten</p>
-          <div className="cart-ingredients">
-            {rows.map(row => (
-              <div key={row.cat} className="ingredient-row">
-                <span className="ingredient-cat">{row.cat}</span>
-                <span className="ingredient-vals">{row.vals.join(', ')}</span>
-              </div>
-            ))}
+          {/* 2 — Compact price (mobile-only, hidden on desktop via CSS) */}
+          <div className="cart-price-compact">
+            <span className="cart-price-compact__total">€{subtotal.toFixed(2)}</span>
+            {qty > 1 && <span className="cart-price-compact__unit">€{unitPrice.toFixed(2)} / Stk.</span>}
           </div>
 
-          <div className="cart-divider" />
+          {/* 3 — Ingredient body: normal flow on desktop, accordion on mobile */}
+          <div className={`cart-ing-body${ingredientsOpen ? ' cart-ing-body--open' : ''}`}>
+            <div className="cart-ing-body__inner">
+              <p className="cart-section-label">Zutaten</p>
+              <div className="cart-ingredients">
+                {rows.map(row => (
+                  <div key={row.cat} className="ingredient-row">
+                    <span className="ingredient-cat">{row.cat}</span>
+                    <span className="ingredient-vals">{row.vals.join(', ')}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
 
+          {/* Divider after ingredients (desktop-only, hidden on mobile) */}
+          <div className="cart-divider cart-divider--ing" />
+
+          {/* 4 — Quantity */}
           <div className="cart-qty-row">
             <span className="cart-qty-label">Menge</span>
             <div className="qty-ctrl">
@@ -93,6 +123,7 @@ export default function BurgerCartCard({ burger, isExiting, animDelay, onRemove,
             </div>
           </div>
 
+          {/* 5 — Price block (desktop-only, hidden on mobile via CSS) */}
           <div className="cart-price-block" style={{ marginTop: '14px' }}>
             <div className="cart-price-row">
               <span>Stückpreis</span>
@@ -104,8 +135,27 @@ export default function BurgerCartCard({ burger, isExiting, animDelay, onRemove,
             </div>
           </div>
 
-          <div className="cart-divider" />
+          {/* 6 — Ingredient toggle (mobile-only, hidden on desktop via CSS) */}
+          <button
+            className={`cart-ing-toggle${ingredientsOpen ? ' cart-ing-toggle--open' : ''}`}
+            onClick={() => setIngredientsOpen(o => !o)}
+            aria-expanded={ingredientsOpen}
+          >
+            <span>Zutaten</span>
+            <svg
+              className="cart-ing-toggle__chevron"
+              width="11" height="11" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" strokeWidth="2.5"
+              strokeLinecap="round" strokeLinejoin="round"
+            >
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+          </button>
 
+          {/* Divider before actions */}
+          <div className="cart-divider cart-divider--actions" />
+
+          {/* 7 — Card actions */}
           <div className="cart-card-actions">
             {onEdit && (
               <button className="cart-edit-btn" onClick={() => onEdit(burger)} aria-label="Burger bearbeiten">
@@ -127,7 +177,6 @@ export default function BurgerCartCard({ burger, isExiting, animDelay, onRemove,
             </button>
           </div>
         </div>
-
       </div>
     </div>
   );

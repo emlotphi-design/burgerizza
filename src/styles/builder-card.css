@@ -246,57 +246,8 @@
 
 /* ── Responsive — tablet/mobile ≤ 900px ──────── */
 @media (max-width: 900px) {
+  /* Hide the floating preview panel — cleaner mobile layout */
   .bpc-panel {
-    right: auto;
-    left: 0;
-    right: 0;
-    top: auto;
-    bottom: 160px;
-    transform: none;
-    flex-direction: column;
-    max-height: none;
-    animation: bpcPanelMobileIn 0.44s cubic-bezier(0.22, 1, 0.36, 1) both;
-    padding: 0;
-    gap: 6px;
-  }
-
-  .bpc-panel-label {
-    padding: 0 16px;
-    text-align: left;
-  }
-
-  .bpc-panel-list {
-    flex-direction: row;
-    overflow-x: auto;
-    overflow-y: visible;
-    max-height: none;
-    gap: 10px;
-    padding: 4px 16px 10px;
-    scroll-snap-type: x mandatory;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-  }
-
-  .bpc-panel-list::-webkit-scrollbar {
     display: none;
-  }
-
-  .bpc-card {
-    width: 158px;
-    flex-shrink: 0;
-    scroll-snap-align: start;
-  }
-
-  @keyframes bpcPanelMobileIn {
-    from { opacity: 0; transform: translateY(16px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-}
-
-/* ── Responsive — small mobile ≤ 480px ───────── */
-@media (max-width: 480px) {
-  .bpc-card {
-    width: 148px;
-    padding: 10px 12px;
   }
 }

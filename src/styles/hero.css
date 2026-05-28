@@ -258,10 +258,16 @@
     align-items: center;
     justify-content: flex-start;
 
-    padding-top: 0px;
+    /* push content below the fixed navbar */
+    padding-top: calc(var(--nav-h) + 16px);
     padding-bottom: 0px;
 
-    gap: 2px;
+    gap: 8px;
+  }
+
+  .food-img {
+    width: min(690px, 88vw);
+    height: auto;
   }
 
   .ctas {
@@ -289,22 +295,48 @@
    RESPONSIVE — mobile ≤ 520px
 ══════════════════════════════════════════ */
 @media (max-width: 520px) {
+  .hero {
+    padding-left: 20px;
+    padding-right: 20px;
+    padding-bottom: 28px;
+    gap: 0;
+  }
+
   .heading {
-    font-size: clamp(20px, 7.5vw, 34px);
-    letter-spacing: 0px;
+    font-size: clamp(21px, 8vw, 30px);
+    letter-spacing: -0.2px;
+    margin-bottom: 0;
+  }
+
+  /* balanced breathing room above and below the hero image */
+  .food-wrap {
+    margin-top: 10px;
+    margin-bottom: 4px;
+  }
+
+  .food-img {
+    width: min(290px, 76vw);
+    max-height: 38vh;
   }
 
   .ctas {
     flex-direction: column;
     align-items: center;
-    gap: 12px;
+    /* sits cleanly below the image, no upward overlap */
+    margin-top: 8px;
+    top: 0;
+    gap: 9px;
     width: 100%;
-    max-width: 280px;
+    max-width: 210px;
   }
 
   .btn {
     width: 100%;
     white-space: normal;
+    font-size: 11px;
+    padding: 10px 16px;
+    min-height: 44px;
+    letter-spacing: 0.9px;
   }
 
   /* only keep a few scatter icons */

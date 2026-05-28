@@ -433,6 +433,18 @@
   font-size: 15px;
 }
 
+/* ── Corner delete (mobile-only, hidden on desktop) ── */
+.cart-delete-corner { display: none; }
+
+/* ── Compact price (mobile-only, hidden on desktop) ── */
+.cart-price-compact { display: none; }
+
+/* ── Ingredient toggle (mobile-only, hidden on desktop) ── */
+.cart-ing-toggle { display: none; }
+
+/* ── Ingredient body — always visible block on desktop ── */
+.cart-ing-body { display: block; }
+
 /* ══════════════════════════════════════════
    CART RESPONSIVE — tablet ≤ 900px
 ══════════════════════════════════════════ */
@@ -463,30 +475,6 @@
   }
 }
 
-@media (max-width: 520px) {
-  .cart-main {
-    padding: calc(var(--nav-h) + 8px) 14px 80px;
-  }
-
-  .cart-details {
-    border-radius: 18px;
-    padding: 18px 16px;
-  }
-
-  .cart-price-total {
-    font-size: 16px;
-  }
-
-  .cart-pizza-name {
-    font-size: 16px;
-  }
-
-  .cart-summary-total {
-    font-size: 15px;
-    border-radius: 16px;
-    padding: 14px 16px;
-  }
-}
 
 /* ══════════════════════════════════════════
    PREMIUM CHECKOUT BUTTON (Cart page)
@@ -567,4 +555,341 @@
 .btn-checkout-premium:active {
   transform: translateY(-1px) scale(0.98);
   filter: brightness(1.0);
+}
+
+/* ══════════════════════════════════════════
+   CART — mobile compact layout
+   Placed after all base rules so overrides
+   take effect via source-order cascade.
+══════════════════════════════════════════ */
+@media (max-width: 900px) {
+  .cart-main .heading {
+    margin-bottom: 22px !important;
+  }
+
+  .cart-pizzas-list {
+    gap: 14px;
+  }
+
+  .cart-layout {
+    gap: 16px;
+  }
+
+  .cart-details {
+    padding: 18px 16px;
+  }
+
+  .cart-pizza-name-row {
+    margin-bottom: 8px;
+  }
+
+  .cart-section-label {
+    margin-bottom: 6px;
+  }
+
+  .cart-divider {
+    margin: 12px 0;
+  }
+
+  /* Pizza in stacked column layout (tablet) */
+  .cart-preview .pizza-canvas-wrap {
+    width: min(220px, 60vw) !important;
+  }
+}
+
+/* ══════════════════════════════════════════
+   CART — phone ≤ 520px
+   Single consolidated block.
+   Accordion: ingredients hidden by default,
+   expanded on toggle. Flex order reflows the
+   card without changing desktop source order.
+══════════════════════════════════════════ */
+@media (max-width: 520px) {
+  /* Page shell */
+  .cart-main {
+    padding: calc(var(--nav-h) + 6px) 10px 88px;
+  }
+
+  /* Page title */
+  .cart-main .heading {
+    font-size: clamp(18px, 7vw, 24px);
+    letter-spacing: -0.2px;
+    margin-bottom: 18px !important;
+  }
+
+  /* Card shell */
+  .cart-pizza-card {
+    position: relative;
+    padding: 10px 10px 7px;
+    border-radius: 18px;
+  }
+
+  /* ── Corner delete button ── */
+  .cart-delete-corner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    top: 9px;
+    right: 9px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: rgba(200, 0, 30, 0.88);
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    z-index: 5;
+    transition: background 0.15s ease, transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .cart-delete-corner:active {
+    background: #C8001E;
+    transform: scale(0.88);
+  }
+
+  /* Name row: pull back from corner button */
+  .cart-pizza-name-row {
+    padding-right: 26px;
+  }
+
+  /* Side-by-side layout */
+  .cart-layout {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  /* Pizza thumbnail */
+  .cart-preview .pizza-canvas-wrap {
+    width: 148px !important;
+  }
+
+  /* Burger thumbnail */
+  .cart-burger-img {
+    width: 148px !important;
+    height: 148px !important;
+  }
+
+  /* Details: flex column so order-based reflow works */
+  .cart-details {
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    border-radius: 0;
+  }
+
+  /* ── Element ordering ──────────────────────
+     Desktop source order: name → ing-body →
+     divider-ing → qty → price-block →
+     ing-toggle → divider-actions → actions.
+     Mobile reflow via order:
+  ─────────────────────────────────────────── */
+  .cart-details > .cart-pizza-name-row    { order: 1; }
+  .cart-details > .cart-price-compact     { order: 2; }
+  .cart-details > .cart-qty-row           { order: 3; }
+  .cart-details > .cart-ing-toggle        { order: 4; }
+  .cart-details > .cart-ing-body          { order: 5; }
+  .cart-details > .cart-divider--ing      { display: none; }
+  .cart-details > .cart-price-block       { display: none; }
+  .cart-details > .cart-divider--actions  { order: 6; }
+  .cart-details > .cart-card-actions      { order: 7; }
+
+  /* ── Name ── */
+  .cart-pizza-name {
+    font-size: 13px;
+    line-height: 1.2;
+  }
+
+  .cart-pizza-name-row {
+    margin-bottom: 4px;
+  }
+
+  /* ── Compact price ── */
+  .cart-price-compact {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    margin-bottom: 8px;
+  }
+
+  .cart-price-compact__total {
+    font-family: 'Nunito', sans-serif;
+    font-weight: 900;
+    font-size: 15px;
+    color: #1A0A00;
+  }
+
+  .cart-price-compact__unit {
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+    font-size: 10px;
+    color: rgba(26, 10, 0, 0.45);
+  }
+
+  /* ── Quantity ── */
+  .cart-qty-row {
+    margin-bottom: 8px;
+  }
+
+  .cart-qty-label {
+    font-size: 11px;
+  }
+
+  .qty-btn {
+    width: 32px;
+    height: 32px;
+  }
+
+  .qty-val {
+    font-size: 12px;
+    min-width: 24px;
+  }
+
+  /* ── Ingredient toggle ── */
+  .cart-ing-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    background: rgba(26, 10, 0, 0.04);
+    border: 1px solid rgba(26, 10, 0, 0.08);
+    border-radius: 10px;
+    padding: 7px 10px;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 10px;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: rgba(26, 10, 0, 0.48);
+    cursor: pointer;
+    transition: background 0.16s ease, border-color 0.16s ease, color 0.16s ease;
+  }
+
+  .cart-ing-toggle:active {
+    background: rgba(26, 10, 0, 0.08);
+  }
+
+  .cart-ing-toggle--open {
+    background: rgba(245, 197, 24, 0.10);
+    border-color: rgba(245, 197, 24, 0.38);
+    color: rgba(26, 10, 0, 0.65);
+  }
+
+  .cart-ing-toggle__chevron {
+    transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+    flex-shrink: 0;
+  }
+
+  .cart-ing-toggle--open .cart-ing-toggle__chevron {
+    transform: rotate(180deg);
+  }
+
+  /* ── Ingredient accordion ── */
+  .cart-ing-body {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .cart-ing-body--open {
+    grid-template-rows: 1fr;
+  }
+
+  .cart-ing-body__inner {
+    overflow: hidden;
+    min-height: 0;
+  }
+
+  /* section label margin-top creates breathing room when accordion opens;
+     it stays clipped when collapsed due to overflow: hidden on __inner */
+  .cart-section-label {
+    font-size: 9px;
+    letter-spacing: 1.4px;
+    margin-top: 6px;
+    margin-bottom: 3px;
+  }
+
+  .cart-ingredients {
+    gap: 0;
+  }
+
+  .ingredient-row {
+    padding: 1px 0;
+    gap: 5px;
+  }
+
+  .ingredient-cat {
+    font-size: 9px;
+    min-width: 36px;
+  }
+
+  .ingredient-vals {
+    font-size: 11px;
+    line-height: 1.2;
+  }
+
+  /* ── Dividers ── */
+  .cart-divider {
+    margin: 3px 0;
+  }
+
+  /* ── Card actions — edit only, delete moved to corner ── */
+  .cart-card-actions {
+    gap: 6px;
+    margin-top: 3px;
+  }
+
+  /* Row-level delete hidden — replaced by corner X button */
+  .cart-delete-btn {
+    display: none;
+  }
+
+  /* Edit fills the full row width */
+  .cart-edit-btn {
+    flex: 1;
+    padding: 8px 10px;
+    min-height: 32px;
+    font-size: 10px;
+    border-radius: 10px;
+    gap: 5px;
+  }
+
+  /* ── Menu item card (desserts / drinks) ── */
+  /* Desc divider and description hidden — compact mobile layout */
+  .cart-details > .cart-divider--desc { display: none; }
+  .menu-item-cart-desc { display: none; }
+  /* Compact emoji column, aligned to top */
+  .menu-item-emoji-area {
+    width: 80px;
+    min-width: 80px;
+    align-self: flex-start;
+  }
+  .menu-item-cart-emoji {
+    font-size: 52px;
+  }
+
+  /* ── List ── */
+  .cart-pizzas-list {
+    gap: 10px;
+  }
+
+  /* ── Summary + checkout ── */
+  .cart-summary {
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+
+  .cart-summary-total {
+    font-size: 14px;
+    padding: 12px 14px;
+    border-radius: 14px;
+  }
+
+  .btn-checkout-premium {
+    padding: 14px 20px;
+    font-size: 13px;
+    letter-spacing: 1.2px;
+    border-radius: 18px;
+  }
 }
