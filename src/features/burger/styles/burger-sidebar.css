@@ -121,11 +121,12 @@
 /* Tablet / mobile — horizontal pill below canvas, matches pizza category-toolbar */
 @media (max-width: 900px) {
   .bs-rail {
-    /* Reposition: centered at bottom, above order button */
+    /* Reposition: centered at bottom, above order button.
+       Offset = button-bottom(12) + button-height(~44) + gap(12) = 68px above safe area */
     position: fixed;
     left: 50%;
     top: auto;
-    bottom: 88px;
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 68px);
     transform: translateX(-50%);
 
     width: auto;
@@ -170,17 +171,17 @@
   }
 }
 
-/* Medium phone — tuck pill closer to shrunk order button */
+/* Medium phone */
 @media (max-width: 600px) {
   .bs-rail {
-    bottom: 76px;
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 68px);
   }
 }
 
 /* Small phone — iPhone SE and similar */
 @media (max-width: 480px) {
   .bs-rail {
-    bottom: 72px;
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 68px);
     gap: 2px;
     padding: 7px 8px;
   }

@@ -544,16 +544,20 @@
     width: min(500px, 88vw, calc(100vh - 260px));
   }
 
-  /* Bottom padding clears fixed pill (bottom: 88px, ~72px tall) + order button */
+  /* Bottom padding clears fixed pill + order button */
   .bb-workspace {
-    padding: 0 16px 170px;
+    padding: 0 16px 140px;
     gap: 10px;
+  }
+
+  /* Reposition order button: safe-area aware, keep horizontal centering for tablet */
+  .bb-order-btn {
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 12px);
   }
 }
 
 @media (max-width: 600px) {
   .bb-order-btn {
-    bottom: 20px;
     padding: 12px 36px;
     font-size: 12px;
     letter-spacing: 2.2px;
@@ -561,7 +565,6 @@
 }
 
 @media (max-width: 480px) {
-  /* Bottom padding clears fixed pill (bottom: 72px, ~62px tall) + order button */
   .bb-workspace {
     padding: 0 12px 140px;
     gap: 8px;
@@ -571,17 +574,34 @@
     width: min(380px, 88vw, calc(100vh - 250px));
   }
 
+  /* Full-width pill for iPhone — clears Safari bottom chrome via safe-area */
   .bb-order-btn {
-    bottom: calc(18px + env(safe-area-inset-bottom, 0px));
+    left: 16px;
+    right: 16px;
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 12px);
+    z-index: 999;
+    transform: translateY(14px);
     padding: 11px 28px;
     font-size: 11px;
     letter-spacing: 2px;
+  }
+
+  .bb-order-btn--visible {
+    transform: translateY(0);
+  }
+
+  .bb-order-btn--visible:hover {
+    transform: translateY(-3px);
+  }
+
+  .bb-order-btn--visible:active {
+    transform: translateY(-1px);
   }
 }
 
 @media (max-width: 360px) {
   .bb-workspace {
-    padding: 0 10px 130px;
+    padding: 0 10px 140px;
     gap: 6px;
   }
 
