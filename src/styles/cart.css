@@ -374,6 +374,7 @@
 /* reuse cart-layout inside the card */
 .cart-pizza-card .cart-layout {
   padding: 0;
+  margin-bottom: 0;
 }
 
 .cart-pizza-card .cart-details {
@@ -729,7 +730,7 @@
   /* Side-by-side layout */
   .cart-layout {
     flex-direction: row;
-    align-items: flex-start;
+    align-items: center;
     gap: 10px;
   }
 
@@ -750,6 +751,7 @@
     flex-direction: column;
     padding: 0;
     border-radius: 0;
+    align-self: flex-start;
   }
 
   /* ── Element ordering ──────────────────────
