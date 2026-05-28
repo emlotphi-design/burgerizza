@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react';
-import { supabase } from '../lib/supabase';
+import { supabase, SITE_URL } from '../lib/supabase';
 
 /* ─── Per-user localStorage helpers ────────────────────── */
 function uKey(uid, suffix) { return `bz_${suffix}_${uid}`; }
@@ -55,13 +55,21 @@ export function AuthProvider({ children }) {
   /* Restore session on mount, listen for auth changes */
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
-      setCurrentUser(toAppUser(session?.user ?? null));
+      const user = session?.user ?? null;
+      const confirmed = user ? (user.email_confirmed_at || user.confirmed_at) : null;
+      setCurrentUser(confirmed ? toAppUser(user) : null);
       setLoading(false);
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        setCurrentUser(toAppUser(session?.user ?? null));
+      (event, session) => {
+        console.log('[auth] onAuthStateChange →', event, '| session:', !!session);
+        const user = session?.user ?? null;
+        const confirmed = user ? (user.email_confirmed_at || user.confirmed_at) : null;
+        if (user && !confirmed) {
+          console.log('[auth] user not yet confirmed — skipping login');
+        }
+        setCurrentUser(confirmed ? toAppUser(user) : null);
         setLoading(false);
       }
     );
@@ -74,7 +82,10 @@ export function AuthProvider({ children }) {
     if (registerInFlight.current) return {};
     registerInFlight.current = true;
 
-    const redirectTo = window.location.origin;
+    // Hardcoded production callback — must match Supabase → Auth → Redirect URLs exactly.
+    // Dynamic SITE_URL was causing silent email failures on mobile when the computed URL
+    // did not appear in Supabase's allowed redirect list.
+    const redirectTo = 'https://burgerizza-iota.vercel.app/auth/callback';
     console.log('[auth] signUp →', email, '| redirectTo:', redirectTo);
 
     try {
@@ -88,11 +99,12 @@ export function AuthProvider({ children }) {
       });
 
       console.log('[auth] signUp result:', {
-        userId:     data?.user?.id     ?? null,
-        hasSession: !!data?.session,
-        identities: data?.user?.identities?.length ?? 'n/a',
-        errorCode:  error?.code        ?? null,
-        errorMsg:   error?.message     ?? null,
+        userId:          data?.user?.id               ?? null,
+        hasSession:      !!data?.session,
+        identities:      data?.user?.identities?.length ?? 'n/a',
+        emailConfirmed:  data?.user?.email_confirmed_at ?? null,
+        errorCode:       error?.code                  ?? null,
+        errorMsg:        error?.message               ?? null,
       });
 
       if (error) return { error: mapError(error.message) };
@@ -104,13 +116,23 @@ export function AuthProvider({ children }) {
         return { error: 'Diese E-Mail ist bereits registriert. Bitte melde dich an oder setze dein Passwort zurück.' };
       }
 
-      // Email confirmation required → confirmation email dispatched
+      // Guard: Supabase returned a session but email is not yet confirmed.
+      // This happens when Supabase auto-confirms (setting changed) or in rare edge cases.
+      // Sign out immediately so the user cannot bypass email verification.
+      if (data.session && !data.user?.email_confirmed_at) {
+        console.warn('[auth] session returned for unconfirmed user — signing out to enforce verification');
+        await supabase.auth.signOut();
+        return { needsVerification: true };
+      }
+
+      // Email confirmation required → confirmation email dispatched (normal case)
       if (!data.session) {
         console.log('[auth] confirmation email dispatched to:', email);
         return { needsVerification: true };
       }
 
       // Email confirmation disabled in Supabase → immediately logged in
+      console.log('[auth] auto-confirm enabled — user logged in immediately:', email);
       return { user: toAppUser(data.user) };
     } catch (err) {
       console.error('[auth] signUp threw:', err?.message);

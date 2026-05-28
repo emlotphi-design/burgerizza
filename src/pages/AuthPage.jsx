@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Socials from '../components/Socials';
 import { useAuth } from '../context/AuthContext';
-import { supabase } from '../lib/supabase';
+import { supabase, SITE_URL } from '../lib/supabase';
 
 /* ─── Minimal toast ──────────────────────────────────────── */
 function useToast() {
@@ -152,7 +152,7 @@ function RegisterForm({ onSuccess, showToast }) {
       const { error } = await supabase.auth.resend({
         type: 'signup',
         email: fields.email,
-        options: { emailRedirectTo: window.location.origin },
+        options: { emailRedirectTo: 'https://burgerizza-iota.vercel.app/auth/callback' },
       });
       console.log('[auth] resend →', error?.message ?? 'ok');
       if (error) {
