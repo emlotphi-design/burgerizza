@@ -286,7 +286,7 @@ async function captureToDataURL(snapshot) {
 // ─── Component ──────────────────────────────────────────────────────────────
 
 export default function BurgerBuilder() {
-  const [activeItem, setActiveItem]   = useState('bun');
+  const [activeItem, setActiveItem]   = useState(() => localStorage.getItem('bb-active-item') ?? 'bun');
   const [isOrdering, setIsOrdering]   = useState(false);
   const [toastVisible, setToastVisible] = useState(false);
   const { draft, setDraft, clearDraft } = useBurgerStore();
@@ -300,6 +300,11 @@ export default function BurgerBuilder() {
   const toastTimerRef    = useRef(null);
 
   const burgerItems = pizzas.filter(p => p.type === 'burger');
+
+  // ── Active sidebar item persistence ─────────────────────────────────────
+  useEffect(() => {
+    localStorage.setItem('bb-active-item', activeItem);
+  }, [activeItem]);
 
   // ── Wrapper persistence ──────────────────────────────────────────────────
   const initWrapperIdx = useRef(Math.floor(Math.random() * wrappers.length));
