@@ -7,6 +7,7 @@ import { useAuth } from '../context/AuthContext';
 import { useCheckoutStore } from '../store/checkoutStore';
 import { calcPrice } from '../utils/pizzaUtils';
 import GlassInput from '../components/GlassInput';
+import { api } from '../utils/api';
 
 /* ─── Delivery profile helpers ─────────────────────────── */
 const REQUIRED_DELIVERY = ['fullName', 'street', 'houseNumber', 'postalCode', 'city', 'phone', 'email'];
@@ -612,6 +613,11 @@ export default function Checkout() {
       addOrder(order);
       pizzas.forEach(p => savePizzaToProfile({ ...p }));
     }
+
+    api.orders.create({
+      items:      pizzas.map(p => ({ ...p })),
+      totalPrice: total,
+    }).catch(err => console.warn('[checkout] order not saved to backend:', err.message));
 
     setDone(true);
     clearCart();

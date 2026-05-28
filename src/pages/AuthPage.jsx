@@ -1,10 +1,58 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Socials from '../components/Socials';
 import { useAuth } from '../context/AuthContext';
+import { supabase, SITE_URL } from '../lib/supabase';
 
-/* ─── Shared glass input ────────────────────────────────── */
+/* ─── Minimal toast ──────────────────────────────────────── */
+function useToast() {
+  const [toast, setToast] = useState(null);
+  const timer = useRef(null);
+
+  const show = useCallback((msg, type = 'success') => {
+    if (timer.current) clearTimeout(timer.current);
+    setToast({ msg, type });
+    timer.current = setTimeout(() => setToast(null), 3800);
+  }, []);
+
+  useEffect(() => () => { if (timer.current) clearTimeout(timer.current); }, []);
+  return [toast, show];
+}
+
+function Toast({ toast }) {
+  if (!toast) return null;
+  return (
+    <div
+      role="status"
+      aria-live="polite"
+      style={{
+        position: 'fixed',
+        top: 82,
+        left: '50%',
+        transform: 'translateX(-50%)',
+        zIndex: 9999,
+        background: toast.type === 'error' ? '#C8001E' : '#3db96e',
+        color: '#fff',
+        fontFamily: 'Nunito, sans-serif',
+        fontWeight: 700,
+        fontSize: 13,
+        padding: '9px 22px',
+        borderRadius: 50,
+        boxShadow: '0 4px 24px rgba(0,0,0,0.22)',
+        maxWidth: 'calc(100vw - 40px)',
+        textAlign: 'center',
+        pointerEvents: 'none',
+        animation: 'toast-in 0.28s ease both',
+        whiteSpace: 'nowrap',
+      }}
+    >
+      {toast.msg}
+    </div>
+  );
+}
+
+/* ─── Shared glass input ─────────────────────────────────── */
 function Field({ label, name, value, onChange, type = 'text', placeholder, required, error }) {
   return (
     <div className="co-field">
@@ -26,11 +74,12 @@ function Field({ label, name, value, onChange, type = 'text', placeholder, requi
 /* ═══════════════════════════════════════════════════════
    LOGIN TAB
 ═══════════════════════════════════════════════════════ */
-function LoginForm({ onSuccess }) {
+function LoginForm({ onSuccess, showToast }) {
   const { login } = useAuth();
-  const [fields, setFields] = useState({ email: '', password: '' });
-  const [errors, setErrors] = useState({});
+  const [fields,  setFields]  = useState({ email: '', password: '' });
+  const [errors,  setErrors]  = useState({});
   const [loading, setLoading] = useState(false);
+  const inFlight = useRef(false);
 
   function handleChange(e) {
     const { name, value } = e.target;
@@ -40,16 +89,23 @@ function LoginForm({ onSuccess }) {
 
   async function handleSubmit(e) {
     e.preventDefault();
+    if (inFlight.current) return;
+
     const errs = {};
-    if (!fields.email.trim()) errs.email = 'Pflichtfeld';
+    if (!fields.email.trim()) errs.email    = 'Pflichtfeld';
     if (!fields.password)     errs.password = 'Pflichtfeld';
     if (Object.keys(errs).length) { setErrors(errs); return; }
 
+    inFlight.current = true;
     setLoading(true);
-    const { user, error } = await login(fields.email, fields.password);
-    setLoading(false);
-    if (error) { setErrors({ general: error }); return; }
-    onSuccess(user);
+    try {
+      const { user, error } = await login(fields.email, fields.password);
+      if (error) { setErrors({ general: error }); return; }
+      onSuccess(user);
+    } finally {
+      inFlight.current = false;
+      setLoading(false);
+    }
   }
 
   return (
@@ -62,8 +118,8 @@ function LoginForm({ onSuccess }) {
       {errors.general && <div className="auth-error-banner">{errors.general}</div>}
 
       <div className="co-fields">
-        <Field label="E-Mail" name="email" type="email" value={fields.email} onChange={handleChange}
-          placeholder="max@beispiel.de" required error={errors.email} />
+        <Field label="E-Mail" name="email" type="email" value={fields.email}
+          onChange={handleChange} placeholder="max@beispiel.de" required error={errors.email} />
         <Field label="Passwort" name="password" type="password" value={fields.password}
           onChange={handleChange} placeholder="••••••••" required error={errors.password} />
       </div>
@@ -78,13 +134,40 @@ function LoginForm({ onSuccess }) {
 /* ═══════════════════════════════════════════════════════
    REGISTER TAB
 ═══════════════════════════════════════════════════════ */
-function RegisterForm({ onSuccess }) {
+function RegisterForm({ onSuccess, showToast }) {
   const { register } = useAuth();
   const [fields, setFields] = useState({
     fullName: '', email: '', phone: '', password: '', confirmPassword: '',
   });
-  const [errors, setErrors] = useState({});
-  const [loading, setLoading] = useState(false);
+  const [errors,       setErrors]       = useState({});
+  const [loading,      setLoading]      = useState(false);
+  const [verifying,    setVerifying]    = useState(false);
+  const [resendStatus, setResendStatus] = useState('idle'); // idle | sending | sent | error
+  const inFlight = useRef(false);
+
+  async function handleResend() {
+    if (resendStatus === 'sending') return;
+    setResendStatus('sending');
+    try {
+      const { error } = await supabase.auth.resend({
+        type: 'signup',
+        email: fields.email,
+        options: { emailRedirectTo: 'https://burgerizza-iota.vercel.app/auth/callback' },
+      });
+      console.log('[auth] resend →', error?.message ?? 'ok');
+      if (error) {
+        setResendStatus('error');
+        showToast('Zu viele Versuche. Bitte warte einige Minuten.', 'error');
+      } else {
+        setResendStatus('sent');
+        showToast('Bestätigungslink erneut gesendet!');
+      }
+    } catch (err) {
+      console.error('[auth] resend threw:', err?.message);
+      setResendStatus('error');
+      showToast('Fehler beim Senden. Bitte versuche es erneut.', 'error');
+    }
+  }
 
   function handleChange(e) {
     const { name, value } = e.target;
@@ -94,26 +177,91 @@ function RegisterForm({ onSuccess }) {
 
   async function handleSubmit(e) {
     e.preventDefault();
+    if (inFlight.current) return;
+
     const errs = {};
     if (!fields.fullName.trim()) errs.fullName = 'Pflichtfeld';
-    if (!fields.email.trim()) errs.email = 'Pflichtfeld';
+    if (!fields.email.trim())    errs.email    = 'Pflichtfeld';
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(fields.email)) errs.email = 'Ungültige E-Mail';
-    if (!fields.phone.trim()) errs.phone = 'Pflichtfeld';
-    if (!fields.password) errs.password = 'Pflichtfeld';
+    if (!fields.phone.trim())    errs.phone    = 'Pflichtfeld';
+    if (!fields.password)        errs.password = 'Pflichtfeld';
     else if (fields.password.length < 8) errs.password = 'Mindestens 8 Zeichen';
     if (fields.confirmPassword !== fields.password) errs.confirmPassword = 'Passwörter stimmen nicht überein';
     if (Object.keys(errs).length) { setErrors(errs); return; }
 
+    inFlight.current = true;
     setLoading(true);
-    const { user, error } = await register({
-      fullName: fields.fullName,
-      email: fields.email,
-      phone: fields.phone,
-      password: fields.password,
-    });
-    setLoading(false);
-    if (error) { setErrors({ general: error }); return; }
-    onSuccess(user);
+    try {
+      const { user, error, needsVerification } = await register({
+        fullName: fields.fullName,
+        email:    fields.email,
+        phone:    fields.phone,
+        password: fields.password,
+      });
+      if (error) { setErrors({ general: error }); return; }
+      if (needsVerification) {
+        showToast('Bestätigungslink wurde gesendet!');
+        setVerifying(true);
+        return;
+      }
+      onSuccess(user);
+    } finally {
+      inFlight.current = false;
+      setLoading(false);
+    }
+  }
+
+  if (verifying) {
+    return (
+      <div className="co-form">
+        <div className="co-form-header">
+          <h2 className="co-form-title">E-Mail bestätigen</h2>
+          <p className="co-form-sub">
+            Wir haben einen Bestätigungslink an{' '}
+            <strong style={{ color: '#1A0A00' }}>{fields.email}</strong> gesendet.
+          </p>
+        </div>
+
+        <div style={{
+          background: 'rgba(26,10,0,0.04)',
+          border: '1px solid rgba(26,10,0,0.09)',
+          borderRadius: 14,
+          padding: '14px 18px',
+          marginBottom: 20,
+        }}>
+          <p className="co-form-sub" style={{ marginBottom: 6, fontWeight: 800, color: '#1A0A00' }}>
+            E-Mail nicht angekommen?
+          </p>
+          <ul style={{ paddingLeft: 18, margin: 0, display: 'flex', flexDirection: 'column', gap: 4 }}>
+            <li className="co-form-sub">Prüfe deinen <strong>Spam-Ordner</strong></li>
+            <li className="co-form-sub">Warte bis zu <strong>5 Minuten</strong></li>
+            <li className="co-form-sub">Nutze die Schaltfläche unten zum erneuten Senden</li>
+          </ul>
+        </div>
+
+        <button
+          type="button"
+          className="co-next-btn"
+          onClick={handleResend}
+          disabled={resendStatus === 'sending' || resendStatus === 'sent'}
+          style={{ marginBottom: 8 }}
+        >
+          {resendStatus === 'sending' ? <span className="co-spinner" /> :
+           resendStatus === 'sent'    ? '✓ Erneut gesendet!' :
+           'Bestätigungslink erneut senden'}
+        </button>
+
+        {resendStatus === 'error' && (
+          <p style={{ color: '#C8001E', fontSize: 12, fontWeight: 700, textAlign: 'center', marginBottom: 8 }}>
+            Supabase erlaubt nur 2 E-Mails/Stunde. Bitte warte kurz.
+          </p>
+        )}
+
+        <button type="button" className="co-back-link" onClick={() => setVerifying(false)}>
+          ← Andere E-Mail verwenden
+        </button>
+      </div>
+    );
   }
 
   return (
@@ -150,18 +298,20 @@ function RegisterForm({ onSuccess }) {
    MAIN AUTH PAGE
 ═══════════════════════════════════════════════════════ */
 export default function AuthPage() {
-  const navigate   = useNavigate();
-  const location   = useLocation();
-  const { isLoggedIn } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { isLoggedIn, loading } = useAuth();
+  const [toast, showToast] = useToast();
 
   const defaultTab = location.state?.tab ?? 'login';
   const [tab, setTab] = useState(defaultTab);
-  const returnTo   = location.state?.returnTo ?? '/profile';
+  const returnTo = location.state?.returnTo ?? '/profile';
 
-  if (isLoggedIn) {
-    navigate(returnTo, { replace: true });
-    return null;
-  }
+  useEffect(() => {
+    if (!loading && isLoggedIn) navigate(returnTo, { replace: true });
+  }, [isLoggedIn, loading, navigate, returnTo]);
+
+  if (loading || isLoggedIn) return null;
 
   function handleSuccess() {
     navigate(returnTo, { replace: true });
@@ -169,6 +319,7 @@ export default function AuthPage() {
 
   return (
     <div className="page-enter" style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+      <Toast toast={toast} />
       <Navbar />
 
       <main className="co-main">
@@ -191,8 +342,8 @@ export default function AuthPage() {
 
           <div className="co-panel">
             {tab === 'login'
-              ? <LoginForm onSuccess={handleSuccess} />
-              : <RegisterForm onSuccess={handleSuccess} />
+              ? <LoginForm onSuccess={handleSuccess} showToast={showToast} />
+              : <RegisterForm onSuccess={handleSuccess} showToast={showToast} />
             }
           </div>
         </div>

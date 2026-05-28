@@ -1,17 +1,23 @@
-const jwt = require('jsonwebtoken');
+const { createClient } = require('@supabase/supabase-js');
 
-module.exports = function requireAuth(req, res, next) {
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY,
+);
+
+module.exports = async function requireAuth(req, res, next) {
   const header = req.headers.authorization;
   if (!header?.startsWith('Bearer ')) {
     return res.status(401).json({ error: 'Nicht autorisiert.' });
   }
 
   const token = header.slice(7);
-  try {
-    const payload = jwt.verify(token, process.env.JWT_SECRET);
-    req.userId = payload.userId;
-    next();
-  } catch {
-    res.status(401).json({ error: 'Token ungültig oder abgelaufen.' });
+  const { data: { user }, error } = await supabase.auth.getUser(token);
+
+  if (error || !user) {
+    return res.status(401).json({ error: 'Token ungültig oder abgelaufen.' });
   }
+
+  req.userId = user.id;
+  next();
 };

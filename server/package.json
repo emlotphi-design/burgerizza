@@ -1,23 +1,26 @@
 {
   "name": "burgerizza-server",
   "version": "1.0.0",
-  "description": "Burgerizza REST API — Express + PostgreSQL + Prisma",
+  "description": "Burgerizza REST API — Express + PostgreSQL",
   "type": "commonjs",
+  "main": "server.js",
   "scripts": {
-    "dev": "nodemon index.js",
-    "start": "node index.js",
+    "dev": "nodemon server.js",
+    "start": "node server.js",
+    "db:generate": "prisma generate",
     "db:push": "prisma db push",
     "db:migrate": "prisma migrate deploy",
-    "db:generate": "prisma generate",
     "db:studio": "prisma studio"
   },
   "dependencies": {
     "@prisma/client": "^5.22.0",
+    "@supabase/supabase-js": "^2.106.2",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
-    "jsonwebtoken": "^9.0.2"
+    "jsonwebtoken": "^9.0.2",
+    "pg": "^8.13.1"
   },
   "devDependencies": {
     "nodemon": "^3.1.7",

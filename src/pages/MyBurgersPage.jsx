@@ -1,8 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Socials from '../components/Socials';
 import { usePizzaStore } from '../context/PizzaContext';
+import { useAuth } from '../context/AuthContext';
+import { api } from '../utils/api';
 import { calcBurgerPrice, BURGER_LABEL } from '../features/burger/utils/burgerUtils';
 import SkeletonImage from '../components/SkeletonImage';
 import { useMountDelay } from '../hooks/useMountDelay';
@@ -168,12 +170,39 @@ function BurgersSkeleton() {
 export default function MyBurgersPage() {
   const navigate = useNavigate();
   const { savedItems, removeSavedItem, addToCart } = usePizzaStore();
-  const [exitingIds, setExitingIds] = useState([]);
+  const { isLoggedIn } = useAuth();
+
+  const [exitingIds,  setExitingIds]  = useState([]);
+  const [dbBurgers,   setDbBurgers]   = useState([]);
+  const [fetching,    setFetching]    = useState(false);
+  const [fetchError,  setFetchError]  = useState(null);
   const ready = useMountDelay(280);
 
-  if (!ready) return <BurgersSkeleton />;
+  // Fetch saved burgers from database when logged in
+  useEffect(() => {
+    if (!isLoggedIn) return;
+    setFetching(true);
+    setFetchError(null);
+    api.burgers.list()
+      .then(data => {
+        setDbBurgers(
+          (data.burgers ?? []).map(b => ({
+            ...b,
+            type:    'burger',
+            savedAt: b.createdAt,
+          }))
+        );
+      })
+      .catch(() => setFetchError('Deine Burgers konnten nicht geladen werden.'))
+      .finally(() => setFetching(false));
+  }, [isLoggedIn]);
 
-  const burgers = (savedItems ?? []).filter(i => i.type === 'burger');
+  if (!ready || (isLoggedIn && fetching)) return <BurgersSkeleton />;
+
+  // Logged-in: use DB as source of truth. Guest: use localStorage.
+  const burgers = isLoggedIn
+    ? dbBurgers
+    : (savedItems ?? []).filter(i => i.type === 'burger');
 
   function handleEdit(burger) {
     // Write to bz_burger_draft localStorage so BurgerBuilder picks it up on mount
@@ -199,7 +228,12 @@ export default function MyBurgersPage() {
   function handleDelete(id) {
     setExitingIds(prev => [...prev, id]);
     setTimeout(() => {
-      removeSavedItem(id);
+      if (isLoggedIn) {
+        setDbBurgers(prev => prev.filter(b => b.id !== id));
+        api.burgers.remove(id).catch(() => {});
+      } else {
+        removeSavedItem(id);
+      }
       setExitingIds(prev => prev.filter(x => x !== id));
     }, 400);
   }
@@ -229,6 +263,10 @@ export default function MyBurgersPage() {
             ← Back
           </button>
         </div>
+
+        {fetchError && (
+          <p className="auth-error-banner" style={{ marginBottom: 16 }}>{fetchError}</p>
+        )}
 
         {burgers.length === 0 ? (
           <div className="saved-page-empty">
