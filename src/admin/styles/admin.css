@@ -940,6 +940,125 @@
 }
 
 /* ══════════════════════════════════════════
+   LOADING SCREEN
+══════════════════════════════════════════ */
+@keyframes adm-spin {
+  to { transform: rotate(360deg); }
+}
+
+.adm-loader-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: var(--adm-bg);
+  font-family: 'Nunito', sans-serif;
+}
+
+.adm-loader-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+.adm-loader-brand {
+  font-size: 17px;
+  font-weight: 900;
+  color: var(--adm-text);
+  letter-spacing: -0.3px;
+  margin-bottom: 4px;
+}
+
+.adm-loader-brand span { color: var(--adm-accent-deep); }
+
+.adm-loader-ring {
+  width: 34px;
+  height: 34px;
+  border: 3px solid rgba(255, 210, 63, 0.20);
+  border-top-color: #D4920A;
+  border-radius: 50%;
+  animation: adm-spin 0.70s linear infinite;
+}
+
+.adm-loader-text {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--adm-text-3);
+  letter-spacing: 0.3px;
+}
+
+/* ══════════════════════════════════════════
+   FORBIDDEN / 403 SCREEN
+══════════════════════════════════════════ */
+.adm-forbidden-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: var(--adm-bg);
+  font-family: 'Nunito', sans-serif;
+  padding: 24px;
+}
+
+.adm-forbidden-card {
+  max-width: 420px;
+  width: 100%;
+  padding: 44px 36px 40px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+}
+
+.adm-forbidden-icon {
+  width: 58px;
+  height: 58px;
+  border-radius: 16px;
+  background: rgba(255, 59, 48, 0.09);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--adm-red);
+  margin-bottom: 18px;
+}
+
+.adm-forbidden-code {
+  font-size: 52px;
+  font-weight: 900;
+  color: var(--adm-text);
+  letter-spacing: -3px;
+  line-height: 1;
+  margin-bottom: 10px;
+}
+
+.adm-forbidden-title {
+  font-size: 18px;
+  font-weight: 900;
+  color: var(--adm-text);
+  letter-spacing: -0.3px;
+  margin-bottom: 10px;
+}
+
+.adm-forbidden-desc {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--adm-text-2);
+  line-height: 1.55;
+  max-width: 300px;
+  margin-bottom: 26px;
+}
+
+.adm-forbidden-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+  width: 100%;
+}
+
+/* ══════════════════════════════════════════
    RESPONSIVE
 ══════════════════════════════════════════ */
 @media (max-width: 900px) {
