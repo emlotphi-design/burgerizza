@@ -41,30 +41,3 @@
   }
 }
 
-/* ── Builder pages (Pizza + Burger): float above CTA buttons ── */
-/* Body gets is-builder class via useEffect while builder is mounted */
-@media (max-width: 900px) {
-  .is-builder .social-bar {
-    left: 50%;
-    transform: translateX(-50%);
-    bottom: 150px;
-    gap: 20px;
-  }
-}
-
-@media (max-width: 480px) {
-  .is-builder .social-bar {
-    gap: 16px;
-    /* 160px keeps icons below the toolbar and above the ORDER button.
-       The old calc(136+env) was too large (170px on iPhone), causing
-       icons to render ABOVE the toolbar bottom — direct overlap. */
-    bottom: 160px;
-  }
-}
-
-/* SE-class and very small phones: not enough vertical room, hide icons */
-@media (max-width: 380px) {
-  .is-builder .social-bar {
-    display: none;
-  }
-}

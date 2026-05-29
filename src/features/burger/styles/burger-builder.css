@@ -605,7 +605,7 @@
 
 @media (max-width: 480px) {
   .bb-workspace {
-    padding: 6px 12px 130px;
+    padding: 6px 12px 54px;
     gap: 6px;
   }
 
@@ -639,10 +639,10 @@
   }
 }
 
-/* iPhone SE / 375px-class — screen too narrow for social icons in builder */
+/* iPhone SE / 375px-class */
 @media (max-width: 380px) {
   .bb-workspace {
-    padding: 4px 8px 100px;
+    padding: 4px 8px 80px;
     gap: 4px;
   }
 
@@ -653,7 +653,7 @@
 
 @media (max-width: 360px) {
   .bb-workspace {
-    padding: 4px 8px 95px;
+    padding: 4px 8px 80px;
     gap: 4px;
   }
 
