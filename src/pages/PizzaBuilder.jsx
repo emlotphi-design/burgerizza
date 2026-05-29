@@ -1,5 +1,4 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Socials from '../components/Socials';
 import PizzaCanvas from '../components/PizzaCanvas';
@@ -105,7 +104,6 @@ function SavedPizzaCard({ pizza, onEdit, onDelete, onRename, exiting }) {
 }
 
 export default function PizzaBuilder() {
-  const navigate = useNavigate();
   const store = usePizzaStore();
   const {
     pizzas, draft,
@@ -122,29 +120,25 @@ export default function PizzaBuilder() {
 
   const [lockMsg, setLockMsg] = useState('');
   const [exitingIds, setExitingIds] = useState([]);
+  const [toastVisible, setToastVisible] = useState(false);
   const lockTimer = useRef(null);
+  const toastTimerRef = useRef(null);
 
   const pizzaItems = pizzas.filter(p => p.type !== 'burger');
 
   const canAddToCart = !!selectedDough && !!selectedSauce && !!selectedCheese;
-  const hasPizzas = canAddToCart || pizzaItems.length > 0;
   const totalCount = pizzas.length + (canAddToCart ? 1 : 0);
   const isEditing = editingId !== null;
   const nextPizzaNumber = pizzas.length + 1;
 
-  const handleBuildAnother = useCallback(() => {
+  const handleAddToCart = useCallback(() => {
     if (!canAddToCart) return;
     saveDraftAsPizza();
     clearDraft();
+    clearTimeout(toastTimerRef.current);
+    setToastVisible(true);
+    toastTimerRef.current = setTimeout(() => setToastVisible(false), 2800);
   }, [canAddToCart, saveDraftAsPizza, clearDraft]);
-
-  const handleAddToCart = useCallback(() => {
-    if (canAddToCart) {
-      saveDraftAsPizza();
-      clearDraft();
-    }
-    navigate('/cart');
-  }, [navigate, canAddToCart, saveDraftAsPizza, clearDraft]);
 
   const handleEditPizza = useCallback((pizza) => {
     startEditing(pizza);
@@ -273,15 +267,7 @@ export default function PizzaBuilder() {
         </div>
       )}
 
-      <div className={`builder-actions${hasPizzas ? ' builder-actions--visible' : ''}`}>
-        {canAddToCart && (
-          <button className="build-another-btn" onClick={handleBuildAnother} aria-label="Build another pizza">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
-            </svg>
-            BUILD ANOTHER
-          </button>
-        )}
+      <div className={`builder-actions${canAddToCart ? ' builder-actions--visible' : ''}`}>
         <button
           className="add-to-cart-btn"
           onClick={handleAddToCart}
@@ -297,6 +283,17 @@ export default function PizzaBuilder() {
           {totalCount > 1 && <span className="cart-btn-badge">{totalCount}</span>}
         </button>
       </div>
+
+      {toastVisible && (
+        <div className="pb-toast" role="status" aria-live="polite">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" strokeWidth="3"
+            strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+          Pizza added to cart
+        </div>
+      )}
 
       <Socials />
     </div>
