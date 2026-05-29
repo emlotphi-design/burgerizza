@@ -20,17 +20,6 @@ const PIPELINE = [
 ];
 const PIPELINE_VALS = PIPELINE.map(p => p.value);
 
-function StatusBadge({ status }) {
-  const cfg = STATUS_MAP[status];
-  if (!cfg) return <span className="adm-badge adm-badge--gray">{status}</span>;
-  return (
-    <span className={`adm-badge ${cfg.badge}`}>
-      <span style={{ width: 6, height: 6, borderRadius: '50%', background: cfg.color, display: 'inline-block', marginRight: 3 }} />
-      {cfg.label}
-    </span>
-  );
-}
-
 /* ── Helpers ───────────────────────────────────────────────── */
 function fmtCurrency(n) {
   return '€' + Number(n).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
@@ -38,10 +27,6 @@ function fmtCurrency(n) {
 function fmtDate(iso) {
   if (!iso) return '—';
   return new Date(iso).toLocaleString('en-GB', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
-}
-function fmtTime(iso) {
-  if (!iso) return '—';
-  return new Date(iso).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
 }
 function timeAgo(iso) {
   if (!iso) return '';
@@ -100,33 +85,45 @@ function getCustomizations(item) {
   return rows;
 }
 
-/* ── Pipeline ──────────────────────────────────────────────── */
-function OrderPipeline({ status }) {
-  const idx = PIPELINE_VALS.indexOf(status);
+/* ═══════════════════════════════════════════════════════════
+   COMPACT PIPELINE — always visible in each row
+═══════════════════════════════════════════════════════════ */
+function CompactPipeline({ status }) {
+  if (status === 'cancelled') {
+    return (
+      <div className="adm-cpipe-cancelled">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+        Cancelled
+      </div>
+    );
+  }
+
+  const idx          = PIPELINE_VALS.indexOf(status);
   const effectiveIdx = idx === -1 ? 0 : idx;
+
   return (
-    <div className="adm-pipeline">
+    <div className="adm-cpipe">
       {PIPELINE.map((step, i) => {
         const done   = i < effectiveIdx;
         const active = i === effectiveIdx;
         return (
           <Fragment key={step.value}>
-            <div className="adm-pipeline-step">
-              <div className={`adm-pipeline-dot${done ? ' adm-pipeline-dot--done' : active ? ' adm-pipeline-dot--active' : ''}`}>
+            <div className={`adm-cpipe-step${done ? ' adm-cpipe-step--done' : active ? ' adm-cpipe-step--active' : ''}`}>
+              <div className="adm-cpipe-dot">
                 {done ? (
-                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round">
+                  <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round">
                     <polyline points="20 6 9 17 4 12"/>
                   </svg>
                 ) : (
-                  <span className="adm-pipeline-emoji">{step.icon}</span>
+                  <span className="adm-cpipe-icon">{step.icon}</span>
                 )}
               </div>
-              <span className={`adm-pipeline-label${active ? ' adm-pipeline-label--active' : done ? ' adm-pipeline-label--done' : ''}`}>
-                {step.label}
-              </span>
+              <span className="adm-cpipe-label">{step.label}</span>
             </div>
             {i < PIPELINE.length - 1 && (
-              <div className={`adm-pipeline-connector${done ? ' adm-pipeline-connector--done' : ''}`} />
+              <div className={`adm-cpipe-line${done ? ' adm-cpipe-line--done' : ''}`} />
             )}
           </Fragment>
         );
@@ -135,26 +132,113 @@ function OrderPipeline({ status }) {
   );
 }
 
-/* ── Order Info Panel ──────────────────────────────────────── */
-function OrderInfoPanel({ order, onAction, saving }) {
-  const addr   = order.delivery_address || {};
-  const items  = Array.isArray(order.items) ? order.items : [];
-  const status = order.status;
+/* ═══════════════════════════════════════════════════════════
+   ROW ACTIONS — always visible on the right
+═══════════════════════════════════════════════════════════ */
+function RowActions({ order, onAction, saving, infoOpen, onToggleInfo }) {
+  const { status } = order;
+  const canAccept  = status === 'pending'  || status === 'confirmed';
+  const canDeliver = status === 'preparing';
+  const canDone    = status === 'ready';
+  const canCancel  = !['delivered', 'cancelled'].includes(status);
 
-  const canAccept   = status === 'pending' || status === 'confirmed';
-  const canDeliver  = status === 'preparing';
-  const canDelivered= status === 'ready';
-  const canCancel   = !['delivered', 'cancelled'].includes(status);
-  const isDone      = status === 'delivered';
-  const isCancelled = status === 'cancelled';
+  return (
+    <div className="adm-row-actions">
+      {canAccept && (
+        <button
+          className="adm-row-btn adm-row-btn--accept"
+          onClick={() => onAction(order.id, 'preparing')}
+          disabled={saving}
+          title="Accept Order"
+        >
+          {saving ? <span className="adm-action-spinner adm-action-spinner--sm" /> : (
+            <>
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+              Accept Order
+            </>
+          )}
+        </button>
+      )}
+
+      {canDeliver && (
+        <button
+          className="adm-row-btn adm-row-btn--deliver"
+          onClick={() => onAction(order.id, 'ready')}
+          disabled={saving}
+          title="Out For Delivery"
+        >
+          {saving ? <span className="adm-action-spinner adm-action-spinner--sm" /> : (
+            <><span style={{ fontSize: 12 }}>🛵</span> Out For Delivery</>
+          )}
+        </button>
+      )}
+
+      {canDone && (
+        <button
+          className="adm-row-btn adm-row-btn--done"
+          onClick={() => onAction(order.id, 'delivered')}
+          disabled={saving}
+          title="Mark Delivered"
+        >
+          {saving ? <span className="adm-action-spinner adm-action-spinner--sm" /> : (
+            <>
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+              Mark Delivered
+            </>
+          )}
+        </button>
+      )}
+
+      {canCancel && (
+        <button
+          className="adm-row-btn adm-row-btn--cancel"
+          onClick={() => onAction(order.id, 'cancelled')}
+          disabled={saving}
+          title="Cancel Order"
+        >
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+          Cancel
+        </button>
+      )}
+
+      <button
+        className={`adm-info-btn${infoOpen ? ' adm-info-btn--open' : ''}`}
+        onClick={onToggleInfo}
+        aria-label="Toggle order details"
+        aria-expanded={infoOpen}
+      >
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="8"  x2="12"   y2="12"/>
+          <line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+        Info
+        <svg
+          width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"
+          style={{ transition: 'transform 0.22s ease', transform: infoOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}
+        >
+          <polyline points="6 9 12 15 18 9"/>
+        </svg>
+      </button>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════
+   INFO PANEL — customer / delivery / items / payment only
+═══════════════════════════════════════════════════════════ */
+function OrderInfoPanel({ order }) {
+  const addr  = order.delivery_address || {};
+  const items = Array.isArray(order.items) ? order.items : [];
 
   return (
     <div className="adm-info-panel">
-
-      {/* Status pipeline */}
-      <div className="adm-info-panel-pipeline">
-        <OrderPipeline status={status} />
-      </div>
 
       {/* Three-column info grid */}
       <div className="adm-info-grid">
@@ -292,91 +376,6 @@ function OrderInfoPanel({ order, onAction, saving }) {
         )}
       </div>
 
-      {/* Kitchen action buttons */}
-      <div className="adm-info-actions">
-        {canAccept && (
-          <button
-            className="adm-action-btn adm-action-btn--accept"
-            onClick={() => onAction(order.id, 'preparing')}
-            disabled={saving}
-          >
-            {saving ? <span className="adm-action-spinner" /> : (
-              <>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round">
-                  <polyline points="20 6 9 17 4 12"/>
-                </svg>
-                Accept Order
-              </>
-            )}
-          </button>
-        )}
-
-        {canDeliver && (
-          <button
-            className="adm-action-btn adm-action-btn--delivery"
-            onClick={() => onAction(order.id, 'ready')}
-            disabled={saving}
-          >
-            {saving ? <span className="adm-action-spinner" /> : (
-              <>
-                <span style={{ fontSize: 14 }}>🛵</span>
-                Out For Delivery
-              </>
-            )}
-          </button>
-        )}
-
-        {canDelivered && (
-          <button
-            className="adm-action-btn adm-action-btn--delivered"
-            onClick={() => onAction(order.id, 'delivered')}
-            disabled={saving}
-          >
-            {saving ? <span className="adm-action-spinner" /> : (
-              <>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round">
-                  <polyline points="20 6 9 17 4 12"/>
-                </svg>
-                Mark Delivered
-              </>
-            )}
-          </button>
-        )}
-
-        {canCancel && (
-          <button
-            className="adm-action-btn adm-action-btn--cancel"
-            onClick={() => onAction(order.id, 'cancelled')}
-            disabled={saving}
-          >
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round">
-              <line x1="18" y1="6" x2="6" y2="18"/>
-              <line x1="6"  y1="6" x2="18" y2="18"/>
-            </svg>
-            Cancel Order
-          </button>
-        )}
-
-        {isDone && (
-          <div className="adm-action-status adm-action-status--done">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-              <polyline points="20 6 9 17 4 12"/>
-            </svg>
-            Order delivered successfully
-          </div>
-        )}
-
-        {isCancelled && (
-          <div className="adm-action-status adm-action-status--cancelled">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-              <line x1="18" y1="6" x2="6" y2="18"/>
-              <line x1="6"  y1="6" x2="18" y2="18"/>
-            </svg>
-            Order cancelled
-          </div>
-        )}
-      </div>
-
     </div>
   );
 }
@@ -488,7 +487,6 @@ export default function Orders() {
   });
 
   const pendingCount = orders.filter(o => o.status === 'pending').length;
-  const TABLE_COLS = 8;
 
   return (
     <>
@@ -556,6 +554,7 @@ export default function Orders() {
         </div>
       )}
 
+      {/* Order list */}
       <div className="adm-card">
         {loading ? (
           <div>
@@ -577,146 +576,63 @@ export default function Orders() {
             <div className="adm-empty-sub">Try adjusting search or filters.</div>
           </div>
         ) : (
-          <>
-            {/* Desktop table */}
-            <div className="adm-table-wrap">
-              <table className="adm-table">
-                <thead>
-                  <tr>
-                    <th>Order</th>
-                    <th>Customer</th>
-                    <th>Phone</th>
-                    <th>Items</th>
-                    <th>Total</th>
-                    <th>Status</th>
-                    <th>Time</th>
-                    <th style={{ width: 72, textAlign: 'center' }}>Info</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filtered.map(o => (
-                    <Fragment key={o.id}>
-                      <tr
-                        className={[
-                          'adm-order-row',
-                          newIds.has(o.id)     ? 'adm-order-row--new'     : '',
-                          successIds.has(o.id) ? 'adm-order-row--success' : '',
-                          expandedId === o.id  ? 'adm-order-row--open'    : '',
-                        ].filter(Boolean).join(' ')}
-                      >
-                        <td style={{ fontFamily: 'Courier New,monospace', fontSize: 11, letterSpacing: 0.5, color: 'var(--adm-text-2)', fontWeight: 700 }}>
-                          #{o.id.slice(0, 8).toUpperCase()}
-                          {newIds.has(o.id) && (
-                            <span style={{ marginLeft: 5, fontSize: 9, fontWeight: 900, letterSpacing: 1, color: '#4ade80', verticalAlign: 'middle' }}>NEW</span>
-                          )}
-                        </td>
-                        <td>
-                          <div style={{ fontWeight: 800 }}>{o.customer_name || '—'}</div>
-                          <div className="adm-table-muted">{o.customer_email || ''}</div>
-                        </td>
-                        <td className="adm-table-muted">{o.customer_phone || '—'}</td>
-                        <td className="adm-table-muted" style={{ maxWidth: 200 }}>{itemsSummary(o.items)}</td>
-                        <td style={{ fontWeight: 900, color: 'var(--adm-accent-text)' }}>{fmtCurrency(o.total_price)}</td>
-                        <td><StatusBadge status={o.status} /></td>
-                        <td>
-                          <div className="adm-table-muted">{fmtTime(o.created_at)}</div>
-                          <div style={{ fontSize: 10.5, color: 'var(--adm-text-4)', fontWeight: 700 }}>{timeAgo(o.created_at)}</div>
-                        </td>
-                        <td style={{ textAlign: 'center', padding: '0 8px' }}>
-                          <button
-                            className={`adm-info-btn${expandedId === o.id ? ' adm-info-btn--open' : ''}`}
-                            onClick={() => setExpandedId(prev => prev === o.id ? null : o.id)}
-                            aria-label="Toggle order info"
-                            aria-expanded={expandedId === o.id}
-                          >
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
-                              <circle cx="12" cy="12" r="10"/>
-                              <line x1="12" y1="8"  x2="12"   y2="12"/>
-                              <line x1="12" y1="16" x2="12.01" y2="16"/>
-                            </svg>
-                            Info
-                            <svg
-                              width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"
-                              style={{ transition: 'transform 0.22s ease', transform: expandedId === o.id ? 'rotate(180deg)' : 'rotate(0deg)' }}
-                            >
-                              <polyline points="6 9 12 15 18 9"/>
-                            </svg>
-                          </button>
-                        </td>
-                      </tr>
-
-                      {expandedId === o.id && (
-                        <tr className="adm-order-expanded-row">
-                          <td colSpan={TABLE_COLS} style={{ padding: 0 }}>
-                            <OrderInfoPanel
-                              order={o}
-                              onAction={handleAction}
-                              saving={savingIds.has(o.id)}
-                            />
-                          </td>
-                        </tr>
-                      )}
-                    </Fragment>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-
-            {/* Mobile cards */}
-            <div className="adm-order-cards">
-              {filtered.map(o => (
+          <div className="adm-orders-list">
+            {filtered.map(o => (
+              <Fragment key={o.id}>
                 <div
-                  key={o.id}
                   className={[
-                    'adm-order-card',
-                    newIds.has(o.id)     ? 'adm-order-card--new'     : '',
-                    successIds.has(o.id) ? 'adm-order-card--success' : '',
+                    'adm-orow',
+                    newIds.has(o.id)     ? 'adm-orow--new'     : '',
+                    successIds.has(o.id) ? 'adm-orow--success' : '',
+                    expandedId === o.id  ? 'adm-orow--open'    : '',
                   ].filter(Boolean).join(' ')}
                 >
-                  <div className="adm-order-card-top">
-                    <span className="adm-order-card-id">#{o.id.slice(0, 8).toUpperCase()}</span>
-                    <StatusBadge status={o.status} />
-                  </div>
-                  <div className="adm-order-card-customer">{o.customer_name || '—'}</div>
-                  {o.customer_phone && (
-                    <div className="adm-order-card-email">{o.customer_phone}</div>
-                  )}
-                  <div className="adm-order-card-items">{itemsSummary(o.items)}</div>
-                  <div className="adm-order-card-footer">
-                    <span className="adm-order-card-total" style={{ color: 'var(--adm-accent-text)' }}>
-                      {fmtCurrency(o.total_price)}
-                    </span>
-                    <span className="adm-order-card-time">{timeAgo(o.created_at)}</span>
-                  </div>
-                  <button
-                    className={`adm-info-btn adm-info-btn--card${expandedId === o.id ? ' adm-info-btn--open' : ''}`}
-                    onClick={() => setExpandedId(prev => prev === o.id ? null : o.id)}
-                  >
-                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
-                      <circle cx="12" cy="12" r="10"/>
-                      <line x1="12" y1="8"  x2="12"   y2="12"/>
-                      <line x1="12" y1="16" x2="12.01" y2="16"/>
-                    </svg>
-                    {expandedId === o.id ? 'Hide Details' : 'Show Details'}
-                    <svg
-                      width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"
-                      style={{ transition: 'transform 0.22s ease', transform: expandedId === o.id ? 'rotate(180deg)' : 'rotate(0deg)' }}
-                    >
-                      <polyline points="6 9 12 15 18 9"/>
-                    </svg>
-                  </button>
+                  {/* ── Main 3-column row ── */}
+                  <div className="adm-orow-main">
 
+                    {/* LEFT: order meta */}
+                    <div className="adm-orow-left">
+                      <div className="adm-orow-id">
+                        #{o.id.slice(0, 8).toUpperCase()}
+                        {newIds.has(o.id) && (
+                          <span className="adm-orow-new-tag">NEW</span>
+                        )}
+                      </div>
+                      <div className="adm-orow-customer">{o.customer_name || '—'}</div>
+                      <div className="adm-orow-items">{itemsSummary(o.items)}</div>
+                      <div className="adm-orow-foot">
+                        <span className="adm-orow-total">{fmtCurrency(o.total_price)}</span>
+                        <span className="adm-orow-time">{timeAgo(o.created_at)}</span>
+                      </div>
+                    </div>
+
+                    {/* CENTER: live pipeline */}
+                    <div className="adm-orow-center">
+                      <CompactPipeline status={o.status} />
+                    </div>
+
+                    {/* RIGHT: action buttons + info toggle */}
+                    <div className="adm-orow-right">
+                      <RowActions
+                        order={o}
+                        onAction={handleAction}
+                        saving={savingIds.has(o.id)}
+                        infoOpen={expandedId === o.id}
+                        onToggleInfo={() => setExpandedId(prev => prev === o.id ? null : o.id)}
+                      />
+                    </div>
+                  </div>
+
+                  {/* ── Expandable info drawer ── */}
                   {expandedId === o.id && (
-                    <OrderInfoPanel
-                      order={o}
-                      onAction={handleAction}
-                      saving={savingIds.has(o.id)}
-                    />
+                    <div className="adm-orow-drawer">
+                      <OrderInfoPanel order={o} />
+                    </div>
                   )}
                 </div>
-              ))}
-            </div>
-          </>
+              </Fragment>
+            ))}
+          </div>
         )}
       </div>
 
