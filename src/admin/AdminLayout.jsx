@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { NavLink, Outlet, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { subscribeToOrders, fetchOrders } from './services/adminService';
 import './styles/admin.css';
 
 const NAV = [
@@ -28,6 +29,7 @@ const NAV = [
       {
         to: '/admin/orders',
         label: 'Orders',
+        badgeKey: 'pending',
         icon: (
           <svg className="adm-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/>
@@ -77,16 +79,39 @@ const NAV = [
 ];
 
 export default function AdminLayout() {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarOpen,  setSidebarOpen]  = useState(false);
+  const [pendingCount, setPendingCount] = useState(0);
   const { currentUser } = useAuth();
+  const channelRef = useRef(null);
 
   const initials = currentUser?.fullName
-    ? currentUser.fullName.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()
+    ? currentUser.fullName.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase()
     : (currentUser?.email?.[0] ?? 'A').toUpperCase();
 
   const displayName = currentUser?.fullName || currentUser?.email || 'Admin';
 
   const close = () => setSidebarOpen(false);
+
+  /* Track pending order count for sidebar badge */
+  useEffect(() => {
+    fetchOrders({ status: 'pending', limit: 99 })
+      .then(orders => setPendingCount(orders.length))
+      .catch(() => {});
+
+    channelRef.current = subscribeToOrders(({ eventType, new: row, old }) => {
+      if (eventType === 'INSERT' && row?.status === 'pending') {
+        setPendingCount(c => c + 1);
+      } else if (eventType === 'UPDATE') {
+        if (old?.status === 'pending' && row?.status !== 'pending')
+          setPendingCount(c => Math.max(0, c - 1));
+        else if (old?.status !== 'pending' && row?.status === 'pending')
+          setPendingCount(c => c + 1);
+      } else if (eventType === 'DELETE' && old?.status === 'pending') {
+        setPendingCount(c => Math.max(0, c - 1));
+      }
+    });
+    return () => { channelRef.current?.unsubscribe(); };
+  }, []);
 
   return (
     <div className="adm-layout">
@@ -106,7 +131,7 @@ export default function AdminLayout() {
           {NAV.map(({ section, items }) => (
             <div key={section} className="adm-nav-section">
               <span className="adm-nav-section-label">{section}</span>
-              {items.map(({ to, end, label, icon }) => (
+              {items.map(({ to, end, label, icon, badgeKey }) => (
                 <NavLink
                   key={to}
                   to={to}
@@ -118,6 +143,9 @@ export default function AdminLayout() {
                 >
                   {icon}
                   {label}
+                  {badgeKey === 'pending' && pendingCount > 0 && (
+                    <span className="adm-nav-badge">{pendingCount}</span>
+                  )}
                 </NavLink>
               ))}
             </div>
@@ -162,20 +190,36 @@ export default function AdminLayout() {
               <line x1="3" y1="18" x2="21" y2="18"/>
             </svg>
           </button>
-          <div className="adm-topbar-brand">Burger<span>izza</span></div>
+
+          <div className="adm-topbar-brand">
+            Burger<span>izza</span>
+            {pendingCount > 0 && (
+              <span style={{
+                display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                marginLeft: 8, minWidth: 20, height: 20, borderRadius: 10,
+                background: '#fbbf24', color: '#1A0A00',
+                fontSize: 10, fontWeight: 900, padding: '0 5px',
+                verticalAlign: 'middle',
+              }}>
+                {pendingCount}
+              </span>
+            )}
+          </div>
+
           <div className="adm-topbar-actions">
             <Link
               to="/"
               title="Back to site"
               style={{
-                width: 44, height: 44, display: 'flex', alignItems: 'center',
+                width: 40, height: 40, display: 'flex', alignItems: 'center',
                 justifyContent: 'center', borderRadius: 8,
                 border: '1px solid var(--adm-border)',
                 color: 'var(--adm-text-3)', textDecoration: 'none',
+                background: 'rgba(255,255,255,0.04)',
                 transition: 'background 0.14s ease, color 0.14s ease',
               }}
               onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,210,63,0.10)'; e.currentTarget.style.color = 'var(--adm-text)'; }}
-              onMouseLeave={e => { e.currentTarget.style.background = ''; e.currentTarget.style.color = 'var(--adm-text-3)'; }}
+              onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; e.currentTarget.style.color = 'var(--adm-text-3)'; }}
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
