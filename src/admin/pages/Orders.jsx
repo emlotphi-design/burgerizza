@@ -85,6 +85,54 @@ function getCustomizations(item) {
   return rows;
 }
 
+function getKeyMods(item) {
+  const pills = [];
+  if (item.cheeses && typeof item.cheeses === 'object') {
+    Object.entries(item.cheeses).filter(([, q]) => q > 0).forEach(([id]) => pills.push(capitalize(id)));
+  }
+  if (Array.isArray(item.sauces)) item.sauces.forEach(s => pills.push(capitalize(s)));
+  else if (item.sauce) pills.push(capitalize(item.sauce));
+  if (item.cheese) pills.push(capitalize(item.cheese));
+  if (Array.isArray(item.meats)) item.meats.forEach(m => pills.push(capitalize(m)));
+  if (Array.isArray(item.vegetables)) item.vegetables.forEach(v => pills.push(capitalize(v)));
+  return pills.slice(0, 5);
+}
+
+function InlineOrderItems({ items }) {
+  if (!Array.isArray(items) || !items.length) {
+    return <div className="adm-row-items adm-row-items--empty">—</div>;
+  }
+  return (
+    <div className="adm-row-items">
+      {items.slice(0, 4).map((item, i) => {
+        const emoji = item.type === 'burger' ? '🍔' : '🍕';
+        const name  = item.name || capitalize(item.type || 'Item');
+        const qty   = item.quantity ?? 1;
+        const mods  = getKeyMods(item);
+        return (
+          <div key={i} className="adm-row-item">
+            <div className="adm-row-item-line">
+              <span className="adm-row-item-emoji">{emoji}</span>
+              <span className="adm-row-item-name">{name}</span>
+              {qty > 1 && <span className="adm-row-item-qty">×{qty}</span>}
+            </div>
+            {mods.length > 0 && (
+              <div className="adm-row-item-mods">
+                {mods.map((mod, mi) => (
+                  <span key={mi} className="adm-row-item-mod">{mod}</span>
+                ))}
+              </div>
+            )}
+          </div>
+        );
+      })}
+      {items.length > 4 && (
+        <div className="adm-row-item adm-row-item--more">+{items.length - 4} more</div>
+      )}
+    </div>
+  );
+}
+
 /* ═══════════════════════════════════════════════════════════
    COMPACT PIPELINE — always visible in each row
 ═══════════════════════════════════════════════════════════ */
@@ -592,18 +640,16 @@ export default function Orders() {
 
                     {/* LEFT: order meta */}
                     <div className="adm-orow-left">
-                      <div className="adm-orow-id">
-                        #{o.id.slice(0, 8).toUpperCase()}
-                        {newIds.has(o.id) && (
-                          <span className="adm-orow-new-tag">NEW</span>
-                        )}
-                      </div>
-                      <div className="adm-orow-customer">{o.customer_name || '—'}</div>
-                      <div className="adm-orow-items">{itemsSummary(o.items)}</div>
-                      <div className="adm-orow-foot">
-                        <span className="adm-orow-total">{fmtCurrency(o.total_price)}</span>
+                      <div className="adm-orow-topline">
+                        <div className="adm-orow-id">
+                          #{o.id.slice(0, 8).toUpperCase()}
+                          {newIds.has(o.id) && <span className="adm-orow-new-tag">NEW</span>}
+                        </div>
                         <span className="adm-orow-time">{timeAgo(o.created_at)}</span>
                       </div>
+                      <div className="adm-orow-customer">{o.customer_name || '—'}</div>
+                      <InlineOrderItems items={o.items} />
+                      <div className="adm-orow-total">{fmtCurrency(o.total_price)}</div>
                     </div>
 
                     {/* CENTER: live pipeline */}
