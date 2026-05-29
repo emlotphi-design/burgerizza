@@ -17,6 +17,13 @@ import ComingSoon from './pages/ComingSoon';
 import CategoryPage from './pages/CategoryPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import AuthCallback from './pages/AuthCallback';
+import AdminLayout from './admin/AdminLayout';
+import AdminRoute from './admin/AdminRoute';
+import AdminDashboard from './admin/pages/Dashboard';
+import AdminOrders from './admin/pages/Orders';
+import AdminProducts from './admin/pages/Products';
+import AdminUsers from './admin/pages/Users';
+import AdminSettings from './admin/pages/Settings';
 
 const BUILDER_ROUTES = new Set(['/build-pizza', '/build-burger']);
 
@@ -73,6 +80,18 @@ function AnimatedRoutes() {
         <Route path="/pizza"   element={<CategoryPage />} />
         <Route path="/dessert" element={<CategoryPage />} />
         <Route path="/drinks"  element={<CategoryPage />} />
+
+        {/* Admin panel — protected, own layout (no AnimatedRoutes animation) */}
+        <Route
+          path="/admin"
+          element={<AdminRoute><AdminLayout /></AdminRoute>}
+        >
+          <Route index          element={<AdminDashboard />} />
+          <Route path="orders"  element={<AdminOrders />} />
+          <Route path="products" element={<AdminProducts />} />
+          <Route path="users"   element={<AdminUsers />} />
+          <Route path="settings" element={<AdminSettings />} />
+        </Route>
       </Routes>
     </div>
   );
