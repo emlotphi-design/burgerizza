@@ -228,6 +228,19 @@ const previewBtn = {
   overflow: 'visible',
 };
 
+// ─── Selection order helpers ────────────────────────────────────────────────
+
+// Removes the LAST occurrence of {type, id} from the order array.
+// Used when decrementing qty: the most recently added layer is removed.
+function removeLastOf(order, type, id) {
+  for (let i = order.length - 1; i >= 0; i--) {
+    if (order[i].type === type && order[i].id === id) {
+      return [...order.slice(0, i), ...order.slice(i + 1)];
+    }
+  }
+  return order;
+}
+
 // ─── Canvas capture ─────────────────────────────────────────────────────────
 // Composites all ingredient layers onto an offscreen canvas and returns a PNG
 // data URL. All lookup maps are module-level so this plain function can read them.
@@ -265,19 +278,12 @@ async function captureToDataURL(snapshot) {
 
   // Bottom bun
   await drawCentered(BUN_BASES[snapshot.bun], bunSize, -2);
-  // Ingredients in selection order — last selected = top layer
+  // Each selectionOrder entry = exactly one rendered layer (last entry = top)
   for (const { type, id } of (snapshot.selectionOrder ?? [])) {
-    if (type === 'sauce' && SAUCE_BASES[id]) {
-      await drawCentered(SAUCE_BASES[id], ingSize);
-    } else if (type === 'meat' && MEAT_BASES[id]) {
-      const qty = (snapshot.meats ?? {})[id] ?? 0;
-      for (let i = 0; i < qty; i++) await drawCentered(MEAT_BASES[id], ingSize);
-    } else if (type === 'cheese' && CHEESE_BASES[id]) {
-      const qty = (snapshot.cheeses ?? {})[id] ?? 0;
-      for (let i = 0; i < qty; i++) await drawCentered(CHEESE_BASES[id], ingSize);
-    } else if (type === 'vegetable' && VEGETABLE_BASES[id]) {
-      await drawCentered(VEGETABLE_BASES[id], ingSize);
-    }
+    if      (type === 'sauce'     && SAUCE_BASES[id])     await drawCentered(SAUCE_BASES[id],     ingSize);
+    else if (type === 'meat'      && MEAT_BASES[id])      await drawCentered(MEAT_BASES[id],      ingSize);
+    else if (type === 'cheese'    && CHEESE_BASES[id])    await drawCentered(CHEESE_BASES[id],    ingSize);
+    else if (type === 'vegetable' && VEGETABLE_BASES[id]) await drawCentered(VEGETABLE_BASES[id], ingSize);
   }
   // Top bun is always included in the final captured image
   await drawCentered(BUN_TOPS[snapshot.bun], bunSize, -2);
@@ -342,27 +348,19 @@ export default function BurgerBuilder() {
 
   const hasMeat = Object.keys(selectedMeats).length > 0;
 
-  // Ingredient layers in selection order — each entry gets z-index 5+idx so the
-  // last selected ingredient always renders on top. Preview orbitals are at z=30,
-  // top bun at z=25 (CSS), so all ingredient layers stay safely below both.
-  const ingredientLayers = (draft.selectionOrder ?? []).flatMap(({ type, id }, idx) => {
+  // One selectionOrder entry = one rendered layer. z-index = 5+idx so the most
+  // recently added layer (last entry) always sits on top. Keys include idx to
+  // handle duplicate entries (same ingredient added multiple times).
+  const ingredientLayers = (draft.selectionOrder ?? []).map(({ type, id }, idx) => {
     const style = { position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%, -50%)', zIndex: 5 + idx };
     switch (type) {
-      case 'sauce':
-        return SAUCE_BASES[id] ? [{ key: `s-${id}`, cls: 'bb-sauce-img', src: SAUCE_BASES[id], style }] : [];
-      case 'meat': {
-        const qty = selectedMeats[id] ?? 0;
-        return MEAT_BASES[id] ? Array.from({ length: qty }, (_, j) => ({ key: `m-${id}-${j}`, cls: 'bb-meat-img', src: MEAT_BASES[id], style })) : [];
-      }
-      case 'cheese': {
-        const qty = selectedCheeses[id] ?? 0;
-        return CHEESE_BASES[id] ? Array.from({ length: qty }, (_, j) => ({ key: `c-${id}-${j}`, cls: 'bb-cheese-img', src: CHEESE_BASES[id], style })) : [];
-      }
-      case 'vegetable':
-        return VEGETABLE_BASES[id] ? [{ key: `v-${id}`, cls: 'bb-vegetable-img', src: VEGETABLE_BASES[id], style }] : [];
-      default: return [];
+      case 'sauce':     return SAUCE_BASES[id]     ? { key: `s-${idx}`, cls: 'bb-sauce-img',     src: SAUCE_BASES[id],     style } : null;
+      case 'meat':      return MEAT_BASES[id]       ? { key: `m-${idx}`, cls: 'bb-meat-img',      src: MEAT_BASES[id],      style } : null;
+      case 'cheese':    return CHEESE_BASES[id]     ? { key: `c-${idx}`, cls: 'bb-cheese-img',    src: CHEESE_BASES[id],    style } : null;
+      case 'vegetable': return VEGETABLE_BASES[id]  ? { key: `v-${idx}`, cls: 'bb-vegetable-img', src: VEGETABLE_BASES[id], style } : null;
+      default: return null;
     }
-  });
+  }).filter(Boolean);
 
   // ── Burger panel handlers ────────────────────────────────────────────────
   const handleEditBurger = useCallback((burger) => {
@@ -370,11 +368,16 @@ export default function BurgerBuilder() {
     const cheeses = burger.cheeses ?? (burger.cheese ? { [burger.cheese]: 1 } : {});
     const sauces = burger.sauces ?? [];
     const vegetables = burger.vegetables ?? [];
-    // Restore saved order or reconstruct in default category sequence
-    const selectionOrder = burger.selectionOrder ?? [
+    // Validate selectionOrder: must have one entry per qty layer for meats/cheeses.
+    // Old saved burgers have one entry per ingredient — rebuild if counts are off.
+    const saved = burger.selectionOrder;
+    const countsOk = saved &&
+      Object.entries(meats).every(([id, qty]) => qty === saved.filter(e => e.type === 'meat'   && e.id === id).length) &&
+      Object.entries(cheeses).every(([id, qty]) => qty === saved.filter(e => e.type === 'cheese' && e.id === id).length);
+    const selectionOrder = countsOk ? saved : [
       ...sauces.map(id => ({ type: 'sauce', id })),
-      ...Object.keys(meats).map(id => ({ type: 'meat', id })),
-      ...Object.keys(cheeses).map(id => ({ type: 'cheese', id })),
+      ...Object.entries(meats).flatMap(([id, qty]) => Array.from({ length: qty }, () => ({ type: 'meat', id }))),
+      ...Object.entries(cheeses).flatMap(([id, qty]) => Array.from({ length: qty }, () => ({ type: 'cheese', id }))),
       ...vegetables.map(id => ({ type: 'vegetable', id })),
     ];
     setDraft({ bun: burger.bun, meats, cheeses, sauces, vegetables, selectionOrder, name: burger.name, editingId: burger.id });
@@ -652,7 +655,7 @@ export default function BurgerBuilder() {
                             meats,
                             selectionOrder: removing
                               ? (prev.selectionOrder ?? []).filter(e => !(e.type === 'meat' && e.id === meat.id))
-                              : prev.selectionOrder ?? [],
+                              : removeLastOf(prev.selectionOrder ?? [], 'meat', meat.id),
                           };
                         });
                       }}
@@ -667,7 +670,10 @@ export default function BurgerBuilder() {
                         setDraft(prev => {
                           const current = prev.meats[meat.id] ?? 0;
                           if (current >= MAX_MEAT_QTY) return prev;
-                          return { meats: { ...prev.meats, [meat.id]: current + 1 } };
+                          return {
+                            meats: { ...prev.meats, [meat.id]: current + 1 },
+                            selectionOrder: [...(prev.selectionOrder ?? []), { type: 'meat', id: meat.id }],
+                          };
                         });
                       }}
                     >+</button>
@@ -718,7 +724,7 @@ export default function BurgerBuilder() {
                   )}
                 </button>
 
-                {isSelected && (
+                {isSelected && cheese.hasQty && (
                   <div className="bb-qty-bar">
                     <button
                       className="bb-qty-btn"
@@ -733,7 +739,7 @@ export default function BurgerBuilder() {
                             cheeses,
                             selectionOrder: removing
                               ? (prev.selectionOrder ?? []).filter(e => !(e.type === 'cheese' && e.id === cheese.id))
-                              : prev.selectionOrder ?? [],
+                              : removeLastOf(prev.selectionOrder ?? [], 'cheese', cheese.id),
                           };
                         });
                       }}
@@ -748,7 +754,10 @@ export default function BurgerBuilder() {
                         setDraft(prev => {
                           const current = (prev.cheeses ?? {})[cheese.id] ?? 0;
                           if (current >= MAX_CHEESE_QTY) return prev;
-                          return { cheeses: { ...prev.cheeses, [cheese.id]: current + 1 } };
+                          return {
+                            cheeses: { ...prev.cheeses, [cheese.id]: current + 1 },
+                            selectionOrder: [...(prev.selectionOrder ?? []), { type: 'cheese', id: cheese.id }],
+                          };
                         });
                       }}
                     >+</button>

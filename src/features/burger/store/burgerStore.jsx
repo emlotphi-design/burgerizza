@@ -35,12 +35,17 @@ export function BurgerProvider({ children }) {
       stored.cheeses = { [stored.cheese]: 1 };
       delete stored.cheese;
     }
-    // Reconstruct selectionOrder for drafts saved before this field existed
-    if (!stored.selectionOrder) {
+    // Build selectionOrder with one entry per layer (qty=2 → 2 entries).
+    // Runs when absent OR when a meat/cheese has qty > the current entry count
+    // (old format stored one entry per ingredient regardless of qty).
+    const needsRebuild = !stored.selectionOrder ||
+      Object.entries(stored.meats   ?? {}).some(([id, qty]) => qty > (stored.selectionOrder).filter(e => e.type === 'meat'   && e.id === id).length) ||
+      Object.entries(stored.cheeses ?? {}).some(([id, qty]) => qty > (stored.selectionOrder).filter(e => e.type === 'cheese' && e.id === id).length);
+    if (needsRebuild) {
       const order = [];
       for (const id of (stored.sauces ?? [])) order.push({ type: 'sauce', id });
-      for (const id of Object.keys(stored.meats ?? {})) order.push({ type: 'meat', id });
-      for (const id of Object.keys(stored.cheeses ?? {})) order.push({ type: 'cheese', id });
+      for (const [id, qty] of Object.entries(stored.meats   ?? {})) for (let i = 0; i < qty; i++) order.push({ type: 'meat',   id });
+      for (const [id, qty] of Object.entries(stored.cheeses ?? {})) for (let i = 0; i < qty; i++) order.push({ type: 'cheese', id });
       for (const id of (stored.vegetables ?? [])) order.push({ type: 'vegetable', id });
       stored.selectionOrder = order;
     }
