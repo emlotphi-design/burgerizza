@@ -344,3 +344,48 @@
     gap: 32px;
   }
 }
+
+/* ── Responsive — small phone ≤ 480px ─────────── */
+@media (max-width: 480px) {
+  .cat-page-main {
+    padding: 28px 16px 120px;
+  }
+
+  .cat-page-emoji {
+    font-size: 52px;
+    margin-bottom: 14px;
+  }
+
+  .cat-page-hero {
+    margin-bottom: 28px;
+  }
+
+  /* Touch-friendly add button */
+  .menu-add-btn {
+    min-height: 44px;
+    padding: 10px 16px;
+  }
+
+  /* Stack price + button vertically on very narrow cards */
+  .menu-product-footer {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .menu-add-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* ── Responsive — tiny phone ≤ 360px ──────────── */
+@media (max-width: 360px) {
+  .cat-page-main {
+    padding: 24px 12px 100px;
+  }
+
+  .menu-product-card {
+    padding: 16px 14px 14px;
+  }
+}

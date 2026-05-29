@@ -42,7 +42,7 @@ const supabaseStub = {
 export const supabase = canInit
   ? createClient(supabaseUrl, supabaseKey, {
       auth: {
-        flowType:           'implicit',
+        flowType:           'pkce',
         detectSessionInUrl: true,
         autoRefreshToken:   true,
         persistSession:     true,

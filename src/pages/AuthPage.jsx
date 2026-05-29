@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Socials from '../components/Socials';
 import { useAuth } from '../context/AuthContext';
-import { supabase, SITE_URL } from '../lib/supabase';
+import { supabase } from '../lib/supabase';
 
 /* ─── Minimal toast ──────────────────────────────────────── */
 function useToast() {
@@ -72,9 +72,145 @@ function Field({ label, name, value, onChange, type = 'text', placeholder, requi
 }
 
 /* ═══════════════════════════════════════════════════════
+   FORGOT PASSWORD FORM
+═══════════════════════════════════════════════════════ */
+function ForgotPasswordForm({ onBack, showToast }) {
+  const [email,   setEmail]   = useState('');
+  const [loading, setLoading] = useState(false);
+  const [sent,    setSent]    = useState(false);
+  const [error,   setError]   = useState('');
+  const inFlight = useRef(false);
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+    if (inFlight.current) return;
+    if (!email.trim()) { setError('Pflichtfeld'); return; }
+
+    inFlight.current = true;
+    setLoading(true);
+    setError('');
+    try {
+      const { error: err } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+        redirectTo: 'https://burgerizza-iota.vercel.app/auth/callback',
+      });
+      if (err) { setError(err.message); return; }
+      setSent(true);
+      showToast('Passwort-Reset-Link gesendet!');
+    } finally {
+      inFlight.current = false;
+      setLoading(false);
+    }
+  }
+
+  if (sent) {
+    return (
+      <div className="co-form">
+        <div className="co-form-header">
+          <h2 className="co-form-title">E-Mail gesendet</h2>
+          <p className="co-form-sub">
+            Wir haben einen Link zum Zurücksetzen deines Passworts an{' '}
+            <strong style={{ color: '#1A0A00' }}>{email}</strong> gesendet.
+            Prüfe deinen Spam-Ordner, falls du ihn nicht siehst.
+          </p>
+        </div>
+        <button type="button" className="co-next-btn" onClick={onBack}>
+          Zurück zur Anmeldung
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <form className="co-form" onSubmit={handleSubmit} noValidate>
+      <div className="co-form-header">
+        <h2 className="co-form-title">Passwort vergessen?</h2>
+        <p className="co-form-sub">Gib deine E-Mail-Adresse ein und wir senden dir einen Reset-Link.</p>
+      </div>
+
+      {error && <div className="auth-error-banner">{error}</div>}
+
+      <div className="co-fields">
+        <Field label="E-Mail" name="email" type="email" value={email}
+          onChange={e => { setEmail(e.target.value); setError(''); }}
+          placeholder="max@beispiel.de" required error={error && !email ? error : ''} />
+      </div>
+
+      <button type="submit" className="co-next-btn" disabled={loading}>
+        {loading ? <span className="co-spinner" /> : 'Reset-Link senden'}
+      </button>
+      <button type="button" className="co-back-link" style={{ marginTop: 10 }} onClick={onBack}>
+        ← Zurück zur Anmeldung
+      </button>
+    </form>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════
+   RESET PASSWORD FORM (after clicking email link)
+═══════════════════════════════════════════════════════ */
+function ResetPasswordForm({ showToast, onDone }) {
+  const [fields,  setFields]  = useState({ password: '', confirmPassword: '' });
+  const [errors,  setErrors]  = useState({});
+  const [loading, setLoading] = useState(false);
+  const inFlight = useRef(false);
+
+  function handleChange(e) {
+    const { name, value } = e.target;
+    setFields(p => ({ ...p, [name]: value }));
+    if (errors[name]) setErrors(p => ({ ...p, [name]: '' }));
+  }
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+    if (inFlight.current) return;
+
+    const errs = {};
+    if (!fields.password)                       errs.password = 'Pflichtfeld';
+    else if (fields.password.length < 8)        errs.password = 'Mindestens 8 Zeichen';
+    if (fields.confirmPassword !== fields.password) errs.confirmPassword = 'Passwörter stimmen nicht überein';
+    if (Object.keys(errs).length) { setErrors(errs); return; }
+
+    inFlight.current = true;
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.updateUser({ password: fields.password });
+      if (error) { setErrors({ general: error.message }); return; }
+      showToast('Passwort erfolgreich geändert!');
+      onDone();
+    } finally {
+      inFlight.current = false;
+      setLoading(false);
+    }
+  }
+
+  return (
+    <form className="co-form" onSubmit={handleSubmit} noValidate>
+      <div className="co-form-header">
+        <h2 className="co-form-title">Neues Passwort</h2>
+        <p className="co-form-sub">Wähle ein neues Passwort für dein Konto.</p>
+      </div>
+
+      {errors.general && <div className="auth-error-banner">{errors.general}</div>}
+
+      <div className="co-fields">
+        <Field label="Neues Passwort" name="password" type="password" value={fields.password}
+          onChange={handleChange} placeholder="Mindestens 8 Zeichen" required error={errors.password} />
+        <Field label="Passwort bestätigen" name="confirmPassword" type="password"
+          value={fields.confirmPassword} onChange={handleChange} placeholder="••••••••"
+          required error={errors.confirmPassword} />
+      </div>
+
+      <button type="submit" className="co-next-btn" disabled={loading}>
+        {loading ? <span className="co-spinner" /> : 'Passwort speichern'}
+      </button>
+    </form>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════
    LOGIN TAB
 ═══════════════════════════════════════════════════════ */
-function LoginForm({ onSuccess, showToast }) {
+function LoginForm({ onSuccess, showToast, onForgotPassword }) {
   const { login } = useAuth();
   const [fields,  setFields]  = useState({ email: '', password: '' });
   const [errors,  setErrors]  = useState({});
@@ -120,8 +256,26 @@ function LoginForm({ onSuccess, showToast }) {
       <div className="co-fields">
         <Field label="E-Mail" name="email" type="email" value={fields.email}
           onChange={handleChange} placeholder="max@beispiel.de" required error={errors.email} />
-        <Field label="Passwort" name="password" type="password" value={fields.password}
-          onChange={handleChange} placeholder="••••••••" required error={errors.password} />
+        <div className="co-field">
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 4 }}>
+            <label className="co-label" style={{ marginBottom: 0 }}>
+              Passwort<span className="co-required">*</span>
+            </label>
+            <button type="button" className="co-forgot-link" onClick={onForgotPassword}>
+              Passwort vergessen?
+            </button>
+          </div>
+          <input
+            className={`co-input${errors.password ? ' co-input--error' : ''}`}
+            type="password"
+            name="password"
+            value={fields.password}
+            onChange={handleChange}
+            placeholder="••••••••"
+            autoComplete="current-password"
+          />
+          {errors.password && <span className="co-field-error">{errors.password}</span>}
+        </div>
       </div>
 
       <button type="submit" className="co-next-btn" disabled={loading}>
@@ -303,18 +457,44 @@ export default function AuthPage() {
   const { isLoggedIn, loading } = useAuth();
   const [toast, showToast] = useToast();
 
+  const searchParams = new URLSearchParams(location.search);
+  const isReset = searchParams.get('reset') === '1';
+
   const defaultTab = location.state?.tab ?? 'login';
-  const [tab, setTab] = useState(defaultTab);
+  const [tab,      setTab]      = useState(defaultTab);
+  const [showForgot, setForgot] = useState(false);
   const returnTo = location.state?.returnTo ?? '/profile';
 
   useEffect(() => {
-    if (!loading && isLoggedIn) navigate(returnTo, { replace: true });
-  }, [isLoggedIn, loading, navigate, returnTo]);
+    if (!loading && isLoggedIn && !isReset) navigate(returnTo, { replace: true });
+  }, [isLoggedIn, loading, navigate, returnTo, isReset]);
 
-  if (loading || isLoggedIn) return null;
+  if (loading) return null;
+  if (isLoggedIn && !isReset) return null;
 
   function handleSuccess() {
     navigate(returnTo, { replace: true });
+  }
+
+  // Password reset mode — user arrived via reset email link
+  if (isReset) {
+    return (
+      <div className="page-enter" style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+        <Toast toast={toast} />
+        <Navbar />
+        <main className="co-main">
+          <div className="co-wrap" style={{ maxWidth: 480 }}>
+            <div className="co-panel">
+              <ResetPasswordForm
+                showToast={showToast}
+                onDone={() => navigate('/profile', { replace: true })}
+              />
+            </div>
+          </div>
+        </main>
+        <Socials />
+      </div>
+    );
   }
 
   return (
@@ -325,26 +505,38 @@ export default function AuthPage() {
       <main className="co-main">
         <div className="co-wrap" style={{ maxWidth: 480 }}>
 
-          <div className="auth-tabs">
-            <button
-              className={`auth-tab${tab === 'login' ? ' auth-tab--active' : ''}`}
-              onClick={() => setTab('login')}
-            >
-              Anmelden
-            </button>
-            <button
-              className={`auth-tab${tab === 'register' ? ' auth-tab--active' : ''}`}
-              onClick={() => setTab('register')}
-            >
-              Registrieren
-            </button>
-          </div>
+          {!showForgot && (
+            <div className="auth-tabs">
+              <button
+                className={`auth-tab${tab === 'login' ? ' auth-tab--active' : ''}`}
+                onClick={() => setTab('login')}
+              >
+                Anmelden
+              </button>
+              <button
+                className={`auth-tab${tab === 'register' ? ' auth-tab--active' : ''}`}
+                onClick={() => setTab('register')}
+              >
+                Registrieren
+              </button>
+            </div>
+          )}
 
           <div className="co-panel">
-            {tab === 'login'
-              ? <LoginForm onSuccess={handleSuccess} showToast={showToast} />
-              : <RegisterForm onSuccess={handleSuccess} showToast={showToast} />
-            }
+            {showForgot ? (
+              <ForgotPasswordForm
+                onBack={() => setForgot(false)}
+                showToast={showToast}
+              />
+            ) : tab === 'login' ? (
+              <LoginForm
+                onSuccess={handleSuccess}
+                showToast={showToast}
+                onForgotPassword={() => setForgot(true)}
+              />
+            ) : (
+              <RegisterForm onSuccess={handleSuccess} showToast={showToast} />
+            )}
           </div>
         </div>
       </main>

@@ -166,6 +166,9 @@ html {
   background-color: #F5C518;
   /* iOS viewport fill — ensures html covers the full screen height */
   height: -webkit-fill-available;
+  /* Prevent iOS font inflation */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 @media (max-width: 900px) {

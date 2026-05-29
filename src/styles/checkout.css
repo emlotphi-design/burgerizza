@@ -6,7 +6,7 @@
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  padding: calc(var(--nav-h) + 32px) 20px 80px;
+  padding: calc(var(--nav-h) + 32px) 20px calc(80px + env(safe-area-inset-bottom, 0px));
   position: relative;
   z-index: 2;
 }
@@ -282,6 +282,32 @@
     inset 0 1px 0 rgba(255, 255, 255, 0.95);
 }
 
+.co-input--locked {
+  background: rgba(255, 255, 255, 0.38);
+  border-color: rgba(26, 10, 0, 0.10);
+  color: rgba(26, 10, 0, 0.50);
+  cursor: default;
+}
+
+.co-input--locked:focus {
+  background: rgba(255, 255, 255, 0.38);
+  border-color: rgba(26, 10, 0, 0.10);
+  box-shadow: none;
+}
+
+.co-locked-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  margin-left: 6px;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: rgba(26, 10, 0, 0.30);
+  vertical-align: middle;
+}
+
 .co-field-error {
   font-family: 'Nunito', sans-serif;
   font-size: 11px;
@@ -382,6 +408,23 @@
 }
 
 /* ── Back link ── */
+.co-forgot-link {
+  background: none;
+  border: none;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
+  font-size: 11px;
+  color: rgba(26, 10, 0, 0.40);
+  cursor: pointer;
+  padding: 0;
+  letter-spacing: 0.3px;
+  transition: color 0.18s ease;
+}
+
+.co-forgot-link:hover {
+  color: #C8001E;
+}
+
 .co-back-link {
   display: block;
   width: 100%;
@@ -403,297 +446,159 @@
   transform: translateY(-1px);
 }
 
-/* ── Verification ── */
-.co-method-tabs {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 18px;
-}
-
-.co-method-tab {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 7px;
-  padding: 12px;
-  border-radius: 14px;
-  border: 1.5px solid rgba(26, 10, 0, 0.12);
-  background: rgba(255, 255, 255, 0.55);
-  font-family: 'Nunito', sans-serif;
-  font-weight: 800;
-  font-size: 13px;
-  color: rgba(26, 10, 0, 0.50);
-  cursor: pointer;
-  transition: background 0.2s, border-color 0.2s, color 0.2s, transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-.co-method-tab:hover:not(.co-method-tab--active) {
-  background: rgba(255, 255, 255, 0.80);
-  border-color: rgba(26, 10, 0, 0.22);
-  transform: translateY(-2px);
-}
-
-.co-method-tab--active {
-  background: rgba(200, 0, 30, 0.08);
-  border-color: rgba(200, 0, 30, 0.35);
-  color: #C8001E;
-}
-
-.co-send-info {
-  font-family: 'Nunito', sans-serif;
-  font-size: 13px;
-  font-weight: 700;
-  color: rgba(26, 10, 0, 0.55);
-  text-align: center;
-  margin-bottom: 20px;
-  padding: 12px 16px;
-  background: rgba(26, 10, 0, 0.04);
-  border-radius: 12px;
-}
-
-.co-otp-sent {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 16px;
-  background: rgba(61, 185, 110, 0.08);
-  border: 1px solid rgba(61, 185, 110, 0.25);
-  border-radius: 14px;
-  margin-bottom: 16px;
-  font-family: 'Nunito', sans-serif;
-  font-size: 13px;
-  font-weight: 700;
-  color: #1A0A00;
-}
-
-.co-otp-sent-icon {
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  background: #3db96e;
-  color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-/* Dev-only OTP hint badge — never shown in production builds */
-.co-dev-hint {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  font-family: 'Nunito', sans-serif;
-  font-size: 11px;
-  font-weight: 700;
-  color: rgba(26, 10, 0, 0.50);
-  background: rgba(245, 197, 24, 0.12);
-  border: 1px dashed rgba(245, 197, 24, 0.50);
-  border-radius: 10px;
-  padding: 7px 14px;
-  margin-bottom: 18px;
-  letter-spacing: 0.3px;
-}
-
-.co-dev-hint strong {
-  color: #1A0A00;
-  letter-spacing: 3px;
-  font-size: 14px;
-  font-weight: 900;
-}
-
-.co-otp-row {
-  display: flex;
-  gap: 8px;
-  justify-content: center;
-  margin-bottom: 14px;
-}
-
-.co-otp-box {
-  width: 50px;
-  height: 58px;
-  border-radius: 14px;
-  border: 1.5px solid rgba(26, 10, 0, 0.14);
-  background: rgba(255, 255, 255, 0.72);
-  text-align: center;
-  font-family: 'Nunito', sans-serif;
-  font-weight: 900;
-  font-size: 24px;
-  color: #1A0A00;
-  outline: none;
-  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
-  caret-color: #C8001E;
-}
-
-.co-otp-box:focus {
-  border-color: rgba(200, 0, 30, 0.45);
-  background: rgba(255, 255, 255, 0.97);
-  box-shadow: 0 0 0 3px rgba(200, 0, 30, 0.11);
-}
-
-.co-otp-box--filled {
-  border-color: rgba(200, 0, 30, 0.30);
-  background: rgba(255, 255, 255, 0.95);
-}
-
-.co-otp-box--error {
-  border-color: rgba(200, 0, 30, 0.60);
-  animation: co-shake 0.35s ease;
-}
-
-@keyframes co-shake {
-
-  0%,
-  100% {
-    transform: translateX(0);
-  }
-
-  25% {
-    transform: translateX(-5px);
-  }
-
-  75% {
-    transform: translateX(5px);
-  }
-}
-
-.co-otp-error {
-  font-family: 'Nunito', sans-serif;
-  font-size: 12px;
-  font-weight: 700;
-  color: #C8001E;
-  text-align: center;
-  margin-bottom: 10px;
-}
-
-.co-resend-row {
-  text-align: center;
-  margin-top: 10px;
-}
-
-.co-resend-btn {
-  background: none;
-  border: none;
-  font-family: 'Nunito', sans-serif;
-  font-weight: 800;
-  font-size: 12px;
-  color: #C8001E;
-  cursor: pointer;
-  text-decoration: underline;
-  text-underline-offset: 3px;
-  transition: opacity 0.18s;
-}
-
-.co-resend-btn:hover {
-  opacity: 0.7;
-}
-
-.co-resend-timer {
-  font-family: 'Nunito', sans-serif;
-  font-size: 12px;
-  font-weight: 700;
-  color: rgba(26, 10, 0, 0.38);
-}
-
 /* ══════════════════════════════════════════
-   CHECKOUT — responsive
+   CHECKOUT — RESPONSIVE
+   Mobile-first breakpoints: 640 → 480 → 360
 ══════════════════════════════════════════ */
+
+/* ── Tablet / large phone ── */
 @media (max-width: 640px) {
   .co-main {
-    padding: calc(var(--nav-h) + 18px) 16px 60px;
+    padding: calc(var(--nav-h) + 16px) 14px calc(72px + env(safe-area-inset-bottom, 0px));
+    align-items: flex-start;
+  }
+
+  .co-wrap {
+    gap: 18px;
   }
 
   .co-panel {
-    padding: 24px 20px;
+    padding: 24px 20px 28px;
     border-radius: 22px;
   }
 
   .co-form-title {
-    font-size: 19px;
-  }
-}
-
-@media (max-width: 520px) {
-  .co-main {
-    padding: calc(var(--nav-h) + 12px) 12px 56px;
+    font-size: 20px;
   }
 
-  .co-wrap {
-    gap: 20px;
+  .co-form-header {
+    margin-bottom: 18px;
   }
 
-  .co-panel {
-    padding: 20px 16px;
-    border-radius: 20px;
-  }
-
-  .co-steps {
-    gap: 4px;
-  }
-
-  .co-step-label {
-    font-size: 10px;
-  }
-
-  .co-step-dot {
-    width: 28px;
-    height: 28px;
-    font-size: 12px;
-  }
-
-  /* Stack two-column field rows on narrow screens */
+  /* Stack two-column rows earlier */
   .co-row {
     flex-direction: column;
-    gap: 12px;
+    gap: 10px;
   }
 
   .co-field--shrink {
     min-width: 0;
   }
 
+  .co-step-label {
+    display: none;
+  }
+}
+
+/* ── Phone ── */
+@media (max-width: 480px) {
+  .co-main {
+    padding: calc(var(--nav-h) + 12px) 12px calc(80px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .co-wrap {
+    gap: 14px;
+    max-width: 100%;
+  }
+
+  .co-panel {
+    padding: 20px 16px 24px;
+    border-radius: 20px;
+  }
+
+  .co-form-title {
+    font-size: 18px;
+  }
+
+  .co-fields {
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+
+  .co-steps {
+    gap: 4px;
+  }
+
+  .co-step-dot {
+    width: 28px;
+    height: 28px;
+    font-size: 11px;
+    flex-shrink: 0;
+  }
+
+  .co-step-line {
+    min-width: 12px;
+  }
+
+  /* Prevent iOS auto-zoom on input focus — must be ≥ 16px */
+  .co-input {
+    font-size: 16px;
+    padding: 12px 14px;
+  }
+
   .co-next-btn {
-    padding: 14px 20px;
+    padding: 15px 20px;
     font-size: 13px;
-    min-height: 50px;
+    min-height: 52px;
+    letter-spacing: 0.8px;
   }
 
   .co-next-btn--pay {
     font-size: 14px;
-    padding: 15px 20px;
+    padding: 16px 20px;
   }
 
-  .co-method-tab {
+  .co-location-btn {
     font-size: 12px;
-    padding: 10px 8px;
-    gap: 5px;
-  }
-}
-
-/* OTP boxes must never overflow on small phones */
-@media (max-width: 420px) {
-  .co-otp-row {
-    gap: 6px;
+    padding: 11px 16px;
   }
 
-  .co-otp-box {
+  /* Payment cards — tighter on small screens */
+  .co-pay-card {
+    padding: 12px 14px;
+    gap: 12px;
+  }
+
+  .co-pay-icon {
     width: 40px;
-    height: 50px;
-    font-size: 20px;
-    border-radius: 12px;
+    height: 40px;
+  }
+
+  .co-pay-label {
+    font-size: 13px;
   }
 }
 
+/* ── Small phone ── */
 @media (max-width: 360px) {
   .co-main {
-    padding: calc(var(--nav-h) + 10px) 10px 48px;
+    padding: calc(var(--nav-h) + 10px) 10px calc(80px + env(safe-area-inset-bottom, 0px));
   }
 
-  .co-otp-box {
-    width: 36px;
-    height: 46px;
-    font-size: 18px;
+  .co-panel {
+    padding: 18px 14px 22px;
+    border-radius: 18px;
+  }
+
+  .co-form-title {
+    font-size: 17px;
+  }
+
+  .co-input {
+    font-size: 16px;
+    padding: 11px 12px;
+  }
+
+  .co-next-btn {
+    font-size: 12px;
+    padding: 14px 16px;
+  }
+}
+
+/* ── Hide social bar on mobile checkout to prevent overlap ── */
+@media (max-width: 640px) {
+  .co-page .social-bar {
+    display: none;
   }
 }
 
@@ -866,41 +771,3 @@
   border-radius: 50px;
 }
 
-/* ── Responsive ── */
-@media (max-width: 560px) {
-  .co-panel {
-    padding: 24px 18px;
-    border-radius: 22px;
-  }
-
-  .co-wrap {
-    gap: 20px;
-  }
-
-  .co-main {
-    padding: calc(var(--nav-h) + 16px) 14px 60px;
-  }
-
-  .co-step-label {
-    display: none;
-  }
-
-  .co-otp-box {
-    width: 42px;
-    height: 50px;
-    font-size: 20px;
-  }
-}
-
-@media (max-width: 380px) {
-  .co-otp-box {
-    width: 36px;
-    height: 44px;
-    font-size: 18px;
-    gap: 5px;
-  }
-
-  .co-otp-row {
-    gap: 5px;
-  }
-}

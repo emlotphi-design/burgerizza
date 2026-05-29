@@ -1,13 +1,13 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Socials from '../components/Socials';
 import { usePizzaStore } from '../context/PizzaContext';
 import { useAuth } from '../context/AuthContext';
-import { useCheckoutStore } from '../store/checkoutStore';
 import { calcPrice } from '../utils/pizzaUtils';
 import GlassInput from '../components/GlassInput';
 import { api } from '../utils/api';
+import { supabase } from '../lib/supabase';
 
 /* ─── Delivery profile helpers ─────────────────────────── */
 const REQUIRED_DELIVERY = ['fullName', 'street', 'houseNumber', 'postalCode', 'city', 'phone', 'email'];
@@ -71,22 +71,24 @@ function StepDots({ step, labels }) {
 /* ═══════════════════════════════════════════════════════
    STEP 1 — Delivery form
 ═══════════════════════════════════════════════════════ */
-function StepDelivery({ profile, setProfile, onNext, autofilled }) {
+function StepDelivery({ profile, setProfile, onNext, autofilled, lockedFields = [] }) {
   const [locLoading, setLocLoading] = useState(false);
   const [locError,   setLocError]   = useState('');
   const [errors,     setErrors]     = useState({});
 
   function handleChange(e) {
     const { name, value } = e.target;
+    if (lockedFields.includes(name)) return;
     setProfile(prev => ({ ...prev, [name]: value }));
     if (errors[name]) setErrors(prev => ({ ...prev, [name]: '' }));
   }
 
   function validate() {
-    const req = ['fullName', 'street', 'houseNumber', 'postalCode', 'city', 'phone', 'email'];
+    const req = ['fullName', 'street', 'houseNumber', 'postalCode', 'city', 'phone'];
+    if (!lockedFields.includes('email')) req.push('email');
     const errs = {};
     req.forEach(k => { if (!profile[k]?.trim()) errs[k] = 'Pflichtfeld'; });
-    if (profile.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(profile.email)) errs.email = 'Ungültige E-Mail';
+    if (!lockedFields.includes('email') && profile.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(profile.email)) errs.email = 'Ungültige E-Mail';
     if (profile.phone && !/^[\d\s\+\-\(\)]{6,}$/.test(profile.phone)) errs.phone = 'Ungültige Nummer';
     setErrors(errs);
     return Object.keys(errs).length === 0;
@@ -190,12 +192,16 @@ function StepDelivery({ profile, setProfile, onNext, autofilled }) {
         <GlassInput label="Telefon" name="phone" type="tel" value={profile.phone} onChange={handleChange} placeholder="+49 151 12345678" required />
         {errors.phone && <span className="co-field-error">{errors.phone}</span>}
 
-        <GlassInput label="E-Mail" name="email" type="email" value={profile.email} onChange={handleChange} placeholder="max@beispiel.de" required />
-        {errors.email && <span className="co-field-error">{errors.email}</span>}
+        {!lockedFields.includes('email') && (
+          <>
+            <GlassInput label="E-Mail" name="email" type="email" value={profile.email} onChange={handleChange} placeholder="max@beispiel.de" required />
+            {errors.email && <span className="co-field-error">{errors.email}</span>}
+          </>
+        )}
       </div>
 
       <button type="submit" className="co-next-btn">
-        Weiter zur Verifizierung
+        Weiter zur Zahlung
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
           <path d="M5 12h14M12 5l7 7-7 7"/>
         </svg>
@@ -205,143 +211,7 @@ function StepDelivery({ profile, setProfile, onNext, autofilled }) {
 }
 
 /* ═══════════════════════════════════════════════════════
-   STEP 2 — OTP Verification (state owned by checkoutStore)
-═══════════════════════════════════════════════════════ */
-const OTP_LEN = 6;
-
-function StepVerification({ profile, onNext, onBack }) {
-  const {
-    otpCode, otpSent, otpSending, otpError, resendTimer,
-    sendOtp, verifyOtp,
-  } = useCheckoutStore();
-
-  const [method, setMethod] = useState('email');
-  const [otp,    setOtp]    = useState(Array(OTP_LEN).fill(''));
-  const inputRefs            = useRef([]);
-
-  /* Reset input boxes and focus first cell after code is sent */
-  useEffect(() => {
-    if (otpSent) {
-      setOtp(Array(OTP_LEN).fill(''));
-      setTimeout(() => inputRefs.current[0]?.focus(), 120);
-    }
-  }, [otpSent]);
-
-  function handleOtpChange(i, val) {
-    if (!/^\d*$/.test(val)) return;
-    const next = [...otp];
-    next[i] = val.slice(-1);
-    setOtp(next);
-    if (val && i < OTP_LEN - 1) inputRefs.current[i + 1]?.focus();
-  }
-
-  function handleOtpKey(i, e) {
-    if (e.key === 'Backspace' && !otp[i] && i > 0) inputRefs.current[i - 1]?.focus();
-  }
-
-  function handleOtpPaste(e) {
-    const text = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, OTP_LEN);
-    if (text.length === OTP_LEN) {
-      setOtp(text.split(''));
-      inputRefs.current[OTP_LEN - 1]?.focus();
-    }
-    e.preventDefault();
-  }
-
-  function handleVerify() {
-    if (verifyOtp(otp.join(''))) onNext();
-  }
-
-  const destination = method === 'email' ? profile.email : profile.phone;
-
-  return (
-    <div className="co-form">
-      <div className="co-form-header">
-        <h2 className="co-form-title">Verifizierung</h2>
-        <p className="co-form-sub">Wir senden dir einen 6-stelligen Code zur Bestätigung.</p>
-      </div>
-
-      {!otpSent ? (
-        <>
-          <div className="co-method-tabs">
-            <button type="button" className={`co-method-tab${method === 'email' ? ' co-method-tab--active' : ''}`} onClick={() => setMethod('email')}>
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 7 10-7"/>
-              </svg>
-              E-Mail
-            </button>
-            <button type="button" className={`co-method-tab${method === 'whatsapp' ? ' co-method-tab--active' : ''}`} onClick={() => setMethod('whatsapp')}>
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
-                <path d="M12 0C5.373 0 0 5.373 0 12c0 2.136.565 4.135 1.548 5.86L0 24l6.336-1.52A11.932 11.932 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.9 0-3.681-.513-5.21-1.407l-.375-.219-3.884.933.976-3.786-.243-.39A9.96 9.96 0 0 1 2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/>
-              </svg>
-              WhatsApp
-            </button>
-          </div>
-          <div className="co-send-info">Code senden an: <strong>{destination || '—'}</strong></div>
-          {import.meta.env.DEV && (
-            <div className="co-dev-hint">DEV CODE: <strong>123456</strong></div>
-          )}
-          <button type="button" className="co-next-btn" onClick={sendOtp} disabled={otpSending}>
-            {otpSending ? <span className="co-spinner" /> : (
-              <>
-                Code senden
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M22 2L11 13M22 2 15 22 11 13 2 9l20-7z"/>
-                </svg>
-              </>
-            )}
-          </button>
-        </>
-      ) : (
-        <>
-          <div className="co-otp-sent">
-            <div className="co-otp-sent-icon">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M22 2L11 13M22 2 15 22 11 13 2 9l20-7z"/>
-              </svg>
-            </div>
-            <p>Bestätigungscode gesendet an <strong>{destination}</strong></p>
-          </div>
-          {import.meta.env.DEV && (
-            <div className="co-dev-hint">DEV CODE: <strong>{otpCode}</strong></div>
-          )}
-          <div className="co-otp-row" onPaste={handleOtpPaste}>
-            {otp.map((digit, i) => (
-              <input
-                key={i}
-                ref={el => inputRefs.current[i] = el}
-                className={`co-otp-box${digit ? ' co-otp-box--filled' : ''}${otpError ? ' co-otp-box--error' : ''}`}
-                type="text" inputMode="numeric" maxLength={1}
-                value={digit}
-                onChange={e => handleOtpChange(i, e.target.value)}
-                onKeyDown={e => handleOtpKey(i, e)}
-              />
-            ))}
-          </div>
-          {otpError && <p className="co-otp-error">{otpError}</p>}
-          <button type="button" className="co-next-btn" onClick={handleVerify} disabled={otp.join('').length < OTP_LEN}>
-            Bestätigen
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="20 6 9 17 4 12"/>
-            </svg>
-          </button>
-          <div className="co-resend-row">
-            {resendTimer > 0
-              ? <span className="co-resend-timer">Erneut senden in {resendTimer}s</span>
-              : <button type="button" className="co-resend-btn" onClick={sendOtp}>Code erneut senden</button>
-            }
-          </div>
-        </>
-      )}
-
-      <button type="button" className="co-back-link" onClick={onBack}>← Zurück zur Lieferadresse</button>
-    </div>
-  );
-}
-
-/* ═══════════════════════════════════════════════════════
-   STEP 3 — Create Account (only when not logged in)
+   STEP 2 (guest) — Create Account
 ═══════════════════════════════════════════════════════ */
 function StepAccount({ profile, onSkip, onCreated }) {
   const { register } = useAuth();
@@ -562,10 +432,6 @@ export default function Checkout() {
   const navigate = useNavigate();
   const { pizzas, clearCart } = usePizzaStore();
   const { isLoggedIn, currentUser, addOrder, savePizzaToProfile } = useAuth();
-  const { resetOtp } = useCheckoutStore();
-
-  /* Clean up OTP state whenever the user leaves checkout */
-  useEffect(() => () => resetOtp(), [resetOtp]);
 
   /* Derive profile: auth user takes priority over guest localStorage cache */
   const [profile, setProfile] = useState(() =>
@@ -577,19 +443,34 @@ export default function Checkout() {
     if (currentUser) setProfile(profileFromUser(currentUser));
   }, [currentUser]);
 
-  /* Auto-advance past delivery step when the user already has a complete address */
-  const [step, setStep] = useState(() =>
-    currentUser && isDeliveryComplete(profileFromUser(currentUser)) ? 2 : 1
-  );
+  /* Fetch public.profiles row to enrich + confirm pre-filled fields */
+  useEffect(() => {
+    if (!isLoggedIn || !currentUser?.id) return;
+    supabase
+      .from('profiles')
+      .select('email')
+      .eq('id', currentUser.id)
+      .single()
+      .then(({ data }) => {
+        if (data?.email) {
+          setProfile(prev => ({ ...prev, email: data.email }));
+        }
+      })
+      .catch(() => {});
+  }, [isLoggedIn, currentUser?.id]);
 
+  /* Only email is locked — taken directly from the Supabase session */
+  const lockedFields = isLoggedIn ? ['email'] : [];
+
+  const [step, setStep] = useState(1);
   const [done, setDone] = useState(false);
   const [finalTotal, setFinalTotal] = useState(0);
 
   /* Steps differ based on login state */
   const stepLabels = isLoggedIn
-    ? ['Lieferung', 'Verifizierung', 'Zahlung']
-    : ['Lieferung', 'Verifizierung', 'Konto', 'Zahlung'];
-  const paymentStep = isLoggedIn ? 3 : 4;
+    ? ['Lieferung', 'Zahlung']
+    : ['Lieferung', 'Konto', 'Zahlung'];
+  const paymentStep = isLoggedIn ? 2 : 3;
 
   const grandTotal = pizzas.reduce((sum, p) => sum + calcPrice(p) * (p.quantity || 1), 0);
 
@@ -619,6 +500,48 @@ export default function Checkout() {
       totalPrice: total,
     }).catch(err => console.warn('[checkout] order not saved to backend:', err.message));
 
+    supabase.from('orders').insert({
+      user_id:          currentUser?.id ?? null,
+      customer_name:    profile.fullName  || '',
+      customer_email:   profile.email     || '',
+      customer_phone:   profile.phone     || '',
+      delivery_address: {
+        street:      profile.street      || '',
+        houseNumber: profile.houseNumber || '',
+        postalCode:  profile.postalCode  || '',
+        city:        profile.city        || '',
+        floor:       profile.floor       || '',
+      },
+      items: pizzas.map(p => {
+        const item = {
+          name:     p.name || (p.type === 'burger' ? 'Custom Burger' : 'Custom Pizza'),
+          type:     p.type || 'pizza',
+          quantity: p.quantity ?? 1,
+          price:    calcPrice(p),
+        };
+        // Pizza customizations
+        if (p.dough)      item.dough      = p.dough;
+        if (p.sauce)      item.sauce      = p.sauce;
+        if (p.cheese)     item.cheese     = p.cheese;
+        if (p.meats?.length)      item.meats      = p.meats;
+        if (p.vegetables?.length) item.vegetables = p.vegetables;
+        // Burger customizations
+        if (p.bun)        item.bun        = p.bun;
+        if (p.sauces?.length)     item.sauces     = p.sauces;
+        if (p.cheeses && Object.keys(p.cheeses).length) item.cheeses = p.cheeses;
+        if (p.type === 'burger' && p.meats && typeof p.meats === 'object' && !Array.isArray(p.meats)) {
+          item.burger_meats = p.meats;
+          delete item.meats;
+        }
+        return item;
+      }),
+      total_price:    total,
+      status:         'pending',
+      payment_method: paymentMethod,
+    }).then(({ error }) => {
+      if (error) console.warn('[checkout] Supabase order write failed:', error.message);
+    });
+
     setDone(true);
     clearCart();
   }
@@ -637,7 +560,7 @@ export default function Checkout() {
   const displayStep = done ? stepLabels.length + 1 : step;
 
   return (
-    <div className="page-enter" style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+    <div className="page-enter co-page" style={{ display: 'flex', flexDirection: 'column', minHeight: '100dvh' }}>
       <Navbar />
 
       <main className="co-main">
@@ -648,10 +571,8 @@ export default function Checkout() {
             {done ? (
               <OrderSuccess grandTotal={finalTotal || grandTotal} onHome={() => navigate('/')} />
             ) : step === 1 ? (
-              <StepDelivery profile={profile} setProfile={setProfile} onNext={handleDeliveryNext} autofilled={!!currentUser} />
-            ) : step === 2 ? (
-              <StepVerification profile={profile} onNext={stepForward} onBack={() => setStep(1)} />
-            ) : step === 3 && !isLoggedIn ? (
+              <StepDelivery profile={profile} setProfile={setProfile} onNext={handleDeliveryNext} autofilled={!!currentUser} lockedFields={lockedFields} />
+            ) : step === 2 && !isLoggedIn ? (
               <StepAccount profile={profile} onCreated={handleAccountCreated} onSkip={handleSkipAccount} />
             ) : (
               <StepPayment

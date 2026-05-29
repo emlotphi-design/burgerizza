@@ -1,61 +1,20 @@
-import { useEffect, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { supabase } from '../../lib/supabase';
+
+// Admin email is set once in .env.local as VITE_ADMIN_EMAIL.
+// No Supabase role promotion needed — email is checked directly
+// against the authenticated session on both frontend and DB (via is_admin()).
+const ADMIN_EMAIL = (import.meta.env.VITE_ADMIN_EMAIL ?? '').trim().toLowerCase();
 
 // Possible status values:
-//   'loading'         — waiting for auth session or profile fetch
+//   'loading'         — auth session still being restored
 //   'unauthenticated' — no active Supabase session
-//   'forbidden'       — session exists but role !== 'admin'
-//   'authorized'      — session exists and role === 'admin'
+//   'forbidden'       — logged in but email doesn't match VITE_ADMIN_EMAIL
+//   'authorized'      — email matches, full admin access granted
 export function useAdminCheck() {
   const { currentUser, isLoggedIn, loading: authLoading } = useAuth();
-  const [status, setStatus] = useState('loading');
 
-  useEffect(() => {
-    // Wait for AuthContext to finish restoring the session
-    if (authLoading) {
-      setStatus('loading');
-      return;
-    }
-
-    if (!isLoggedIn || !currentUser?.id) {
-      setStatus('unauthenticated');
-      return;
-    }
-
-    let cancelled = false;
-    setStatus('loading');
-
-    // Read the current user's own profile row.
-    // RLS policy "profiles: select own" (auth.uid() = id) allows this.
-    // If Supabase is not configured the stub lacks .from(), so we catch that too.
-    (async () => {
-      try {
-        const { data, error } = await supabase
-          .from('profiles')
-          .select('role')
-          .eq('id', currentUser.id)
-          .single();
-
-        if (cancelled) return;
-
-        if (error || !data) {
-          // Profile row missing (pre-migration user) or query error → not admin
-          console.warn('[AdminRoute] profile fetch failed:', error?.message ?? 'no data');
-          setStatus('forbidden');
-        } else {
-          setStatus(data.role === 'admin' ? 'authorized' : 'forbidden');
-        }
-      } catch (err) {
-        // supabase stub has no .from() → TypeError; treat as forbidden
-        if (cancelled) return;
-        console.warn('[AdminRoute] supabase.from threw (stub or network):', err?.message);
-        setStatus('forbidden');
-      }
-    })();
-
-    return () => { cancelled = true; };
-  }, [authLoading, isLoggedIn, currentUser?.id]);
-
-  return status;
+  if (authLoading) return 'loading';
+  if (!isLoggedIn || !currentUser?.id) return 'unauthenticated';
+  if (!ADMIN_EMAIL || currentUser.email?.trim().toLowerCase() !== ADMIN_EMAIL) return 'forbidden';
+  return 'authorized';
 }

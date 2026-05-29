@@ -7,11 +7,9 @@ export default function AuthCallback() {
   const [errorMsg, setErrorMsg] = useState('');
 
   useEffect(() => {
-    const url         = new URL(window.location.href);
-    const code        = url.searchParams.get('code');
-    const errorDesc   = url.searchParams.get('error_description');
-    const hashParams  = new URLSearchParams(window.location.hash.slice(1));
-    const accessToken = hashParams.get('access_token');
+    const url       = new URL(window.location.href);
+    const code      = url.searchParams.get('code');
+    const errorDesc = url.searchParams.get('error_description');
 
     if (errorDesc) {
       setErrorMsg(decodeURIComponent(errorDesc.replace(/\+/g, ' ')));
@@ -20,7 +18,6 @@ export default function AuthCallback() {
 
     let done = false;
 
-    // Safety net: if nothing resolves in 6 s, fall back to /auth
     const timeout = setTimeout(() => {
       if (!done) {
         done = true;
@@ -29,35 +26,21 @@ export default function AuthCallback() {
       }
     }, 6000);
 
-    // onAuthStateChange fires as soon as detectSessionInUrl processes any
-    // implicit-flow hash or PKCE code exchange, covering both flows.
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    // onAuthStateChange fires once the PKCE code exchange completes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (done) return;
       done = true;
       clearTimeout(timeout);
-      const confirmed = session?.user?.email_confirmed_at || session?.user?.confirmed_at;
-      console.log('[auth/callback] onAuthStateChange → session:', !!session, '| confirmed:', !!confirmed);
-      navigate(session && confirmed ? '/profile' : '/auth', { replace: true });
+      console.log('[auth/callback] event:', event, '| session:', !!session);
+      if (event === 'PASSWORD_RECOVERY' && session) {
+        navigate('/auth?reset=1', { replace: true });
+      } else {
+        navigate(session ? '/profile' : '/auth', { replace: true });
+      }
     });
 
     async function handle() {
       try {
-        // Implicit flow: hash already present, detectSessionInUrl will handle it.
-        // We just need to wait for onAuthStateChange above. But also do a
-        // getSession() call to cover the case where the hash was already consumed.
-        if (!accessToken && !code) {
-          // No token, no code — just check existing session
-          const { data: { session } } = await supabase.auth.getSession();
-          if (!done) {
-            done = true;
-            clearTimeout(timeout);
-            const confirmed = session?.user?.email_confirmed_at || session?.user?.confirmed_at;
-            navigate(session && confirmed ? '/profile' : '/auth', { replace: true });
-          }
-          return;
-        }
-
-        // PKCE fallback: exchange code if present (may fail on cross-browser mobile)
         if (code) {
           const { error } = await supabase.auth.exchangeCodeForSession(code);
           if (error) {
@@ -72,15 +55,16 @@ export default function AuthCallback() {
             }
             return;
           }
+          // onAuthStateChange handles the redirect after exchange
+          return;
         }
 
-        // For implicit flow or after successful exchange, getSession returns the session
+        // No code — just check for an existing session
         const { data: { session } } = await supabase.auth.getSession();
         if (!done) {
           done = true;
           clearTimeout(timeout);
-          const confirmed = session?.user?.email_confirmed_at || session?.user?.confirmed_at;
-          navigate(session && confirmed ? '/profile' : '/auth', { replace: true });
+          navigate(session ? '/profile' : '/auth', { replace: true });
         }
       } catch (err) {
         console.error('[auth/callback]', err?.message);

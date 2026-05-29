@@ -1,31 +1,49 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { fetchUsers, updateUserRole } from '../services/adminService';
 
-const MOCK_USERS = [
-  { id: 'u001', name: 'Anna Müller',    email: 'anna@example.com',   joined: '12 Jan 2026', orders: 8,  status: 'active' },
-  { id: 'u002', name: 'Lukas Bauer',   email: 'lukas@example.com',  joined: '3 Feb 2026',  orders: 14, status: 'active' },
-  { id: 'u003', name: 'Sophie Klein',  email: 'sophie@example.com', joined: '18 Feb 2026', orders: 3,  status: 'active' },
-  { id: 'u004', name: 'Max Weber',     email: 'max@example.com',    joined: '5 Mar 2026',  orders: 21, status: 'active' },
-  { id: 'u005', name: 'Julia Richter', email: 'julia@example.com',  joined: '22 Mar 2026', orders: 1,  status: 'inactive' },
-  { id: 'u006', name: 'Tom Fischer',   email: 'tom@example.com',    joined: '1 Apr 2026',  orders: 7,  status: 'active' },
-  { id: 'u007', name: 'Mia Schmidt',   email: 'mia@example.com',    joined: '14 Apr 2026', orders: 5,  status: 'active' },
-  { id: 'u008', name: 'Erik Dahl',     email: 'erik@example.com',   joined: '2 May 2026',  orders: 0,  status: 'inactive' },
-];
-
-const BADGE = {
-  active:   <span className="adm-badge adm-badge--green">Active</span>,
-  inactive: <span className="adm-badge adm-badge--gray">Inactive</span>,
-};
+function fmtDate(iso) {
+  if (!iso) return '—';
+  return new Date(iso).toLocaleDateString('en-GB', {
+    day: '2-digit', month: 'short', year: 'numeric',
+  });
+}
 
 export default function Users() {
+  const [users, setUsers]           = useState([]);
+  const [loading, setLoading]       = useState(true);
+  const [error, setError]           = useState(null);
   const [search, setSearch]         = useState('');
-  const [statusFilter, setStatus]   = useState('all');
+  const [roleFilter, setRoleFilter] = useState('all');
+  const [updating, setUpdating]     = useState(null);
 
-  const filtered = MOCK_USERS.filter(u => {
-    const matchSearch = !search ||
-      u.name.toLowerCase().includes(search.toLowerCase()) ||
-      u.email.toLowerCase().includes(search.toLowerCase());
-    const matchStatus = statusFilter === 'all' || u.status === statusFilter;
-    return matchSearch && matchStatus;
+  useEffect(() => { load(); }, []);
+
+  async function load() {
+    setLoading(true); setError(null);
+    try { setUsers(await fetchUsers()); }
+    catch (e) { setError(e.message); }
+    finally { setLoading(false); }
+  }
+
+  async function handleRoleToggle(user) {
+    const newRole = user.role === 'admin' ? 'user' : 'admin';
+    setUpdating(user.id);
+    try {
+      const updated = await updateUserRole(user.id, newRole);
+      setUsers(prev => prev.map(u => u.id === user.id ? updated : u));
+    } catch (e) {
+      alert('Failed to update role: ' + e.message);
+    } finally {
+      setUpdating(null);
+    }
+  }
+
+  const filtered = users.filter(u => {
+    const q = search.toLowerCase();
+    const matchSearch = !q ||
+      (u.email || '').toLowerCase().includes(q);
+    const matchRole = roleFilter === 'all' || u.role === roleFilter;
+    return matchSearch && matchRole;
   });
 
   return (
@@ -39,31 +57,38 @@ export default function Users() {
         <input
           className="adm-search"
           type="text"
-          placeholder="Search by name or email…"
+          placeholder="Search by email…"
           value={search}
           onChange={e => setSearch(e.target.value)}
         />
         <select
           className="adm-select"
-          value={statusFilter}
-          onChange={e => setStatus(e.target.value)}
+          value={roleFilter}
+          onChange={e => setRoleFilter(e.target.value)}
         >
-          <option value="all">All users</option>
-          <option value="active">Active</option>
-          <option value="inactive">Inactive</option>
+          <option value="all">All roles</option>
+          <option value="user">User</option>
+          <option value="admin">Admin</option>
         </select>
-        <button className="adm-btn adm-btn--ghost">
+        <button className="adm-btn adm-btn--ghost" onClick={load}>
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
-            <polyline points="7 10 12 15 17 10"/>
-            <line x1="12" y1="15" x2="12" y2="3"/>
+            <polyline points="23 4 23 10 17 10"/>
+            <path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/>
           </svg>
-          Export
+          Refresh
         </button>
       </div>
 
+      {error && (
+        <div className="adm-card" style={{ marginBottom: 16, color: 'var(--adm-danger, #e03d3d)', fontSize: 13 }}>
+          Failed to load users: {error}
+        </div>
+      )}
+
       <div className="adm-card">
-        {filtered.length === 0 ? (
+        {loading ? (
+          <div className="adm-empty"><div className="adm-empty-sub">Loading users…</div></div>
+        ) : filtered.length === 0 ? (
           <div className="adm-empty">
             <div className="adm-empty-emoji">👤</div>
             <div className="adm-empty-title">No users found</div>
@@ -74,25 +99,34 @@ export default function Users() {
             <table className="adm-table">
               <thead>
                 <tr>
-                  <th>Name</th>
                   <th>Email</th>
+                  <th>Role</th>
                   <th>Joined</th>
-                  <th>Orders</th>
-                  <th>Status</th>
                   <th></th>
                 </tr>
               </thead>
               <tbody>
                 {filtered.map(u => (
                   <tr key={u.id}>
-                    <td style={{ fontWeight: 900 }}>{u.name}</td>
-                    <td className="adm-table-muted">{u.email}</td>
-                    <td className="adm-table-muted">{u.joined}</td>
-                    <td style={{ fontWeight: 800 }}>{u.orders}</td>
-                    <td>{BADGE[u.status]}</td>
+                    <td style={{ fontWeight: 800 }}>{u.email}</td>
                     <td>
-                      <button className="adm-btn adm-btn--ghost" style={{ height: 28, padding: '0 10px', fontSize: 11 }}>
-                        View
+                      {u.role === 'admin'
+                        ? <span className="adm-badge adm-badge--amber">Admin</span>
+                        : <span className="adm-badge adm-badge--gray">User</span>
+                      }
+                    </td>
+                    <td className="adm-table-muted">{fmtDate(u.created_at)}</td>
+                    <td>
+                      <button
+                        className="adm-btn adm-btn--ghost"
+                        style={{ height: 36, padding: '0 12px', fontSize: 12 }}
+                        onClick={() => handleRoleToggle(u)}
+                        disabled={updating === u.id}
+                      >
+                        {updating === u.id
+                          ? '…'
+                          : u.role === 'admin' ? 'Remove Admin' : 'Make Admin'
+                        }
                       </button>
                     </td>
                   </tr>

@@ -156,14 +156,33 @@ export default function AdminLayout() {
             onClick={() => setSidebarOpen(s => !s)}
             aria-label="Toggle navigation"
           >
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
               <line x1="3" y1="6"  x2="21" y2="6"/>
               <line x1="3" y1="12" x2="21" y2="12"/>
               <line x1="3" y1="18" x2="21" y2="18"/>
             </svg>
           </button>
           <div className="adm-topbar-brand">Burger<span>izza</span></div>
-          <div style={{ width: 34 }} />
+          <div className="adm-topbar-actions">
+            <Link
+              to="/"
+              title="Back to site"
+              style={{
+                width: 44, height: 44, display: 'flex', alignItems: 'center',
+                justifyContent: 'center', borderRadius: 8,
+                border: '1px solid var(--adm-border)',
+                color: 'var(--adm-text-3)', textDecoration: 'none',
+                transition: 'background 0.14s ease, color 0.14s ease',
+              }}
+              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,210,63,0.10)'; e.currentTarget.style.color = 'var(--adm-text)'; }}
+              onMouseLeave={e => { e.currentTarget.style.background = ''; e.currentTarget.style.color = 'var(--adm-text-3)'; }}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+                <polyline points="9 22 9 12 15 12 15 22"/>
+              </svg>
+            </Link>
+          </div>
         </header>
 
         <div className="adm-content">

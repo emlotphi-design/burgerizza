@@ -1060,6 +1060,13 @@
   }
 }
 
+/* ── iOS zoom fix: inline inputs must be ≥16px on mobile ── */
+@media (max-width: 480px) {
+  .pf-inline-input {
+    font-size: 16px;
+  }
+}
+
 @media (max-width: 380px) {
   .saved-page-main {
     padding: calc(var(--nav-h) + 6px) 10px 72px;

@@ -15,9 +15,6 @@ export default function ProtectedRoute({ children }) {
     );
   }
 
-  // Require a confirmed user — currentUser is only set after email_confirmed_at
-  // is verified in AuthContext, so this check is equivalent to checking both
-  // isLoggedIn AND email_confirmed_at at the same time.
   if (!currentUser) {
     return (
       <Navigate
