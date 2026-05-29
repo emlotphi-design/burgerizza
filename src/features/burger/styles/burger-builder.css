@@ -585,7 +585,7 @@
 
   /* Mirrors pizza builder <main>: small top, generous bottom for fixed order button */
   .bb-workspace {
-    padding: 6px 16px 120px;
+    padding: 6px 16px 100px;
     gap: 10px;
   }
 
@@ -605,7 +605,7 @@
 
 @media (max-width: 480px) {
   .bb-workspace {
-    padding: 6px 12px 120px;
+    padding: 6px 12px 100px;
     gap: 6px;
   }
 
@@ -640,7 +640,7 @@
 
 @media (max-width: 360px) {
   .bb-workspace {
-    padding: 4px 10px 120px;
+    padding: 4px 10px 100px;
     gap: 4px;
   }
 

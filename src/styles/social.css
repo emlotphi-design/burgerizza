@@ -47,7 +47,7 @@
   .is-builder .social-bar {
     left: 50%;
     transform: translateX(-50%);
-    bottom: 142px;
+    bottom: 150px;
     gap: 20px;
   }
 }
@@ -55,6 +55,6 @@
 @media (max-width: 480px) {
   .is-builder .social-bar {
     gap: 16px;
-    bottom: calc(126px + env(safe-area-inset-bottom, 0px));
+    bottom: calc(136px + env(safe-area-inset-bottom, 0px));
   }
 }
