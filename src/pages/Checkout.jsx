@@ -405,7 +405,7 @@ function StepPayment({ grandTotal, paymentStep, onBack, onConfirm }) {
 /* ═══════════════════════════════════════════════════════
    ORDER SUCCESS
 ═══════════════════════════════════════════════════════ */
-function OrderSuccess({ grandTotal, onHome }) {
+function OrderSuccess({ grandTotal, orderId, onHome, onTrack }) {
   return (
     <div className="co-success">
       <div className="co-success-icon">
@@ -420,7 +420,14 @@ function OrderSuccess({ grandTotal, onHome }) {
         Geschätzte Lieferzeit: <strong>25–40 Minuten</strong>
       </p>
       <div className="co-success-total">€{grandTotal.toFixed(2)} bezahlt</div>
-      <button className="co-next-btn" onClick={onHome}>Zurück zur Startseite</button>
+      {orderId && (
+        <button className="co-next-btn" onClick={onTrack} style={{ marginBottom: 10 }}>
+          🛵 Track My Order
+        </button>
+      )}
+      <button className={orderId ? 'co-back-link' : 'co-next-btn'} onClick={onHome}>
+        Zurück zur Startseite
+      </button>
     </div>
   );
 }
@@ -462,9 +469,10 @@ export default function Checkout() {
   /* Only email is locked — taken directly from the Supabase session */
   const lockedFields = isLoggedIn ? ['email'] : [];
 
-  const [step, setStep] = useState(1);
-  const [done, setDone] = useState(false);
+  const [step,      setStep]      = useState(1);
+  const [done,      setDone]      = useState(false);
   const [finalTotal, setFinalTotal] = useState(0);
+  const [savedOrderId, setSavedOrderId] = useState(null);
 
   /* Steps differ based on login state */
   const stepLabels = isLoggedIn
@@ -500,17 +508,18 @@ export default function Checkout() {
       totalPrice: total,
     }).catch(err => console.warn('[checkout] order not saved to backend:', err.message));
 
-    supabase.from('orders').insert({
+    const { data: savedOrder } = await supabase.from('orders').insert({
       user_id:          currentUser?.id ?? null,
       customer_name:    profile.fullName  || '',
       customer_email:   profile.email     || '',
       customer_phone:   profile.phone     || '',
       delivery_address: {
-        street:      profile.street      || '',
-        houseNumber: profile.houseNumber || '',
-        postalCode:  profile.postalCode  || '',
-        city:        profile.city        || '',
-        floor:       profile.floor       || '',
+        street:       profile.street       || '',
+        houseNumber:  profile.houseNumber  || '',
+        postalCode:   profile.postalCode   || '',
+        city:         profile.city         || '',
+        floor:        profile.floor        || '',
+        doorbellName: profile.doorbellName || '',
       },
       items: pizzas.map(p => {
         const item = {
@@ -538,9 +547,12 @@ export default function Checkout() {
       total_price:    total,
       status:         'pending',
       payment_method: paymentMethod,
-    }).then(({ error }) => {
-      if (error) console.warn('[checkout] Supabase order write failed:', error.message);
-    });
+    }).select('id').single();
+
+    if (savedOrder?.id) {
+      setSavedOrderId(savedOrder.id);
+      localStorage.setItem('bz_last_order_id', savedOrder.id);
+    }
 
     setDone(true);
     clearCart();
@@ -569,7 +581,12 @@ export default function Checkout() {
 
           <div className="co-panel">
             {done ? (
-              <OrderSuccess grandTotal={finalTotal || grandTotal} onHome={() => navigate('/')} />
+              <OrderSuccess
+                grandTotal={finalTotal || grandTotal}
+                orderId={savedOrderId}
+                onHome={() => navigate('/')}
+                onTrack={() => navigate(savedOrderId ? `/order-tracking/${savedOrderId}` : '/')}
+              />
             ) : step === 1 ? (
               <StepDelivery profile={profile} setProfile={setProfile} onNext={handleDeliveryNext} autofilled={!!currentUser} lockedFields={lockedFields} />
             ) : step === 2 && !isLoggedIn ? (

@@ -14,6 +14,7 @@ import ProfileDashboard from './pages/ProfileDashboard';
 import MyPizzasPage from './pages/MyPizzasPage';
 import MyBurgersPage from './pages/MyBurgersPage';
 import ComingSoon from './pages/ComingSoon';
+import OrderTracking from './pages/OrderTracking';
 import CategoryPage from './pages/CategoryPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import AuthCallback from './pages/AuthCallback';
@@ -73,7 +74,9 @@ function AnimatedRoutes() {
         <Route path="/profile"      element={<ProtectedRoute><ProfileDashboard /></ProtectedRoute>} />
         <Route path="/my-pizzas"    element={<ProtectedRoute><MyPizzasPage /></ProtectedRoute>} />
         <Route path="/my-burgers"   element={<ProtectedRoute><MyBurgersPage /></ProtectedRoute>} />
-        <Route path="/coming-soon"  element={<ComingSoon />} />
+        <Route path="/coming-soon"      element={<ComingSoon />} />
+        <Route path="/order-tracking/:id" element={<OrderTracking />} />
+        <Route path="/order-tracking"     element={<OrderTracking />} />
 
         {/* Food menu category pages */}
         <Route path="/burger"  element={<CategoryPage />} />
