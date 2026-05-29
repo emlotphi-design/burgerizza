@@ -35,8 +35,26 @@
 
 @media (max-width: 520px) {
   .social-bar {
-    bottom: 16px;
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 16px);
     left: 16px;
     gap: 14px;
+  }
+}
+
+/* ── Builder pages (Pizza + Burger): float above CTA buttons ── */
+/* Body gets is-builder class via useEffect while builder is mounted */
+@media (max-width: 900px) {
+  .is-builder .social-bar {
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 142px;
+    gap: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .is-builder .social-bar {
+    gap: 16px;
+    bottom: calc(126px + env(safe-area-inset-bottom, 0px));
   }
 }

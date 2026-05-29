@@ -9,7 +9,7 @@
    overflow: hidden prevents any page scroll.
 ─────────────────────────────────────────────── */
 .bb-stage {
-  height: 100vh;
+  height: 100svh;
   overflow: hidden;
   display: flex;
   flex-direction: column;

@@ -301,6 +301,17 @@ export default function BurgerBuilder() {
 
   const burgerItems = pizzas.filter(p => p.type === 'burger');
 
+  // ── Lock html scroll + mark body while builder is mounted ───────────────
+  useEffect(() => {
+    const prev = document.documentElement.style.overflowY;
+    document.documentElement.style.overflowY = 'hidden';
+    document.body.classList.add('is-builder');
+    return () => {
+      document.documentElement.style.overflowY = prev;
+      document.body.classList.remove('is-builder');
+    };
+  }, []);
+
   // ── Active sidebar item persistence ─────────────────────────────────────
   useEffect(() => {
     localStorage.setItem('bb-active-item', activeItem);

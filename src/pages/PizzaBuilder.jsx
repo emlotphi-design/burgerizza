@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Socials from '../components/Socials';
@@ -158,6 +158,17 @@ export default function PizzaBuilder() {
     }, 400);
   }, [removePizza]);
 
+  // ── Lock html scroll + mark body while builder is mounted ───────────────
+  useEffect(() => {
+    const prev = document.documentElement.style.overflowY;
+    document.documentElement.style.overflowY = 'hidden';
+    document.body.classList.add('is-builder');
+    return () => {
+      document.documentElement.style.overflowY = prev;
+      document.body.classList.remove('is-builder');
+    };
+  }, []);
+
   const unlocked = buildUnlocked(selectedDough, selectedSauce, selectedCheese);
   const completed = buildCompleted(selectedDough, selectedSauce, selectedCheese, selectedMeats, selectedVegetables);
 
@@ -197,9 +208,9 @@ export default function PizzaBuilder() {
   }, [setDraft]);
 
   return (
-    <div className="page-enter" style={{ display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden', paddingTop: 'var(--nav-h, 74px)' }}>
+    <div className="page-enter" style={{ display: 'flex', flexDirection: 'column', height: '100svh', overflow: 'hidden', paddingTop: 'var(--nav-h, 74px)' }}>
       <Navbar />
-      <main style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '6px 16px 72px', overflow: 'hidden', minHeight: 0 }}>
+      <main style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '6px 16px 100px', overflow: 'hidden', minHeight: 0 }}>
         <div className="builder-stage">
           {isEditing && (
             <div className="builder-edit-banner">
