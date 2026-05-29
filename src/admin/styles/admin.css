@@ -1760,3 +1760,51 @@ textarea.adm-input {
 
   .adm-product-grid { grid-template-columns: 1fr; }
 }
+
+/* ══════════════════════════════════════════════
+   ADMIN ROUTE LOADER
+══════════════════════════════════════════════ */
+.adm-loader-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: var(--adm-bg);
+  font-family: 'Nunito', sans-serif;
+}
+
+.adm-loader-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.adm-loader-brand {
+  font-size: 22px;
+  font-weight: 900;
+  color: var(--adm-text);
+  letter-spacing: -0.5px;
+}
+
+.adm-loader-brand span { color: var(--adm-accent); }
+
+.adm-loader-ring {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 3px solid rgba(255,255,255,0.08);
+  border-top-color: var(--adm-accent);
+  animation: adm-spin 0.8s linear infinite;
+}
+
+@keyframes adm-spin {
+  to { transform: rotate(360deg); }
+}
+
+.adm-loader-text {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--adm-text-3);
+  letter-spacing: 0.3px;
+}

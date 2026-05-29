@@ -315,7 +315,7 @@ export default function Orders() {
       } else if (eventType === 'DELETE') {
         setOrders(prev => prev.filter(o => o.id !== old.id));
       }
-    });
+    }, 'admin-orders-orders');
     return () => { channelRef.current?.unsubscribe(); };
   }, []);
 

@@ -160,9 +160,9 @@ export async function updateOrderStatus(orderId, status) {
   return data;
 }
 
-export function subscribeToOrders(callback) {
+export function subscribeToOrders(callback, channelName = 'admin-orders') {
   return supabase
-    .channel('admin-orders')
+    .channel(channelName)
     .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, callback)
     .subscribe();
 }

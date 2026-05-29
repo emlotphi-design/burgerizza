@@ -109,7 +109,7 @@ export default function AdminLayout() {
       } else if (eventType === 'DELETE' && old?.status === 'pending') {
         setPendingCount(c => Math.max(0, c - 1));
       }
-    });
+    }, 'admin-orders-layout');
     return () => { channelRef.current?.unsubscribe(); };
   }, []);
 

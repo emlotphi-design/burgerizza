@@ -49,6 +49,13 @@ function StatusBadge({ status }) {
 
 /* ── Inline SVG bar chart ──────────────────────────────────── */
 function RevenueChart({ data }) {
+  if (!data || data.length === 0) {
+    return (
+      <div style={{ height: 134, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <span style={{ color: 'var(--adm-text-3)', fontSize: 12 }}>No revenue data</span>
+      </div>
+    );
+  }
   const max = Math.max(...data.map(d => d.revenue), 0.01);
   const W = 560;
   const H = 110;
@@ -175,7 +182,7 @@ export default function Dashboard() {
     load();
     channelRef.current = subscribeToOrders(({ eventType }) => {
       if (eventType === 'INSERT' || eventType === 'UPDATE') load();
-    });
+    }, 'admin-orders-dashboard');
     return () => { channelRef.current?.unsubscribe(); };
   }, []);
 
