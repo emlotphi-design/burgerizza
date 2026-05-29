@@ -419,8 +419,9 @@ export default function BurgerBuilder() {
           addBurger({ ...snapshot, image });
           clearDraft();
           setIsOrdering(false);
+          setActiveItem('bun');
         });
-        setActiveItem('bun');
+        try { localStorage.setItem('bb-active-item', 'bun'); } catch {}
         // Persist to database for logged-in users (fire-and-forget)
         if (isLoggedIn) {
           api.burgers.save({
@@ -441,8 +442,9 @@ export default function BurgerBuilder() {
           addBurger(snapshot);
           clearDraft();
           setIsOrdering(false);
+          setActiveItem('bun');
         });
-        setActiveItem('bun');
+        try { localStorage.setItem('bb-active-item', 'bun'); } catch {}
         // Persist to database for logged-in users (fire-and-forget, no image)
         if (isLoggedIn) {
           api.burgers.save({
