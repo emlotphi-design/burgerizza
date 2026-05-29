@@ -2361,7 +2361,7 @@ textarea.adm-input { height: auto; padding: 10px 14px; resize: vertical; min-hei
 /* 3-column grid */
 .adm-orow-main {
   display: grid;
-  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 0.85fr);
+  grid-template-columns: minmax(0, 1.5fr) minmax(0, 1.1fr) minmax(0, 0.6fr);
   align-items: center;
   min-height: 60px;
 }
@@ -2425,6 +2425,11 @@ textarea.adm-input { height: auto; padding: 10px 14px; resize: vertical; min-hei
   font-size: 11px;
   font-weight: 700;
   color: var(--adm-text-3);
+}
+
+/* Info button when inside left column */
+.adm-orow-left .adm-info-btn {
+  margin-top: 7px;
 }
 
 /* Topline: ID + time in one row */
@@ -2502,11 +2507,11 @@ textarea.adm-input { height: auto; padding: 10px 14px; resize: vertical; min-hei
 
 /* CENTER: pipeline */
 .adm-orow-center {
-  padding: 10px 14px;
+  padding: 10px 14px 10px 8px;
   border-right: 1px solid var(--adm-border-2);
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
 }
 
 /* RIGHT: actions */
@@ -2750,11 +2755,15 @@ textarea.adm-input { height: auto; padding: 10px 14px; resize: vertical; min-hei
 .adm-driver-badge {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  margin-top: 4px;
-  font-size: 11px;
+  gap: 5px;
+  margin-top: 5px;
+  font-size: 10.5px;
   font-weight: 800;
   color: #16a34a;
+  background: rgba(34,197,94,0.08);
+  border: 1px solid rgba(34,197,94,0.22);
+  padding: 3px 9px 3px 6px;
+  border-radius: 20px;
 }
 
 /* ── Dark mode: orow ── */
@@ -2812,7 +2821,11 @@ textarea.adm-input { height: auto; padding: 10px 14px; resize: vertical; min-hei
   color: #FFD54A;
 }
 .adm-layout[data-theme="dark"] .adm-driver-option--active { color: #4ade80; }
-.adm-layout[data-theme="dark"] .adm-driver-badge { color: #4ade80; }
+.adm-layout[data-theme="dark"] .adm-driver-badge {
+  color: #4ade80;
+  background: rgba(74,222,128,0.10);
+  border-color: rgba(74,222,128,0.18);
+}
 
 /* ── Responsive: orow ── */
 @media (max-width: 1000px) {

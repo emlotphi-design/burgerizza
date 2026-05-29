@@ -156,7 +156,7 @@ function DriverSelector({ order, onAssign, saving }) {
         onClick={() => setOpen(v => !v)}
         disabled={saving}
       >
-        <span style={{ fontSize: 12 }}>🚚</span>
+        <span style={{ fontSize: 14 }}>🛵</span>
         <span>{order.driver_name || 'Assign Driver'}</span>
         <svg
           width="9" height="9" viewBox="0 0 24 24" fill="none"
@@ -234,7 +234,7 @@ function CompactPipeline({ status }) {
 /* ═══════════════════════════════════════════════════════════
    ROW ACTIONS — always visible on the right
 ═══════════════════════════════════════════════════════════ */
-function RowActions({ order, onAction, onDriverAssign, saving, infoOpen, onToggleInfo }) {
+function RowActions({ order, onAction, onDriverAssign, saving }) {
   const { status } = order;
   const canAccept  = status === 'pending'  || status === 'confirmed';
   const canDeliver = status === 'preparing' && !!order.driver_name;
@@ -310,25 +310,6 @@ function RowActions({ order, onAction, onDriverAssign, saving, infoOpen, onToggl
         </button>
       )}
 
-      <button
-        className={`adm-info-btn${infoOpen ? ' adm-info-btn--open' : ''}`}
-        onClick={onToggleInfo}
-        aria-label="Toggle order details"
-        aria-expanded={infoOpen}
-      >
-        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
-          <circle cx="12" cy="12" r="10"/>
-          <line x1="12" y1="8"  x2="12"   y2="12"/>
-          <line x1="12" y1="16" x2="12.01" y2="16"/>
-        </svg>
-        Info
-        <svg
-          width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"
-          style={{ transition: 'transform 0.22s ease', transform: infoOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}
-        >
-          <polyline points="6 9 12 15 18 9"/>
-        </svg>
-      </button>
     </div>
   );
 }
@@ -720,9 +701,28 @@ export default function Orders() {
                       <div className="adm-orow-total">{fmtCurrency(o.total_price)}</div>
                       {o.driver_name && (
                         <div className="adm-driver-badge">
-                          <span style={{ fontSize: 11 }}>🚚</span> {o.driver_name}
+                          <span style={{ fontSize: 12 }}>🛵</span> Driver: {o.driver_name}
                         </div>
                       )}
+                      <button
+                        className={`adm-info-btn${expandedId === o.id ? ' adm-info-btn--open' : ''}`}
+                        onClick={() => setExpandedId(prev => prev === o.id ? null : o.id)}
+                        aria-label="Toggle order details"
+                        aria-expanded={expandedId === o.id}
+                      >
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
+                          <circle cx="12" cy="12" r="10"/>
+                          <line x1="12" y1="8"  x2="12"   y2="12"/>
+                          <line x1="12" y1="16" x2="12.01" y2="16"/>
+                        </svg>
+                        Info
+                        <svg
+                          width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"
+                          style={{ transition: 'transform 0.22s ease', transform: expandedId === o.id ? 'rotate(180deg)' : 'rotate(0deg)' }}
+                        >
+                          <polyline points="6 9 12 15 18 9"/>
+                        </svg>
+                      </button>
                     </div>
 
                     {/* CENTER: live pipeline */}
@@ -730,15 +730,13 @@ export default function Orders() {
                       <CompactPipeline status={o.status} />
                     </div>
 
-                    {/* RIGHT: action buttons + info toggle */}
+                    {/* RIGHT: action buttons */}
                     <div className="adm-orow-right">
                       <RowActions
                         order={o}
                         onAction={handleAction}
                         onDriverAssign={handleDriverAssign}
                         saving={savingIds.has(o.id)}
-                        infoOpen={expandedId === o.id}
-                        onToggleInfo={() => setExpandedId(prev => prev === o.id ? null : o.id)}
                       />
                     </div>
                   </div>
