@@ -605,12 +605,13 @@
 
 @media (max-width: 480px) {
   .bb-workspace {
-    padding: 6px 12px 100px;
+    padding: 6px 12px 130px;
     gap: 6px;
   }
 
+  /* 84vw + 100svh ensures canvas is proportioned to the actual visible viewport */
   .bb-builder-canvas {
-    width: min(380px, 88vw, calc(100vh - 280px));
+    width: min(360px, 84vw, calc(100svh - 270px));
   }
 
   /* Full-width pill for iPhone — matches pizza builder's calc(76px + env) */
@@ -638,14 +639,26 @@
   }
 }
 
-@media (max-width: 360px) {
+/* iPhone SE / 375px-class — screen too narrow for social icons in builder */
+@media (max-width: 380px) {
   .bb-workspace {
-    padding: 4px 10px 100px;
+    padding: 4px 8px 100px;
     gap: 4px;
   }
 
   .bb-builder-canvas {
-    width: min(340px, 90vw, calc(100vh - 270px));
+    width: min(290px, 80vw, calc(100svh - 260px));
+  }
+}
+
+@media (max-width: 360px) {
+  .bb-workspace {
+    padding: 4px 8px 95px;
+    gap: 4px;
+  }
+
+  .bb-builder-canvas {
+    width: min(270px, 78vw, calc(100svh - 260px));
   }
 
   .bb-order-btn {

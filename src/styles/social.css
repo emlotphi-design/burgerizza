@@ -55,6 +55,16 @@
 @media (max-width: 480px) {
   .is-builder .social-bar {
     gap: 16px;
-    bottom: calc(136px + env(safe-area-inset-bottom, 0px));
+    /* 160px keeps icons below the toolbar and above the ORDER button.
+       The old calc(136+env) was too large (170px on iPhone), causing
+       icons to render ABOVE the toolbar bottom — direct overlap. */
+    bottom: 160px;
+  }
+}
+
+/* SE-class and very small phones: not enough vertical room, hide icons */
+@media (max-width: 380px) {
+  .is-builder .social-bar {
+    display: none;
   }
 }
