@@ -234,7 +234,7 @@ function CompactPipeline({ status }) {
 /* ═══════════════════════════════════════════════════════════
    ROW ACTIONS — always visible on the right
 ═══════════════════════════════════════════════════════════ */
-function RowActions({ order, onAction, onDriverAssign, saving }) {
+function RowActions({ order, onAction, saving }) {
   const { status } = order;
   const canAccept  = status === 'pending'  || status === 'confirmed';
   const canDeliver = status === 'preparing' && !!order.driver_name;
@@ -259,10 +259,6 @@ function RowActions({ order, onAction, onDriverAssign, saving }) {
             </>
           )}
         </button>
-      )}
-
-      {status === 'preparing' && (
-        <DriverSelector order={order} onAssign={onDriverAssign} saving={saving} />
       )}
 
       {canDeliver && (
@@ -699,11 +695,24 @@ export default function Orders() {
                       <div className="adm-orow-customer">{o.customer_name || '—'}</div>
                       <InlineOrderItems items={o.items} />
                       <div className="adm-orow-total">{fmtCurrency(o.total_price)}</div>
-                      {o.driver_name && (
+                    </div>
+
+                    {/* RIGHT: status → driver → actions → info */}
+                    <div className="adm-orow-right">
+                      <CompactPipeline status={o.status} />
+                      {o.status === 'preparing' && (
+                        <DriverSelector order={o} onAssign={handleDriverAssign} saving={savingIds.has(o.id)} />
+                      )}
+                      {o.driver_name && o.status !== 'preparing' && (
                         <div className="adm-driver-badge">
                           <span style={{ fontSize: 12 }}>🛵</span> Driver: {o.driver_name}
                         </div>
                       )}
+                      <RowActions
+                        order={o}
+                        onAction={handleAction}
+                        saving={savingIds.has(o.id)}
+                      />
                       <button
                         className={`adm-info-btn${expandedId === o.id ? ' adm-info-btn--open' : ''}`}
                         onClick={() => setExpandedId(prev => prev === o.id ? null : o.id)}
@@ -723,21 +732,6 @@ export default function Orders() {
                           <polyline points="6 9 12 15 18 9"/>
                         </svg>
                       </button>
-                    </div>
-
-                    {/* CENTER: live pipeline */}
-                    <div className="adm-orow-center">
-                      <CompactPipeline status={o.status} />
-                    </div>
-
-                    {/* RIGHT: action buttons */}
-                    <div className="adm-orow-right">
-                      <RowActions
-                        order={o}
-                        onAction={handleAction}
-                        onDriverAssign={handleDriverAssign}
-                        saving={savingIds.has(o.id)}
-                      />
                     </div>
                   </div>
 
