@@ -506,119 +506,92 @@
 }
 
 /* ══════════════════════════════════════════
-   BUILDER ACTION BUTTONS CONTAINER
+   ORDER NOW BUTTON — matches burger builder
 ══════════════════════════════════════════ */
-.builder-actions {
+.pb-order-btn {
   position: fixed;
-  bottom: 40px;
+  bottom: 30px;
   left: 50%;
-  transform: translateX(-50%) translateY(20px);
-  z-index: 60;
-  display: flex;
-  gap: 10px;
-  align-items: center;
+  transform: translateX(-50%) translateY(14px);
+  z-index: 150;
+
+  padding: 15px 56px;
+  border-radius: 100px;
+  border: 1.5px solid rgba(255, 255, 255, 0.60);
+  cursor: pointer;
+  overflow: hidden;
+
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.96) 0%,
+    #FFD700 30%,
+    #FFC000 62%,
+    rgba(255, 248, 195, 0.98) 100%
+  );
+
+  box-shadow:
+    0 8px 32px rgba(255, 185, 0, 0.40),
+    0 2px 0   rgba(255, 255, 255, 0.60) inset,
+    0 -1px 0  rgba(180, 110, 0, 0.18) inset;
+
+  font-family: 'Nunito', sans-serif;
+  font-size: 14px;
+  font-weight: 900;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: #1A0A00;
+
   opacity: 0;
   pointer-events: none;
   transition:
-    opacity 0.38s cubic-bezier(0.22, 1, 0.36, 1),
-    transform 0.38s cubic-bezier(0.22, 1, 0.36, 1);
+    opacity  0.40s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.40s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.22s ease;
 }
 
-.builder-actions--visible {
-  opacity: 1;
-  transform: translateX(-50%) translateY(0);
-  pointer-events: auto;
-}
-
-/* ══════════════════════════════════════════
-   ADD TO CART BUTTON — liquid glass
-══════════════════════════════════════════ */
-.add-to-cart-btn {
-  position: relative;
-  overflow: hidden;
-
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-
-  background: linear-gradient(148deg,
-      rgba(255, 255, 230, 0.96) 0%,
-      rgba(255, 228, 120, 0.95) 58%,
-      rgba(255, 210, 80, 0.96) 100%);
-  color: #1A0A00;
-  border: 1px solid rgba(255, 215, 75, 0.55);
-  border-radius: 50px;
-  padding: 14px 32px;
-  font-family: 'Nunito', sans-serif;
-  font-weight: 900;
-  font-size: 13px;
-  letter-spacing: 1.6px;
-  text-transform: uppercase;
-  cursor: pointer;
-  white-space: nowrap;
-
-  box-shadow:
-    0 8px 32px rgba(155, 105, 0, 0.26),
-    0 2px 10px rgba(0, 0, 0, 0.14),
-    inset 0 1.5px 0 rgba(255, 255, 255, 0.80),
-    inset 0 -1px 0 rgba(175, 115, 0, 0.12);
-
-  transition:
-    transform 0.26s cubic-bezier(0.34, 1.56, 0.64, 1),
-    box-shadow 0.26s ease,
-    filter 0.26s ease;
-}
-
-/* top glass-shine streak */
-.add-to-cart-btn::before {
+.pb-order-btn::before {
   content: '';
   position: absolute;
   top: 0;
-  left: 8%;
-  right: 8%;
-  height: 46%;
-  background: linear-gradient(180deg,
-      rgba(255, 255, 255, 0.60) 0%,
-      rgba(255, 255, 255, 0.02) 100%);
-  border-radius: 0 0 50% 50%;
+  left: 0;
+  right: 0;
+  height: 52%;
+  border-radius: 100px 100px 0 0;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.52) 0%,
+    rgba(255, 255, 255, 0.00) 100%
+  );
   pointer-events: none;
 }
 
-.add-to-cart-btn:hover {
-  transform: translateY(-4px) scale(1.05);
-  filter: brightness(1.07);
-  box-shadow:
-    0 14px 44px rgba(155, 105, 0, 0.32),
-    0 5px 18px rgba(0, 0, 0, 0.16),
-    0 0 26px rgba(255, 200, 55, 0.30),
-    inset 0 1.5px 0 rgba(255, 255, 255, 0.88),
-    inset 0 -1px 0 rgba(175, 115, 0, 0.15);
+.pb-order-btn--visible {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateX(-50%) translateY(0);
 }
 
-.add-to-cart-btn:active {
-  transform: translateY(-1px) scale(0.97);
-  filter: brightness(1.0);
+.pb-order-btn--visible:hover {
+  transform: translateX(-50%) translateY(-3px);
   box-shadow:
-    0 3px 16px rgba(155, 105, 0, 0.20),
-    0 1px 6px rgba(0, 0, 0, 0.12),
-    inset 0 1.5px 0 rgba(255, 255, 255, 0.72),
-    inset 0 -1px 0 rgba(175, 115, 0, 0.10);
+    0 16px 48px rgba(255, 185, 0, 0.58),
+    0 2px 0   rgba(255, 255, 255, 0.75) inset,
+    0 -1px 0  rgba(180, 110, 0, 0.18) inset;
 }
 
-.cart-btn-badge {
-  display: inline-flex;
+.pb-order-btn--visible:active {
+  transform: translateX(-50%) translateY(-1px);
+}
+
+/* ── Pizza builder main layout ── */
+.pb-main {
+  flex: 1;
+  display: flex;
   align-items: center;
   justify-content: center;
-  width: 20px;
-  height: 20px;
-  background: #C8001E;
-  color: #fff;
-  border-radius: 50%;
-  font-size: 11px;
-  font-weight: 900;
-  margin-left: 2px;
-  flex-shrink: 0;
-  line-height: 1;
+  padding: 6px 16px 100px;
+  overflow: hidden;
+  min-height: 0;
 }
 
 /* ══════════════════════════════════════════
@@ -694,48 +667,66 @@
 }
 
 /* ══════════════════════════════════════════
-   BUILDER BUTTONS — mobile responsive
+   ORDER BUTTON — mobile responsive
 ══════════════════════════════════════════ */
 @media (max-width: 900px) {
-  .builder-actions {
-    width: calc(100vw - 40px);
-    max-width: 420px;
+  .pb-order-btn {
     bottom: 88px;
-    gap: 8px;
-    justify-content: center;
   }
+}
 
-  .builder-actions .add-to-cart-btn {
-    flex: 1;
-    min-width: 0;
-  }
-
-  .add-to-cart-btn {
-    padding: 13px 14px;
-    font-size: 11px;
-    letter-spacing: 0.9px;
-    gap: 8px;
+@media (max-width: 600px) {
+  .pb-order-btn {
+    padding: 12px 36px;
+    font-size: 12px;
+    letter-spacing: 2.2px;
   }
 }
 
 @media (max-width: 480px) {
-  .builder-actions {
-    width: calc(100vw - 32px);
+  .pb-order-btn {
+    left: 16px;
+    right: 16px;
     bottom: calc(76px + env(safe-area-inset-bottom, 0px));
-    gap: 6px;
+    z-index: 999;
+    transform: translateY(14px);
+    padding: 11px 28px;
+    font-size: 11px;
+    letter-spacing: 2px;
   }
 
-  .add-to-cart-btn {
-    padding: 11px 10px;
+  .pb-order-btn--visible {
+    transform: translateY(0);
+  }
+
+  .pb-order-btn--visible:hover {
+    transform: translateY(-3px);
+  }
+
+  .pb-order-btn--visible:active {
+    transform: translateY(-1px);
+  }
+
+  .pb-main {
+    padding: 6px 12px 54px;
+  }
+}
+
+@media (max-width: 380px) {
+  .pb-main {
+    padding: 4px 8px 80px;
+  }
+}
+
+@media (max-width: 360px) {
+  .pb-main {
+    padding: 4px 8px 80px;
+  }
+
+  .pb-order-btn {
+    padding: 10px 22px;
     font-size: 10px;
-    letter-spacing: 0.7px;
-    gap: 6px;
-  }
-
-  .add-to-cart-btn svg {
-    width: 14px;
-    height: 14px;
-    flex-shrink: 0;
+    letter-spacing: 1.6px;
   }
 }
 

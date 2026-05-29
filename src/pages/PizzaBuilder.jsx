@@ -127,7 +127,6 @@ export default function PizzaBuilder() {
   const pizzaItems = pizzas.filter(p => p.type !== 'burger');
 
   const canAddToCart = !!selectedDough && !!selectedSauce && !!selectedCheese;
-  const totalCount = pizzas.length + (canAddToCart ? 1 : 0);
   const isEditing = editingId !== null;
   const nextPizzaNumber = pizzas.length + 1;
 
@@ -204,7 +203,7 @@ export default function PizzaBuilder() {
   return (
     <div className="page-enter" style={{ display: 'flex', flexDirection: 'column', height: '100svh', overflow: 'hidden', paddingTop: 'var(--nav-h, 74px)' }}>
       <Navbar />
-      <main style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '6px 16px 100px', overflow: 'hidden', minHeight: 0 }}>
+      <main className="pb-main">
         <div className="builder-stage">
           {isEditing && (
             <div className="builder-edit-banner">
@@ -267,22 +266,13 @@ export default function PizzaBuilder() {
         </div>
       )}
 
-      <div className={`builder-actions${canAddToCart ? ' builder-actions--visible' : ''}`}>
-        <button
-          className="add-to-cart-btn"
-          onClick={handleAddToCart}
-          aria-label="In den Warenkorb"
-        >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
-            style={{ flexShrink: 0 }}>
-            <circle cx="9" cy="21" r="1" /><circle cx="20" cy="21" r="1" />
-            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
-          </svg>
-          IN DEN WARENKORB
-          {totalCount > 1 && <span className="cart-btn-badge">{totalCount}</span>}
-        </button>
-      </div>
+      <button
+        className={`pb-order-btn${canAddToCart ? ' pb-order-btn--visible' : ''}`}
+        onClick={handleAddToCart}
+        aria-label="Order pizza"
+      >
+        ORDER NOW
+      </button>
 
       {toastVisible && (
         <div className="pb-toast" role="status" aria-live="polite">
