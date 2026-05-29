@@ -263,19 +263,21 @@ async function captureToDataURL(snapshot) {
   const bunData = BURGER_BUNS.find(b => b.id === snapshot.bun);
   const bunSize = SIZE * (parseFloat(bunData?.baseWidth ?? '36') / 100);
 
-  // Render order matches the live canvas: bun → sauces → meats → cheese → vegetables → top bun
+  // Bottom bun
   await drawCentered(BUN_BASES[snapshot.bun], bunSize, -2);
-  for (const id of (snapshot.sauces ?? [])) {
-    await drawCentered(SAUCE_BASES[id], ingSize);
-  }
-  for (const [id, qty] of Object.entries(snapshot.meats ?? {})) {
-    for (let i = 0; i < qty; i++) await drawCentered(MEAT_BASES[id], ingSize);
-  }
-  for (const [id, qty] of Object.entries(snapshot.cheeses ?? {})) {
-    for (let i = 0; i < qty; i++) await drawCentered(CHEESE_BASES[id], ingSize);
-  }
-  for (const id of (snapshot.vegetables ?? [])) {
-    await drawCentered(VEGETABLE_BASES[id], ingSize);
+  // Ingredients in selection order — last selected = top layer
+  for (const { type, id } of (snapshot.selectionOrder ?? [])) {
+    if (type === 'sauce' && SAUCE_BASES[id]) {
+      await drawCentered(SAUCE_BASES[id], ingSize);
+    } else if (type === 'meat' && MEAT_BASES[id]) {
+      const qty = (snapshot.meats ?? {})[id] ?? 0;
+      for (let i = 0; i < qty; i++) await drawCentered(MEAT_BASES[id], ingSize);
+    } else if (type === 'cheese' && CHEESE_BASES[id]) {
+      const qty = (snapshot.cheeses ?? {})[id] ?? 0;
+      for (let i = 0; i < qty; i++) await drawCentered(CHEESE_BASES[id], ingSize);
+    } else if (type === 'vegetable' && VEGETABLE_BASES[id]) {
+      await drawCentered(VEGETABLE_BASES[id], ingSize);
+    }
   }
   // Top bun is always included in the final captured image
   await drawCentered(BUN_TOPS[snapshot.bun], bunSize, -2);
@@ -338,27 +340,44 @@ export default function BurgerBuilder() {
   const selectedCheeses = draft.cheeses ?? {};
   const selectedSauces  = draft.sauces  ?? [];
 
-  const meatLayers = Object.entries(selectedMeats).flatMap(([meatId, qty]) =>
-    Array.from({ length: qty }, (_, j) => ({ meatId, layerKey: `${meatId}-${j}` }))
-  );
+  const hasMeat = Object.keys(selectedMeats).length > 0;
 
-  const cheeseLayers = Object.entries(selectedCheeses).flatMap(([cheeseId, qty]) =>
-    Array.from({ length: qty }, (_, j) => ({ cheeseId, layerKey: `${cheeseId}-${j}` }))
-  );
-
-  const hasMeat = meatLayers.length > 0;
+  // Ingredient layers in selection order — each entry gets z-index 5+idx so the
+  // last selected ingredient always renders on top. Preview orbitals are at z=30,
+  // top bun at z=25 (CSS), so all ingredient layers stay safely below both.
+  const ingredientLayers = (draft.selectionOrder ?? []).flatMap(({ type, id }, idx) => {
+    const style = { position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%, -50%)', zIndex: 5 + idx };
+    switch (type) {
+      case 'sauce':
+        return SAUCE_BASES[id] ? [{ key: `s-${id}`, cls: 'bb-sauce-img', src: SAUCE_BASES[id], style }] : [];
+      case 'meat': {
+        const qty = selectedMeats[id] ?? 0;
+        return MEAT_BASES[id] ? Array.from({ length: qty }, (_, j) => ({ key: `m-${id}-${j}`, cls: 'bb-meat-img', src: MEAT_BASES[id], style })) : [];
+      }
+      case 'cheese': {
+        const qty = selectedCheeses[id] ?? 0;
+        return CHEESE_BASES[id] ? Array.from({ length: qty }, (_, j) => ({ key: `c-${id}-${j}`, cls: 'bb-cheese-img', src: CHEESE_BASES[id], style })) : [];
+      }
+      case 'vegetable':
+        return VEGETABLE_BASES[id] ? [{ key: `v-${id}`, cls: 'bb-vegetable-img', src: VEGETABLE_BASES[id], style }] : [];
+      default: return [];
+    }
+  });
 
   // ── Burger panel handlers ────────────────────────────────────────────────
   const handleEditBurger = useCallback((burger) => {
-    setDraft({
-      bun: burger.bun,
-      meats: burger.meats ?? {},
-      cheeses: burger.cheeses ?? (burger.cheese ? { [burger.cheese]: 1 } : {}),
-      sauces: burger.sauces ?? [],
-      vegetables: burger.vegetables ?? [],
-      name: burger.name,
-      editingId: burger.id,
-    });
+    const meats = burger.meats ?? {};
+    const cheeses = burger.cheeses ?? (burger.cheese ? { [burger.cheese]: 1 } : {});
+    const sauces = burger.sauces ?? [];
+    const vegetables = burger.vegetables ?? [];
+    // Restore saved order or reconstruct in default category sequence
+    const selectionOrder = burger.selectionOrder ?? [
+      ...sauces.map(id => ({ type: 'sauce', id })),
+      ...Object.keys(meats).map(id => ({ type: 'meat', id })),
+      ...Object.keys(cheeses).map(id => ({ type: 'cheese', id })),
+      ...vegetables.map(id => ({ type: 'vegetable', id })),
+    ];
+    setDraft({ bun: burger.bun, meats, cheeses, sauces, vegetables, selectionOrder, name: burger.name, editingId: burger.id });
     removePizza(burger.id);
   }, [setDraft, removePizza]);
 
@@ -482,81 +501,10 @@ export default function BurgerBuilder() {
             />
           )}
 
-          {/* Sauce layers — z-index 3–4 */}
-          {selectedSauces.map((sauceId, i) =>
-            SAUCE_BASES[sauceId] ? (
-              <img
-                key={sauceId}
-                className="bb-sauce-img"
-                src={SAUCE_BASES[sauceId]}
-                alt={sauceId}
-                style={{
-                  position: 'absolute',
-                  left: '50%',
-                  top: '50%',
-                  transform: 'translate(-50%, -50%)',
-                  zIndex: 3 + i,
-                }}
-              />
-            ) : null
-          )}
-
-          {/* Meat layers — z-index 5+ */}
-          {meatLayers.map(({ meatId, layerKey }, idx) =>
-            MEAT_BASES[meatId] ? (
-              <img
-                key={layerKey}
-                className="bb-meat-img"
-                src={MEAT_BASES[meatId]}
-                alt={meatId}
-                style={{
-                  position: 'absolute',
-                  left: '50%',
-                  top: '50%',
-                  transform: 'translate(-50%, -50%)',
-                  zIndex: 5 + idx,
-                }}
-              />
-            ) : null
-          )}
-
-          {/* Cheese layers — z-index 12+ */}
-          {cheeseLayers.map(({ cheeseId, layerKey }, idx) =>
-            CHEESE_BASES[cheeseId] ? (
-              <img
-                key={layerKey}
-                className="bb-cheese-img"
-                src={CHEESE_BASES[cheeseId]}
-                alt={cheeseId}
-                style={{
-                  position: 'absolute',
-                  left: '50%',
-                  top: '50%',
-                  transform: 'translate(-50%, -50%)',
-                  zIndex: 12 + idx,
-                }}
-              />
-            ) : null
-          )}
-
-          {/* Vegetable layers — z-index above max cheese (12 + MAX_CHEESE_QTY) */}
-          {(draft.vegetables ?? []).map((vegId, idx) =>
-            VEGETABLE_BASES[vegId] ? (
-              <img
-                key={vegId}
-                className="bb-vegetable-img"
-                src={VEGETABLE_BASES[vegId]}
-                alt={vegId}
-                style={{
-                  position: 'absolute',
-                  left: '50%',
-                  top: '50%',
-                  transform: 'translate(-50%, -50%)',
-                  zIndex: 12 + MAX_CHEESE_QTY + idx,
-                }}
-              />
-            ) : null
-          )}
+          {/* Ingredient layers in selection order — last selected = highest z-index */}
+          {ingredientLayers.map(({ key, cls, src, style }) => (
+            <img key={key} className={cls} src={src} alt="" style={style} />
+          ))}
 
           {/* Top bun — drops in above all layers when ORDER is clicked */}
           {isOrdering && topBunSrc && (
@@ -625,11 +573,15 @@ export default function BurgerBuilder() {
                   disabled={isDisabled}
                   onClick={() => {
                     if (isDisabled) return;
-                    setDraft(prev => ({
-                      sauces: prev.sauces.includes(sauce.id)
-                        ? prev.sauces.filter(s => s !== sauce.id)
-                        : [...prev.sauces, sauce.id],
-                    }));
+                    setDraft(prev => {
+                      const adding = !prev.sauces.includes(sauce.id);
+                      return {
+                        sauces: adding ? [...prev.sauces, sauce.id] : prev.sauces.filter(s => s !== sauce.id),
+                        selectionOrder: adding
+                          ? [...(prev.selectionOrder ?? []), { type: 'sauce', id: sauce.id }]
+                          : (prev.selectionOrder ?? []).filter(e => !(e.type === 'sauce' && e.id === sauce.id)),
+                      };
+                    });
                   }}
                   aria-label={sauce.name}
                   aria-pressed={isSelected}
@@ -663,8 +615,14 @@ export default function BurgerBuilder() {
                   className="bb-preview-btn"
                   onClick={() => setDraft(prev => {
                     const meats = { ...prev.meats };
-                    if (meats[meat.id]) { delete meats[meat.id]; } else { meats[meat.id] = 1; }
-                    return { meats };
+                    const wasSelected = !!meats[meat.id];
+                    if (wasSelected) { delete meats[meat.id]; } else { meats[meat.id] = 1; }
+                    return {
+                      meats,
+                      selectionOrder: wasSelected
+                        ? (prev.selectionOrder ?? []).filter(e => !(e.type === 'meat' && e.id === meat.id))
+                        : [...(prev.selectionOrder ?? []), { type: 'meat', id: meat.id }],
+                    };
                   })}
                   aria-label={meat.name}
                   aria-pressed={isSelected}
@@ -686,9 +644,14 @@ export default function BurgerBuilder() {
                         e.stopPropagation();
                         setDraft(prev => {
                           const meats = { ...prev.meats };
-                          if ((meats[meat.id] ?? 0) <= 1) { delete meats[meat.id]; }
-                          else { meats[meat.id] -= 1; }
-                          return { meats };
+                          const removing = (meats[meat.id] ?? 0) <= 1;
+                          if (removing) { delete meats[meat.id]; } else { meats[meat.id] -= 1; }
+                          return {
+                            meats,
+                            selectionOrder: removing
+                              ? (prev.selectionOrder ?? []).filter(e => !(e.type === 'meat' && e.id === meat.id))
+                              : prev.selectionOrder ?? [],
+                          };
                         });
                       }}
                     >−</button>
@@ -731,8 +694,14 @@ export default function BurgerBuilder() {
                   className="bb-preview-btn"
                   onClick={() => setDraft(prev => {
                     const cheeses = { ...prev.cheeses };
-                    if (cheeses[cheese.id]) { delete cheeses[cheese.id]; } else { cheeses[cheese.id] = 1; }
-                    return { cheeses };
+                    const wasSelected = !!cheeses[cheese.id];
+                    if (wasSelected) { delete cheeses[cheese.id]; } else { cheeses[cheese.id] = 1; }
+                    return {
+                      cheeses,
+                      selectionOrder: wasSelected
+                        ? (prev.selectionOrder ?? []).filter(e => !(e.type === 'cheese' && e.id === cheese.id))
+                        : [...(prev.selectionOrder ?? []), { type: 'cheese', id: cheese.id }],
+                    };
                   })}
                   aria-label={cheese.name}
                   aria-pressed={isSelected}
@@ -756,9 +725,14 @@ export default function BurgerBuilder() {
                         e.stopPropagation();
                         setDraft(prev => {
                           const cheeses = { ...prev.cheeses };
-                          if ((cheeses[cheese.id] ?? 0) <= 1) { delete cheeses[cheese.id]; }
-                          else { cheeses[cheese.id] -= 1; }
-                          return { cheeses };
+                          const removing = (cheeses[cheese.id] ?? 0) <= 1;
+                          if (removing) { delete cheeses[cheese.id]; } else { cheeses[cheese.id] -= 1; }
+                          return {
+                            cheeses,
+                            selectionOrder: removing
+                              ? (prev.selectionOrder ?? []).filter(e => !(e.type === 'cheese' && e.id === cheese.id))
+                              : prev.selectionOrder ?? [],
+                          };
                         });
                       }}
                     >−</button>
@@ -806,10 +780,12 @@ export default function BurgerBuilder() {
                     if (isDisabled) return;
                     setDraft(prev => {
                       const vegs = prev.vegetables ?? [];
+                      const adding = !vegs.includes(veg.id);
                       return {
-                        vegetables: vegs.includes(veg.id)
-                          ? vegs.filter(v => v !== veg.id)
-                          : [...vegs, veg.id],
+                        vegetables: adding ? [...vegs, veg.id] : vegs.filter(v => v !== veg.id),
+                        selectionOrder: adding
+                          ? [...(prev.selectionOrder ?? []), { type: 'vegetable', id: veg.id }]
+                          : (prev.selectionOrder ?? []).filter(e => !(e.type === 'vegetable' && e.id === veg.id)),
                       };
                     });
                   }}

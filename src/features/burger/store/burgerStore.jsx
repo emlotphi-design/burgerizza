@@ -6,6 +6,7 @@ export const DEFAULT_BURGER_DRAFT = {
   cheeses: {},  // { [cheeseId]: quantity }
   sauces: [],
   vegetables: [],
+  selectionOrder: [], // [{ type, id }] — visual stacking order, last = top layer
   wrapper: null,
   name: '',
   editingId: null,
@@ -33,6 +34,15 @@ export function BurgerProvider({ children }) {
     if (stored.cheese != null && !stored.cheeses) {
       stored.cheeses = { [stored.cheese]: 1 };
       delete stored.cheese;
+    }
+    // Reconstruct selectionOrder for drafts saved before this field existed
+    if (!stored.selectionOrder) {
+      const order = [];
+      for (const id of (stored.sauces ?? [])) order.push({ type: 'sauce', id });
+      for (const id of Object.keys(stored.meats ?? {})) order.push({ type: 'meat', id });
+      for (const id of Object.keys(stored.cheeses ?? {})) order.push({ type: 'cheese', id });
+      for (const id of (stored.vegetables ?? [])) order.push({ type: 'vegetable', id });
+      stored.selectionOrder = order;
     }
     return { ...DEFAULT_BURGER_DRAFT, ...stored };
   });
