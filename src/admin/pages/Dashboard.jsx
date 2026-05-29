@@ -33,12 +33,12 @@ function itemsSummary(items) {
 
 /* ── Status config ─────────────────────────────────────────── */
 const STATUS_CONFIG = {
-  pending:   { label: 'Pending',          color: '#818cf8', badge: 'adm-badge--indigo' },
-  confirmed: { label: 'Confirmed',        color: '#60a5fa', badge: 'adm-badge--blue'   },
-  preparing: { label: 'Preparing',        color: '#fbbf24', badge: 'adm-badge--amber'  },
-  ready:     { label: 'Out for delivery', color: '#fb923c', badge: 'adm-badge--orange' },
-  delivered: { label: 'Delivered',        color: '#4ade80', badge: 'adm-badge--green'  },
-  cancelled: { label: 'Cancelled',        color: '#f87171', badge: 'adm-badge--red'    },
+  pending:   { label: 'Pending',          color: '#6366f1', badge: 'adm-badge--indigo' },
+  confirmed: { label: 'Confirmed',        color: '#3b82f6', badge: 'adm-badge--blue'   },
+  preparing: { label: 'Preparing',        color: '#d97706', badge: 'adm-badge--amber'  },
+  ready:     { label: 'Out for delivery', color: '#f97316', badge: 'adm-badge--orange' },
+  delivered: { label: 'Delivered',        color: '#22c55e', badge: 'adm-badge--green'  },
+  cancelled: { label: 'Cancelled',        color: '#ef4444', badge: 'adm-badge--red'    },
 };
 
 function StatusBadge({ status }) {
@@ -81,7 +81,7 @@ function RevenueChart({ data }) {
               <rect
                 x={x} y={y} width={barW} height={barH}
                 rx={4}
-                fill={isToday ? '#FFD23F' : 'rgba(255,255,255,0.12)'}
+                fill={isToday ? '#FFD54A' : 'rgba(255,193,7,0.22)'}
                 style={{ transition: 'fill 0.2s' }}
               />
               {d.revenue > 0 && (
@@ -89,7 +89,7 @@ function RevenueChart({ data }) {
                   x={x + barW / 2} y={y - 5}
                   textAnchor="middle"
                   fontSize="9"
-                  fill={isToday ? '#FFD23F' : 'rgba(255,255,255,0.30)'}
+                  fill={isToday ? '#8B6914' : 'rgba(31,31,31,0.40)'}
                   fontWeight="700"
                   fontFamily="Nunito,sans-serif"
                 >
@@ -107,7 +107,7 @@ function RevenueChart({ data }) {
           <span
             key={d.date}
             className="adm-bar-chart-label"
-            style={{ color: i === data.length - 1 ? '#FFD23F' : undefined }}
+            style={{ color: i === data.length - 1 ? '#8B6914' : undefined }}
           >
             {fmtDay(d.date)}
           </span>
@@ -204,7 +204,7 @@ export default function Dashboard() {
       cardClass: 'adm-stat-card--amber',
       iconClass: 'adm-stat-icon--amber',
       sparkData: sparkRevenue,
-      sparkColor:'#FFD23F',
+      sparkColor:'#C49A00',
       icon: (
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
           <line x1="12" y1="1" x2="12" y2="23"/>
@@ -219,7 +219,7 @@ export default function Dashboard() {
       cardClass: 'adm-stat-card--blue',
       iconClass: 'adm-stat-icon--blue',
       sparkData: sparkOrders,
-      sparkColor:'#60a5fa',
+      sparkColor:'#2563eb',
       icon: (
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/>

@@ -3,12 +3,12 @@ import { fetchOrders, updateOrderStatus, subscribeToOrders } from '../services/a
 
 /* ── Status config ─────────────────────────────────────────── */
 const STATUS_FLOW = [
-  { value: 'pending',   label: 'Pending',          color: '#818cf8', badge: 'adm-badge--indigo' },
-  { value: 'confirmed', label: 'Confirmed',         color: '#60a5fa', badge: 'adm-badge--blue'   },
-  { value: 'preparing', label: 'Preparing',         color: '#fbbf24', badge: 'adm-badge--amber'  },
-  { value: 'ready',     label: 'Out for delivery',  color: '#fb923c', badge: 'adm-badge--orange' },
-  { value: 'delivered', label: 'Delivered',         color: '#4ade80', badge: 'adm-badge--green'  },
-  { value: 'cancelled', label: 'Cancelled',         color: '#f87171', badge: 'adm-badge--red'    },
+  { value: 'pending',   label: 'Pending',          color: '#6366f1', badge: 'adm-badge--indigo' },
+  { value: 'confirmed', label: 'Confirmed',         color: '#3b82f6', badge: 'adm-badge--blue'   },
+  { value: 'preparing', label: 'Preparing',         color: '#d97706', badge: 'adm-badge--amber'  },
+  { value: 'ready',     label: 'Out for delivery',  color: '#f97316', badge: 'adm-badge--orange' },
+  { value: 'delivered', label: 'Delivered',         color: '#22c55e', badge: 'adm-badge--green'  },
+  { value: 'cancelled', label: 'Cancelled',         color: '#ef4444', badge: 'adm-badge--red'    },
 ];
 
 const STATUS_MAP = Object.fromEntries(STATUS_FLOW.map(s => [s.value, s]));
@@ -225,7 +225,7 @@ function OrderModal({ order, onClose, onStatusChange }) {
             </div>
             <div className="adm-order-summary-row adm-order-summary-row--total">
               <span>Total</span>
-              <span style={{ color: 'var(--adm-accent)' }}>{fmtCurrency(order.total_price)}</span>
+              <span style={{ color: 'var(--adm-accent-text)' }}>{fmtCurrency(order.total_price)}</span>
             </div>
           </div>
 
@@ -467,7 +467,7 @@ export default function Orders() {
                     <tr
                       key={o.id}
                       onClick={() => setSelected(o)}
-                      style={newIds.has(o.id) ? { background: 'rgba(74,222,128,0.04)' } : undefined}
+                      style={newIds.has(o.id) ? { background: 'rgba(22,163,74,0.06)' } : undefined}
                     >
                       <td style={{ fontFamily: 'Courier New,monospace', fontSize: 11, letterSpacing: 0.5, color: 'var(--adm-text-2)', fontWeight: 700 }}>
                         #{o.id.slice(0,8).toUpperCase()}
@@ -484,7 +484,7 @@ export default function Orders() {
                       </td>
                       <td className="adm-table-muted">{o.customer_phone || '—'}</td>
                       <td className="adm-table-muted" style={{ maxWidth: 200 }}>{itemsSummary(o.items)}</td>
-                      <td style={{ fontWeight: 900, color: 'var(--adm-accent)' }}>{fmtCurrency(o.total_price)}</td>
+                      <td style={{ fontWeight: 900, color: 'var(--adm-accent-text)' }}>{fmtCurrency(o.total_price)}</td>
                       <td><StatusBadge status={o.status} /></td>
                       <td className="adm-table-muted" style={{ textTransform: 'capitalize' }}>{o.payment_method || '—'}</td>
                       <td>
@@ -515,7 +515,7 @@ export default function Orders() {
                   )}
                   <div className="adm-order-card-items">{itemsSummary(o.items)}</div>
                   <div className="adm-order-card-footer">
-                    <span className="adm-order-card-total" style={{ color: 'var(--adm-accent)' }}>
+                    <span className="adm-order-card-total" style={{ color: 'var(--adm-accent-text)' }}>
                       {fmtCurrency(o.total_price)}
                     </span>
                     <span className="adm-order-card-time">{timeAgo(o.created_at)}</span>
