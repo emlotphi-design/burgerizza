@@ -401,6 +401,7 @@ export default function BurgerBuilder() {
           clearDraft();
           setIsOrdering(false);
         });
+        setActiveItem('bun');
         // Persist to database for logged-in users (fire-and-forget)
         if (isLoggedIn) {
           api.burgers.save({
@@ -422,6 +423,7 @@ export default function BurgerBuilder() {
           clearDraft();
           setIsOrdering(false);
         });
+        setActiveItem('bun');
         // Persist to database for logged-in users (fire-and-forget, no image)
         if (isLoggedIn) {
           api.burgers.save({
