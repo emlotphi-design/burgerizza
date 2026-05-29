@@ -156,18 +156,55 @@ export async function updateOrderStatus(orderId, status) {
     .eq('id', orderId)
     .select()
     .single();
-  if (error) throw error;
+  if (error) {
+    console.error('[updateOrderStatus] Supabase error', {
+      code: error.code, message: error.message,
+      hint: error.hint, details: error.details,
+      orderId, status,
+    });
+    throw error;
+  }
   return data;
 }
 
 export async function assignDriver(orderId, driverName) {
+  if (!driverName?.trim()) throw new Error('Driver name is required');
   const { data, error } = await supabase
     .from('orders')
-    .update({ driver_name: driverName })
+    .update({ driver_name: driverName.trim() })
     .eq('id', orderId)
     .select()
     .single();
-  if (error) throw error;
+  if (error) {
+    console.error('[assignDriver] Supabase error', {
+      code: error.code, message: error.message,
+      hint: error.hint, details: error.details,
+      orderId, driverName,
+    });
+    throw error;
+  }
+  return data;
+}
+
+export async function assignDriverAndAdvance(orderId, driverName, status) {
+  if (!driverName?.trim()) throw new Error('Driver name is required');
+  if (!orderId)            throw new Error('Order ID is required');
+  console.log('[assignDriverAndAdvance] →', { orderId, driverName, status });
+  const { data, error } = await supabase
+    .from('orders')
+    .update({ driver_name: driverName.trim(), status })
+    .eq('id', orderId)
+    .select()
+    .single();
+  if (error) {
+    console.error('[assignDriverAndAdvance] Supabase error', {
+      code: error.code, message: error.message,
+      hint: error.hint, details: error.details,
+      orderId, driverName, status,
+    });
+    throw error;
+  }
+  console.log('[assignDriverAndAdvance] ✓ updated row:', data?.id);
   return data;
 }
 

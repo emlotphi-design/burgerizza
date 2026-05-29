@@ -1,5 +1,5 @@
 import { Fragment, useCallback, useEffect, useRef, useState } from 'react';
-import { fetchOrders, updateOrderStatus, subscribeToOrders, assignDriver } from '../services/adminService';
+import { fetchOrders, updateOrderStatus, subscribeToOrders, assignDriverAndAdvance } from '../services/adminService';
 
 /* ── Status config ─────────────────────────────────────────── */
 const STATUS_FLOW = [
@@ -136,58 +136,21 @@ function InlineOrderItems({ items }) {
 const DRIVERS = ['Ali', 'Reza', 'Max', 'Julia'];
 
 /* ═══════════════════════════════════════════════════════════
-   DRIVER SELECTOR
+   SMART PIPELINE — interactive workflow tracker
 ═══════════════════════════════════════════════════════════ */
-function DriverSelector({ order, onAssign, saving }) {
-  const [open, setOpen] = useState(false);
+function SmartPipeline({ order, onStepClick, onDriverAndAdvance, saving }) {
+  const [driverOpen, setDriverOpen] = useState(false);
   const wrapRef = useRef(null);
 
   useEffect(() => {
-    if (!open) return;
-    function close(e) { if (!wrapRef.current?.contains(e.target)) setOpen(false); }
+    if (!driverOpen) return;
+    function close(e) { if (!wrapRef.current?.contains(e.target)) setDriverOpen(false); }
     document.addEventListener('mousedown', close);
     return () => document.removeEventListener('mousedown', close);
-  }, [open]);
+  }, [driverOpen]);
 
-  return (
-    <div className="adm-driver-wrap" ref={wrapRef}>
-      <button
-        className={`adm-driver-btn${order.driver_name ? ' adm-driver-btn--assigned' : ''}`}
-        onClick={() => setOpen(v => !v)}
-        disabled={saving}
-      >
-        <span style={{ fontSize: 14 }}>🛵</span>
-        <span>{order.driver_name || 'Assign Driver'}</span>
-        <svg
-          width="9" height="9" viewBox="0 0 24 24" fill="none"
-          stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"
-          style={{ transition: 'transform 0.18s', transform: open ? 'rotate(180deg)' : 'none', marginLeft: 'auto' }}
-        >
-          <polyline points="6 9 12 15 18 9" />
-        </svg>
-      </button>
-      {open && (
-        <div className="adm-driver-dropdown">
-          {DRIVERS.map(d => (
-            <button
-              key={d}
-              className={`adm-driver-option${order.driver_name === d ? ' adm-driver-option--active' : ''}`}
-              onClick={() => { onAssign(order.id, d); setOpen(false); }}
-              disabled={saving}
-            >
-              {d}
-            </button>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
+  const { status, driver_name } = order;
 
-/* ═══════════════════════════════════════════════════════════
-   COMPACT PIPELINE — always visible in each row
-═══════════════════════════════════════════════════════════ */
-function CompactPipeline({ status }) {
   if (status === 'cancelled') {
     return (
       <div className="adm-cpipe-cancelled">
@@ -202,110 +165,107 @@ function CompactPipeline({ status }) {
   const idx          = PIPELINE_VALS.indexOf(status);
   const effectiveIdx = idx === -1 ? 0 : idx;
 
+  function handleStepClick(stepIdx, stepValue) {
+    if (saving) return;
+    if (stepIdx !== effectiveIdx + 1) return;
+    if (stepValue === 'ready') {
+      setDriverOpen(v => !v);
+    } else {
+      onStepClick(order.id, stepValue);
+    }
+  }
+
+  function handleDriverSelect(driverName) {
+    setDriverOpen(false);
+    onDriverAndAdvance(order.id, driverName, 'ready');
+  }
+
   return (
-    <div className="adm-cpipe">
-      {PIPELINE.map((step, i) => {
-        const done   = i < effectiveIdx;
-        const active = i === effectiveIdx;
-        return (
-          <Fragment key={step.value}>
-            <div className={`adm-cpipe-step${done ? ' adm-cpipe-step--done' : active ? ' adm-cpipe-step--active' : ''}`}>
-              <div className="adm-cpipe-dot">
-                {done ? (
-                  <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round">
-                    <polyline points="20 6 9 17 4 12"/>
-                  </svg>
-                ) : (
-                  <span className="adm-cpipe-icon">{step.icon}</span>
+    <div className="adm-spipe" ref={wrapRef}>
+      <div className="adm-spipe-track">
+        {PIPELINE.map((step, i) => {
+          const done      = i < effectiveIdx;
+          const active    = i === effectiveIdx;
+          const isNext    = i === effectiveIdx + 1;
+          const clickable = isNext && !saving;
+
+          return (
+            <Fragment key={step.value}>
+              <div
+                className={[
+                  'adm-spipe-step',
+                  done      ? 'adm-spipe-step--done'        : '',
+                  active    ? 'adm-spipe-step--active'      : '',
+                  isNext    ? 'adm-spipe-step--next'        : '',
+                  clickable ? 'adm-spipe-step--clickable'   : '',
+                  (step.value === 'ready' && driverOpen) ? 'adm-spipe-step--driver-open' : '',
+                ].filter(Boolean).join(' ')}
+                onClick={() => handleStepClick(i, step.value)}
+                role={clickable ? 'button' : undefined}
+                tabIndex={clickable ? 0 : undefined}
+              >
+                <div className="adm-spipe-dot">
+                  {done ? (
+                    <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round">
+                      <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                  ) : (
+                    <span className="adm-spipe-icon">{step.icon}</span>
+                  )}
+                </div>
+                <span className="adm-spipe-label">{step.label}</span>
+                {step.value === 'ready' && (done || active) && driver_name && (
+                  <span className="adm-spipe-driver-badge">🛵 {driver_name}</span>
                 )}
               </div>
-              <span className="adm-cpipe-label">{step.label}</span>
-            </div>
-            {i < PIPELINE.length - 1 && (
-              <div className={`adm-cpipe-line${done ? ' adm-cpipe-line--done' : ''}`} />
-            )}
-          </Fragment>
-        );
-      })}
+              {i < PIPELINE.length - 1 && (
+                <div className={`adm-spipe-line${done ? ' adm-spipe-line--done' : ''}`} />
+              )}
+            </Fragment>
+          );
+        })}
+      </div>
+
+      {driverOpen && (
+        <div className="adm-spipe-driver-panel">
+          <div className="adm-spipe-driver-title">Assign &amp; dispatch</div>
+          <div className="adm-spipe-driver-grid">
+            {DRIVERS.map(d => (
+              <button
+                key={d}
+                className={`adm-spipe-driver-opt${order.driver_name === d ? ' adm-spipe-driver-opt--current' : ''}`}
+                onClick={() => handleDriverSelect(d)}
+                disabled={saving}
+              >
+                🛵 {d}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
 /* ═══════════════════════════════════════════════════════════
-   ROW ACTIONS — always visible on the right
+   ROW ACTIONS — cancel only; pipeline handles forward moves
 ═══════════════════════════════════════════════════════════ */
 function RowActions({ order, onAction, saving }) {
-  const { status } = order;
-  const canAccept  = status === 'pending'  || status === 'confirmed';
-  const canDeliver = status === 'preparing' && !!order.driver_name;
-  const canDone    = status === 'ready';
-  const canCancel  = !['delivered', 'cancelled'].includes(status);
-
+  const canCancel = !['delivered', 'cancelled'].includes(order.status);
+  if (!canCancel) return null;
   return (
     <div className="adm-row-actions">
-      {canAccept && (
-        <button
-          className="adm-row-btn adm-row-btn--accept"
-          onClick={() => onAction(order.id, 'preparing')}
-          disabled={saving}
-          title="Accept Order"
-        >
-          {saving ? <span className="adm-action-spinner adm-action-spinner--sm" /> : (
-            <>
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
-                <polyline points="20 6 9 17 4 12"/>
-              </svg>
-              Accept Order
-            </>
-          )}
-        </button>
-      )}
-
-      {canDeliver && (
-        <button
-          className="adm-row-btn adm-row-btn--deliver"
-          onClick={() => onAction(order.id, 'ready')}
-          disabled={saving}
-          title="Out For Delivery"
-        >
-          {saving ? <span className="adm-action-spinner adm-action-spinner--sm" /> : (
-            <><span style={{ fontSize: 12 }}>🛵</span> Out For Delivery</>
-          )}
-        </button>
-      )}
-
-      {canDone && (
-        <button
-          className="adm-row-btn adm-row-btn--done"
-          onClick={() => onAction(order.id, 'delivered')}
-          disabled={saving}
-          title="Mark Delivered"
-        >
-          {saving ? <span className="adm-action-spinner adm-action-spinner--sm" /> : (
-            <>
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
-                <polyline points="20 6 9 17 4 12"/>
-              </svg>
-              Mark Delivered
-            </>
-          )}
-        </button>
-      )}
-
-      {canCancel && (
-        <button
-          className="adm-row-btn adm-row-btn--cancel"
-          onClick={() => onAction(order.id, 'cancelled')}
-          disabled={saving}
-          title="Cancel Order"
-        >
-          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
-            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-          </svg>
-          Cancel
-        </button>
-      )}
-
+      <button
+        className="adm-row-btn adm-row-btn--cancel"
+        onClick={() => onAction(order.id, 'cancelled')}
+        disabled={saving}
+        title="Cancel Order"
+      >
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+        Cancel
+      </button>
     </div>
   );
 }
@@ -493,7 +453,10 @@ export default function Orders() {
   const [newIds,       setNewIds]       = useState(new Set());
   const [savingIds,    setSavingIds]    = useState(new Set());
   const [successIds,   setSuccessIds]   = useState(new Set());
-  const channelRef = useRef(null);
+  const channelRef  = useRef(null);
+  // Always-current orders snapshot for optimistic-UI rollback without stale closures
+  const ordersRef   = useRef([]);
+  useEffect(() => { ordersRef.current = orders; }, [orders]);
 
   function addToast(title, text, type = 'new-order', icon = '🛎️') {
     const id = Date.now();
@@ -526,6 +489,10 @@ export default function Orders() {
   }, []);
 
   const handleAction = useCallback(async (id, newStatus) => {
+    // Capture snapshot for rollback before any state mutation
+    const original = ordersRef.current.find(o => o.id === id) ?? null;
+    // Optimistic: reflect new status immediately
+    setOrders(prev => prev.map(o => o.id === id ? { ...o, status: newStatus } : o));
     setSavingIds(prev => new Set([...prev, id]));
     try {
       const updated = await updateOrderStatus(id, newStatus);
@@ -536,21 +503,57 @@ export default function Orders() {
       const icons = { preparing: '✅', ready: '🛵', delivered: '📦', cancelled: '❌' };
       const types = { preparing: 'accept', ready: 'delivery', delivered: 'update', cancelled: 'error' };
       addToast('Status updated', `Order #${id.slice(0, 8).toUpperCase()} → ${label}`, types[newStatus] ?? 'update', icons[newStatus] ?? '📦');
-    } catch {
-      addToast('Update failed', 'Please try again', 'error', '❌');
+    } catch (err) {
+      console.error('[handleAction] status update failed', {
+        message: err?.message, code: err?.code,
+        hint: err?.hint, details: err?.details,
+        id, newStatus,
+      });
+      // Rollback optimistic update
+      if (original) setOrders(prev => prev.map(o => o.id === id ? original : o));
+      addToast('Update failed', err?.message ?? 'Please try again', 'error', '❌');
     } finally {
       setSavingIds(prev => { const n = new Set(prev); n.delete(id); return n; });
     }
   }, []);
 
-  const handleDriverAssign = useCallback(async (orderId, driverName) => {
+  const handleDriverAndAdvance = useCallback(async (orderId, driverName, status) => {
+    if (!driverName?.trim()) {
+      console.warn('[handleDriverAndAdvance] called with empty driverName — aborting');
+      return;
+    }
+    // Guard: never assign driver to a finished order
+    const current = ordersRef.current.find(o => o.id === orderId);
+    if (current && ['delivered', 'cancelled'].includes(current.status)) return;
+
+    // Capture snapshot for rollback
+    const original = current ?? null;
+    // Optimistic: show driver name + new status immediately
+    setOrders(prev => prev.map(o =>
+      o.id === orderId ? { ...o, driver_name: driverName.trim(), status } : o
+    ));
     setSavingIds(prev => new Set([...prev, orderId]));
     try {
-      const updated = await assignDriver(orderId, driverName);
+      const updated = await assignDriverAndAdvance(orderId, driverName.trim(), status);
+      // Confirm with server truth
       setOrders(prev => prev.map(o => o.id === orderId ? updated : o));
-      addToast('Driver assigned', `${driverName} will handle this delivery`, 'update', '🚚');
-    } catch {
-      addToast('Assignment failed', 'Please try again', 'error', '❌');
+      setSuccessIds(prev => new Set([...prev, orderId]));
+      setTimeout(() => setSuccessIds(prev => { const n = new Set(prev); n.delete(orderId); return n; }), 2400);
+      addToast('Driver assigned', `${driverName} is on the way! 🛵`, 'delivery', '🛵');
+    } catch (err) {
+      console.error('[handleDriverAndAdvance] assignment failed', {
+        message: err?.message, code: err?.code,
+        hint: err?.hint, details: err?.details,
+        orderId, driverName, status,
+      });
+      // Rollback optimistic update to pre-assignment state
+      if (original) setOrders(prev => prev.map(o => o.id === orderId ? original : o));
+      addToast(
+        'Assignment failed',
+        err?.message ?? 'Please try again',
+        'error',
+        '❌',
+      );
     } finally {
       setSavingIds(prev => { const n = new Set(prev); n.delete(orderId); return n; });
     }
@@ -692,46 +695,42 @@ export default function Orders() {
                         </div>
                         <span className="adm-orow-time">{timeAgo(o.created_at)}</span>
                       </div>
-                      <div className="adm-orow-customer">{o.customer_name || '—'}</div>
+                      <div className="adm-orow-name-row">
+                        <div className="adm-orow-customer">{o.customer_name || '—'}</div>
+                        <div className="adm-orow-total">{fmtCurrency(o.total_price)}</div>
+                      </div>
                       <InlineOrderItems items={o.items} />
-                      <div className="adm-orow-total">{fmtCurrency(o.total_price)}</div>
                     </div>
 
-                    {/* RIGHT: status → driver → actions → info */}
+                    {/* RIGHT: pipeline + info on one row, cancel below */}
                     <div className="adm-orow-right">
-                      <CompactPipeline status={o.status} />
-                      {o.status === 'preparing' && (
-                        <DriverSelector order={o} onAssign={handleDriverAssign} saving={savingIds.has(o.id)} />
-                      )}
-                      {o.driver_name && o.status !== 'preparing' && (
-                        <div className="adm-driver-badge">
-                          <span style={{ fontSize: 12 }}>🛵</span> Driver: {o.driver_name}
-                        </div>
-                      )}
+                      <div className="adm-pipe-info-row">
+                        <SmartPipeline
+                          order={o}
+                          onStepClick={handleAction}
+                          onDriverAndAdvance={handleDriverAndAdvance}
+                          saving={savingIds.has(o.id)}
+                        />
+                        <button
+                          className={`adm-info-btn adm-info-btn--mini${expandedId === o.id ? ' adm-info-btn--open' : ''}`}
+                          onClick={() => setExpandedId(prev => prev === o.id ? null : o.id)}
+                          aria-label="Toggle order details"
+                          aria-expanded={expandedId === o.id}
+                        >
+                          Info
+                          <svg
+                            width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"
+                            style={{ transition: 'transform 0.22s ease', transform: expandedId === o.id ? 'rotate(180deg)' : 'rotate(0deg)' }}
+                          >
+                            <polyline points="6 9 12 15 18 9"/>
+                          </svg>
+                        </button>
+                      </div>
                       <RowActions
                         order={o}
                         onAction={handleAction}
                         saving={savingIds.has(o.id)}
                       />
-                      <button
-                        className={`adm-info-btn${expandedId === o.id ? ' adm-info-btn--open' : ''}`}
-                        onClick={() => setExpandedId(prev => prev === o.id ? null : o.id)}
-                        aria-label="Toggle order details"
-                        aria-expanded={expandedId === o.id}
-                      >
-                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
-                          <circle cx="12" cy="12" r="10"/>
-                          <line x1="12" y1="8"  x2="12"   y2="12"/>
-                          <line x1="12" y1="16" x2="12.01" y2="16"/>
-                        </svg>
-                        Info
-                        <svg
-                          width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"
-                          style={{ transition: 'transform 0.22s ease', transform: expandedId === o.id ? 'rotate(180deg)' : 'rotate(0deg)' }}
-                        >
-                          <polyline points="6 9 12 15 18 9"/>
-                        </svg>
-                      </button>
                     </div>
                   </div>
 
