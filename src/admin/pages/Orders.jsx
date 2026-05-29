@@ -1,5 +1,5 @@
 import { Fragment, useCallback, useEffect, useRef, useState } from 'react';
-import { fetchOrders, updateOrderStatus, subscribeToOrders } from '../services/adminService';
+import { fetchOrders, updateOrderStatus, subscribeToOrders, assignDriver } from '../services/adminService';
 
 /* ── Status config ─────────────────────────────────────────── */
 const STATUS_FLOW = [
@@ -133,6 +133,57 @@ function InlineOrderItems({ items }) {
   );
 }
 
+const DRIVERS = ['Ali', 'Reza', 'Max', 'Julia'];
+
+/* ═══════════════════════════════════════════════════════════
+   DRIVER SELECTOR
+═══════════════════════════════════════════════════════════ */
+function DriverSelector({ order, onAssign, saving }) {
+  const [open, setOpen] = useState(false);
+  const wrapRef = useRef(null);
+
+  useEffect(() => {
+    if (!open) return;
+    function close(e) { if (!wrapRef.current?.contains(e.target)) setOpen(false); }
+    document.addEventListener('mousedown', close);
+    return () => document.removeEventListener('mousedown', close);
+  }, [open]);
+
+  return (
+    <div className="adm-driver-wrap" ref={wrapRef}>
+      <button
+        className={`adm-driver-btn${order.driver_name ? ' adm-driver-btn--assigned' : ''}`}
+        onClick={() => setOpen(v => !v)}
+        disabled={saving}
+      >
+        <span style={{ fontSize: 12 }}>🚚</span>
+        <span>{order.driver_name || 'Assign Driver'}</span>
+        <svg
+          width="9" height="9" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"
+          style={{ transition: 'transform 0.18s', transform: open ? 'rotate(180deg)' : 'none', marginLeft: 'auto' }}
+        >
+          <polyline points="6 9 12 15 18 9" />
+        </svg>
+      </button>
+      {open && (
+        <div className="adm-driver-dropdown">
+          {DRIVERS.map(d => (
+            <button
+              key={d}
+              className={`adm-driver-option${order.driver_name === d ? ' adm-driver-option--active' : ''}`}
+              onClick={() => { onAssign(order.id, d); setOpen(false); }}
+              disabled={saving}
+            >
+              {d}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 /* ═══════════════════════════════════════════════════════════
    COMPACT PIPELINE — always visible in each row
 ═══════════════════════════════════════════════════════════ */
@@ -183,10 +234,10 @@ function CompactPipeline({ status }) {
 /* ═══════════════════════════════════════════════════════════
    ROW ACTIONS — always visible on the right
 ═══════════════════════════════════════════════════════════ */
-function RowActions({ order, onAction, saving, infoOpen, onToggleInfo }) {
+function RowActions({ order, onAction, onDriverAssign, saving, infoOpen, onToggleInfo }) {
   const { status } = order;
   const canAccept  = status === 'pending'  || status === 'confirmed';
-  const canDeliver = status === 'preparing';
+  const canDeliver = status === 'preparing' && !!order.driver_name;
   const canDone    = status === 'ready';
   const canCancel  = !['delivered', 'cancelled'].includes(status);
 
@@ -208,6 +259,10 @@ function RowActions({ order, onAction, saving, infoOpen, onToggleInfo }) {
             </>
           )}
         </button>
+      )}
+
+      {status === 'preparing' && (
+        <DriverSelector order={order} onAssign={onDriverAssign} saving={saving} />
       )}
 
       {canDeliver && (
@@ -511,6 +566,19 @@ export default function Orders() {
     }
   }, []);
 
+  const handleDriverAssign = useCallback(async (orderId, driverName) => {
+    setSavingIds(prev => new Set([...prev, orderId]));
+    try {
+      const updated = await assignDriver(orderId, driverName);
+      setOrders(prev => prev.map(o => o.id === orderId ? updated : o));
+      addToast('Driver assigned', `${driverName} will handle this delivery`, 'update', '🚚');
+    } catch {
+      addToast('Assignment failed', 'Please try again', 'error', '❌');
+    } finally {
+      setSavingIds(prev => { const n = new Set(prev); n.delete(orderId); return n; });
+    }
+  }, []);
+
   /* Filters */
   const filtered = orders.filter(o => {
     const q = search.toLowerCase();
@@ -650,6 +718,11 @@ export default function Orders() {
                       <div className="adm-orow-customer">{o.customer_name || '—'}</div>
                       <InlineOrderItems items={o.items} />
                       <div className="adm-orow-total">{fmtCurrency(o.total_price)}</div>
+                      {o.driver_name && (
+                        <div className="adm-driver-badge">
+                          <span style={{ fontSize: 11 }}>🚚</span> {o.driver_name}
+                        </div>
+                      )}
                     </div>
 
                     {/* CENTER: live pipeline */}
@@ -662,6 +735,7 @@ export default function Orders() {
                       <RowActions
                         order={o}
                         onAction={handleAction}
+                        onDriverAssign={handleDriverAssign}
                         saving={savingIds.has(o.id)}
                         infoOpen={expandedId === o.id}
                         onToggleInfo={() => setExpandedId(prev => prev === o.id ? null : o.id)}

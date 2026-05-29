@@ -160,6 +160,17 @@ export async function updateOrderStatus(orderId, status) {
   return data;
 }
 
+export async function assignDriver(orderId, driverName) {
+  const { data, error } = await supabase
+    .from('orders')
+    .update({ driver_name: driverName })
+    .eq('id', orderId)
+    .select()
+    .single();
+  if (error) throw error;
+  return data;
+}
+
 export function subscribeToOrders(callback, channelName = 'admin-orders') {
   return supabase
     .channel(channelName)
