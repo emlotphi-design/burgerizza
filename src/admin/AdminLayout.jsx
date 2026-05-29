@@ -78,11 +78,41 @@ const NAV = [
   },
 ];
 
+const MoonIcon = () => (
+  <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+    <path d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z"/>
+  </svg>
+);
+
+const SunIcon = () => (
+  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+    <circle cx="12" cy="12" r="4"/>
+    <line x1="12" y1="2"  x2="12" y2="5"/>
+    <line x1="12" y1="19" x2="12" y2="22"/>
+    <line x1="4.22" y1="4.22"   x2="6.34" y2="6.34"/>
+    <line x1="17.66" y1="17.66" x2="19.78" y2="19.78"/>
+    <line x1="2"  y1="12" x2="5"  y2="12"/>
+    <line x1="19" y1="12" x2="22" y2="12"/>
+    <line x1="4.22" y1="19.78"  x2="6.34" y2="17.66"/>
+    <line x1="17.66" y1="6.34"  x2="19.78" y2="4.22"/>
+  </svg>
+);
+
 export default function AdminLayout() {
   const [sidebarOpen,  setSidebarOpen]  = useState(false);
   const [pendingCount, setPendingCount] = useState(0);
+  const [theme,        setTheme]        = useState(() => localStorage.getItem('adminTheme') ?? 'light');
   const { currentUser } = useAuth();
-  const channelRef = useRef(null);
+  const channelRef  = useRef(null);
+  const layoutRef   = useRef(null);
+
+  function toggleTheme() {
+    layoutRef.current?.classList.add('adm-theme-changing');
+    const next = theme === 'light' ? 'dark' : 'light';
+    setTheme(next);
+    localStorage.setItem('adminTheme', next);
+    setTimeout(() => layoutRef.current?.classList.remove('adm-theme-changing'), 400);
+  }
 
   const initials = currentUser?.fullName
     ? currentUser.fullName.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase()
@@ -114,7 +144,7 @@ export default function AdminLayout() {
   }, []);
 
   return (
-    <div className="adm-layout">
+    <div className="adm-layout" ref={layoutRef} data-theme={theme}>
 
       {/* ── Sidebar ── */}
       <aside className={`adm-sidebar${sidebarOpen ? ' adm-sidebar--open' : ''}`}>
@@ -158,6 +188,21 @@ export default function AdminLayout() {
             <div className="adm-user-info">
               <div className="adm-user-name">{displayName}</div>
               <div className="adm-user-email">{currentUser?.email ?? ''}</div>
+            </div>
+          </div>
+          <div className="adm-theme-row">
+            <span className="adm-theme-label">{theme === 'dark' ? 'Dark mode' : 'Light mode'}</span>
+            <div
+              className={`adm-theme-switch${theme === 'dark' ? ' adm-theme-switch--on' : ''}`}
+              onClick={toggleTheme}
+              role="switch"
+              aria-checked={theme === 'dark'}
+              tabIndex={0}
+              onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && toggleTheme()}
+            >
+              <div className="adm-theme-switch-knob">
+                {theme === 'dark' ? <SunIcon /> : <MoonIcon />}
+              </div>
             </div>
           </div>
           <Link to="/" className="adm-back-link" onClick={close}>
@@ -207,6 +252,14 @@ export default function AdminLayout() {
           </div>
 
           <div className="adm-topbar-actions">
+            <button
+              className="adm-topbar-theme-btn"
+              onClick={toggleTheme}
+              aria-label="Toggle theme"
+              title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+            >
+              {theme === 'dark' ? <SunIcon /> : <MoonIcon />}
+            </button>
             <Link
               to="/"
               title="Back to site"

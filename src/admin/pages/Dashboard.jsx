@@ -81,7 +81,7 @@ function RevenueChart({ data }) {
               <rect
                 x={x} y={y} width={barW} height={barH}
                 rx={4}
-                fill={isToday ? '#FFD54A' : 'rgba(255,193,7,0.22)'}
+                fill={isToday ? 'var(--adm-chart-bar-today)' : 'var(--adm-chart-bar-other)'}
                 style={{ transition: 'fill 0.2s' }}
               />
               {d.revenue > 0 && (
@@ -89,7 +89,7 @@ function RevenueChart({ data }) {
                   x={x + barW / 2} y={y - 5}
                   textAnchor="middle"
                   fontSize="9"
-                  fill={isToday ? '#8B6914' : 'rgba(31,31,31,0.40)'}
+                  fill={isToday ? 'var(--adm-chart-text-today)' : 'var(--adm-chart-text-other)'}
                   fontWeight="700"
                   fontFamily="Nunito,sans-serif"
                 >
@@ -107,7 +107,7 @@ function RevenueChart({ data }) {
           <span
             key={d.date}
             className="adm-bar-chart-label"
-            style={{ color: i === data.length - 1 ? '#8B6914' : undefined }}
+            style={{ color: i === data.length - 1 ? 'var(--adm-accent-text)' : undefined }}
           >
             {fmtDay(d.date)}
           </span>
@@ -204,7 +204,7 @@ export default function Dashboard() {
       cardClass: 'adm-stat-card--amber',
       iconClass: 'adm-stat-icon--amber',
       sparkData: sparkRevenue,
-      sparkColor:'#C49A00',
+      sparkColor:'var(--adm-spark-revenue)',
       icon: (
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
           <line x1="12" y1="1" x2="12" y2="23"/>
@@ -219,7 +219,7 @@ export default function Dashboard() {
       cardClass: 'adm-stat-card--blue',
       iconClass: 'adm-stat-icon--blue',
       sparkData: sparkOrders,
-      sparkColor:'#2563eb',
+      sparkColor:'var(--adm-spark-orders)',
       icon: (
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/>
