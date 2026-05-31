@@ -205,6 +205,12 @@ export function AuthProvider({ children }) {
     localStorage.removeItem('bz_jwt');
   }, []);
 
+  /* ── changePassword ───────────────────────────────────── */
+  const changePassword = useCallback(async (newPassword) => {
+    const { error } = await supabase.auth.updateUser({ password: newPassword });
+    return { error: error ? mapError(error.code ?? '', error.message ?? '') : null };
+  }, []);
+
   /* ── updateProfile ────────────────────────────────────────
      Updates name and phone only.
      Delivery address is managed separately via useDeliveryAddress.
@@ -312,6 +318,7 @@ export function AuthProvider({ children }) {
       register,
       login,
       logout,
+      changePassword,
       updateProfile,
       addOrder,
       savePizzaToProfile,

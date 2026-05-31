@@ -7,6 +7,7 @@ import { usePizzaStore } from '../store/PizzaContext';
 import { calcPrice } from '../utils/pizzaUtils';
 import { useMountDelay } from '../hooks/useMountDelay';
 import { useDeliveryAddress } from '../hooks/useDeliveryAddress';
+import PasswordInput from '../components/ui/PasswordInput';
 
 // ─── Always-available fallback — page never goes blank ───────
 const MOCK_USER = {
@@ -113,7 +114,6 @@ function PersonalInfoSection({ user }) {
   const [editing, setEditing] = useState(false);
   const [fields,  setFields]  = useState({
     fullName: user?.fullName ?? '',
-    email:    user?.email    ?? '',
     phone:    user?.phone    ?? '',
   });
 
@@ -142,10 +142,16 @@ function PersonalInfoSection({ user }) {
 
   return (
     <div className="pf-info-grid">
+      {/* Email is read-only — changing it requires Supabase email-verification flow */}
+      <div className="pf-field-row" style={{ opacity: 0.55 }}>
+        <label className="pf-info-label">E-Mail</label>
+        <span style={{ fontFamily: 'Nunito, sans-serif', fontSize: 13, fontWeight: 700 }}>
+          {user?.email}
+        </span>
+      </div>
       {[
-        { label: 'Name',     key: 'fullName', type: 'text',  ph: 'Vollständiger Name' },
-        { label: 'E-Mail',   key: 'email',    type: 'email', ph: 'E-Mail Adresse'     },
-        { label: 'Telefon',  key: 'phone',    type: 'tel',   ph: '+49 …'              },
+        { label: 'Name',    key: 'fullName', type: 'text', ph: 'Vollständiger Name' },
+        { label: 'Telefon', key: 'phone',    type: 'tel',  ph: '+49 …'              },
       ].map(f => (
         <div key={f.key} className="pf-field-row">
           <label className="pf-info-label">{f.label}</label>
@@ -161,6 +167,92 @@ function PersonalInfoSection({ user }) {
       <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
         <button className="pf-save-btn" onClick={handleSave}>Speichern</button>
         <button className="pf-cancel-btn" onClick={() => setEditing(false)}>Abbrechen</button>
+      </div>
+    </div>
+  );
+}
+
+// ─── Change password section ──────────────────────────────────
+function ChangePasswordSection() {
+  const { changePassword } = useAuth();
+  const [newPw,    setNewPw]    = useState('');
+  const [confirm,  setConfirm]  = useState('');
+  const [errors,   setErrors]   = useState({});
+  const [saving,   setSaving]   = useState(false);
+  const [saveOk,   setSaveOk]   = useState(false);
+
+  async function handleSave() {
+    const errs = {};
+    if (!newPw)               errs.newPw   = 'Pflichtfeld';
+    else if (newPw.length < 8)errs.newPw   = 'Mindestens 8 Zeichen';
+    if (confirm !== newPw)    errs.confirm = 'Passwörter stimmen nicht überein';
+    if (Object.keys(errs).length) { setErrors(errs); return; }
+
+    setSaving(true);
+    setErrors({});
+    const { error } = await changePassword(newPw);
+    setSaving(false);
+
+    if (error) { setErrors({ general: error }); return; }
+
+    setNewPw('');
+    setConfirm('');
+    setSaveOk(true);
+    setTimeout(() => setSaveOk(false), 4000);
+  }
+
+  return (
+    <div className="pf-info-grid">
+      {saveOk && (
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: 7,
+          padding: '8px 14px', marginBottom: 4,
+          background: 'rgba(61,185,110,0.10)',
+          border: '1px solid rgba(61,185,110,0.28)', borderRadius: 10,
+        }}>
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#3db96e" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+          <span style={{ fontFamily: 'Nunito, sans-serif', fontSize: 12, fontWeight: 800, color: '#2a9655' }}>
+            Passwort erfolgreich geändert ✓
+          </span>
+        </div>
+      )}
+
+      {errors.general && (
+        <div style={{ padding: '8px 14px', background: 'rgba(200,0,30,0.07)', border: '1px solid rgba(200,0,30,0.20)', borderRadius: 10, fontFamily: 'Nunito, sans-serif', fontSize: 12, fontWeight: 700, color: '#C8001E' }}>
+          {errors.general}
+        </div>
+      )}
+
+      <div className="pf-field-row">
+        <label className="pf-info-label">Neues Passwort *</label>
+        <PasswordInput
+          className="pf-inline-input"
+          value={newPw}
+          onChange={e => { setNewPw(e.target.value); setErrors(p => ({ ...p, newPw: '' })); }}
+          placeholder="Mindestens 8 Zeichen"
+          autoComplete="new-password"
+        />
+      </div>
+      {errors.newPw && <span className="co-field-error" style={{ paddingLeft: 0 }}>{errors.newPw}</span>}
+
+      <div className="pf-field-row">
+        <label className="pf-info-label">Bestätigen *</label>
+        <PasswordInput
+          className="pf-inline-input"
+          value={confirm}
+          onChange={e => { setConfirm(e.target.value); setErrors(p => ({ ...p, confirm: '' })); }}
+          placeholder="••••••••"
+          autoComplete="new-password"
+        />
+      </div>
+      {errors.confirm && <span className="co-field-error" style={{ paddingLeft: 0 }}>{errors.confirm}</span>}
+
+      <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
+        <button className="pf-save-btn" onClick={handleSave} disabled={saving}>
+          {saving ? 'Speichern…' : 'Passwort ändern'}
+        </button>
       </div>
     </div>
   );
@@ -473,6 +565,15 @@ function ProfileContent() {
             <h1 className="pf-hero-name">{user?.fullName ?? 'Profil'}</h1>
             <p className="pf-hero-email">{user?.email ?? ''}</p>
             <div className="pf-hero-stats">
+              {isLoggedIn && (
+                <span className="pf-hero-stat" style={{ color: '#2a7a4a' }}>
+                  <svg width="9" height="9" viewBox="0 0 10 10" fill="#3db96e">
+                    <circle cx="5" cy="5" r="5"/>
+                  </svg>
+                  Angemeldet · Sitzung gespeichert
+                </span>
+              )}
+              {isLoggedIn && <span className="pf-hero-stat-sep">·</span>}
               <span className="pf-hero-stat">
                 <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
@@ -592,6 +693,20 @@ function ProfileContent() {
           >
             <ProfileErrorBoundary>
               <OrderHistorySection orders={user?.orderHistory} />
+            </ProfileErrorBoundary>
+          </SectionCard>
+
+          <SectionCard
+            title="Passwort ändern"
+            icon={
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+              </svg>
+            }
+          >
+            <ProfileErrorBoundary>
+              <ChangePasswordSection />
             </ProfileErrorBoundary>
           </SectionCard>
 

@@ -208,6 +208,7 @@ function StepAccount({ profile, onSkip, onCreated }) {
   const [confirm, setConfirm] = useState('');
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
+  const [verificationSent, setVerificationSent] = useState(false);
 
   async function handleCreate() {
     const errs = {};
@@ -217,45 +218,71 @@ function StepAccount({ profile, onSkip, onCreated }) {
     if (Object.keys(errs).length) { setErrors(errs); return; }
 
     setLoading(true);
-    const result = await register({
-      fullName: profile.fullName,
-      email: profile.email,
-      phone: profile.phone,
-      password,
-    });
+    const result = await register({ fullName: profile.fullName, email: profile.email, phone: profile.phone, password });
     setLoading(false);
-
-    // ── DIAGNOSTIC: log the exact register() response ──────────────────
-    console.log('[StepAccount] register() returned:', {
-      hasUser: !!result.user,
-      hasError: !!result.error,
-      needsVerification: !!result.needsVerification,
-      error: result.error ?? null,
-      userId: result.user?.id?.slice(0, 8) ?? null,
-    });
 
     const { user, error, needsVerification } = result;
 
     if (error) { setErrors({ general: error }); return; }
 
-    // needsVerification means signUp succeeded but email confirmation is pending.
-    // The user is NOT yet logged in. Log this so we can see if this is the
-    // broken path where isLoggedIn stays false through payment.
     if (needsVerification) {
-      console.warn('[StepAccount] email confirmation required — user NOT logged in yet.',
-        'isLoggedIn will be false during handleConfirmed → saveAddress will be skipped!'
-      );
+      // Email confirmation required — user is NOT yet logged in.
+      // Show a clear verification-pending screen instead of silently
+      // advancing to payment with isLoggedIn=false.
+      setVerificationSent(true);
+      return;
     }
 
     onCreated(user);
   }
 
+  /* ── Verification pending screen ── */
+  if (verificationSent) {
+    return (
+      <div className="co-form">
+        <div className="co-form-header" style={{ textAlign: 'center' }}>
+          <div style={{ fontSize: 44, marginBottom: 12 }}>📬</div>
+          <h2 className="co-form-title">E-Mail bestätigen</h2>
+          <p className="co-form-sub">
+            Wir haben eine Bestätigungs-E-Mail an <strong>{profile.email}</strong> gesendet.
+            Bitte klicke auf den Link, um dein Konto zu aktivieren — du bleibst danach dauerhaft angemeldet.
+          </p>
+        </div>
+        <div style={{
+          background: 'rgba(61,185,110,0.08)',
+          border: '1px solid rgba(61,185,110,0.25)',
+          borderRadius: 14,
+          padding: '14px 18px',
+          fontSize: 13,
+          fontFamily: 'Nunito, sans-serif',
+          fontWeight: 700,
+          color: '#2a7a4a',
+          marginBottom: 20,
+          lineHeight: 1.6,
+        }}>
+          Nach der Bestätigung wird deine Adresse automatisch gespeichert.<br />
+          Du musst dich nicht erneut anmelden.
+        </div>
+        <button type="button" className="co-next-btn" onClick={onSkip}>
+          Jetzt bestellen · ohne Bestätigung
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M5 12h14M12 5l7 7-7 7" />
+          </svg>
+        </button>
+        <p style={{ fontFamily: 'Nunito, sans-serif', fontSize: 11, fontWeight: 700, color: 'rgba(26,10,0,0.38)', textAlign: 'center', marginTop: 14 }}>
+          Deine Bestellung wird sofort platziert. Die Adressspeicherung erfolgt nach der E-Mail-Bestätigung.
+        </p>
+      </div>
+    );
+  }
+
+  /* ── Account creation form ── */
   return (
     <div className="co-form">
       <div className="co-form-header">
         <h2 className="co-form-title">Konto erstellen</h2>
         <p className="co-form-sub">
-          Speichere deine Bestellungen und Lieblingsrezepte für das nächste Mal.
+          Speichere deine Adresse einmalig — beim nächsten Checkout nie wieder eingeben.
         </p>
       </div>
 
@@ -805,12 +832,27 @@ function CheckoutNormal() {
   }, [done]); // clearCart is a stable useCallback ref
 
   useEffect(() => {
-    // Only redirect to cart if we're actually on /checkout (not transitioning away)
-    // and the cart is genuinely empty before the order was placed.
     if (pizzas.length === 0 && !done && window.location.pathname === '/checkout') {
       navigate('/cart');
     }
   }, [pizzas.length, done, navigate]);
+
+  /* ── MOUNT diagnostic ── */
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log('[checkout:mount]', {
+        isLoggedIn,
+        authLoading,
+        addrLoading,
+        hasSavedAddress,
+        address: savedAddress,
+        reactUserId: currentUser?.id ?? null,
+        sessionUserId: session?.user?.id ?? null,
+        viewportWidth: window.innerWidth,
+        userAgent: navigator.userAgent,
+      });
+    });
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   async function handleConfirmed(paymentMethod) {
     const total = grandTotal;
@@ -990,13 +1032,12 @@ function CheckoutNormal() {
                 onTrack={() => navigate(savedOrderId ? `/order-tracking/${savedOrderId}` : '/')}
               />
             ) : isLoading ? (
-              <div className="co-form" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 240 }}>
-                <span className="co-spinner" />
-              </div>
+              /* eslint-disable-next-line no-sequences */
+              (console.log('[checkout:render] isLoading=true', { authLoading, addrLoading, isLoggedIn, reactUserId: currentUser?.id ?? null }),
+                <div className="co-form" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 240 }}>
+                  <span className="co-spinner" />
+                </div>)
             ) : (savedAddressConfirmed || step >= paymentStep) ? (
-              /* Payment step — shown when user confirmed saved address OR advanced
-                 through the manual delivery form. Checked first so no re-render
-                 can drop the user back to an address form. */
               <StepPayment
                 grandTotal={grandTotal}
                 paymentStep={paymentStep}
@@ -1004,24 +1045,26 @@ function CheckoutNormal() {
                 onConfirm={handleConfirmed}
               />
             ) : step === 1 && showConfirmCard ? (
-              <CheckoutAddressSelector
-                savedAddress={savedAddress}
-                onUseThis={() => {
-                  setProfile({ ...savedAddress, email: currentUser?.email || '' });
-                  setSavedAddressConfirmed(true);
-                  setStep(paymentStep);
-                }}
-                onEnterNew={() => {
-                  setSavedAddressConfirmed(false);
-                  setShowNewAddressForm(true);
-                  setProfile({
-                    ...EMPTY_PROFILE,
-                    email: currentUser?.email || '',
-                    fullName: currentUser?.fullName || '',
-                    phone: currentUser?.phone || '',
-                  });
-                }}
-              />
+              /* eslint-disable-next-line no-sequences */
+              (console.log('[checkout:render] → CONFIRM CARD', { hasSavedAddress, showNewAddressForm, address: savedAddress, viewportWidth: window.innerWidth }),
+                <CheckoutAddressSelector
+                  savedAddress={savedAddress}
+                  onUseThis={() => {
+                    setProfile({ ...savedAddress, email: currentUser?.email || '' });
+                    setSavedAddressConfirmed(true);
+                    setStep(paymentStep);
+                  }}
+                  onEnterNew={() => {
+                    setSavedAddressConfirmed(false);
+                    setShowNewAddressForm(true);
+                    setProfile({
+                      ...EMPTY_PROFILE,
+                      email: currentUser?.email || '',
+                      fullName: currentUser?.fullName || '',
+                      phone: currentUser?.phone || '',
+                    });
+                  }}
+                />)
             ) : step === 1 && (!hasSavedAddress || showNewAddressForm) ? (
               <StepDelivery
                 profile={profile}
