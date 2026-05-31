@@ -26,7 +26,7 @@ function readGuestProfile() {
   catch { return {}; }
 }
 function saveGuestProfile(p) {
-  try { localStorage.setItem('bz_profile', JSON.stringify(p)); } catch {}
+  try { localStorage.setItem('bz_profile', JSON.stringify(p)); } catch { }
 }
 
 /* ─── Step indicator (dynamic) ─────────────────────────── */
@@ -56,8 +56,8 @@ function StepDots({ step, labels }) {
 ═══════════════════════════════════════════════════════ */
 function StepDelivery({ profile, setProfile, onNext, autofilled, lockedFields = [], onBackToSaved }) {
   const [locLoading, setLocLoading] = useState(false);
-  const [locError,   setLocError]   = useState('');
-  const [errors,     setErrors]     = useState({});
+  const [locError, setLocError] = useState('');
+  const [errors, setErrors] = useState({});
 
   function handleChange(e) {
     const { name, value } = e.target;
@@ -98,13 +98,13 @@ function StepDelivery({ profile, setProfile, onNext, autofilled, lockedFields = 
           const a = data.address ?? {};
           setProfile(prev => ({
             ...prev,
-            street:      a.road ?? prev.street,
+            street: a.road ?? prev.street,
             houseNumber: a.house_number ?? prev.houseNumber,
-            postalCode:  a.postcode ?? prev.postalCode,
-            city:        a.city ?? a.town ?? a.village ?? prev.city,
+            postalCode: a.postcode ?? prev.postalCode,
+            city: a.city ?? a.town ?? a.village ?? prev.city,
           }));
         } catch { setLocError('Adresse konnte nicht ermittelt werden.'); }
-        finally  { setLocLoading(false); }
+        finally { setLocLoading(false); }
       },
       () => { setLocError('Standortzugriff verweigert.'); setLocLoading(false); }
     );
@@ -126,7 +126,7 @@ function StepDelivery({ profile, setProfile, onNext, autofilled, lockedFields = 
       {autofilled && (
         <div className="co-autofill-notice">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="20 6 9 17 4 12"/>
+            <polyline points="20 6 9 17 4 12" />
           </svg>
           Vorausgefüllt aus deinem Profil — Felder nach Bedarf bearbeiten
         </div>
@@ -134,8 +134,8 @@ function StepDelivery({ profile, setProfile, onNext, autofilled, lockedFields = 
 
       <button type="button" className="co-location-btn" onClick={handleLocation} disabled={locLoading}>
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-          <circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/>
-          <path d="M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2z" opacity=".3"/>
+          <circle cx="12" cy="12" r="3" /><path d="M12 2v3M12 19v3M2 12h3M19 12h3" />
+          <path d="M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2z" opacity=".3" />
         </svg>
         {locLoading ? 'Ermittle Standort…' : 'Aktuellen Standort verwenden'}
       </button>
@@ -192,7 +192,7 @@ function StepDelivery({ profile, setProfile, onNext, autofilled, lockedFields = 
       <button type="submit" className="co-next-btn">
         Weiter zur Zahlung
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M5 12h14M12 5l7 7-7 7"/>
+          <path d="M5 12h14M12 5l7 7-7 7" />
         </svg>
       </button>
     </form>
@@ -204,34 +204,34 @@ function StepDelivery({ profile, setProfile, onNext, autofilled, lockedFields = 
 ═══════════════════════════════════════════════════════ */
 function StepAccount({ profile, onSkip, onCreated }) {
   const { register } = useAuth();
-  const [password,  setPassword]  = useState('');
-  const [confirm,   setConfirm]   = useState('');
-  const [errors,    setErrors]    = useState({});
-  const [loading,   setLoading]   = useState(false);
+  const [password, setPassword] = useState('');
+  const [confirm, setConfirm] = useState('');
+  const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(false);
 
   async function handleCreate() {
     const errs = {};
-    if (!password)             errs.password = 'Pflichtfeld';
+    if (!password) errs.password = 'Pflichtfeld';
     else if (password.length < 8) errs.password = 'Mindestens 8 Zeichen';
-    if (confirm !== password)  errs.confirm = 'Passwörter stimmen nicht überein';
+    if (confirm !== password) errs.confirm = 'Passwörter stimmen nicht überein';
     if (Object.keys(errs).length) { setErrors(errs); return; }
 
     setLoading(true);
     const result = await register({
       fullName: profile.fullName,
-      email:    profile.email,
-      phone:    profile.phone,
+      email: profile.email,
+      phone: profile.phone,
       password,
     });
     setLoading(false);
 
     // ── DIAGNOSTIC: log the exact register() response ──────────────────
     console.log('[StepAccount] register() returned:', {
-      hasUser:            !!result.user,
-      hasError:           !!result.error,
-      needsVerification:  !!result.needsVerification,
-      error:              result.error   ?? null,
-      userId:             result.user?.id?.slice(0, 8) ?? null,
+      hasUser: !!result.user,
+      hasError: !!result.error,
+      needsVerification: !!result.needsVerification,
+      error: result.error ?? null,
+      userId: result.user?.id?.slice(0, 8) ?? null,
     });
 
     const { user, error, needsVerification } = result;
@@ -291,7 +291,7 @@ function StepAccount({ profile, onSkip, onCreated }) {
           <>
             Konto erstellen & weiter
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M5 12h14M12 5l7 7-7 7"/>
+              <path d="M5 12h14M12 5l7 7-7 7" />
             </svg>
           </>
         )}
@@ -312,8 +312,8 @@ const PAYMENT_METHODS = [
     id: 'paypal', label: 'PayPal', sub: 'Schnell & sicher bezahlen',
     icon: (
       <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
-        <path d="M20.067 8.478c.492.315.844.825.983 1.39.387 1.592-.948 3.097-2.83 3.097h-.638c-.22 0-.408.16-.443.378l-.483 3.08-.136.864a.45.45 0 0 1-.445.378H13.9a.27.27 0 0 1-.267-.31l.572-3.635.025-.157a.45.45 0 0 1 .445-.378h.934c1.882 0 3.217-1.505 2.83-3.097a2.067 2.067 0 0 0-.372-.61z" fill="#009cde"/>
-        <path d="M8.526 3h5.417c.638 0 1.233.047 1.776.147.155.027.306.058.453.093a5.1 5.1 0 0 1 1.798.82c.491.315.843.825.982 1.39.387 1.592-.948 3.097-2.83 3.097H13.48a.45.45 0 0 0-.444.378l-.628 3.993-.094.6-.483 3.08-.136.864a.45.45 0 0 1-.445.378H8.94a.27.27 0 0 1-.267-.31L10.39 7.38l.025-.157.025-.157.572-3.635A.27.27 0 0 1 11.278 3H8.526z" fill="#003087"/>
+        <path d="M20.067 8.478c.492.315.844.825.983 1.39.387 1.592-.948 3.097-2.83 3.097h-.638c-.22 0-.408.16-.443.378l-.483 3.08-.136.864a.45.45 0 0 1-.445.378H13.9a.27.27 0 0 1-.267-.31l.572-3.635.025-.157a.45.45 0 0 1 .445-.378h.934c1.882 0 3.217-1.505 2.83-3.097a2.067 2.067 0 0 0-.372-.61z" fill="#009cde" />
+        <path d="M8.526 3h5.417c.638 0 1.233.047 1.776.147.155.027.306.058.453.093a5.1 5.1 0 0 1 1.798.82c.491.315.843.825.982 1.39.387 1.592-.948 3.097-2.83 3.097H13.48a.45.45 0 0 0-.444.378l-.628 3.993-.094.6-.483 3.08-.136.864a.45.45 0 0 1-.445.378H8.94a.27.27 0 0 1-.267-.31L10.39 7.38l.025-.157.025-.157.572-3.635A.27.27 0 0 1 11.278 3H8.526z" fill="#003087" />
       </svg>
     ),
   },
@@ -321,7 +321,7 @@ const PAYMENT_METHODS = [
     id: 'card', label: 'Kreditkarte', sub: 'Visa, Mastercard, Amex',
     icon: (
       <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#1A0A00" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-        <rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/><line x1="6" y1="15" x2="10" y2="15"/>
+        <rect x="2" y="5" width="20" height="14" rx="2" /><line x1="2" y1="10" x2="22" y2="10" /><line x1="6" y1="15" x2="10" y2="15" />
       </svg>
     ),
   },
@@ -329,7 +329,7 @@ const PAYMENT_METHODS = [
     id: 'apple', label: 'Apple Pay', sub: 'Mit Face ID oder Touch ID',
     icon: (
       <svg width="24" height="24" viewBox="0 0 24 24" fill="#1A0A00">
-        <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
+        <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z" />
       </svg>
     ),
   },
@@ -337,17 +337,17 @@ const PAYMENT_METHODS = [
     id: 'google', label: 'Google Pay', sub: 'Schnell mit Google bezahlen',
     icon: (
       <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
-        <path d="M12 11v2h3.5c-.15.9-.68 1.65-1.43 2.15l2.3 1.79C17.67 15.7 18.5 14 18.5 12c0-.43-.04-.85-.1-1.25L12 11z" fill="#4285F4"/>
-        <path d="M5.95 14.3A7 7 0 0 1 5 12c0-.8.14-1.57.39-2.3L3.1 7.9A10 10 0 0 0 2 12c0 1.62.39 3.15 1.08 4.5l2.87-2.2z" fill="#FBBC05"/>
-        <path d="M12 19c2.43 0 4.47-.8 5.96-2.18l-2.3-1.79C14.77 15.64 13.47 16 12 16c-2.34 0-4.33-1.58-5.04-3.7L4.1 14.5A10 10 0 0 0 12 19z" fill="#34A853"/>
-        <path d="M17.96 6.82C16.47 5.41 14.43 5 12 5A10 10 0 0 0 4.1 9.5l2.86 2.2C7.67 9.58 9.66 8 12 8c1.34 0 2.53.44 3.47 1.17l2.49-2.35z" fill="#EA4335"/>
+        <path d="M12 11v2h3.5c-.15.9-.68 1.65-1.43 2.15l2.3 1.79C17.67 15.7 18.5 14 18.5 12c0-.43-.04-.85-.1-1.25L12 11z" fill="#4285F4" />
+        <path d="M5.95 14.3A7 7 0 0 1 5 12c0-.8.14-1.57.39-2.3L3.1 7.9A10 10 0 0 0 2 12c0 1.62.39 3.15 1.08 4.5l2.87-2.2z" fill="#FBBC05" />
+        <path d="M12 19c2.43 0 4.47-.8 5.96-2.18l-2.3-1.79C14.77 15.64 13.47 16 12 16c-2.34 0-4.33-1.58-5.04-3.7L4.1 14.5A10 10 0 0 0 12 19z" fill="#34A853" />
+        <path d="M17.96 6.82C16.47 5.41 14.43 5 12 5A10 10 0 0 0 4.1 9.5l2.86 2.2C7.67 9.58 9.66 8 12 8c1.34 0 2.53.44 3.47 1.17l2.49-2.35z" fill="#EA4335" />
       </svg>
     ),
   },
 ];
 
 function StepPayment({ grandTotal, paymentStep, onBack, onConfirm }) {
-  const [selected,   setSelected]   = useState(null);
+  const [selected, setSelected] = useState(null);
   const [confirming, setConfirming] = useState(false);
 
   function handleConfirm() {
@@ -380,7 +380,7 @@ function StepPayment({ grandTotal, paymentStep, onBack, onConfirm }) {
             <div className="co-pay-radio">
               {selected === m.id && (
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                  <polyline points="20 6 9 17 4 12"/>
+                  <polyline points="20 6 9 17 4 12" />
                 </svg>
               )}
             </div>
@@ -394,7 +394,7 @@ function StepPayment({ grandTotal, paymentStep, onBack, onConfirm }) {
         {confirming ? <span className="co-spinner" /> : (
           <>Jetzt bestellen · €{grandTotal.toFixed(2)}
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M5 12h14M12 5l7 7-7 7"/>
+              <path d="M5 12h14M12 5l7 7-7 7" />
             </svg>
           </>
         )}
@@ -413,8 +413,8 @@ function OrderSuccess({ grandTotal, orderId, onHome, onTrack }) {
     <div className="co-success">
       <div className="co-success-icon">
         <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-          <polyline points="22 4 12 14.01 9 11.01"/>
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+          <polyline points="22 4 12 14.01 9 11.01" />
         </svg>
       </div>
       <h2 className="co-success-title">Bestellung aufgegeben!</h2>
@@ -444,9 +444,9 @@ function RestaurantCheckout() {
   const { rmConfig, exitRestaurantMode } = useRestaurantMode();
 
   const [sending, setSending] = useState(false);
-  const [done,    setDone]    = useState(false);
+  const [done, setDone] = useState(false);
   const [orderId, setOrderId] = useState(null);
-  const [errMsg,  setErrMsg]  = useState('');
+  const [errMsg, setErrMsg] = useState('');
 
   const grandTotal = pizzas.reduce((s, p) => s + calcPrice(p) * (p.quantity || 1), 0);
 
@@ -465,21 +465,21 @@ function RestaurantCheckout() {
       /* ── Serialize cart items — same shape as normal checkout ── */
       const items = pizzas.map(p => {
         const item = {
-          name:     p.name || (p.type === 'burger' ? 'Custom Burger' : 'Custom Pizza'),
-          type:     p.type || 'pizza',
+          name: p.name || (p.type === 'burger' ? 'Custom Burger' : 'Custom Pizza'),
+          type: p.type || 'pizza',
           quantity: p.quantity ?? 1,
-          price:    calcPrice(p),
-          emoji:    p.emoji,
+          price: calcPrice(p),
+          emoji: p.emoji,
         };
         // Pizza customizations
-        if (p.dough)            item.dough      = p.dough;
-        if (p.sauce)            item.sauce      = p.sauce;
-        if (p.cheese)           item.cheese     = p.cheese;
-        if (p.meats?.length)    item.meats      = p.meats;
+        if (p.dough) item.dough = p.dough;
+        if (p.sauce) item.sauce = p.sauce;
+        if (p.cheese) item.cheese = p.cheese;
+        if (p.meats?.length) item.meats = p.meats;
         if (p.vegetables?.length) item.vegetables = p.vegetables;
         // Burger customizations
-        if (p.bun)              item.bun        = p.bun;
-        if (p.sauces?.length)   item.sauces     = p.sauces;
+        if (p.bun) item.bun = p.bun;
+        if (p.sauces?.length) item.sauces = p.sauces;
         if (p.cheeses && Object.keys(p.cheeses).length) item.cheeses = p.cheeses;
         // Burger meats are an object map { [meatId]: qty }, not an array
         if (p.type === 'burger' && p.meats && typeof p.meats === 'object' && !Array.isArray(p.meats)) {
@@ -497,22 +497,22 @@ function RestaurantCheckout() {
       const tableNum = rmConfig.orderType === 'dine_in' ? (rmConfig.tableNumber || '') : '';
 
       const payload = {
-        user_id:          null,
-        customer_name:    customerName,
-        customer_email:   '',           // NOT NULL DEFAULT ''
-        customer_phone:   rmConfig.phone?.trim() || '',
+        user_id: null,
+        customer_name: customerName,
+        customer_email: '',           // NOT NULL DEFAULT ''
+        customer_phone: rmConfig.phone?.trim() || '',
         delivery_address: {
-          mode:         rmConfig.orderType,
-          tableNumber:  tableNum,
+          mode: rmConfig.orderType,
+          tableNumber: tableNum,
           // Restaurant metadata stored here as fallback (readable before migration):
-          source:       'restaurant_mode',
-          order_type:   rmConfig.orderType,
+          source: 'restaurant_mode',
+          order_type: rmConfig.orderType,
           table_number: tableNum,
-          payment:      rmConfig.payment,
+          payment: rmConfig.payment,
         },
         items,
-        total_price:    +grandTotal.toFixed(2),
-        status:         'pending',            // no migration needed for this
+        total_price: +grandTotal.toFixed(2),
+        status: 'pending',            // no migration needed for this
         payment_method: rmConfig.payment,
       };
 
@@ -535,7 +535,7 @@ function RestaurantCheckout() {
           osc.start(ctx.currentTime + delay);
           osc.stop(ctx.currentTime + delay + 0.26);
         });
-      } catch (_) {}
+      } catch (_) { }
 
       clearCart();
       setDone(true);
@@ -543,11 +543,11 @@ function RestaurantCheckout() {
     } catch (err) {
       /* Surface the real Supabase error — both in console and UI */
       console.error('[RestaurantCheckout] Order insert failed:', {
-        message:  err?.message,
-        code:     err?.code,
-        details:  err?.details,
-        hint:     err?.hint,
-        payload:  { rmConfig, itemCount: pizzas.length },
+        message: err?.message,
+        code: err?.code,
+        details: err?.details,
+        hint: err?.hint,
+        payload: { rmConfig, itemCount: pizzas.length },
       });
       setErrMsg(err?.message || 'Unknown error — check console for details');
     } finally {
@@ -558,7 +558,7 @@ function RestaurantCheckout() {
   /* ── Styles (uses website palette, no admin CSS) ── */
   const brand = { fontFamily: 'Nunito, sans-serif' };
   const accent = '#FFD54A';
-  const dark   = '#1A0A00';
+  const dark = '#1A0A00';
 
   if (done) {
     return (
@@ -619,7 +619,7 @@ function RestaurantCheckout() {
                       {(p.quantity ?? 1) > 1 && <span style={{ color: '#A09070', marginLeft: 6, fontWeight: 700 }}>×{p.quantity}</span>}
                     </div>
                     {p.dough && <div style={{ fontSize: 11, color: '#A09070', fontWeight: 700, marginTop: 2 }}>{[p.dough, p.sauce, p.cheese].filter(Boolean).join(' · ')}</div>}
-                    {p.bun   && <div style={{ fontSize: 11, color: '#A09070', fontWeight: 700, marginTop: 2 }}>{p.bun}</div>}
+                    {p.bun && <div style={{ fontSize: 11, color: '#A09070', fontWeight: 700, marginTop: 2 }}>{p.bun}</div>}
                   </div>
                   <div style={{ fontWeight: 900, fontSize: 15, color: '#8B6914' }}>€{price.toFixed(2)}</div>
                 </div>
@@ -645,8 +645,8 @@ function RestaurantCheckout() {
                 Order type
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 6 }}>
-                {[{id:'walkin',l:'Walk-in',i:'🚶'},{id:'pickup',l:'Pickup',i:'🏃'},{id:'dine_in',l:'Dine-in',i:'🪑'}].map(t => (
-                  <div key={t.id} style={{ padding: '8px 4px', borderRadius: 10, border: `1.5px solid ${rmConfig.orderType===t.id ? accent : '#E8E0CB'}`, background: rmConfig.orderType===t.id ? `rgba(255,213,74,0.14)` : '#FFFDF5', textAlign: 'center', fontSize: 10, fontWeight: 800, color: rmConfig.orderType===t.id ? '#8B6914' : '#A09070' }}>
+                {[{ id: 'walkin', l: 'Walk-in', i: '🚶' }, { id: 'pickup', l: 'Pickup', i: '🏃' }, { id: 'dine_in', l: 'Dine-in', i: '🪑' }].map(t => (
+                  <div key={t.id} style={{ padding: '8px 4px', borderRadius: 10, border: `1.5px solid ${rmConfig.orderType === t.id ? accent : '#E8E0CB'}`, background: rmConfig.orderType === t.id ? `rgba(255,213,74,0.14)` : '#FFFDF5', textAlign: 'center', fontSize: 10, fontWeight: 800, color: rmConfig.orderType === t.id ? '#8B6914' : '#A09070' }}>
                     <div style={{ fontSize: 16 }}>{t.i}</div>
                     {t.l}
                   </div>
@@ -661,8 +661,8 @@ function RestaurantCheckout() {
             <div style={{ background: '#FFF8EE', borderRadius: 10, padding: '10px 14px', border: '1px solid #E8E0CB' }}>
               <div style={{ fontSize: 11, fontWeight: 700, color: '#5A4A2A', lineHeight: 1.6 }}>
                 {rmConfig.orderType === 'dine_in' && <>🪑 Table {rmConfig.tableNumber || '?'}{rmConfig.customerName ? ` · ${rmConfig.customerName}` : ''}</>}
-                {rmConfig.orderType === 'pickup'  && <>{rmConfig.customerName || 'Walk-in'}{rmConfig.phone ? ` · ${rmConfig.phone}` : ''}</>}
-                {rmConfig.orderType === 'walkin'  && <>{rmConfig.customerName || 'Walk-in customer'}</>}
+                {rmConfig.orderType === 'pickup' && <>{rmConfig.customerName || 'Walk-in'}{rmConfig.phone ? ` · ${rmConfig.phone}` : ''}</>}
+                {rmConfig.orderType === 'walkin' && <>{rmConfig.customerName || 'Walk-in customer'}</>}
                 <br />
                 {rmConfig.payment === 'cash' ? '💵 Cash' : '💳 Card in Store'}
               </div>
@@ -696,14 +696,14 @@ function RestaurantCheckout() {
               {sending ? (
                 <>
                   <svg style={{ animation: 'spin 0.7s linear infinite', width: 18, height: 18 }} viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round">
-                    <path d="M21 12a9 9 0 11-6.219-8.56"/>
+                    <path d="M21 12a9 9 0 11-6.219-8.56" />
                   </svg>
                   Sending…
                 </>
               ) : (
                 <>
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M22 2L11 13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                    <path d="M22 2L11 13" /><polygon points="22 2 15 22 11 13 2 9 22 2" />
                   </svg>
                   Place Order
                 </>
@@ -755,7 +755,7 @@ function CheckoutNormal() {
   const { isLoggedIn, currentUser, addOrder, savePizzaToProfile, loading: authLoading } = useAuth();
 
   /* ── Canonical delivery address — profiles table only ──────────────────── */
-  const { address: savedAddress, hasSavedAddress, isLoading: addrLoading, saveAddress } = useDeliveryAddress();
+  const { address: savedAddress, hasSavedAddress, isLoading: addrLoading, saveAddress, refreshAddress } = useDeliveryAddress();
 
   /* Form state: pre-fill identity from auth for logged-in users.
      Address fields start empty — the confirm card handles saved addresses. */
@@ -773,11 +773,14 @@ function CheckoutNormal() {
   const [showNewAddressForm, setShowNewAddressForm] = useState(false);
   const showConfirmCard = hasSavedAddress && !showNewAddressForm;
 
-  /* Spinner until auth resolves AND (for logged-in users) until address fetch settles */
-  const isLoading = authLoading || (isLoggedIn && addrLoading);
+  /* Spinner until auth resolves AND address fetch settles.
+     addrLoading is checked unconditionally — mobile users with email-confirmation
+     pending have isLoggedIn=false but still need the address fetch to complete
+     before we decide whether to show the confirm card or the empty form. */
+  const isLoading = authLoading || addrLoading;
 
-  const [step,      setStep]      = useState(1);
-  const [done,      setDone]      = useState(false);
+  const [step, setStep] = useState(1);
+  const [done, setDone] = useState(false);
   const [finalTotal, setFinalTotal] = useState(0);
   const [savedOrderId, setSavedOrderId] = useState(null);
   /* Explicit flag: set when user confirms the saved address card. Prevents any
@@ -818,14 +821,14 @@ function CheckoutNormal() {
       paymentMethod,
       total,
       isLoggedIn,
-      userId:             currentUser?.id?.slice(0, 8) ?? null,
-      profile_fullName:   profile.fullName,
-      profile_street:     profile.street,
-      profile_houseNumber:profile.houseNumber,
+      userId: currentUser?.id?.slice(0, 8) ?? null,
+      profile_fullName: profile.fullName,
+      profile_street: profile.street,
+      profile_houseNumber: profile.houseNumber,
       profile_postalCode: profile.postalCode,
-      profile_city:       profile.city,
-      profile_phone:      profile.phone,
-      willSaveAddress:    isLoggedIn && !!(profile.street),
+      profile_city: profile.city,
+      profile_phone: profile.phone,
+      willSaveAddress: isLoggedIn && !!(profile.street),
     });
 
     if (isLoggedIn && currentUser) {
@@ -842,40 +845,40 @@ function CheckoutNormal() {
     }
 
     api.orders.create({
-      items:      pizzas.map(p => ({ ...p })),
+      items: pizzas.map(p => ({ ...p })),
       totalPrice: total,
     }).catch(err => console.warn('[checkout] order not saved to backend:', err.message));
 
     try {
       const { data: savedOrder, error: orderError } = await supabase.from('orders').insert({
-        user_id:          currentUser?.id ?? null,
-        customer_name:    profile.fullName  || '',
-        customer_email:   profile.email     || '',
-        customer_phone:   profile.phone     || '',
+        user_id: currentUser?.id ?? null,
+        customer_name: profile.fullName || '',
+        customer_email: profile.email || '',
+        customer_phone: profile.phone || '',
         delivery_address: {
-          street:       profile.street       || '',
-          houseNumber:  profile.houseNumber  || '',
-          postalCode:   profile.postalCode   || '',
-          city:         profile.city         || '',
-          floor:        profile.floor        || '',
+          street: profile.street || '',
+          houseNumber: profile.houseNumber || '',
+          postalCode: profile.postalCode || '',
+          city: profile.city || '',
+          floor: profile.floor || '',
           doorbellName: profile.doorbellName || '',
         },
         items: pizzas.map(p => {
           const item = {
-            name:     p.name || (p.type === 'burger' ? 'Custom Burger' : 'Custom Pizza'),
-            type:     p.type || 'pizza',
+            name: p.name || (p.type === 'burger' ? 'Custom Burger' : 'Custom Pizza'),
+            type: p.type || 'pizza',
             quantity: p.quantity ?? 1,
-            price:    calcPrice(p),
+            price: calcPrice(p),
           };
           // Pizza customizations
-          if (p.dough)      item.dough      = p.dough;
-          if (p.sauce)      item.sauce      = p.sauce;
-          if (p.cheese)     item.cheese     = p.cheese;
-          if (p.meats?.length)      item.meats      = p.meats;
+          if (p.dough) item.dough = p.dough;
+          if (p.sauce) item.sauce = p.sauce;
+          if (p.cheese) item.cheese = p.cheese;
+          if (p.meats?.length) item.meats = p.meats;
           if (p.vegetables?.length) item.vegetables = p.vegetables;
           // Burger customizations
-          if (p.bun)        item.bun        = p.bun;
-          if (p.sauces?.length)     item.sauces     = p.sauces;
+          if (p.bun) item.bun = p.bun;
+          if (p.sauces?.length) item.sauces = p.sauces;
           if (p.cheeses && Object.keys(p.cheeses).length) item.cheeses = p.cheeses;
           if (p.type === 'burger' && p.meats && typeof p.meats === 'object' && !Array.isArray(p.meats)) {
             item.burger_meats = p.meats;
@@ -883,8 +886,8 @@ function CheckoutNormal() {
           }
           return item;
         }),
-        total_price:    total,
-        status:         'pending',
+        total_price: total,
+        status: 'pending',
         payment_method: paymentMethod,
       }).select('id').single();
 
@@ -905,30 +908,26 @@ function CheckoutNormal() {
     }
 
     // ── Persist delivery address to profiles ─────────────────────────────
-    // saveAddress() handles the uid fallback (currentUser?.id OR live session)
-    // and calls setAddress() on success so hasSavedAddress updates immediately
-    // in the same render — no refetch or page reload needed.
-    if (
-      profile?.street?.trim() &&
-      profile?.houseNumber?.trim() &&
-      profile?.postalCode?.trim() &&
-      profile?.city?.trim()
-    ) {
-      console.log('[checkout] profile before save', profile);
+    // saveAddress() resolves the uid itself (context or live session fallback)
+    // and updates hasSavedAddress immediately via setAddress on success.
+    // No profile.street guard — saveAddress returns early if no uid exists.
+    console.log('[checkout] profile before save', profile);
+    {
       const { error: addrErr } = await saveAddress({
-        fullName:     profile.fullName,
-        phone:        profile.phone,
-        street:       profile.street,
-        houseNumber:  profile.houseNumber,
-        postalCode:   profile.postalCode,
-        city:         profile.city,
-        floor:        profile.floor       || '',
+        fullName: profile.fullName,
+        phone: profile.phone,
+        street: profile.street,
+        houseNumber: profile.houseNumber,
+        postalCode: profile.postalCode,
+        city: profile.city,
+        floor: profile.floor || '',
         doorbellName: profile.doorbellName || '',
       });
       if (addrErr) {
         console.error('[checkout] address save failed', addrErr);
       } else {
         console.log('[checkout] address saved successfully');
+        refreshAddress(); // force re-read so confirm card shows on next checkout
       }
     }
 
@@ -952,14 +951,14 @@ function CheckoutNormal() {
     // ── DIAGNOSTIC: snapshot profile state at delivery form submit ──────
     console.log('[handleDeliveryNext] form submitted:', {
       isLoggedIn,
-      userId:      currentUser?.id?.slice(0, 8) ?? null,
-      fullName:    profile.fullName,
-      street:      profile.street,
+      userId: currentUser?.id?.slice(0, 8) ?? null,
+      fullName: profile.fullName,
+      street: profile.street,
       houseNumber: profile.houseNumber,
-      postalCode:  profile.postalCode,
-      city:        profile.city,
-      phone:       profile.phone,
-      email:       profile.email,
+      postalCode: profile.postalCode,
+      city: profile.city,
+      phone: profile.phone,
+      email: profile.email,
       allFieldsFilled: !!(profile.fullName && profile.street && profile.houseNumber && profile.postalCode && profile.city && profile.phone),
     });
     if (!isLoggedIn) saveGuestProfile(profile);
@@ -967,7 +966,7 @@ function CheckoutNormal() {
   }
 
   function handleAccountCreated() { stepForward(); }
-  function handleSkipAccount()    { stepForward(); }
+  function handleSkipAccount() { stepForward(); }
 
   /* When address is confirmed, show the payment step label in the dots. */
   const displayStep = done
@@ -1017,9 +1016,9 @@ function CheckoutNormal() {
                   setShowNewAddressForm(true);
                   setProfile({
                     ...EMPTY_PROFILE,
-                    email:    currentUser?.email    || '',
+                    email: currentUser?.email || '',
                     fullName: currentUser?.fullName || '',
-                    phone:    currentUser?.phone    || '',
+                    phone: currentUser?.phone || '',
                   });
                 }}
               />

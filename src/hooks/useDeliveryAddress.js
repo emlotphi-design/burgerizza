@@ -2,8 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../services/supabase';
 import { useAuth } from '../store/AuthContext';
 
-
-/* Map a profiles row → app address shape */
+/* Map a profiles row (snake_case) → app address shape (camelCase) */
 function rowToAddress(row) {
   return {
     fullName:     row.full_name    || '',
@@ -17,15 +16,26 @@ function rowToAddress(row) {
   };
 }
 
+/* Resolve the authenticated user id.
+   Falls back to a live Supabase session query so mobile users who registered
+   with email-confirmation pending (isLoggedIn=false in React context but a
+   real session exists) are handled identically to already-logged-in users. */
+async function resolveUid(contextUserId) {
+  if (contextUserId) return contextUserId;
+  const { data: { session } } = await supabase.auth.getSession();
+  return session?.user?.id ?? null;
+}
+
 /**
- * Single source of truth for the logged-in user's delivery address.
+ * Single canonical source for the logged-in user's delivery address.
  * Reads from and writes to public.profiles ONLY.
  *
  * Returns:
- *   address        — current address object (null if not logged-in or not yet loaded)
- *   hasSavedAddress — true when all 4 required fields are non-empty
- *   isLoading      — true while the initial profiles fetch is in-flight
- *   saveAddress(addr) — upserts addr to profiles, updates local state optimistically
+ *   address          — current address object (null when not resolved yet)
+ *   hasSavedAddress  — true when street + houseNumber + postalCode + city are all non-empty
+ *   isLoading        — true while the initial profiles fetch is in-flight
+ *   saveAddress(addr) — upserts to profiles, updates local state immediately
+ *   refreshAddress() — force re-fetch from DB (call after external writes)
  */
 export function useDeliveryAddress() {
   const { currentUser, isLoggedIn } = useAuth();
@@ -33,58 +43,59 @@ export function useDeliveryAddress() {
   const [address,   setAddress]   = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    if (!isLoggedIn || !currentUser?.id) {
+  /* ── Core read ── */
+  const fetchAddress = useCallback(async () => {
+    const uid = await resolveUid(currentUser?.id);
+
+    if (!uid) {
+      console.log('[addr] no uid — skipping fetch');
       setAddress(null);
       setIsLoading(false);
       return;
     }
 
     setIsLoading(true);
-    console.log('[addr] READ start — userId:', currentUser.id.slice(0, 8));
+    console.log('[addr] reading profile for uid', uid);
 
-    supabase
+    const { data, error } = await supabase
       .from('profiles')
       .select('full_name, phone, street, house_number, postal_code, city, floor, bell_name')
-      .eq('id', currentUser.id)
-      .single()
-      .then(({ data, error }) => {
-        if (error) {
-          console.error('[addr] READ error:', { code: error.code, message: error.message, hint: error.hint });
-        } else {
-          console.log('[addr] READ result:', {
-            street:       data?.street       || '(empty)',
-            house_number: data?.house_number || '(empty)',
-            postal_code:  data?.postal_code  || '(empty)',
-            city:         data?.city         || '(empty)',
-            floor:        data?.floor        || '(empty)',
-            bell_name:    data?.bell_name    || '(empty)',
-            full_name:    data?.full_name    || '(empty)',
-            phone:        data?.phone        || '(empty)',
-          });
-        }
-        if (!error && data) setAddress(rowToAddress(data));
-        setIsLoading(false);
-      })
-      .catch(err => {
-        console.error('[addr] READ threw:', err?.message);
-        setIsLoading(false);
-      });
-  }, [isLoggedIn, currentUser?.id]);
+      .eq('id', uid)
+      .single();
 
+    if (error) {
+      console.error('[addr] READ error:', { code: error.code, message: error.message, hint: error.hint });
+    } else {
+      console.log('[addr] raw profile row', data);
+    }
+
+    if (!error && data) setAddress(rowToAddress(data));
+    setIsLoading(false);
+  }, [currentUser?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  /* Re-fetch whenever auth identity changes (login, logout, registration) */
+  useEffect(() => {
+    fetchAddress();
+  }, [fetchAddress]);
+
+  /* ── Public refresh for callers that need to force a re-read ── */
+  const refreshAddress = useCallback(() => {
+    fetchAddress();
+  }, [fetchAddress]);
+
+  /* ── Derived state ── */
   const hasSavedAddress =
     !!address?.street?.trim() &&
     !!address?.houseNumber?.trim() &&
     !!address?.postalCode?.trim() &&
     !!address?.city?.trim();
 
+  console.log('[addr] current address state', address);
+  console.log('[addr] hasSavedAddress', hasSavedAddress);
+
+  /* ── Write ── */
   const saveAddress = useCallback(async (addr) => {
-    // Prefer context id; fall back to live session in case React state lags
-    let uid = currentUser?.id;
-    if (!uid) {
-      const { data: { session } } = await supabase.auth.getSession();
-      uid = session?.user?.id ?? null;
-    }
+    const uid = await resolveUid(currentUser?.id);
     if (!uid) {
       console.error('[addr] WRITE blocked — no user id in context or session');
       return { error: 'not-logged-in' };
@@ -102,7 +113,7 @@ export function useDeliveryAddress() {
       bell_name:    addr.doorbellName || '',
     };
 
-    console.log('[addr] WRITE start — payload:', payload);
+    console.log('[addr] save payload', payload);
 
     const { data: upsertData, error } = await supabase
       .from('profiles')
@@ -110,39 +121,19 @@ export function useDeliveryAddress() {
       .select('street, house_number, postal_code, city, floor, bell_name');
 
     if (error) {
-      console.error('[addr] WRITE error:', { code: error.code, message: error.message, hint: error.hint, details: error.details });
+      console.error('[addr] WRITE error:', {
+        code: error.code, message: error.message,
+        hint: error.hint, details: error.details,
+      });
     } else {
-      console.log('[addr] WRITE success — DB confirmed:', upsertData);
-    }
-
-    if (!error) {
-      // Update local state immediately — no refetch needed.
-      // rowToAddress(payload) uses the same mapping as the read path,
-      // so hasSavedAddress becomes true the instant the write succeeds.
+      console.log('[addr] upsert success', upsertData);
+      // Update local state immediately — rowToAddress(payload) uses the same
+      // mapping as the read path so hasSavedAddress flips to true instantly.
       setAddress(rowToAddress(payload));
-
-      // Verify round-trip: re-read what's now in the DB
-      supabase
-        .from('profiles')
-        .select('street, house_number, postal_code, city')
-        .eq('id', uid)
-        .single()
-        .then(({ data: verify, error: vErr }) => {
-          if (vErr) {
-            console.error('[addr] VERIFY re-read error:', vErr.message);
-          } else {
-            console.log('[addr] VERIFY re-read after write:', {
-              street:       verify?.street       || '(empty)',
-              house_number: verify?.house_number || '(empty)',
-              postal_code:  verify?.postal_code  || '(empty)',
-              city:         verify?.city         || '(empty)',
-            });
-          }
-        });
     }
 
     return { error };
-  }, [currentUser?.id]);
+  }, [currentUser?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  return { address, hasSavedAddress, isLoading, saveAddress };
+  return { address, hasSavedAddress, isLoading, saveAddress, refreshAddress };
 }
