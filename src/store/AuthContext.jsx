@@ -19,9 +19,8 @@ function toAppUser(supaUser) {
   return {
     id:           supaUser.id,
     email:        supaUser.email,
-    fullName:     m.fullName    ?? '',
-    phone:        m.phone       ?? '',
-    address:      m.address     ?? {},
+    fullName:     m.fullName ?? '',
+    phone:        m.phone    ?? '',
     createdAt:    supaUser.created_at,
     savedPizzas:  readULS(supaUser.id, 'saved',  []),
     orderHistory: readULS(supaUser.id, 'orders', []),
@@ -47,6 +46,35 @@ function mapError(code = '', msg = '') {
   return msg || 'Ein unbekannter Fehler ist aufgetreten.';
 }
 
+/* ─── Hydrate user from public.profiles (primary DB source) ─
+   Fetches name/phone from the profiles row so they stay fresh
+   even if user_metadata hasn't been updated yet.
+   Delivery address is NOT stored here — use useDeliveryAddress.
+──────────────────────────────────────────────────────────── */
+async function hydrateUser(supaUser) {
+  if (!supaUser) return null;
+  const base = toAppUser(supaUser);
+
+  try {
+    const { data: row, error } = await supabase
+      .from('profiles')
+      .select('full_name, phone')
+      .eq('id', base.id)
+      .single();
+
+    if (error || !row) return base;
+
+    return {
+      ...base,
+      fullName: row.full_name || base.fullName,
+      phone:    row.phone     || base.phone,
+    };
+  } catch (err) {
+    console.error('[auth] hydrateUser threw:', err?.message);
+    return base;
+  }
+}
+
 /* ─── Context ──────────────────────────────────────────── */
 const AuthCtx = createContext(null);
 
@@ -58,16 +86,35 @@ export function AuthProvider({ children }) {
 
   /* Restore session on mount, listen for auth changes */
   useEffect(() => {
+    // Step 1 — quick render: set basic user from session cache (no DB call)
+    // then enrich async from profiles table so address is available immediately.
     supabase.auth.getSession().then(({ data: { session } }) => {
-      setCurrentUser(toAppUser(session?.user ?? null));
+      if (!session?.user) { setCurrentUser(null); setLoading(false); return; }
+      setCurrentUser(toAppUser(session.user)); // fast, from localStorage cache
       setLoading(false);
+      hydrateUser(session.user).then(enriched => setCurrentUser(enriched)); // DB fetch
     });
 
+    // Step 2 — auth events: sign-in / sign-out / token refresh
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         console.log('[auth] onAuthStateChange →', event, '| session:', !!session);
-        setCurrentUser(toAppUser(session?.user ?? null));
-        setLoading(false);
+        if (event === 'SIGNED_OUT') {
+          setCurrentUser(null);
+          setLoading(false);
+        } else if (event === 'TOKEN_REFRESHED') {
+          // Token rotated — keep existing profile data, no extra DB call needed
+          setLoading(false);
+        } else if (session?.user) {
+          // SIGNED_IN, USER_UPDATED, INITIAL_SESSION, PASSWORD_RECOVERY
+          hydrateUser(session.user).then(appUser => {
+            setCurrentUser(appUser);
+            setLoading(false);
+          });
+        } else {
+          setCurrentUser(null);
+          setLoading(false);
+        }
       }
     );
 
@@ -90,7 +137,7 @@ export function AuthProvider({ children }) {
         email,
         password,
         options: {
-          data: { fullName, phone, address: {} },
+          data: { fullName, phone },
           emailRedirectTo: redirectTo,
         },
       });
@@ -158,22 +205,39 @@ export function AuthProvider({ children }) {
     localStorage.removeItem('bz_jwt');
   }, []);
 
-  /* ── updateProfile ────────────────────────────────────── */
+  /* ── updateProfile ────────────────────────────────────────
+     Updates name and phone only.
+     Delivery address is managed separately via useDeliveryAddress.
+  ──────────────────────────────────────────────────────────── */
   const updateProfile = useCallback(async (partial, newPassword) => {
     if (!currentUser) return;
 
-    const updates = {};
-    if (newPassword) updates.password = newPassword;
-    updates.data = {
-      fullName: currentUser.fullName,
-      phone:    currentUser.phone,
-      address:  currentUser.address,
-      ...partial,
-    };
+    const fullName = partial.fullName ?? currentUser.fullName ?? '';
+    const phone    = partial.phone    ?? currentUser.phone    ?? '';
 
-    const { data, error } = await supabase.auth.updateUser(updates);
-    if (!error && data.user) {
-      setCurrentUser(prev => ({ ...toAppUser(data.user), savedPizzas: prev.savedPizzas, orderHistory: prev.orderHistory }));
+    // ── 1. Update public.profiles (name + phone only) ───────
+    const { error: dbError } = await supabase
+      .from('profiles')
+      .upsert({ id: currentUser.id, full_name: fullName, phone }, { onConflict: 'id' });
+
+    if (dbError) console.error('[auth] profiles upsert failed:', dbError.message);
+
+    // ── 2. Update auth user_metadata so JWT claims stay fresh ─
+    const { data: authData, error: authError } = await supabase.auth.updateUser({
+      data: { fullName, phone },
+      ...(newPassword ? { password: newPassword } : {}),
+    });
+    if (authError) console.error('[auth] updateUser (metadata) failed:', authError.message);
+
+    // ── 3. Optimistic local state update ────────────────────
+    if (!authError && authData?.user) {
+      setCurrentUser(prev => ({
+        ...toAppUser(authData.user),
+        savedPizzas:  prev.savedPizzas,
+        orderHistory: prev.orderHistory,
+      }));
+    } else {
+      setCurrentUser(prev => ({ ...prev, fullName, phone }));
     }
   }, [currentUser]);
 

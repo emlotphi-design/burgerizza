@@ -6,6 +6,7 @@ import { useAuth } from '../store/AuthContext';
 import { usePizzaStore } from '../store/PizzaContext';
 import { calcPrice } from '../utils/pizzaUtils';
 import { useMountDelay } from '../hooks/useMountDelay';
+import { useDeliveryAddress } from '../hooks/useDeliveryAddress';
 
 // ─── Always-available fallback — page never goes blank ───────
 const MOCK_USER = {
@@ -13,7 +14,7 @@ const MOCK_USER = {
   fullName:     'Azad',
   email:        'emlotphi@gmail.com',
   phone:        '+49 151 000 0000',
-  address:      { street: 'Musterstraße', houseNumber: '12', postalCode: '10115', city: 'Berlin', floor: '', doorbellName: '' },
+  address:      {},
   savedPizzas:  [],
   orderHistory: [],
   createdAt:    '2025-01-01T00:00:00.000Z',
@@ -159,6 +160,156 @@ function PersonalInfoSection({ user }) {
       ))}
       <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
         <button className="pf-save-btn" onClick={handleSave}>Speichern</button>
+        <button className="pf-cancel-btn" onClick={() => setEditing(false)}>Abbrechen</button>
+      </div>
+    </div>
+  );
+}
+
+// ─── Delivery address section ─────────────────────────────────
+// Reads and writes ONLY through useDeliveryAddress (profiles table).
+function AddressSection() {
+  const auth = useAuth();
+  const { address, hasSavedAddress, isLoading, saveAddress } = useDeliveryAddress();
+
+  const [editing, setEditing] = useState(false);
+  const [saving,  setSaving]  = useState(false);
+  const [saveOk,  setSaveOk]  = useState(false);
+  const [fields,  setFields]  = useState({
+    street: '', houseNumber: '', postalCode: '', city: '', floor: '', doorbellName: '',
+  });
+
+  function startEditing() {
+    setFields({
+      street:       address?.street       || '',
+      houseNumber:  address?.houseNumber  || '',
+      postalCode:   address?.postalCode   || '',
+      city:         address?.city         || '',
+      floor:        address?.floor        || '',
+      doorbellName: address?.doorbellName || '',
+    });
+    setEditing(true);
+  }
+
+  async function handleSave() {
+    setSaving(true);
+    setSaveOk(false);
+    try {
+      const { error } = await saveAddress({
+        fullName: auth?.currentUser?.fullName || '',
+        phone:    auth?.currentUser?.phone    || '',
+        ...fields,
+      });
+      if (!error) {
+        setSaveOk(true);
+        setTimeout(() => setSaveOk(false), 3000);
+        setEditing(false);
+      }
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  if (isLoading) {
+    return (
+      <div style={{ padding: '16px 0', display: 'flex', alignItems: 'center', gap: 10 }}>
+        <div style={{
+          width: 16, height: 16, borderRadius: '50%',
+          border: '2.5px solid rgba(26,10,0,0.12)',
+          borderTopColor: '#C8001E',
+          animation: 'co-spin 0.7s linear infinite',
+        }} />
+        <span style={{ fontFamily: 'Nunito, sans-serif', fontSize: 13, fontWeight: 700, color: 'rgba(26,10,0,0.40)' }}>
+          Lade Adresse…
+        </span>
+      </div>
+    );
+  }
+
+  if (!editing) {
+    return (
+      <div className="pf-info-grid">
+        {saveOk && (
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: 7,
+            padding: '8px 14px', marginBottom: 4,
+            background: 'rgba(61,185,110,0.10)',
+            border: '1px solid rgba(61,185,110,0.28)',
+            borderRadius: 10,
+          }}>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#3db96e" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+            <span style={{ fontFamily: 'Nunito, sans-serif', fontSize: 12, fontWeight: 800, color: '#2a9655' }}>
+              Adresse gespeichert ✓
+            </span>
+          </div>
+        )}
+
+        {hasSavedAddress ? (
+          <>
+            <InfoRow label="Straße"       value={address.street} />
+            <InfoRow label="Hausnummer"   value={address.houseNumber} />
+            <InfoRow label="PLZ"          value={address.postalCode} />
+            <InfoRow label="Stadt"        value={address.city} />
+            {address.floor        && <InfoRow label="Etage"       value={address.floor} />}
+            {address.doorbellName && <InfoRow label="Klingelname" value={address.doorbellName} />}
+            <div style={{ padding: '6px 0 2px', display: 'flex', alignItems: 'center', gap: 5 }}>
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#3db96e" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+              <span style={{ fontFamily: 'Nunito, sans-serif', fontSize: 11, fontWeight: 700, color: '#3db96e' }}>
+                Beim Checkout automatisch vorausgefüllt
+              </span>
+            </div>
+          </>
+        ) : (
+          <p className="pf-empty-hint">
+            Keine Lieferadresse gespeichert. Einmal hier speichern — beim nächsten Checkout nie wieder eingeben.
+          </p>
+        )}
+
+        <button className="pf-edit-btn" onClick={startEditing}>
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"
+            strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: 5 }}>
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+          </svg>
+          {hasSavedAddress ? 'Bearbeiten' : 'Adresse hinzufügen'}
+        </button>
+      </div>
+    );
+  }
+
+  // ── Edit form ────────────────────────────────────────────────
+  return (
+    <div className="pf-info-grid">
+      {[
+        { label: 'Straße',      key: 'street',       ph: 'Musterstraße', required: true  },
+        { label: 'Hausnr.',     key: 'houseNumber',  ph: '12A',          required: true  },
+        { label: 'PLZ',         key: 'postalCode',   ph: '10115',        required: true  },
+        { label: 'Stadt',       key: 'city',         ph: 'Berlin',       required: true  },
+        { label: 'Etage',       key: 'floor',        ph: '2. OG'                         },
+        { label: 'Klingelname', key: 'doorbellName', ph: 'Mustermann'                    },
+      ].map(f => (
+        <div key={f.key} className="pf-field-row">
+          <label className="pf-info-label">
+            {f.label}
+            {f.required && <span style={{ color: '#C8001E', marginLeft: 2 }}>*</span>}
+          </label>
+          <input
+            className="pf-inline-input"
+            type="text"
+            value={fields[f.key]}
+            placeholder={f.ph}
+            onChange={e => setFields(p => ({ ...p, [f.key]: e.target.value }))}
+          />
+        </div>
+      ))}
+      <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
+        <button className="pf-save-btn" onClick={handleSave} disabled={saving}>
+          {saving ? 'Speichern…' : 'Speichern'}
+        </button>
         <button className="pf-cancel-btn" onClick={() => setEditing(false)}>Abbrechen</button>
       </div>
     </div>
@@ -374,6 +525,21 @@ function ProfileContent() {
               </ProfileErrorBoundary>
             </SectionCard>
           </div>
+
+          <SectionCard
+            title="Lieferadresse"
+            icon={
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+                strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                <circle cx="12" cy="10" r="3"/>
+              </svg>
+            }
+          >
+            <ProfileErrorBoundary>
+              <AddressSection />
+            </ProfileErrorBoundary>
+          </SectionCard>
 
           <SectionCard
             title={`My Pizzas${savedPizzas.length ? ` (${savedPizzas.length})` : ''}`}

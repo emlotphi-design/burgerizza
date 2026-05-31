@@ -602,6 +602,166 @@
   }
 }
 
+/* ══════════════════════════════════════════
+   SAVED ADDRESS SELECTOR
+══════════════════════════════════════════ */
+
+/* Section header label above the card */
+.co-addr-section {
+  margin-bottom: 20px;
+}
+
+.co-addr-section-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: #8A7A6A;
+  margin-bottom: 10px;
+}
+
+/* "oder" divider between the two action buttons */
+.co-addr-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 20px 0 16px;
+}
+
+.co-addr-divider-line {
+  flex: 1;
+  height: 1px;
+  background: rgba(26, 10, 0, 0.10);
+}
+
+.co-addr-divider-text {
+  font-family: 'Nunito', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  color: #8A7A6A;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+/* Secondary action button — "Neue Adresse eingeben" */
+.co-addr-new-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 52px;
+  padding: 14px 20px;
+  border-radius: 14px;
+  border: 1.5px solid rgba(26, 10, 0, 0.18);
+  background: transparent;
+  color: #1A0A00;
+  font-family: 'Nunito', sans-serif;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  transition: background 0.14s ease, border-color 0.14s ease, transform 0.14s ease;
+}
+
+.co-addr-new-btn:hover {
+  background: rgba(26, 10, 0, 0.04);
+  border-color: rgba(26, 10, 0, 0.30);
+}
+
+/* Crisp tap feedback on touch devices */
+.co-addr-new-btn:active {
+  background: rgba(26, 10, 0, 0.08);
+  border-color: rgba(26, 10, 0, 0.36);
+  transform: scale(0.98);
+}
+
+@media (max-width: 480px) {
+  .co-addr-section {
+    margin-bottom: 16px;
+  }
+
+  .co-addr-new-btn {
+    min-height: 54px;
+    font-size: 15px;
+    border-radius: 16px;
+  }
+
+  .co-addr-divider {
+    margin: 16px 0 14px;
+  }
+}
+
+/* ── Saved address card ── */
+.co-saved-addr-card {
+  background: rgba(26, 10, 0, 0.04);
+  border: 1.5px solid rgba(26, 10, 0, 0.12);
+  border-radius: 16px;
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.co-saved-addr-name {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 900;
+  font-size: 15px;
+  color: #1A0A00;
+}
+
+.co-saved-addr-line {
+  font-family: 'Nunito', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: #3A2A10;
+}
+
+.co-saved-addr-detail {
+  font-family: 'Nunito', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  color: #8A7A5A;
+}
+
+.co-saved-addr-phone {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: #3A2A10;
+  margin-top: 4px;
+}
+
+@media (max-width: 480px) {
+  .co-saved-addr-card {
+    padding: 14px 16px;
+    border-radius: 14px;
+    gap: 6px;         /* slightly more breathing room between lines */
+  }
+
+  .co-saved-addr-name {
+    font-size: 16px;  /* easier to read on phone */
+  }
+
+  .co-saved-addr-line,
+  .co-saved-addr-phone {
+    font-size: 14px;
+  }
+
+  .co-saved-addr-detail {
+    font-size: 13px;
+  }
+}
+
 /* ── Payment ── */
 .co-total-pill {
   display: inline-flex;

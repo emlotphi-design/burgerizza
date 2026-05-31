@@ -12,34 +12,13 @@ import { useRestaurantMode } from '../store/RestaurantModeContext';
 import { createOrder } from '../admin/services/adminService';
 import PasswordInput from '../components/ui/PasswordInput';
 import CheckoutAddressSelector from '../components/checkout/CheckoutAddressSelector';
+import { useDeliveryAddress } from '../hooks/useDeliveryAddress';
 
 /* ─── Delivery profile helpers ─────────────────────────── */
-const REQUIRED_DELIVERY = ['fullName', 'street', 'houseNumber', 'postalCode', 'city', 'phone', 'email'];
-
 const EMPTY_PROFILE = {
   fullName: '', street: '', houseNumber: '', postalCode: '',
   city: '', floor: '', doorbellName: '', phone: '', email: '',
 };
-
-/** Flatten a currentUser into the checkout form shape, with safe fallbacks */
-function profileFromUser(user) {
-  return {
-    fullName:     user.fullName              ?? '',
-    email:        user.email                 ?? '',
-    phone:        user.phone                 ?? '',
-    street:       user.address?.street       ?? '',
-    houseNumber:  user.address?.houseNumber  ?? '',
-    postalCode:   user.address?.postalCode   ?? '',
-    city:         user.address?.city         ?? '',
-    floor:        user.address?.floor        ?? '',
-    doorbellName: user.address?.doorbellName ?? '',
-  };
-}
-
-/** True when every required delivery field has content */
-function isDeliveryComplete(p) {
-  return REQUIRED_DELIVERY.every(k => p[k]?.trim());
-}
 
 /* Guest-only: cache delivery info in localStorage */
 function readGuestProfile() {
@@ -48,25 +27,6 @@ function readGuestProfile() {
 }
 function saveGuestProfile(p) {
   try { localStorage.setItem('bz_profile', JSON.stringify(p)); } catch {}
-}
-
-// Fields needed to consider an address "complete" for the confirm-card shortcut
-const ADDR_FIELDS = ['street', 'houseNumber', 'postalCode', 'city', 'phone'];
-
-/**
- * Returns profile merged with the bz_last_delivery cache when the Supabase
- * profile address is incomplete. This ensures returning users see the
- * address-selector card even when updateProfile didn't propagate yet.
- */
-function mergeWithLastDelivery(fromUser) {
-  if (ADDR_FIELDS.every(k => fromUser[k]?.trim())) return fromUser;
-  try {
-    const last = JSON.parse(localStorage.getItem('bz_last_delivery') ?? 'null');
-    if (!last) return fromUser;
-    return { ...fromUser, ...last, email: fromUser.email || last.email || '' };
-  } catch {
-    return fromUser;
-  }
 }
 
 /* ─── Step indicator (dynamic) ─────────────────────────── */
@@ -94,7 +54,7 @@ function StepDots({ step, labels }) {
 /* ═══════════════════════════════════════════════════════
    STEP 1 — Delivery form
 ═══════════════════════════════════════════════════════ */
-function StepDelivery({ profile, setProfile, onNext, autofilled, lockedFields = [] }) {
+function StepDelivery({ profile, setProfile, onNext, autofilled, lockedFields = [], onBackToSaved }) {
   const [locLoading, setLocLoading] = useState(false);
   const [locError,   setLocError]   = useState('');
   const [errors,     setErrors]     = useState({});
@@ -152,6 +112,12 @@ function StepDelivery({ profile, setProfile, onNext, autofilled, lockedFields = 
 
   return (
     <form className="co-form" onSubmit={handleSubmit} noValidate>
+      {onBackToSaved && (
+        <button type="button" className="co-back-link" onClick={onBackToSaved} style={{ marginBottom: 12 }}>
+          ← Gespeicherte Adresse verwenden
+        </button>
+      )}
+
       <div className="co-form-header">
         <h2 className="co-form-title">Lieferinformationen</h2>
         <p className="co-form-sub">Wohin soll deine Pizza geliefert werden?</p>
@@ -251,22 +217,36 @@ function StepAccount({ profile, onSkip, onCreated }) {
     if (Object.keys(errs).length) { setErrors(errs); return; }
 
     setLoading(true);
-    const { user, error } = await register({
+    const result = await register({
       fullName: profile.fullName,
       email:    profile.email,
       phone:    profile.phone,
       password,
-      address: {
-        street:      profile.street,
-        houseNumber: profile.houseNumber,
-        postalCode:  profile.postalCode,
-        city:        profile.city,
-        floor:       profile.floor,
-        doorbellName: profile.doorbellName,
-      },
     });
     setLoading(false);
+
+    // ── DIAGNOSTIC: log the exact register() response ──────────────────
+    console.log('[StepAccount] register() returned:', {
+      hasUser:            !!result.user,
+      hasError:           !!result.error,
+      needsVerification:  !!result.needsVerification,
+      error:              result.error   ?? null,
+      userId:             result.user?.id?.slice(0, 8) ?? null,
+    });
+
+    const { user, error, needsVerification } = result;
+
     if (error) { setErrors({ general: error }); return; }
+
+    // needsVerification means signUp succeeded but email confirmation is pending.
+    // The user is NOT yet logged in. Log this so we can see if this is the
+    // broken path where isLoggedIn stays false through payment.
+    if (needsVerification) {
+      console.warn('[StepAccount] email confirmation required — user NOT logged in yet.',
+        'isLoggedIn will be false during handleConfirmed → saveAddress will be skipped!'
+      );
+    }
+
     onCreated(user);
   }
 
@@ -442,7 +422,7 @@ function OrderSuccess({ grandTotal, orderId, onHome, onTrack }) {
         Deine Pizza ist unterwegs. Wir bereiten alles frisch für dich vor.<br />
         Geschätzte Lieferzeit: <strong>25–40 Minuten</strong>
       </p>
-      <div className="co-success-total">€{grandTotal.toFixed(2)} bezahlt</div>
+      <div className="co-success-total">€{(grandTotal ?? 0).toFixed(2)} bezahlt</div>
       {orderId && (
         <button className="co-next-btn" onClick={onTrack} style={{ marginBottom: 10 }}>
           🛵 Track My Order
@@ -772,54 +752,38 @@ function RestaurantCheckout() {
 function CheckoutNormal() {
   const navigate = useNavigate();
   const { pizzas, clearCart } = usePizzaStore();
-  const { isLoggedIn, currentUser, addOrder, savePizzaToProfile, updateProfile, loading: authLoading } = useAuth();
+  const { isLoggedIn, currentUser, addOrder, savePizzaToProfile, loading: authLoading } = useAuth();
 
-  /* Derive profile: auth user takes priority, merged with last-delivery cache */
+  /* ── Canonical delivery address — profiles table only ──────────────────── */
+  const { address: savedAddress, hasSavedAddress, isLoading: addrLoading, saveAddress } = useDeliveryAddress();
+
+  /* Form state: pre-fill identity from auth for logged-in users.
+     Address fields start empty — the confirm card handles saved addresses. */
   const [profile, setProfile] = useState(() =>
     currentUser
-      ? mergeWithLastDelivery(profileFromUser(currentUser))
+      ? { ...EMPTY_PROFILE, email: currentUser.email || '', fullName: currentUser.fullName || '', phone: currentUser.phone || '' }
       : { ...EMPTY_PROFILE, ...readGuestProfile() }
   );
-
-  /* Reactive sync: if currentUser is updated (e.g. profile page), refresh form */
-  useEffect(() => {
-    if (currentUser) setProfile(mergeWithLastDelivery(profileFromUser(currentUser)));
-  }, [currentUser]);
-
-  /* Fetch public.profiles row to enrich + confirm pre-filled fields */
-  useEffect(() => {
-    if (!isLoggedIn || !currentUser?.id) return;
-    supabase
-      .from('profiles')
-      .select('email')
-      .eq('id', currentUser.id)
-      .single()
-      .then(({ data }) => {
-        if (data?.email) {
-          setProfile(prev => ({ ...prev, email: data.email }));
-        }
-      })
-      .catch(() => {});
-  }, [isLoggedIn, currentUser?.id]);
 
   /* Only email is locked — taken directly from the Supabase session */
   const lockedFields = isLoggedIn ? ['email'] : [];
 
-  /* Saved-address confirm card: shown when logged in with a complete address.
-     Derived from currentUser directly (not from profile state) so it resolves
-     on the same render as authLoading→false, with no one-render lag. */
-  const REQUIRED_ADDR = ['fullName', 'street', 'houseNumber', 'postalCode', 'city', 'phone'];
-  const savedAddressData = (isLoggedIn && currentUser)
-    ? mergeWithLastDelivery(profileFromUser(currentUser))
-    : null;
-  const hasSavedAddress = !!savedAddressData && REQUIRED_ADDR.every(k => savedAddressData[k]?.trim());
-  const [useNewAddress, setUseNewAddress] = useState(false);
-  const showConfirmCard = hasSavedAddress && !useNewAddress;
+  /* false = show confirm card (default for users with a saved address);
+     true  = user explicitly requested the manual form */
+  const [showNewAddressForm, setShowNewAddressForm] = useState(false);
+  const showConfirmCard = hasSavedAddress && !showNewAddressForm;
+
+  /* Spinner until auth resolves AND (for logged-in users) until address fetch settles */
+  const isLoading = authLoading || (isLoggedIn && addrLoading);
 
   const [step,      setStep]      = useState(1);
   const [done,      setDone]      = useState(false);
   const [finalTotal, setFinalTotal] = useState(0);
   const [savedOrderId, setSavedOrderId] = useState(null);
+  /* Explicit flag: set when user confirms the saved address card. Prevents any
+     re-render (auth refresh, Supabase fetch, context update) from flipping the
+     view back to the address form once the user has chosen to proceed. */
+  const [savedAddressConfirmed, setSavedAddressConfirmed] = useState(false);
 
   /* Steps differ based on login state */
   const stepLabels = isLoggedIn
@@ -828,6 +792,14 @@ function CheckoutNormal() {
   const paymentStep = isLoggedIn ? 2 : 3;
 
   const grandTotal = pizzas.reduce((sum, p) => sum + calcPrice(p) * (p.quantity || 1), 0);
+
+  /* Clear cart AFTER done=true is committed to avoid a concurrent-render race
+     where clearCart()'s cross-context propagation (cartStore → PizzaContext)
+     produces an intermediate render with pizzas=[] but done=false, incorrectly
+     triggering the empty-cart redirect. */
+  useEffect(() => {
+    if (done) clearCart();
+  }, [done]); // clearCart is a stable useCallback ref
 
   useEffect(() => {
     // Only redirect to cart if we're actually on /checkout (not transitioning away)
@@ -840,6 +812,21 @@ function CheckoutNormal() {
   async function handleConfirmed(paymentMethod) {
     const total = grandTotal;
     setFinalTotal(total);
+
+    // ── DIAGNOSTIC: full state snapshot at payment confirm ──────────────
+    console.log('[handleConfirmed] ▶ payment confirmed:', {
+      paymentMethod,
+      total,
+      isLoggedIn,
+      userId:             currentUser?.id?.slice(0, 8) ?? null,
+      profile_fullName:   profile.fullName,
+      profile_street:     profile.street,
+      profile_houseNumber:profile.houseNumber,
+      profile_postalCode: profile.postalCode,
+      profile_city:       profile.city,
+      profile_phone:      profile.phone,
+      willSaveAddress:    isLoggedIn && !!(profile.street),
+    });
 
     if (isLoggedIn && currentUser) {
       const order = {
@@ -859,74 +846,76 @@ function CheckoutNormal() {
       totalPrice: total,
     }).catch(err => console.warn('[checkout] order not saved to backend:', err.message));
 
-    const { data: savedOrder } = await supabase.from('orders').insert({
-      user_id:          currentUser?.id ?? null,
-      customer_name:    profile.fullName  || '',
-      customer_email:   profile.email     || '',
-      customer_phone:   profile.phone     || '',
-      delivery_address: {
-        street:       profile.street       || '',
-        houseNumber:  profile.houseNumber  || '',
-        postalCode:   profile.postalCode   || '',
-        city:         profile.city         || '',
-        floor:        profile.floor        || '',
-        doorbellName: profile.doorbellName || '',
-      },
-      items: pizzas.map(p => {
-        const item = {
-          name:     p.name || (p.type === 'burger' ? 'Custom Burger' : 'Custom Pizza'),
-          type:     p.type || 'pizza',
-          quantity: p.quantity ?? 1,
-          price:    calcPrice(p),
-        };
-        // Pizza customizations
-        if (p.dough)      item.dough      = p.dough;
-        if (p.sauce)      item.sauce      = p.sauce;
-        if (p.cheese)     item.cheese     = p.cheese;
-        if (p.meats?.length)      item.meats      = p.meats;
-        if (p.vegetables?.length) item.vegetables = p.vegetables;
-        // Burger customizations
-        if (p.bun)        item.bun        = p.bun;
-        if (p.sauces?.length)     item.sauces     = p.sauces;
-        if (p.cheeses && Object.keys(p.cheeses).length) item.cheeses = p.cheeses;
-        if (p.type === 'burger' && p.meats && typeof p.meats === 'object' && !Array.isArray(p.meats)) {
-          item.burger_meats = p.meats;
-          delete item.meats;
-        }
-        return item;
-      }),
-      total_price:    total,
-      status:         'pending',
-      payment_method: paymentMethod,
-    }).select('id').single();
-
-    if (savedOrder?.id) {
-      setSavedOrderId(savedOrder.id);
-      localStorage.setItem('bz_last_order_id', savedOrder.id);
-    }
-
-    setDone(true);
-    clearCart();
-
-    // Persist the delivery address used so next checkout can pre-confirm it.
-    // For logged-in users: update their Supabase profile address (fire-and-forget).
-    // For everyone: cache in localStorage so the confirm card pre-fills instantly.
-    if (isLoggedIn && updateProfile) {
-      updateProfile({
-        fullName: profile.fullName,
-        phone:    profile.phone,
-        address: {
-          street:       profile.street,
-          houseNumber:  profile.houseNumber,
-          postalCode:   profile.postalCode,
-          city:         profile.city,
-          floor:        profile.floor       || '',
+    try {
+      const { data: savedOrder, error: orderError } = await supabase.from('orders').insert({
+        user_id:          currentUser?.id ?? null,
+        customer_name:    profile.fullName  || '',
+        customer_email:   profile.email     || '',
+        customer_phone:   profile.phone     || '',
+        delivery_address: {
+          street:       profile.street       || '',
+          houseNumber:  profile.houseNumber  || '',
+          postalCode:   profile.postalCode   || '',
+          city:         profile.city         || '',
+          floor:        profile.floor        || '',
           doorbellName: profile.doorbellName || '',
         },
-      }).catch(() => {});
+        items: pizzas.map(p => {
+          const item = {
+            name:     p.name || (p.type === 'burger' ? 'Custom Burger' : 'Custom Pizza'),
+            type:     p.type || 'pizza',
+            quantity: p.quantity ?? 1,
+            price:    calcPrice(p),
+          };
+          // Pizza customizations
+          if (p.dough)      item.dough      = p.dough;
+          if (p.sauce)      item.sauce      = p.sauce;
+          if (p.cheese)     item.cheese     = p.cheese;
+          if (p.meats?.length)      item.meats      = p.meats;
+          if (p.vegetables?.length) item.vegetables = p.vegetables;
+          // Burger customizations
+          if (p.bun)        item.bun        = p.bun;
+          if (p.sauces?.length)     item.sauces     = p.sauces;
+          if (p.cheeses && Object.keys(p.cheeses).length) item.cheeses = p.cheeses;
+          if (p.type === 'burger' && p.meats && typeof p.meats === 'object' && !Array.isArray(p.meats)) {
+            item.burger_meats = p.meats;
+            delete item.meats;
+          }
+          return item;
+        }),
+        total_price:    total,
+        status:         'pending',
+        payment_method: paymentMethod,
+      }).select('id').single();
+
+      console.log('[checkout] Supabase response', { savedOrder, orderError });
+
+      if (orderError) {
+        console.warn('[checkout] Supabase SELECT error (order was still created):', orderError);
+      }
+
+      if (savedOrder?.id) {
+        const oid = savedOrder.id;
+        console.log('[checkout] orderId:', oid, '| tracking:', `/order-tracking/${oid}`);
+        setSavedOrderId(oid);
+        localStorage.setItem('bz_last_order_id', oid);
+      }
+    } catch (insertErr) {
+      console.error('[checkout] insert threw — order may or may not have been created:', insertErr);
     }
-    try {
-      localStorage.setItem('bz_last_delivery', JSON.stringify({
+
+    // ── Persist delivery address to profiles ─────────────────────────────
+    // saveAddress() handles the uid fallback (currentUser?.id OR live session)
+    // and calls setAddress() on success so hasSavedAddress updates immediately
+    // in the same render — no refetch or page reload needed.
+    if (
+      profile?.street?.trim() &&
+      profile?.houseNumber?.trim() &&
+      profile?.postalCode?.trim() &&
+      profile?.city?.trim()
+    ) {
+      console.log('[checkout] profile before save', profile);
+      const { error: addrErr } = await saveAddress({
         fullName:     profile.fullName,
         phone:        profile.phone,
         street:       profile.street,
@@ -935,14 +924,44 @@ function CheckoutNormal() {
         city:         profile.city,
         floor:        profile.floor       || '',
         doorbellName: profile.doorbellName || '',
-      }));
-    } catch {}
+      });
+      if (addrErr) {
+        console.error('[checkout] address save failed', addrErr);
+      } else {
+        console.log('[checkout] address saved successfully');
+      }
+    }
+
+    // Transition to success. clearCart() is deferred to a useEffect that fires
+    // after done=true is committed, preventing a concurrent-render race condition.
+    setDone(true);
   }
 
   function stepForward() { setStep(s => s + 1); }
 
+  /* Going back from payment: restore address step in its default state —
+     confirm card if there is a saved address, plain form if not. */
+  function handlePaymentBack() {
+    setSavedAddressConfirmed(false);
+    setShowNewAddressForm(false); // re-show confirm card (not the expanded form)
+    setStep(s => s - 1);
+  }
+
   /* Persist delivery info for guests only; auth users use their profile */
   function handleDeliveryNext() {
+    // ── DIAGNOSTIC: snapshot profile state at delivery form submit ──────
+    console.log('[handleDeliveryNext] form submitted:', {
+      isLoggedIn,
+      userId:      currentUser?.id?.slice(0, 8) ?? null,
+      fullName:    profile.fullName,
+      street:      profile.street,
+      houseNumber: profile.houseNumber,
+      postalCode:  profile.postalCode,
+      city:        profile.city,
+      phone:       profile.phone,
+      email:       profile.email,
+      allFieldsFilled: !!(profile.fullName && profile.street && profile.houseNumber && profile.postalCode && profile.city && profile.phone),
+    });
     if (!isLoggedIn) saveGuestProfile(profile);
     stepForward();
   }
@@ -950,7 +969,10 @@ function CheckoutNormal() {
   function handleAccountCreated() { stepForward(); }
   function handleSkipAccount()    { stepForward(); }
 
-  const displayStep = done ? stepLabels.length + 1 : step;
+  /* When address is confirmed, show the payment step label in the dots. */
+  const displayStep = done
+    ? stepLabels.length + 1
+    : (savedAddressConfirmed ? paymentStep : step);
 
   return (
     <div className="page-enter co-page" style={{ display: 'flex', flexDirection: 'column', minHeight: '100dvh' }}>
@@ -968,30 +990,52 @@ function CheckoutNormal() {
                 onHome={() => navigate('/')}
                 onTrack={() => navigate(savedOrderId ? `/order-tracking/${savedOrderId}` : '/')}
               />
-            ) : authLoading ? (
+            ) : isLoading ? (
               <div className="co-form" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 240 }}>
                 <span className="co-spinner" />
               </div>
-            ) : step === 1 && showConfirmCard ? (
-              <CheckoutAddressSelector
-                savedAddress={savedAddressData}
-                onUseThis={() => {
-                  setProfile(savedAddressData);
-                  stepForward();
-                }}
-                onEnterNew={() => setUseNewAddress(true)}
-              />
-            ) : step === 1 ? (
-              <StepDelivery profile={profile} setProfile={setProfile} onNext={handleDeliveryNext} autofilled={!!currentUser} lockedFields={lockedFields} />
-            ) : step === 2 && !isLoggedIn ? (
-              <StepAccount profile={profile} onCreated={handleAccountCreated} onSkip={handleSkipAccount} />
-            ) : (
+            ) : (savedAddressConfirmed || step >= paymentStep) ? (
+              /* Payment step — shown when user confirmed saved address OR advanced
+                 through the manual delivery form. Checked first so no re-render
+                 can drop the user back to an address form. */
               <StepPayment
                 grandTotal={grandTotal}
                 paymentStep={paymentStep}
-                onBack={() => setStep(step - 1)}
+                onBack={handlePaymentBack}
                 onConfirm={handleConfirmed}
               />
+            ) : step === 1 && showConfirmCard ? (
+              <CheckoutAddressSelector
+                savedAddress={savedAddress}
+                onUseThis={() => {
+                  setProfile({ ...savedAddress, email: currentUser?.email || '' });
+                  setSavedAddressConfirmed(true);
+                  setStep(paymentStep);
+                }}
+                onEnterNew={() => {
+                  setSavedAddressConfirmed(false);
+                  setShowNewAddressForm(true);
+                  setProfile({
+                    ...EMPTY_PROFILE,
+                    email:    currentUser?.email    || '',
+                    fullName: currentUser?.fullName || '',
+                    phone:    currentUser?.phone    || '',
+                  });
+                }}
+              />
+            ) : step === 1 && (!hasSavedAddress || showNewAddressForm) ? (
+              <StepDelivery
+                profile={profile}
+                setProfile={setProfile}
+                onNext={handleDeliveryNext}
+                autofilled={!!currentUser}
+                lockedFields={lockedFields}
+                onBackToSaved={hasSavedAddress ? () => setShowNewAddressForm(false) : undefined}
+              />
+            ) : (
+              /* Guest step 2: account creation. Logged-in users at step 2 are
+                 already caught by the paymentStep condition above. */
+              <StepAccount profile={profile} onCreated={handleAccountCreated} onSkip={handleSkipAccount} />
             )}
           </div>
         </div>
