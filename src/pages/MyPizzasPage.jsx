@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Socials from '../components/Socials';
 import PizzaCanvas from '../components/PizzaCanvas';
-import { usePizzaStore } from '../context/PizzaContext';
+import { usePizzaStore } from '../store/PizzaContext';
 import { calcPrice, LABEL } from '../utils/pizzaUtils';
 import { useMountDelay } from '../hooks/useMountDelay';
 

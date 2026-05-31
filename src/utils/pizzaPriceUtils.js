@@ -1,5 +1,5 @@
-import { INGREDIENTS_BY_ID } from '../constants/pizzaIngredients';
-import { DOUGHS_BY_ID, PIZZA_DOUGHS } from '../constants/pizzaDoughs';
+import { INGREDIENTS_BY_ID } from './pizzaIngredients';
+import { DOUGHS_BY_ID, PIZZA_DOUGHS } from './pizzaDoughs';
 
 /**
  * Fallback base price when dough ID is unknown.

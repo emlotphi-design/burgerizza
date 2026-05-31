@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { usePizzaStore } from '../context/PizzaContext.jsx';
-import { useAuth } from '../context/AuthContext.jsx';
+import { usePizzaStore } from '../store/PizzaContext.jsx';
+import { useAuth } from '../store/AuthContext.jsx';
 import MobileMenu from './MobileMenu.jsx';
 
 /* Pages where the Home button IS shown */

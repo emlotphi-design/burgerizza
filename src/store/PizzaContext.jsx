@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useRef, useCallback } from 'react';
+import { useCartStore } from './cartStore';
 
 export const DEFAULT_DRAFT = {
   activeCategory: 'dough',
@@ -25,22 +26,24 @@ function writeLS(key, val) {
 const Ctx = createContext(null);
 
 export function PizzaProvider({ children }) {
-  const [pizzas,     setPizzas]     = useState(() => readLS('bz_pizzas', []));
+  // Cart state lives entirely in cartStore — no duplicate state here
+  const {
+    items,
+    nextId,
+    addItem,
+    removeItem,
+    setQuantity,
+    renameItem,
+    clearCart:   clearCartItems,
+    replaceCart: replaceCartItems,
+    addToCart,
+  } = useCartStore();
+
   const [draft,      _setDraft]     = useState(() => ({ ...DEFAULT_DRAFT, ...readLS('bz_draft', {}) }));
   const [savedItems, setSavedItems] = useState(() => readLS('bz_saved', []));
 
   const draftRef = useRef(draft);
   draftRef.current = draft;
-
-  // Counter seeded from both cart and saved to avoid ID collisions
-  const counterRef = useRef(null);
-  if (counterRef.current === null) {
-    const cartItems  = readLS('bz_pizzas', []);
-    const savedSnap  = readLS('bz_saved',  []);
-    const allIds     = [...cartItems, ...savedSnap].map(p => p.id ?? 0);
-    counterRef.current = allIds.length ? Math.max(...allIds) + 1 : 1;
-  }
-  function nextId() { return counterRef.current++; }
 
   const setDraft = useCallback((partialOrFn) => {
     _setDraft(prev => {
@@ -73,15 +76,11 @@ export function PizzaProvider({ children }) {
       vegetables: d.selectedVegetables,
     };
 
-    // Cart item (auto-numbered fallback name uses prev.length)
-    setPizzas(prev => {
-      const pizza = isNew
-        ? { ...base, name: custom || `Custom Pizza #${prev.length + 1}`, quantity: 1 }
-        : { ...base, name: custom || d.editingName || 'Custom Pizza', quantity: d.editingQuantity ?? 1 };
-      const next = [...prev, pizza];
-      writeLS('bz_pizzas', next);
-      return next;
-    });
+    // Cart item — functional form so auto-numbered name uses live prev.length
+    addItem(prev => isNew
+      ? { ...base, name: custom || `Custom Pizza #${prev.length + 1}`, quantity: 1 }
+      : { ...base, name: custom || d.editingName || 'Custom Pizza', quantity: d.editingQuantity ?? 1 }
+    );
 
     // Saved-items: add new or update existing
     const profileName = custom || (isNew ? 'My Custom Pizza' : d.editingName || 'Custom Pizza');
@@ -103,31 +102,7 @@ export function PizzaProvider({ children }) {
     }
 
     return true;
-  }, []);
-
-  const removePizza = useCallback((id) => {
-    setPizzas(prev => {
-      const next = prev.filter(p => p.id !== id);
-      writeLS('bz_pizzas', next);
-      return next;
-    });
-  }, []);
-
-  const setQuantity = useCallback((id, qty) => {
-    setPizzas(prev => {
-      const next = prev.map(p => p.id === id ? { ...p, quantity: Math.max(1, qty) } : p);
-      writeLS('bz_pizzas', next);
-      return next;
-    });
-  }, []);
-
-  const renamePizza = useCallback((id, name) => {
-    setPizzas(prev => {
-      const next = prev.map(p => p.id === id ? { ...p, name } : p);
-      writeLS('bz_pizzas', next);
-      return next;
-    });
-  }, []);
+  }, [nextId, addItem]);
 
   const startEditing = useCallback((pizza) => {
     const d = draftRef.current;
@@ -135,45 +110,36 @@ export function PizzaProvider({ children }) {
     // Auto-save an in-progress new pizza before switching
     if (d.editingId === null && d.selectedDough && d.selectedSauce && d.selectedCheese) {
       const newId = nextId();
-      setPizzas(prev => {
-        const auto = {
-          id: newId,
-          name: d.draftName.trim() || `Custom Pizza #${prev.length + 1}`,
-          dough: d.selectedDough,
-          sauce: d.selectedSauce,
-          cheese: d.selectedCheese,
-          meats: d.selectedMeats,
-          vegetables: d.selectedVegetables,
-          quantity: 1,
-        };
-        const next = [...prev, auto];
-        writeLS('bz_pizzas', next);
-        return next;
-      });
+      addItem(prev => ({
+        id:         newId,
+        name:       d.draftName.trim() || `Custom Pizza #${prev.length + 1}`,
+        dough:      d.selectedDough,
+        sauce:      d.selectedSauce,
+        cheese:     d.selectedCheese,
+        meats:      d.selectedMeats,
+        vegetables: d.selectedVegetables,
+        quantity:   1,
+      }));
     }
 
     // Remove target pizza from cart (no-op if it's a saved-only item)
-    setPizzas(prev => {
-      const next = prev.filter(p => p.id !== pizza.id);
-      writeLS('bz_pizzas', next);
-      return next;
-    });
+    removeItem(pizza.id);
 
     const newDraft = {
       ...DEFAULT_DRAFT,
-      selectedDough:    pizza.dough,
-      selectedSauce:    pizza.sauce,
-      selectedCheese:   pizza.cheese,
-      selectedMeats:    pizza.meats ?? [],
+      selectedDough:      pizza.dough,
+      selectedSauce:      pizza.sauce,
+      selectedCheese:     pizza.cheese,
+      selectedMeats:      pizza.meats ?? [],
       selectedVegetables: pizza.vegetables ?? [],
-      draftName:        pizza.name,
-      editingId:        pizza.id,
-      editingName:      pizza.name,
-      editingQuantity:  pizza.quantity ?? 1,
+      draftName:          pizza.name,
+      editingId:          pizza.id,
+      editingName:        pizza.name,
+      editingQuantity:    pizza.quantity ?? 1,
     };
     _setDraft(newDraft);
     writeLS('bz_draft', newDraft);
-  }, []);
+  }, [nextId, addItem, removeItem]);
 
   const addBurger = useCallback((burgerDraft) => {
     const id        = nextId();
@@ -184,39 +150,30 @@ export function PizzaProvider({ children }) {
       type:       'burger',
       bun:        burgerDraft.bun,
       topBun:     burgerDraft.bun,
-      meats:      burgerDraft.meats   ?? {},
-      cheeses:    burgerDraft.cheeses ?? {},
-      sauces:     burgerDraft.sauces  ?? [],
+      meats:      burgerDraft.meats      ?? {},
+      cheeses:    burgerDraft.cheeses    ?? {},
+      sauces:     burgerDraft.sauces     ?? [],
       vegetables: burgerDraft.vegetables ?? [],
-      image:      burgerDraft.image ?? null,
+      image:      burgerDraft.image      ?? null,
       quantity:   1,
     };
 
-    // Cart item (auto-numbered fallback uses prev.length)
-    setPizzas(prev => {
-      const burger = {
-        ...burgerBase,
-        name: burgerDraft.name?.trim() || `Custom Burger #${prev.length + 1}`,
-      };
-      const next = [...prev, burger];
-      writeLS('bz_pizzas', next);
-      return next;
-    });
+    // Cart item — functional form for auto-numbered name
+    addItem(prev => ({
+      ...burgerBase,
+      name: burgerDraft.name?.trim() || `Custom Burger #${prev.length + 1}`,
+    }));
 
     // Save new burgers to profile (not edits of existing cart items)
     if (!isEditing) {
       setSavedItems(prev => {
-        const entry = {
-          ...burgerBase,
-          name: burgerDraft.name?.trim() || 'My Custom Burger',
-          savedAt: new Date().toISOString(),
-        };
-        const next = [entry, ...prev];
+        const entry = { ...burgerBase, name: burgerDraft.name?.trim() || 'My Custom Burger', savedAt: new Date().toISOString() };
+        const next  = [entry, ...prev];
         writeLS('bz_saved', next);
         return next;
       });
     }
-  }, []);
+  }, [nextId, addItem]);
 
   const removeSavedItem = useCallback((id) => {
     setSavedItems(prev => {
@@ -226,39 +183,38 @@ export function PizzaProvider({ children }) {
     });
   }, []);
 
-  // Add a saved item back to the cart (reorder) — always gets a fresh id
-  const addToCart = useCallback((item) => {
-    const id = nextId();
-    setPizzas(prev => {
-      const cartItem = { ...item, id, quantity: 1 };
-      const next = [...prev, cartItem];
-      writeLS('bz_pizzas', next);
-      return next;
-    });
-  }, []);
-
+  // clearCart clears cart items AND the pizza builder draft
   const clearCart = useCallback(() => {
-    setPizzas([]);
-    writeLS('bz_pizzas', []);
+    clearCartItems();
     clearDraft();
-  }, [clearDraft]);
+  }, [clearCartItems, clearDraft]);
 
+  // replaceCart replaces items AND resets draft
   const replaceCart = useCallback((newPizzas) => {
-    const next = newPizzas.map(p => ({ ...p, id: counterRef.current++ }));
-    setPizzas(next);
-    writeLS('bz_pizzas', next);
+    replaceCartItems(newPizzas);
     _setDraft(DEFAULT_DRAFT);
     writeLS('bz_draft', DEFAULT_DRAFT);
-  }, []);
+  }, [replaceCartItems]);
 
   return (
     <Ctx.Provider value={{
-      pizzas, draft, savedItems,
-      setDraft, clearDraft, saveDraftAsPizza,
-      removePizza, setQuantity, renamePizza,
-      startEditing, clearCart, replaceCart,
+      // Cart state — sourced from cartStore, aliased for backward compatibility
+      pizzas:     items,
+      removePizza: removeItem,
+      setQuantity,
+      renamePizza: renameItem,
+      addToCart,
+      clearCart,
+      replaceCart,
+      // Pizza builder state — owned by this context
+      draft,
+      savedItems,
+      setDraft,
+      clearDraft,
+      saveDraftAsPizza,
+      startEditing,
       addBurger,
-      removeSavedItem, addToCart,
+      removeSavedItem,
     }}>
       {children}
     </Ctx.Provider>

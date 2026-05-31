@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CATEGORIES } from '../data/menuData';
+import { CATEGORIES } from '../utils/menuData';
 
 export default function MenuModal({ onClose }) {
   const navigate = useNavigate();

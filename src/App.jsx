@@ -1,4 +1,4 @@
-import './App.css';
+import './styles/App.css';
 import { Routes, Route, useLocation } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import Navbar from './components/Navbar';
@@ -25,6 +25,11 @@ import AdminOrders from './admin/pages/Orders';
 import AdminProducts from './admin/pages/Products';
 import AdminUsers from './admin/pages/Users';
 import AdminSettings from './admin/pages/Settings';
+import AdminPOS from './admin/pages/POS';
+import RestaurantModeBanner from './components/RestaurantModeBanner';
+import RestaurantModeCartBar from './components/RestaurantModeCartBar';
+import RestaurantModeBuilderBar from './components/RestaurantModeBuilderBar';
+import { useRestaurantMode } from './store/RestaurantModeContext';
 
 const BUILDER_ROUTES = new Set(['/build-pizza', '/build-burger']);
 
@@ -51,8 +56,14 @@ function AnimatedRoutes() {
     setDisplayLocation(location);
   }, [location.pathname]);
 
+  const { isRestaurantMode } = useRestaurantMode();
+  const isAdminRoute = displayLocation.pathname.startsWith('/admin');
+
   return (
     <div className={exiting ? 'route-exiting' : undefined}>
+      {isRestaurantMode && !isAdminRoute && <RestaurantModeBanner />}
+      {isRestaurantMode && !isAdminRoute && <RestaurantModeBuilderBar />}
+      {isRestaurantMode && !isAdminRoute && <RestaurantModeCartBar />}
       <Routes location={displayLocation}>
         <Route
           path="/"
@@ -94,6 +105,7 @@ function AnimatedRoutes() {
           <Route path="products" element={<AdminProducts />} />
           <Route path="users"   element={<AdminUsers />} />
           <Route path="settings" element={<AdminSettings />} />
+          <Route path="pos"     element={<AdminPOS />} />
         </Route>
       </Routes>
     </div>

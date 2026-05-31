@@ -2,8 +2,8 @@ import React, { useState, Component } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Socials from '../components/Socials';
-import { useAuth } from '../context/AuthContext';
-import { usePizzaStore } from '../context/PizzaContext';
+import { useAuth } from '../store/AuthContext';
+import { usePizzaStore } from '../store/PizzaContext';
 import { calcPrice } from '../utils/pizzaUtils';
 import { useMountDelay } from '../hooks/useMountDelay';
 

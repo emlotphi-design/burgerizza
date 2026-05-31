@@ -2,13 +2,17 @@ import { useState, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Socials from '../components/Socials';
-import { CATEGORIES, MENU_ITEMS } from '../data/menuData';
-import { usePizzaStore } from '../context/PizzaContext';
+import { CATEGORIES, MENU_ITEMS } from '../utils/menuData';
+import { usePizzaStore } from '../store/PizzaContext';
+import { useRestaurantMode } from '../store/RestaurantModeContext';
+
+const BUILDER_ROUTES = { burger: '/build-burger', pizza: '/build-pizza' };
 
 export default function CategoryPage() {
   const navigate  = useNavigate();
   const location  = useLocation();
   const { addToCart } = usePizzaStore();
+  const { isRestaurantMode } = useRestaurantMode();
 
   const [addedIds, setAddedIds] = useState(new Set());
 
@@ -59,6 +63,40 @@ export default function CategoryPage() {
             ← Back to Menu
           </button>
         </div>
+
+        {/* Restaurant mode: prominent builder shortcut for burger/pizza */}
+        {isRestaurantMode && BUILDER_ROUTES[category] && (
+          <div style={{
+            display: 'flex',
+            justifyContent: 'center',
+            padding: '0 0 24px',
+          }}>
+            <button
+              onClick={() => navigate(BUILDER_ROUTES[category])}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 10,
+                padding: '14px 28px',
+                borderRadius: 16,
+                border: '2.5px solid #FFD54A',
+                background: '#FFD54A',
+                color: '#1A0A00',
+                fontFamily: 'Nunito, sans-serif',
+                fontWeight: 900,
+                fontSize: 15,
+                cursor: 'pointer',
+                boxShadow: '0 4px 16px rgba(255,193,7,0.30)',
+                transition: 'transform 0.14s ease, box-shadow 0.14s ease',
+              }}
+              onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 22px rgba(255,193,7,0.40)'; }}
+              onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 4px 16px rgba(255,193,7,0.30)'; }}
+            >
+              {category === 'burger' ? '🍔' : '🍕'}
+              Build a Custom {category === 'burger' ? 'Burger' : 'Pizza'} →
+            </button>
+          </div>
+        )}
 
         {/* Product grid */}
         <div className="menu-products-grid">

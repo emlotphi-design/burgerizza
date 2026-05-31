@@ -2,12 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Socials from '../components/Socials';
-import { usePizzaStore } from '../context/PizzaContext';
-import { useAuth } from '../context/AuthContext';
+import { usePizzaStore } from '../store/PizzaContext';
+import { useAuth } from '../store/AuthContext';
 import { calcPrice } from '../utils/pizzaUtils';
 import GlassInput from '../components/GlassInput';
-import { api } from '../utils/api';
-import { supabase } from '../lib/supabase';
+import { api } from '../services/api';
+import { supabase } from '../services/supabase';
+import { useRestaurantMode } from '../store/RestaurantModeContext';
+import { createOrder } from '../admin/services/adminService';
+import PasswordInput from '../components/ui/PasswordInput';
+import CheckoutAddressSelector from '../components/checkout/CheckoutAddressSelector';
 
 /* ─── Delivery profile helpers ─────────────────────────── */
 const REQUIRED_DELIVERY = ['fullName', 'street', 'houseNumber', 'postalCode', 'city', 'phone', 'email'];
@@ -44,6 +48,25 @@ function readGuestProfile() {
 }
 function saveGuestProfile(p) {
   try { localStorage.setItem('bz_profile', JSON.stringify(p)); } catch {}
+}
+
+// Fields needed to consider an address "complete" for the confirm-card shortcut
+const ADDR_FIELDS = ['street', 'houseNumber', 'postalCode', 'city', 'phone'];
+
+/**
+ * Returns profile merged with the bz_last_delivery cache when the Supabase
+ * profile address is incomplete. This ensures returning users see the
+ * address-selector card even when updateProfile didn't propagate yet.
+ */
+function mergeWithLastDelivery(fromUser) {
+  if (ADDR_FIELDS.every(k => fromUser[k]?.trim())) return fromUser;
+  try {
+    const last = JSON.parse(localStorage.getItem('bz_last_delivery') ?? 'null');
+    if (!last) return fromUser;
+    return { ...fromUser, ...last, email: fromUser.email || last.email || '' };
+  } catch {
+    return fromUser;
+  }
 }
 
 /* ─── Step indicator (dynamic) ─────────────────────────── */
@@ -269,14 +292,14 @@ function StepAccount({ profile, onSkip, onCreated }) {
       <div className="co-fields">
         <div className="co-field">
           <label className="co-label">Passwort<span className="co-required">*</span></label>
-          <input className="co-input" type="password" value={password}
+          <PasswordInput className="co-input" name="password" value={password}
             onChange={e => { setPassword(e.target.value); setErrors(p => ({ ...p, password: '' })); }}
             placeholder="Mindestens 8 Zeichen" autoComplete="new-password" />
           {errors.password && <span className="co-field-error">{errors.password}</span>}
         </div>
         <div className="co-field">
           <label className="co-label">Passwort bestätigen<span className="co-required">*</span></label>
-          <input className="co-input" type="password" value={confirm}
+          <PasswordInput className="co-input" name="confirmPassword" value={confirm}
             onChange={e => { setConfirm(e.target.value); setErrors(p => ({ ...p, confirm: '' })); }}
             placeholder="••••••••" autoComplete="new-password" />
           {errors.confirm && <span className="co-field-error">{errors.confirm}</span>}
@@ -433,21 +456,334 @@ function OrderSuccess({ grandTotal, orderId, onHome, onTrack }) {
 }
 
 /* ═══════════════════════════════════════════════════════
-   MAIN CHECKOUT PAGE
+   RESTAURANT MODE CHECKOUT — replaces normal flow
 ═══════════════════════════════════════════════════════ */
-export default function Checkout() {
+function RestaurantCheckout() {
   const navigate = useNavigate();
   const { pizzas, clearCart } = usePizzaStore();
-  const { isLoggedIn, currentUser, addOrder, savePizzaToProfile } = useAuth();
+  const { rmConfig, exitRestaurantMode } = useRestaurantMode();
 
-  /* Derive profile: auth user takes priority over guest localStorage cache */
+  const [sending, setSending] = useState(false);
+  const [done,    setDone]    = useState(false);
+  const [orderId, setOrderId] = useState(null);
+  const [errMsg,  setErrMsg]  = useState('');
+
+  const grandTotal = pizzas.reduce((s, p) => s + calcPrice(p) * (p.quantity || 1), 0);
+
+  async function handleSend() {
+    if (!pizzas.length || sending) return;
+    setSending(true);
+    setErrMsg('');
+
+    try {
+      /* ── Customer label ── */
+      const customerName =
+        rmConfig.orderType === 'dine_in'
+          ? (rmConfig.customerName.trim() || `Table ${rmConfig.tableNumber || '?'}`)
+          : (rmConfig.customerName.trim() || 'Walk-in');
+
+      /* ── Serialize cart items — same shape as normal checkout ── */
+      const items = pizzas.map(p => {
+        const item = {
+          name:     p.name || (p.type === 'burger' ? 'Custom Burger' : 'Custom Pizza'),
+          type:     p.type || 'pizza',
+          quantity: p.quantity ?? 1,
+          price:    calcPrice(p),
+          emoji:    p.emoji,
+        };
+        // Pizza customizations
+        if (p.dough)            item.dough      = p.dough;
+        if (p.sauce)            item.sauce      = p.sauce;
+        if (p.cheese)           item.cheese     = p.cheese;
+        if (p.meats?.length)    item.meats      = p.meats;
+        if (p.vegetables?.length) item.vegetables = p.vegetables;
+        // Burger customizations
+        if (p.bun)              item.bun        = p.bun;
+        if (p.sauces?.length)   item.sauces     = p.sauces;
+        if (p.cheeses && Object.keys(p.cheeses).length) item.cheeses = p.cheeses;
+        // Burger meats are an object map { [meatId]: qty }, not an array
+        if (p.type === 'burger' && p.meats && typeof p.meats === 'object' && !Array.isArray(p.meats)) {
+          item.burger_meats = p.meats;
+          delete item.meats;
+        }
+        return item;
+      });
+
+      /* ── Build order payload ─────────────────────────────────────
+         Migration 007 adds source/order_type/table_number columns.
+         Until it runs, those fields live inside delivery_address
+         (JSONB, always exists) so the INSERT succeeds immediately.
+      ────────────────────────────────────────────────────────────── */
+      const tableNum = rmConfig.orderType === 'dine_in' ? (rmConfig.tableNumber || '') : '';
+
+      const payload = {
+        user_id:          null,
+        customer_name:    customerName,
+        customer_email:   '',           // NOT NULL DEFAULT ''
+        customer_phone:   rmConfig.phone?.trim() || '',
+        delivery_address: {
+          mode:         rmConfig.orderType,
+          tableNumber:  tableNum,
+          // Restaurant metadata stored here as fallback (readable before migration):
+          source:       'restaurant_mode',
+          order_type:   rmConfig.orderType,
+          table_number: tableNum,
+          payment:      rmConfig.payment,
+        },
+        items,
+        total_price:    +grandTotal.toFixed(2),
+        status:         'pending',            // no migration needed for this
+        payment_method: rmConfig.payment,
+      };
+
+      console.log('[RestaurantCheckout] placing order:', payload);
+
+      /* ── Insert via adminService — throws on any Supabase error ── */
+      const saved = await createOrder(payload);
+      if (saved?.id) setOrderId(saved.id);
+
+      /* ── Soft confirmation sound (2-note, not kitchen ding) ── */
+      try {
+        const ctx = new window.AudioContext();
+        [[660, 0], [880, 0.14]].forEach(([hz, delay]) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.connect(gain); gain.connect(ctx.destination);
+          osc.frequency.value = hz; osc.type = 'sine';
+          gain.gain.setValueAtTime(0.13, ctx.currentTime + delay);
+          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + delay + 0.22);
+          osc.start(ctx.currentTime + delay);
+          osc.stop(ctx.currentTime + delay + 0.26);
+        });
+      } catch (_) {}
+
+      clearCart();
+      setDone(true);
+
+    } catch (err) {
+      /* Surface the real Supabase error — both in console and UI */
+      console.error('[RestaurantCheckout] Order insert failed:', {
+        message:  err?.message,
+        code:     err?.code,
+        details:  err?.details,
+        hint:     err?.hint,
+        payload:  { rmConfig, itemCount: pizzas.length },
+      });
+      setErrMsg(err?.message || 'Unknown error — check console for details');
+    } finally {
+      setSending(false);
+    }
+  }
+
+  /* ── Styles (uses website palette, no admin CSS) ── */
+  const brand = { fontFamily: 'Nunito, sans-serif' };
+  const accent = '#FFD54A';
+  const dark   = '#1A0A00';
+
+  if (done) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100dvh', background: '#FFF9EC', ...brand }}>
+        <Navbar />
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 18, padding: 32 }}>
+          <div style={{ fontSize: 64 }}>🧾</div>
+          <h2 style={{ fontSize: 26, fontWeight: 900, color: dark, margin: 0 }}>Order Placed!</h2>
+          <p style={{ fontSize: 14, fontWeight: 700, color: '#5A4A2A', margin: 0 }}>
+            Waiting in Orders dashboard — admin will send it to the kitchen
+          </p>
+          {orderId && (
+            <p style={{ fontSize: 12, fontWeight: 700, color: '#A09070', margin: 0, fontFamily: 'monospace' }}>
+              #{orderId.slice(0, 8).toUpperCase()}
+            </p>
+          )}
+          <div style={{ display: 'flex', gap: 12, marginTop: 8 }}>
+            <button
+              onClick={() => { setDone(false); navigate('/menu'); }}
+              style={{ padding: '12px 24px', borderRadius: 14, border: `2px solid ${accent}`, background: accent, color: dark, fontWeight: 900, fontSize: 14, cursor: 'pointer', ...brand }}
+            >
+              🍔 Take Another Order
+            </button>
+            <button
+              onClick={() => navigate('/admin/orders')}
+              style={{ padding: '12px 24px', borderRadius: 14, border: '2px solid #E8E0CB', background: 'white', color: dark, fontWeight: 800, fontSize: 14, cursor: 'pointer', ...brand }}
+            >
+              ← Back to Orders
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100dvh', background: '#FFF9EC', ...brand }}>
+      <Navbar />
+      <main style={{ flex: 1, display: 'grid', gridTemplateColumns: '1fr 380px', gap: 0, maxWidth: 900, margin: '0 auto', width: '100%', padding: '28px 20px 60px', alignItems: 'start', boxSizing: 'border-box' }}>
+
+        {/* Left: item list */}
+        <div style={{ paddingRight: 24 }}>
+          <h2 style={{ fontSize: 20, fontWeight: 900, color: dark, margin: '0 0 16px' }}>
+            Order Summary
+            <span style={{ marginLeft: 10, fontSize: 13, fontWeight: 700, color: '#A09070' }}>
+              {pizzas.length} item{pizzas.length !== 1 ? 's' : ''}
+            </span>
+          </h2>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            {pizzas.map((p, i) => {
+              const price = calcPrice(p) * (p.quantity || 1);
+              return (
+                <div key={i} style={{ background: 'white', border: '1.5px solid #E8E0CB', borderRadius: 14, padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <span style={{ fontSize: 28 }}>{p.type === 'burger' ? '🍔' : p.emoji || '🍕'}</span>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontWeight: 800, fontSize: 14, color: dark }}>
+                      {p.name || (p.type === 'burger' ? 'Custom Burger' : 'Custom Pizza')}
+                      {(p.quantity ?? 1) > 1 && <span style={{ color: '#A09070', marginLeft: 6, fontWeight: 700 }}>×{p.quantity}</span>}
+                    </div>
+                    {p.dough && <div style={{ fontSize: 11, color: '#A09070', fontWeight: 700, marginTop: 2 }}>{[p.dough, p.sauce, p.cheese].filter(Boolean).join(' · ')}</div>}
+                    {p.bun   && <div style={{ fontSize: 11, color: '#A09070', fontWeight: 700, marginTop: 2 }}>{p.bun}</div>}
+                  </div>
+                  <div style={{ fontWeight: 900, fontSize: 15, color: '#8B6914' }}>€{price.toFixed(2)}</div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Right: order config + payment */}
+        <div style={{ background: 'white', border: '1.5px solid #E8E0CB', borderRadius: 18, overflow: 'hidden', boxShadow: '0 4px 20px rgba(0,0,0,0.06)' }}>
+
+          {/* Total header */}
+          <div style={{ background: accent, padding: '16px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span style={{ fontWeight: 900, fontSize: 13, color: dark }}>Total</span>
+            <span style={{ fontWeight: 900, fontSize: 22, color: dark, letterSpacing: '-0.5px' }}>€{grandTotal.toFixed(2)}</span>
+          </div>
+
+          <div style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 18 }}>
+
+            {/* Order type — read from banner config (already set) */}
+            <div>
+              <div style={{ fontSize: 10, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#A09070', marginBottom: 8 }}>
+                Order type
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 6 }}>
+                {[{id:'walkin',l:'Walk-in',i:'🚶'},{id:'pickup',l:'Pickup',i:'🏃'},{id:'dine_in',l:'Dine-in',i:'🪑'}].map(t => (
+                  <div key={t.id} style={{ padding: '8px 4px', borderRadius: 10, border: `1.5px solid ${rmConfig.orderType===t.id ? accent : '#E8E0CB'}`, background: rmConfig.orderType===t.id ? `rgba(255,213,74,0.14)` : '#FFFDF5', textAlign: 'center', fontSize: 10, fontWeight: 800, color: rmConfig.orderType===t.id ? '#8B6914' : '#A09070' }}>
+                    <div style={{ fontSize: 16 }}>{t.i}</div>
+                    {t.l}
+                  </div>
+                ))}
+              </div>
+              <p style={{ fontSize: 11, color: '#A09070', margin: '6px 0 0', fontWeight: 700 }}>
+                Configure order type in the banner above ↑
+              </p>
+            </div>
+
+            {/* Show active config summary */}
+            <div style={{ background: '#FFF8EE', borderRadius: 10, padding: '10px 14px', border: '1px solid #E8E0CB' }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: '#5A4A2A', lineHeight: 1.6 }}>
+                {rmConfig.orderType === 'dine_in' && <>🪑 Table {rmConfig.tableNumber || '?'}{rmConfig.customerName ? ` · ${rmConfig.customerName}` : ''}</>}
+                {rmConfig.orderType === 'pickup'  && <>{rmConfig.customerName || 'Walk-in'}{rmConfig.phone ? ` · ${rmConfig.phone}` : ''}</>}
+                {rmConfig.orderType === 'walkin'  && <>{rmConfig.customerName || 'Walk-in customer'}</>}
+                <br />
+                {rmConfig.payment === 'cash' ? '💵 Cash' : '💳 Card in Store'}
+              </div>
+            </div>
+
+            {/* Place Order */}
+            <button
+              onClick={handleSend}
+              disabled={sending || pizzas.length === 0}
+              style={{
+                width: '100%',
+                height: 52,
+                borderRadius: 14,
+                border: 'none',
+                background: sending || pizzas.length === 0
+                  ? '#ccc'
+                  : 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)',
+                color: 'white',
+                fontSize: 15,
+                fontWeight: 900,
+                cursor: sending || pizzas.length === 0 ? 'not-allowed' : 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 9,
+                boxShadow: sending ? 'none' : '0 4px 16px rgba(22,163,74,0.28)',
+                transition: 'all 0.16s ease',
+                ...brand,
+              }}
+            >
+              {sending ? (
+                <>
+                  <svg style={{ animation: 'spin 0.7s linear infinite', width: 18, height: 18 }} viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round">
+                    <path d="M21 12a9 9 0 11-6.219-8.56"/>
+                  </svg>
+                  Sending…
+                </>
+              ) : (
+                <>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M22 2L11 13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                  </svg>
+                  Place Order
+                </>
+              )}
+            </button>
+
+            {errMsg && (
+              <div style={{
+                padding: '10px 14px',
+                borderRadius: 10,
+                background: 'rgba(220,38,38,0.08)',
+                border: '1.5px solid rgba(220,38,38,0.30)',
+                color: '#dc2626',
+                fontSize: 12,
+                fontWeight: 700,
+                fontFamily: 'Nunito, sans-serif',
+                lineHeight: 1.5,
+              }}>
+                ❌ {errMsg}
+              </div>
+            )}
+
+            <div style={{ textAlign: 'center', fontSize: 10.5, fontWeight: 700, color: '#C0B090' }}>
+              Status → <strong style={{ color: '#eab308' }}>Waiting Confirmation</strong> · admin sends to kitchen
+            </div>
+
+            <button
+              onClick={() => navigate('/menu')}
+              style={{ width: '100%', padding: '10px', borderRadius: 10, border: '1.5px solid #E8E0CB', background: 'transparent', color: '#A09070', fontWeight: 800, fontSize: 12, cursor: 'pointer', ...brand }}
+            >
+              ← Keep adding items
+            </button>
+          </div>
+        </div>
+      </main>
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+    </div>
+  );
+}
+
+/* CheckoutAddressSelector is now a standalone reusable component — imported above */
+
+/* ═══════════════════════════════════════════════════════
+   MAIN CHECKOUT PAGE
+═══════════════════════════════════════════════════════ */
+function CheckoutNormal() {
+  const navigate = useNavigate();
+  const { pizzas, clearCart } = usePizzaStore();
+  const { isLoggedIn, currentUser, addOrder, savePizzaToProfile, updateProfile, loading: authLoading } = useAuth();
+
+  /* Derive profile: auth user takes priority, merged with last-delivery cache */
   const [profile, setProfile] = useState(() =>
-    currentUser ? profileFromUser(currentUser) : { ...EMPTY_PROFILE, ...readGuestProfile() }
+    currentUser
+      ? mergeWithLastDelivery(profileFromUser(currentUser))
+      : { ...EMPTY_PROFILE, ...readGuestProfile() }
   );
 
   /* Reactive sync: if currentUser is updated (e.g. profile page), refresh form */
   useEffect(() => {
-    if (currentUser) setProfile(profileFromUser(currentUser));
+    if (currentUser) setProfile(mergeWithLastDelivery(profileFromUser(currentUser)));
   }, [currentUser]);
 
   /* Fetch public.profiles row to enrich + confirm pre-filled fields */
@@ -469,6 +805,17 @@ export default function Checkout() {
   /* Only email is locked — taken directly from the Supabase session */
   const lockedFields = isLoggedIn ? ['email'] : [];
 
+  /* Saved-address confirm card: shown when logged in with a complete address.
+     Derived from currentUser directly (not from profile state) so it resolves
+     on the same render as authLoading→false, with no one-render lag. */
+  const REQUIRED_ADDR = ['fullName', 'street', 'houseNumber', 'postalCode', 'city', 'phone'];
+  const savedAddressData = (isLoggedIn && currentUser)
+    ? mergeWithLastDelivery(profileFromUser(currentUser))
+    : null;
+  const hasSavedAddress = !!savedAddressData && REQUIRED_ADDR.every(k => savedAddressData[k]?.trim());
+  const [useNewAddress, setUseNewAddress] = useState(false);
+  const showConfirmCard = hasSavedAddress && !useNewAddress;
+
   const [step,      setStep]      = useState(1);
   const [done,      setDone]      = useState(false);
   const [finalTotal, setFinalTotal] = useState(0);
@@ -483,7 +830,11 @@ export default function Checkout() {
   const grandTotal = pizzas.reduce((sum, p) => sum + calcPrice(p) * (p.quantity || 1), 0);
 
   useEffect(() => {
-    if (pizzas.length === 0 && !done) navigate('/cart');
+    // Only redirect to cart if we're actually on /checkout (not transitioning away)
+    // and the cart is genuinely empty before the order was placed.
+    if (pizzas.length === 0 && !done && window.location.pathname === '/checkout') {
+      navigate('/cart');
+    }
   }, [pizzas.length, done, navigate]);
 
   async function handleConfirmed(paymentMethod) {
@@ -556,6 +907,36 @@ export default function Checkout() {
 
     setDone(true);
     clearCart();
+
+    // Persist the delivery address used so next checkout can pre-confirm it.
+    // For logged-in users: update their Supabase profile address (fire-and-forget).
+    // For everyone: cache in localStorage so the confirm card pre-fills instantly.
+    if (isLoggedIn && updateProfile) {
+      updateProfile({
+        fullName: profile.fullName,
+        phone:    profile.phone,
+        address: {
+          street:       profile.street,
+          houseNumber:  profile.houseNumber,
+          postalCode:   profile.postalCode,
+          city:         profile.city,
+          floor:        profile.floor       || '',
+          doorbellName: profile.doorbellName || '',
+        },
+      }).catch(() => {});
+    }
+    try {
+      localStorage.setItem('bz_last_delivery', JSON.stringify({
+        fullName:     profile.fullName,
+        phone:        profile.phone,
+        street:       profile.street,
+        houseNumber:  profile.houseNumber,
+        postalCode:   profile.postalCode,
+        city:         profile.city,
+        floor:        profile.floor       || '',
+        doorbellName: profile.doorbellName || '',
+      }));
+    } catch {}
   }
 
   function stepForward() { setStep(s => s + 1); }
@@ -587,6 +968,19 @@ export default function Checkout() {
                 onHome={() => navigate('/')}
                 onTrack={() => navigate(savedOrderId ? `/order-tracking/${savedOrderId}` : '/')}
               />
+            ) : authLoading ? (
+              <div className="co-form" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 240 }}>
+                <span className="co-spinner" />
+              </div>
+            ) : step === 1 && showConfirmCard ? (
+              <CheckoutAddressSelector
+                savedAddress={savedAddressData}
+                onUseThis={() => {
+                  setProfile(savedAddressData);
+                  stepForward();
+                }}
+                onEnterNew={() => setUseNewAddress(true)}
+              />
             ) : step === 1 ? (
               <StepDelivery profile={profile} setProfile={setProfile} onNext={handleDeliveryNext} autofilled={!!currentUser} lockedFields={lockedFields} />
             ) : step === 2 && !isLoggedIn ? (
@@ -606,4 +1000,10 @@ export default function Checkout() {
       <Socials />
     </div>
   );
+}
+
+export default function Checkout() {
+  const { isRestaurantMode } = useRestaurantMode();
+  if (isRestaurantMode) return <RestaurantCheckout />;
+  return <CheckoutNormal />;
 }

@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react';
-import { supabase } from '../lib/supabase';
+import { supabase } from '../services/supabase';
 
 /* ─── Per-user localStorage helpers ────────────────────── */
 function uKey(uid, suffix) { return `bz_${suffix}_${uid}`; }

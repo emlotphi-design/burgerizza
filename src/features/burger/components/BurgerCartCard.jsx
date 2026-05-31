@@ -1,7 +1,23 @@
 import { useState } from 'react';
-import { usePizzaStore } from '../../../context/PizzaContext';
+import { usePizzaStore } from '../../../store/PizzaContext';
 import { calcBurgerPrice, BURGER_LABEL } from '../utils/burgerUtils';
 import SkeletonImage from '../../../components/SkeletonImage';
+
+/* Bun preview images — used as fallback when canvas capture image is absent
+   (e.g. orders placed via Restaurant Mode sticky bar or admin POS) */
+import classicPreview  from '../../../assets/burgers/buns/buns-preview.png/classicbun-preview.png';
+import classic2Preview from '../../../assets/burgers/buns/buns-preview.png/classicbun-preview2.png';
+import charcoalPreview from '../../../assets/burgers/buns/buns-preview.png/charcoalbun-preview.png';
+import beetrootPreview from '../../../assets/burgers/buns/buns-preview.png/beetrootbun-preview.png';
+import parsleyPreview  from '../../../assets/burgers/buns/buns-preview.png/parsleybun-preview.png';
+
+const BUN_PREVIEWS = {
+  classicbun:  classicPreview,
+  classicbun2: classic2Preview,
+  charcoalbun: charcoalPreview,
+  beetrootbun: beetrootPreview,
+  parsleybun:  parsleyPreview,
+};
 
 export default function BurgerCartCard({ burger, isExiting, animDelay, onRemove, onEdit, idx, visibleCount }) {
   const { setQuantity } = usePizzaStore();
@@ -65,8 +81,9 @@ export default function BurgerCartCard({ burger, isExiting, animDelay, onRemove,
 
       <div className="cart-layout">
         <div className="cart-preview">
-          {burger.image && (
-            <div className="cart-burger-wrap">
+          <div className="cart-burger-wrap">
+            {burger.image ? (
+              /* Level 1 — full canvas capture (normal builder flow) */
               <SkeletonImage
                 src={burger.image}
                 alt={burger.name}
@@ -80,8 +97,31 @@ export default function BurgerCartCard({ burger, isExiting, animDelay, onRemove,
                   filter: 'drop-shadow(0 8px 24px rgba(0,0,0,0.18))',
                 }}
               />
-            </div>
-          )}
+            ) : BUN_PREVIEWS[burger.bun] ? (
+              /* Level 2 — bun preview image (Restaurant Mode / POS path) */
+              <img
+                src={BUN_PREVIEWS[burger.bun]}
+                alt={burger.name || 'Custom Burger'}
+                className="cart-burger-img"
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'contain',
+                  filter: 'drop-shadow(0 8px 24px rgba(0,0,0,0.15))',
+                  opacity: 0.92,
+                }}
+              />
+            ) : (
+              /* Level 3 — emoji placeholder (unknown bun or empty draft) */
+              <div style={{
+                width: '100%', height: '100%',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: 64, lineHeight: 1, userSelect: 'none',
+              }}>
+                🍔
+              </div>
+            )}
+          </div>
         </div>
 
         <div className="cart-details">

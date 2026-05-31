@@ -1,14 +1,25 @@
 import { Fragment, useCallback, useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { fetchOrders, updateOrderStatus, subscribeToOrders, assignDriverAndAdvance } from '../services/adminService';
+import { useRestaurantMode } from '../../store/RestaurantModeContext';
+import {
+  playOrderNotification,
+  showBrowserNotification,
+  requestNotificationPermission,
+  unlockAudio,
+  toggleMute,
+  getMuted,
+} from '../../utils/playOrderNotification';
 
 /* ── Status config ─────────────────────────────────────────── */
 const STATUS_FLOW = [
-  { value: 'pending',   label: 'Pending',          color: '#6366f1', badge: 'adm-badge--indigo' },
-  { value: 'confirmed', label: 'Confirmed',         color: '#3b82f6', badge: 'adm-badge--blue'   },
-  { value: 'preparing', label: 'Preparing',         color: '#d97706', badge: 'adm-badge--amber'  },
-  { value: 'ready',     label: 'Out for delivery',  color: '#f97316', badge: 'adm-badge--orange' },
-  { value: 'delivered', label: 'Delivered',         color: '#22c55e', badge: 'adm-badge--green'  },
-  { value: 'cancelled', label: 'Cancelled',         color: '#ef4444', badge: 'adm-badge--red'    },
+  { value: 'waiting_confirmation', label: 'Waiting',           color: '#eab308', badge: 'adm-badge--waiting' },
+  { value: 'pending',              label: 'Pending',           color: '#6366f1', badge: 'adm-badge--indigo'  },
+  { value: 'confirmed',            label: 'Confirmed',         color: '#3b82f6', badge: 'adm-badge--blue'    },
+  { value: 'preparing',            label: 'Preparing',         color: '#d97706', badge: 'adm-badge--amber'   },
+  { value: 'ready',                label: 'Out for delivery',  color: '#f97316', badge: 'adm-badge--orange'  },
+  { value: 'delivered',            label: 'Delivered',         color: '#22c55e', badge: 'adm-badge--green'   },
+  { value: 'cancelled',            label: 'Cancelled',         color: '#ef4444', badge: 'adm-badge--red'     },
 ];
 const STATUS_MAP = Object.fromEntries(STATUS_FLOW.map(s => [s.value, s]));
 
@@ -150,6 +161,36 @@ function SmartPipeline({ order, onStepClick, onDriverAndAdvance, saving }) {
   }, [driverOpen]);
 
   const { status, driver_name } = order;
+
+  /* Restaurant mode: show "Send to Kitchen" CTA before pipeline starts.
+     Works with status='waiting_confirmation' (after migration 007)
+     AND with status='pending' + delivery_address.source='restaurant_mode' (before migration). */
+  const isRmPending =
+    status === 'waiting_confirmation' ||
+    (status === 'pending' && order.delivery_address?.source === 'restaurant_mode');
+
+  if (isRmPending) {
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+        <span style={{
+          display: 'inline-flex', alignItems: 'center', gap: 4,
+          padding: '3px 8px', borderRadius: 6,
+          background: 'rgba(234,179,8,0.14)', border: '1px solid rgba(234,179,8,0.35)',
+          color: '#854d0e', fontSize: 10, fontWeight: 800, whiteSpace: 'nowrap',
+        }}>
+          🍽️ Waiting
+        </span>
+        <button
+          className="adm-row-btn adm-row-btn--accept"
+          style={{ background: 'linear-gradient(135deg,#22c55e,#16a34a)', fontSize: 10.5, padding: '5px 12px' }}
+          onClick={() => !saving && onStepClick(order.id, 'preparing')}
+          disabled={saving}
+        >
+          👨‍🍳 Send to Kitchen
+        </button>
+      </div>
+    );
+  }
 
   if (status === 'cancelled') {
     return (
@@ -442,6 +483,8 @@ function Toast({ toasts }) {
    ORDERS PAGE
 ════════════════════════════════════════════════════════════ */
 export default function Orders() {
+  const navigate = useNavigate();
+  const { enterRestaurantMode } = useRestaurantMode();
   const [orders,       setOrders]       = useState([]);
   const [loading,      setLoading]      = useState(true);
   const [error,        setError]        = useState(null);
@@ -453,10 +496,28 @@ export default function Orders() {
   const [newIds,       setNewIds]       = useState(new Set());
   const [savingIds,    setSavingIds]    = useState(new Set());
   const [successIds,   setSuccessIds]   = useState(new Set());
+  const [muted,        setMutedState]  = useState(() => getMuted());
   const channelRef  = useRef(null);
   // Always-current orders snapshot for optimistic-UI rollback without stale closures
   const ordersRef   = useRef([]);
   useEffect(() => { ordersRef.current = orders; }, [orders]);
+
+  // Unlock audio + request browser notification permission on first admin interaction
+  useEffect(() => {
+    const unlock = () => { unlockAudio(); document.removeEventListener('pointerdown', unlock); };
+    document.addEventListener('pointerdown', unlock, { passive: true });
+    requestNotificationPermission();
+    return () => document.removeEventListener('pointerdown', unlock);
+  }, []);
+
+  function handleToggleMute() {
+    const nowMuted = toggleMute();
+    setMutedState(nowMuted);
+    if (!nowMuted) {
+      // Play a preview ding so admin knows sound is on
+      playOrderNotification();
+    }
+  }
 
   function addToast(title, text, type = 'new-order', icon = '🛎️') {
     const id = Date.now();
@@ -477,8 +538,11 @@ export default function Orders() {
       if (eventType === 'INSERT') {
         setOrders(prev => [row, ...prev]);
         setNewIds(prev => new Set([...prev, row.id]));
-        addToast('New Order!', `${row.customer_name || 'Guest'} · ${fmtCurrency(row.total_price)}`);
-        setTimeout(() => setNewIds(prev => { const n = new Set(prev); n.delete(row.id); return n; }), 5000);
+        const notifBody = `${row.customer_name || 'Guest'} · ${fmtCurrency(row.total_price)}`;
+        addToast('New Order!', notifBody);
+        playOrderNotification();
+        showBrowserNotification('🛎️ New Order!', notifBody);
+        setTimeout(() => setNewIds(prev => { const n = new Set(prev); n.delete(row.id); return n; }), 6000);
       } else if (eventType === 'UPDATE') {
         setOrders(prev => prev.map(o => o.id === row.id ? row : o));
       } else if (eventType === 'DELETE') {
@@ -500,7 +564,7 @@ export default function Orders() {
       setSuccessIds(prev => new Set([...prev, id]));
       setTimeout(() => setSuccessIds(prev => { const n = new Set(prev); n.delete(id); return n; }), 2400);
       const label = STATUS_MAP[newStatus]?.label ?? newStatus;
-      const icons = { preparing: '✅', ready: '🛵', delivered: '📦', cancelled: '❌' };
+      const icons = { preparing: '👨‍🍳', ready: '🛵', delivered: '📦', cancelled: '❌' };
       const types = { preparing: 'accept', ready: 'delivery', delivered: 'update', cancelled: 'error' };
       addToast('Status updated', `Order #${id.slice(0, 8).toUpperCase()} → ${label}`, types[newStatus] ?? 'update', icons[newStatus] ?? '📦');
     } catch (err) {
@@ -582,7 +646,11 @@ export default function Orders() {
     return matchSearch && matchStatus && matchDate;
   });
 
-  const pendingCount = orders.filter(o => o.status === 'pending').length;
+  const pendingCount = orders.filter(o =>
+    o.status === 'pending' ||
+    o.status === 'waiting_confirmation' ||
+    (o.status === 'preparing' && o.delivery_address?.source === 'restaurant_mode')
+  ).length;
 
   return (
     <>
@@ -613,12 +681,47 @@ export default function Orders() {
             </span>
           </p>
         </div>
+        {/* Mute / unmute order sounds */}
+        <button
+          className="adm-btn adm-btn--ghost adm-notif-btn"
+          onClick={handleToggleMute}
+          title={muted ? 'Unmute order sounds' : 'Mute order sounds'}
+          style={{ height: 38, fontSize: 12, minWidth: 38, padding: '0 12px' }}
+        >
+          {muted ? (
+            /* Bell off */
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M13.73 21a2 2 0 01-3.46 0"/><path d="M18.63 13A17.89 17.89 0 0118 8"/>
+              <path d="M6.26 6.26A5.86 5.86 0 006 8c0 7-3 9-3 9h14"/><path d="M18 8a6 6 0 00-9.33-5"/>
+              <line x1="1" y1="1" x2="23" y2="23"/>
+            </svg>
+          ) : (
+            /* Bell */
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+              <path d="M13.73 21a2 2 0 01-3.46 0"/>
+            </svg>
+          )}
+          <span style={{ marginLeft: 5 }}>{muted ? 'Muted' : 'Sound'}</span>
+        </button>
+
         <button className="adm-btn adm-btn--ghost" onClick={load} style={{ height: 38, fontSize: 12 }}>
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
             <polyline points="23 4 23 10 17 10"/>
             <path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/>
           </svg>
           Refresh
+        </button>
+        <button
+          className="adm-btn adm-btn--primary"
+          onClick={() => enterRestaurantMode(navigate)}
+          style={{ height: 38, fontSize: 12, gap: 7 }}
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+            <polyline points="9 22 9 12 15 12 15 22"/>
+          </svg>
+          Open Restaurant Mode
         </button>
       </div>
 
@@ -695,6 +798,48 @@ export default function Orders() {
                         </div>
                         <span className="adm-orow-time">{timeAgo(o.created_at)}</span>
                       </div>
+
+                      {/* Restaurant Mode metadata row
+                          Reads from delivery_address JSONB (works before migration 007)
+                          and falls back to dedicated columns (works after migration 007) */}
+                      {((o.source === 'restaurant_mode') || (o.delivery_address?.source === 'restaurant_mode')) && (() => {
+                        const addr = o.delivery_address || {};
+                        const orderType   = o.order_type   || addr.order_type   || addr.mode   || '';
+                        const tableNum    = o.table_number  || addr.table_number || addr.tableNumber || '';
+                        const payMethod   = o.payment_method || addr.payment || '';
+                        return (
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 5, flexWrap: 'wrap', margin: '2px 0 3px' }}>
+                            <span style={{
+                              display: 'inline-flex', alignItems: 'center', gap: 3,
+                              padding: '2px 7px', borderRadius: 5,
+                              background: 'rgba(255,213,74,0.16)', border: '1px solid rgba(255,213,74,0.38)',
+                              color: 'var(--adm-accent-text)', fontSize: 9.5, fontWeight: 800,
+                            }}>
+                              🍽️ Restaurant
+                            </span>
+                            {orderType && (
+                              <span style={{ fontSize: 9.5, fontWeight: 700, color: 'var(--adm-text-3)', textTransform: 'capitalize' }}>
+                                {orderType.replace(/_/g, '-')}
+                              </span>
+                            )}
+                            {tableNum && (
+                              <span style={{
+                                padding: '2px 6px', borderRadius: 4,
+                                background: 'var(--adm-surface-4)', border: '1px solid var(--adm-border)',
+                                fontSize: 9.5, fontWeight: 800, color: 'var(--adm-text-2)',
+                              }}>
+                                Table {tableNum}
+                              </span>
+                            )}
+                            {payMethod && (
+                              <span style={{ fontSize: 9.5, fontWeight: 700, color: 'var(--adm-text-3)' }}>
+                                {payMethod === 'card_in_store' ? '💳 Card' : '💵 Cash'}
+                              </span>
+                            )}
+                          </div>
+                        );
+                      })()}
+
                       <div className="adm-orow-name-row">
                         <div className="adm-orow-customer">{o.customer_name || '—'}</div>
                         <div className="adm-orow-total">{fmtCurrency(o.total_price)}</div>

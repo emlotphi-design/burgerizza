@@ -1,105 +1,110 @@
 import { useEffect, useRef, useState } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
-import { supabase } from '../lib/supabase';
+import { useParams, useNavigate } from 'react-router-dom';
+import { supabase } from '../services/supabase';
 import Navbar from '../components/Navbar';
+import TrackingHero from '../components/tracking/TrackingHero';
+import TrackingTimeline from '../components/tracking/TrackingTimeline';
+import OrderPreviewCard from '../components/tracking/OrderPreviewCard';
+import DeliveryStatusCard from '../components/tracking/DeliveryStatusCard';
 import '../styles/order-tracking.css';
 
-const STEPS = [
-  { key: 'pending',   label: 'Received',    icon: '📋', headline: 'Order received!',             sub: 'Your order is confirmed and queued for preparation.' },
-  { key: 'preparing', label: 'Preparing',   icon: '👨‍🍳', headline: 'Being freshly prepared',      sub: 'Our chefs are making your order with fresh ingredients.' },
-  { key: 'ready',     label: 'On the way',  icon: '🛵', headline: 'Your order is on the way!',   sub: 'Our driver is heading to your address right now.' },
-  { key: 'delivered', label: 'Delivered',   icon: '✅', headline: 'Order delivered!',             sub: 'Your food has arrived. Enjoy your meal!' },
-];
-const STEP_KEYS = STEPS.map(s => s.key);
+const STEP_META = {
+  pending:   { headline: 'Order received!',            sub: 'Your order is confirmed and queued for preparation.' },
+  confirmed: { headline: 'Order confirmed!',           sub: 'The kitchen has accepted your order.' },
+  preparing: { headline: 'Being freshly prepared',     sub: 'Our chefs are making your order with fresh ingredients.' },
+  ready:     { headline: 'Your order is on the way!',  sub: 'Our driver is heading to your address right now.' },
+  delivered: { headline: 'Order delivered!',           sub: 'Your food has arrived. Enjoy your meal! 🎉' },
+  cancelled: { headline: 'Order cancelled',            sub: 'This order has been cancelled.' },
+};
 
-/* ── Animations ─────────────────────────────────────────────── */
-function PendingAnimation() {
+/* ── Loading skeleton ──────────────────────────────────── */
+function Skeleton() {
   return (
-    <div className="ot-anim-pending">
-      <div className="ot-anim-receipt">📋</div>
-      <div className="ot-anim-dots">
-        <span className="ot-anim-dot" />
-        <span className="ot-anim-dot" />
-        <span className="ot-anim-dot" />
+    <div className="ot-page">
+      <Navbar />
+      <div className="ot-wrap">
+        <div className="ot-skel ot-skel--hero" />
+        <div className="ot-skel ot-skel--bar"  />
+        <div className="ot-skel ot-skel--card" />
+        <div className="ot-skel ot-skel--card" />
       </div>
-      <p className="ot-anim-text">Waiting for the kitchen to accept…</p>
     </div>
   );
 }
 
-function PrepAnimation() {
+/* ── Error / not-found ─────────────────────────────────── */
+function NotFound({ onHome }) {
   return (
-    <div className="ot-anim-prep">
-      <div className="ot-anim-kitchen">
-        <div className="ot-anim-chef">👨‍🍳</div>
-        <div className="ot-anim-items">
-          <div className="ot-anim-food ot-anim-food--1">🍔</div>
-          <div className="ot-anim-food ot-anim-food--2">🍕</div>
-          <div className="ot-anim-food ot-anim-food--3">🍟</div>
+    <div className="ot-page">
+      <Navbar />
+      <div className="ot-wrap ot-wrap--center">
+        <div className="ot-notfound">
+          <div className="ot-notfound-icon">📭</div>
+          <h2 className="ot-notfound-title">Order not found</h2>
+          <p className="ot-notfound-sub">We couldn't find this order. Check your confirmation email.</p>
+          <button className="ot-pill-btn ot-pill-btn--primary" onClick={onHome}>Back to Menu</button>
         </div>
       </div>
-      <div className="ot-anim-dots">
-        <span className="ot-anim-dot" />
-        <span className="ot-anim-dot" />
-        <span className="ot-anim-dot" />
-      </div>
-      <p className="ot-anim-text">Your food is being freshly made</p>
     </div>
   );
 }
 
-function DeliveryAnimation() {
+/* ── Delivery address card ─────────────────────────────── */
+function AddressCard({ addr }) {
+  if (!addr?.street && !addr?.city) return null;
   return (
-    <div className="ot-anim-delivery">
-      <div className="ot-anim-road">
-        <div className="ot-anim-scooter">🛵</div>
-        <div className="ot-anim-destination">🏠</div>
-      </div>
-      <p className="ot-anim-text">Driver is heading to your location</p>
-    </div>
-  );
-}
-
-function DeliveredAnimation() {
-  return (
-    <div className="ot-anim-delivered">
-      <div className="ot-anim-checkmark">
-        <svg viewBox="0 0 52 52" fill="none">
-          <circle
-            className="ot-check-circle"
-            cx="26" cy="26" r="25"
-            fill="none"
-            stroke="#22c55e"
-            strokeWidth="2"
-          />
-          <polyline
-            className="ot-check-mark"
-            points="14,27 21,34 38,17"
-            fill="none"
-            stroke="#22c55e"
-            strokeWidth="3"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
+    <div className="ot-card ot-addr-card">
+      <div className="ot-section-label">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+          <circle cx="12" cy="10" r="3"/>
         </svg>
+        Delivery address
       </div>
-      <p className="ot-anim-text ot-anim-text--delivered">Enjoy your meal! 🎉</p>
+      <div className="ot-addr-lines">
+        <div className="ot-addr-main">
+          {[addr.street, addr.houseNumber].filter(Boolean).join(' ')}
+        </div>
+        <div className="ot-addr-city">
+          {[addr.postalCode, addr.city].filter(Boolean).join(' ')}
+        </div>
+        {addr.floor && <div className="ot-addr-extra">Floor: {addr.floor}</div>}
+      </div>
     </div>
   );
 }
 
-/* ── Helpers ─────────────────────────────────────────────────── */
-function fmtCurrency(n) {
-  return '€' + Number(n).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+/* ── CTA row ───────────────────────────────────────────── */
+function CTASection({ onHome }) {
+  return (
+    <div className="ot-cta">
+      <button className="ot-pill-btn ot-pill-btn--primary" onClick={onHome}>
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+          <polyline points="9 22 9 12 15 12 15 22"/>
+        </svg>
+        Back to Menu
+      </button>
+      <a className="ot-pill-btn ot-pill-btn--ghost" href="tel:+49123456789">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 8.81 19.79 19.79 0 01.01 2.18 2 2 0 012 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 14.92v2z"/>
+        </svg>
+        Contact Restaurant
+      </a>
+    </div>
+  );
 }
 
-/* ════════════════════════════════════════════════════════════
-   ORDER TRACKING PAGE
-════════════════════════════════════════════════════════════ */
+/* ════════════════════════════════════════════════════════
+   MAIN PAGE — realtime logic preserved exactly
+════════════════════════════════════════════════════════ */
 export default function OrderTracking() {
-  const { id }      = useParams();
-  const navigate    = useNavigate();
-  const channelRef  = useRef(null);
+  const { id }     = useParams();
+  const navigate   = useNavigate();
+  const channelRef = useRef(null);
 
   const [order,   setOrder]   = useState(null);
   const [loading, setLoading] = useState(true);
@@ -108,11 +113,7 @@ export default function OrderTracking() {
   const orderId = id || localStorage.getItem('bz_last_order_id');
 
   useEffect(() => {
-    if (!orderId) {
-      setLoading(false);
-      setError('no-id');
-      return;
-    }
+    if (!orderId) { setLoading(false); setError('no-id'); return; }
 
     supabase.from('orders').select('*').eq('id', orderId).single()
       .then(({ data, error: e }) => {
@@ -124,9 +125,7 @@ export default function OrderTracking() {
     channelRef.current = supabase
       .channel(`ot-${orderId}`)
       .on('postgres_changes', {
-        event:  'UPDATE',
-        schema: 'public',
-        table:  'orders',
+        event: 'UPDATE', schema: 'public', table: 'orders',
         filter: `id=eq.${orderId}`,
       }, ({ new: row }) => setOrder(row))
       .subscribe();
@@ -134,165 +133,42 @@ export default function OrderTracking() {
     return () => { channelRef.current?.unsubscribe(); };
   }, [orderId]);
 
-  /* Step resolution */
-  const stepIdx       = order ? STEP_KEYS.indexOf(order.status) : 0;
-  const effectiveIdx  = stepIdx === -1 ? 0 : stepIdx;
-  const currentStep   = STEPS[effectiveIdx];
-  const isCancelled   = order?.status === 'cancelled';
-  const isDelivered   = order?.status === 'delivered';
+  if (loading) return <Skeleton />;
+  if (error || !order) return <NotFound onHome={() => navigate('/')} />;
 
-  function renderAnimation() {
-    if (!order) return null;
-    if (isDelivered)   return <DeliveredAnimation />;
-    if (order.status === 'ready') return <DeliveryAnimation />;
-    if (order.status === 'preparing' || order.status === 'confirmed') return <PrepAnimation />;
-    return <PendingAnimation />;
-  }
-
-  /* ── Loading ── */
-  if (loading) {
-    return (
-      <div className="ot-page">
-        <Navbar />
-        <div className="ot-wrap">
-          <div className="ot-loading">
-            <div className="ot-spinner" />
-            <p>Loading your order…</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  /* ── Error ── */
-  if (error || !order) {
-    return (
-      <div className="ot-page">
-        <Navbar />
-        <div className="ot-wrap">
-          <div className="ot-error">
-            <div className="ot-error-icon">📭</div>
-            <h2>Order not found</h2>
-            <p>We couldn't find your order details. Please check your confirmation email.</p>
-            <button className="ot-btn" onClick={() => navigate('/')}>Back to Home</button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  const addr  = order.delivery_address || {};
-  const items = Array.isArray(order.items) ? order.items : [];
+  const status  = order.status ?? 'pending';
+  const meta    = STEP_META[status] ?? STEP_META.pending;
+  const addr    = order.delivery_address ?? {};
+  const items   = Array.isArray(order.items) ? order.items : [];
+  const shortId = order.id.slice(0, 8).toUpperCase();
 
   return (
     <div className="ot-page">
       <Navbar />
-
       <div className="ot-wrap">
 
-        {/* Header */}
-        <div className="ot-header">
-          <div className="ot-order-id">
-            Order <span>#{order.id.slice(0, 8).toUpperCase()}</span>
-          </div>
-          <h1 className="ot-headline">
-            {isCancelled ? 'Order Cancelled' : currentStep?.headline ?? 'Tracking your order'}
-          </h1>
-        </div>
+        <TrackingHero
+          status={status}
+          headline={meta.headline}
+          sub={meta.sub}
+          orderId={shortId}
+        />
 
-        {/* Animation zone or cancelled banner */}
-        {isCancelled ? (
-          <div className="ot-cancelled-banner">
-            <span>❌</span> This order has been cancelled
-          </div>
-        ) : (
-          <div className="ot-anim-zone">
-            {renderAnimation()}
+        {status !== 'cancelled' && (
+          <div className="ot-card ot-timeline-card">
+            <TrackingTimeline status={status} />
           </div>
         )}
 
-        {/* Progress steps */}
-        {!isCancelled && (
-          <div className="ot-steps">
-            {STEPS.map((step, i) => {
-              const done   = i < effectiveIdx;
-              const active = i === effectiveIdx;
-              return (
-                <div
-                  key={step.key}
-                  className={`ot-step${done ? ' ot-step--done' : active ? ' ot-step--active' : ''}`}
-                >
-                  <div className="ot-step-dot">
-                    {done ? (
-                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
-                        <polyline points="20 6 9 17 4 12"/>
-                      </svg>
-                    ) : (
-                      <span className="ot-step-icon">{step.icon}</span>
-                    )}
-                  </div>
-                  {i < STEPS.length - 1 && <div className="ot-step-line" />}
-                  <span className="ot-step-label">{step.label}</span>
-                </div>
-              );
-            })}
-          </div>
+        {status !== 'delivered' && status !== 'cancelled' && (
+          <DeliveryStatusCard status={status} />
         )}
 
-        {/* Sub-text for active status */}
-        {!isCancelled && currentStep?.sub && (
-          <p style={{
-            fontSize: 13,
-            fontWeight: 700,
-            color: 'rgba(255,255,255,0.40)',
-            textAlign: 'center',
-            margin: 0,
-            lineHeight: 1.5,
-          }}>
-            {currentStep.sub}
-          </p>
-        )}
+        <OrderPreviewCard items={items} total={order.total_price} />
 
-        {/* Order summary */}
-        {items.length > 0 && (
-          <div className="ot-summary">
-            <div className="ot-summary-title">Your Order</div>
-            <div className="ot-summary-items">
-              {items.map((item, i) => (
-                <div key={i} className="ot-summary-item">
-                  <span className="ot-summary-emoji">{item.type === 'burger' ? '🍔' : '🍕'}</span>
-                  <span className="ot-summary-name">{item.name || item.type || 'Item'}</span>
-                  {(item.quantity ?? 1) > 1 && (
-                    <span className="ot-summary-qty">×{item.quantity}</span>
-                  )}
-                </div>
-              ))}
-            </div>
-            <div className="ot-summary-total">
-              Total <strong>{fmtCurrency(order.total_price)}</strong>
-            </div>
-          </div>
-        )}
+        <AddressCard addr={addr} />
 
-        {/* Delivery address */}
-        {(addr.street || addr.city) && (
-          <div className="ot-address">
-            <div className="ot-address-icon">📍</div>
-            <div>
-              <div className="ot-address-label">Delivery address</div>
-              <div className="ot-address-line">
-                {[addr.street, addr.houseNumber].filter(Boolean).join(' ')}
-              </div>
-              <div className="ot-address-city">
-                {[addr.postalCode, addr.city].filter(Boolean).join(' ')}
-              </div>
-            </div>
-          </div>
-        )}
-
-        <button className="ot-btn ot-btn--ghost" onClick={() => navigate('/')}>
-          ← Back to Menu
-        </button>
+        <CTASection onHome={() => navigate('/')} />
 
       </div>
     </div>

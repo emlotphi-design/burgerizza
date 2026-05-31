@@ -1,11 +1,13 @@
 import { BrowserRouter } from "react-router-dom";
 import { StrictMode, Component } from 'react'
 import { createRoot } from 'react-dom/client'
-import './index.css'
+import './styles/index.css'
 import App from './App.jsx'
-import { PizzaProvider } from './context/PizzaContext.jsx'
-import { AuthProvider } from './context/AuthContext.jsx'
-import { BurgerProvider } from './features/burger/store/burgerStore.jsx'
+import { CartProvider } from './store/cartStore'
+import { PizzaProvider } from './store/PizzaContext'
+import { AuthProvider } from './store/AuthContext'
+import { BurgerProvider } from './features/burger/store/burgerStore'
+import { RestaurantModeProvider } from './store/RestaurantModeContext'
 
 class ErrorBoundary extends Component {
   state = { error: null };
@@ -58,11 +60,15 @@ createRoot(rootElement).render(
     <ErrorBoundary>
       <BrowserRouter>
         <AuthProvider>
-          <PizzaProvider>
-            <BurgerProvider>
-              <App />
-            </BurgerProvider>
-          </PizzaProvider>
+          <CartProvider>
+            <PizzaProvider>
+              <BurgerProvider>
+                <RestaurantModeProvider>
+                  <App />
+                </RestaurantModeProvider>
+              </BurgerProvider>
+            </PizzaProvider>
+          </CartProvider>
         </AuthProvider>
       </BrowserRouter>
     </ErrorBoundary>

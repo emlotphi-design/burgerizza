@@ -1,4 +1,4 @@
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '../../store/AuthContext';
 
 // Admin email is set once in .env.local as VITE_ADMIN_EMAIL.
 // No Supabase role promotion needed — email is checked directly

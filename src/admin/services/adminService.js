@@ -1,4 +1,4 @@
-import { supabase } from '../../lib/supabase';
+import { supabase } from '../../services/supabase';
 
 // ── Dashboard stats (all-time) ─────────────────────────────────
 
@@ -255,6 +255,19 @@ export async function deleteProduct(id) {
 
 export async function toggleProductActive(id, active) {
   return updateProduct(id, { active });
+}
+
+
+// ── Create order (POS / walk-in) ────────────────────────────
+
+export async function createOrder(orderData) {
+  const { data, error } = await supabase
+    .from('orders')
+    .insert(orderData)
+    .select()
+    .single();
+  if (error) throw error;
+  return data;
 }
 
 

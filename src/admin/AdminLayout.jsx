@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { NavLink, Outlet, Link } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../store/AuthContext';
 import { subscribeToOrders, fetchOrders } from './services/adminService';
 import './styles/admin.css';
 
@@ -35,6 +35,20 @@ const NAV = [
             <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/>
             <line x1="3" y1="6" x2="21" y2="6"/>
             <path d="M16 10a4 4 0 01-8 0"/>
+          </svg>
+        ),
+      },
+      {
+        to: '/admin/pos',
+        label: 'POS',
+        icon: (
+          <svg className="adm-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="2" y="3" width="20" height="14" rx="2"/>
+            <path d="M8 21h8M12 17v4"/>
+            <line x1="6" y1="8" x2="6" y2="8.01"/>
+            <line x1="10" y1="8" x2="18" y2="8"/>
+            <line x1="6" y1="12" x2="6" y2="12.01"/>
+            <line x1="10" y1="12" x2="18" y2="12"/>
           </svg>
         ),
       },
@@ -122,21 +136,26 @@ export default function AdminLayout() {
 
   const close = () => setSidebarOpen(false);
 
-  /* Track pending order count for sidebar badge */
+  /* Track actionable order count for sidebar badge (pending + waiting_confirmation) */
+  const NEEDS_ACTION = new Set(['pending', 'waiting_confirmation']);
+
   useEffect(() => {
-    fetchOrders({ status: 'pending', limit: 99 })
-      .then(orders => setPendingCount(orders.length))
+    Promise.all([
+      fetchOrders({ status: 'pending', limit: 99 }),
+      fetchOrders({ status: 'waiting_confirmation', limit: 99 }),
+    ])
+      .then(([p, w]) => setPendingCount(p.length + w.length))
       .catch(() => {});
 
     channelRef.current = subscribeToOrders(({ eventType, new: row, old }) => {
-      if (eventType === 'INSERT' && row?.status === 'pending') {
+      if (eventType === 'INSERT' && NEEDS_ACTION.has(row?.status)) {
         setPendingCount(c => c + 1);
       } else if (eventType === 'UPDATE') {
-        if (old?.status === 'pending' && row?.status !== 'pending')
-          setPendingCount(c => Math.max(0, c - 1));
-        else if (old?.status !== 'pending' && row?.status === 'pending')
-          setPendingCount(c => c + 1);
-      } else if (eventType === 'DELETE' && old?.status === 'pending') {
+        const wasAction = NEEDS_ACTION.has(old?.status);
+        const isAction  = NEEDS_ACTION.has(row?.status);
+        if (wasAction && !isAction) setPendingCount(c => Math.max(0, c - 1));
+        else if (!wasAction && isAction) setPendingCount(c => c + 1);
+      } else if (eventType === 'DELETE' && NEEDS_ACTION.has(old?.status)) {
         setPendingCount(c => Math.max(0, c - 1));
       }
     }, 'admin-orders-layout');
