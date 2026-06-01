@@ -263,17 +263,15 @@ function ChangePasswordSection() {
 // Reads and writes ONLY through useDeliveryAddress (profiles table).
 function AddressSection() {
   const auth = useAuth();
-  const { address, hasSavedAddress, isLoading, saveAddress, refreshAddress, testWrite } = useDeliveryAddress();
+  const { address, hasSavedAddress, isLoading, saveAddress, refreshAddress } = useDeliveryAddress();
 
-  const [editing, setEditing] = useState(false);
-  const [saving, setSaving] = useState(false);
-  const [saveOk, setSaveOk] = useState(false);
+  const [editing,   setEditing]   = useState(false);
+  const [saving,    setSaving]    = useState(false);
+  const [saveOk,    setSaveOk]    = useState(false);
   const [saveError, setSaveError] = useState(null);
-  const [fields, setFields] = useState({
+  const [fields,    setFields]    = useState({
     street: '', houseNumber: '', postalCode: '', city: '', floor: '', doorbellName: '',
   });
-  const [testRunning, setTestRunning] = useState(false);
-  const [testResult, setTestResult] = useState(null);
 
   function startEditing() {
     setFields({
@@ -387,47 +385,6 @@ function AddressSection() {
           {hasSavedAddress ? 'Bearbeiten' : 'Adresse hinzufügen'}
         </button>
 
-        {/* ── TEMP DEBUG BUTTON — remove after diagnosis ── */}
-        <button
-          onClick={async () => {
-            setTestRunning(true);
-            setTestResult(null);
-            const result = await testWrite();
-            setTestResult(result);
-            setTestRunning(false);
-          }}
-          disabled={testRunning}
-          style={{
-            marginTop: 8, width: '100%', padding: '10px 16px',
-            borderRadius: 10, border: '1.5px solid #C8001E',
-            background: testRunning ? '#f5f5f5' : 'rgba(200,0,30,0.06)',
-            color: '#C8001E', fontFamily: 'Nunito, sans-serif',
-            fontWeight: 800, fontSize: 12, cursor: 'pointer',
-          }}
-        >
-          {testRunning ? 'Testing…' : '🔴 TEST PROFILE WRITE'}
-        </button>
-
-        {testResult && (
-          <div style={{
-            marginTop: 8, padding: '10px 14px', borderRadius: 10, fontFamily: 'monospace',
-            fontSize: 11, lineHeight: 1.8, wordBreak: 'break-all',
-            background: testResult.ok ? 'rgba(61,185,110,0.08)' : 'rgba(200,0,30,0.08)',
-            border: `1px solid ${testResult.ok ? 'rgba(61,185,110,0.30)' : 'rgba(200,0,30,0.30)'}`,
-            color: testResult.ok ? '#1a4a2a' : '#5a0010',
-          }}>
-            <div><b>{testResult.ok ? '✓ WRITE OK' : '✗ WRITE FAILED'}</b></div>
-            <div>uid: {testResult.uid ?? 'null'}</div>
-            <div>session: {String(testResult.sessionExists)}</div>
-            {testResult.ok
-              ? <div>returned: {JSON.stringify(testResult.data)}</div>
-              : <div>error: {testResult.error?.message ?? String(testResult.error)}</div>
-            }
-            {testResult.error?.code && <div>code: {testResult.error.code}</div>}
-            {testResult.error?.hint && <div>hint: {testResult.error.hint}</div>}
-            {testResult.error?.details && <div>details: {testResult.error.details}</div>}
-          </div>
-        )}
       </div>
     );
   }

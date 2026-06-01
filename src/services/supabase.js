@@ -35,8 +35,7 @@ function probeStorage() {
   };
 }
 
-const { type: _storageType, store: _robustStorage } = probeStorage();
-export const storageType = _storageType;
+const { store: _robustStorage } = probeStorage();
 
 export const SITE_URL = (import.meta.env.VITE_SITE_URL ?? window.location.origin)
   .replace(/\/$/, '');

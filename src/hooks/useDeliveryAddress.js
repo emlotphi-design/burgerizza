@@ -31,19 +31,16 @@ async function resolveUid(contextUserId) {
  *
  * Returns:
  *   address           — current address object (null when not resolved yet)
- *   addressSource     — 'profiles' | 'last_order' | null
  *   hasSavedAddress   — true when street + houseNumber + postalCode + city are non-empty
  *   isLoading         — true while the initial fetch is in-flight
  *   saveAddress(addr) — upserts to profiles, updates local state immediately
  *   refreshAddress()  — force re-fetch from DB
- *   testWrite()       — isolated write test for debugging
  */
 export function useDeliveryAddress() {
   const { currentUser } = useAuth();
 
-  const [address,       setAddress]       = useState(null);
-  const [addressSource, setAddressSource] = useState(null);
-  const [isLoading,     setIsLoading]     = useState(true);
+  const [address,   setAddress]   = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   /* ── Core read ──────────────────────────────────────────────────────────── */
   const doFetch = useCallback(async () => {
@@ -82,7 +79,6 @@ export function useDeliveryAddress() {
 
     if (profComplete) {
       setAddress(profAddr);
-      setAddressSource('profiles');
       setIsLoading(false);
       return;
     }
@@ -118,15 +114,12 @@ export function useDeliveryAddress() {
         floor:        da.floor        || '',
         doorbellName: da.doorbellName || '',
       });
-      setAddressSource('last_order');
     } else if (profAddr) {
       // Profiles row exists but address is incomplete — use what we have
       // (name/phone are still useful for pre-filling the delivery form)
       setAddress(profAddr);
-      setAddressSource(null);
     } else {
       setAddress(null);
-      setAddressSource(null);
     }
 
     setIsLoading(false);
@@ -214,41 +207,5 @@ export function useDeliveryAddress() {
     return { error };
   }, [currentUser?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  /* ── Isolated test write (debug only) ──────────────────────────────────── */
-  async function testWrite() {
-    const { data: { session } } = await supabase.auth.getSession();
-    const uid = session?.user?.id ?? null;
-    if (!uid) return { ok: false, uid: null, sessionExists: false, error: 'AUTH SESSION NOT READY — no session in localStorage', data: null };
-
-    // First: verify the columns exist by doing a SELECT
-    const { data: readData, error: readErr } = await supabase
-      .from('profiles')
-      .select('id, street, house_number, city')
-      .eq('id', uid)
-      .single();
-
-    if (readErr?.code === '42703') {
-      return { ok: false, uid: uid.slice(0, 8), sessionExists: true,
-        error: 'COLUMN MISSING — migration 008 not applied (42703: ' + readErr.message + ')', data: null };
-    }
-
-    // Then: try writing
-    const { data, error } = await supabase
-      .from('profiles')
-      .upsert({ id: uid, city: 'DEBUG_TEST' })
-      .select();
-
-    return {
-      ok:            !error,
-      uid:           uid.slice(0, 8),
-      sessionExists: !!session,
-      readRow:       readData,
-      data,
-      error: error
-        ? `${error.code}: ${error.message}${error.hint ? ' (' + error.hint + ')' : ''}`
-        : null,
-    };
-  }
-
-  return { address, addressSource, hasSavedAddress, isLoading, saveAddress, refreshAddress, testWrite };
+  return { address, hasSavedAddress, isLoading, saveAddress, refreshAddress };
 }
