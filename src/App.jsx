@@ -1,5 +1,6 @@
 import './styles/App.css';
 import { Routes, Route, useLocation, Navigate } from 'react-router-dom';
+import { useRTL } from './hooks/useRTL';
 import { useState, useEffect } from 'react';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
@@ -37,6 +38,7 @@ import { useRestaurantMode } from './store/RestaurantModeContext';
 const BUILDER_ROUTES = new Set(['/build-pizza', '/build-burger']);
 
 function AnimatedRoutes() {
+  useRTL(); /* Apply RTL/LTR direction to <html> on language change */
   const location = useLocation();
   const [displayLocation, setDisplayLocation] = useState(location);
   const [exiting, setExiting] = useState(false);

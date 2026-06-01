@@ -1,4 +1,6 @@
 @import './global.css';
+@import './rtl.css';
+@import './lang-switcher.css';
 @import './card-system.css';
 @import './skeleton.css';
 @import './mobile-menu.css';

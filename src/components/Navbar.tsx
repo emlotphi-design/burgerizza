@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { usePizzaStore } from '../store/PizzaContext.jsx';
 import { useAuth } from '../store/AuthContext.jsx';
 import MobileMenu from './MobileMenu.jsx';
+import LanguageSwitcher from './LanguageSwitcher.jsx';
 
 /* Pages where the Home button IS shown */
 const HOME_ROUTES = new Set(['/cart']);
@@ -82,6 +84,7 @@ function IconBurger() {
 export default function Navbar() {
   const navigate   = useNavigate();
   const location   = useLocation();
+  const { t }      = useTranslation();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const store      = usePizzaStore() as any;
   const count: number = store?.pizzas?.length ?? 0;
@@ -95,7 +98,7 @@ export default function Navbar() {
     <>
     <nav className="nav">
       {/* Brand — navigates to home without hard reload */}
-      <button className="brand" aria-label="Zur Startseite" onClick={() => navigate('/')}>
+      <button className="brand" aria-label={t('nav.home')} onClick={() => navigate('/')}>
         <svg className="brand-logo" width="46" height="46" viewBox="0 0 46 46" fill="none" aria-hidden="true">
           <rect width="46" height="46" rx="10" fill="#1A0A00" />
           <text x="23" y="33" textAnchor="middle"
@@ -112,9 +115,9 @@ export default function Navbar() {
         {showHome && (
           <button
             className="nav-btn nav-home-btn"
-            aria-label="Zur Startseite"
+            aria-label={t('nav.home')}
             onClick={() => navigate('/build-pizza')}
-            title="Pizza Builder"
+            title={t('nav.buildPizza')}
           >
             <IconHome />
           </button>
@@ -124,8 +127,8 @@ export default function Navbar() {
         {location.pathname === '/build-pizza' && (
           <button
             className="nav-btn nav-builder-btn"
-            aria-label="Zum Burger Builder"
-            title="Burger Builder"
+            aria-label={t('nav.buildBurger')}
+            title={t('nav.buildBurger')}
             onClick={() => navigate('/build-burger')}
           >
             <IconBurger />
@@ -134,8 +137,8 @@ export default function Navbar() {
         {location.pathname === '/build-burger' && (
           <button
             className="nav-btn nav-builder-btn"
-            aria-label="Zum Pizza Builder"
-            title="Pizza Builder"
+            aria-label={t('nav.buildPizza')}
+            title={t('nav.buildPizza')}
             onClick={() => navigate('/build-pizza')}
           >
             <IconPizza />
@@ -144,7 +147,7 @@ export default function Navbar() {
 
         <button
           className="nav-btn nav-cart-btn"
-          aria-label={`Warenkorb${count > 0 ? ` (${count})` : ''}`}
+          aria-label={count > 0 ? t('nav.cartWithCount', { count }) : t('nav.cart')}
           onClick={() => navigate('/cart')}
         >
           <IconCart />
@@ -155,13 +158,15 @@ export default function Navbar() {
 
         <button
           className="nav-btn"
-          aria-label="Profil"
+          aria-label={t('nav.profile')}
           onClick={() => navigate(isLoggedIn ? '/profile' : '/auth')}
         >
           <IconUser />
         </button>
 
-        <button className="nav-btn" aria-label="Menü" onClick={() => setMenuOpen(true)}><IconMenu /></button>
+        <LanguageSwitcher compact />
+
+        <button className="nav-btn" aria-label={t('nav.openMenu')} onClick={() => setMenuOpen(true)}><IconMenu /></button>
       </div>
     </nav>
     {menuOpen && <MobileMenu onClose={() => setMenuOpen(false)} />}

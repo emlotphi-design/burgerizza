@@ -3,6 +3,7 @@ import { NavLink, Outlet, Link } from 'react-router-dom';
 import { useAuth } from '../store/AuthContext';
 import { subscribeToOrders, fetchOrders } from './services/adminService';
 import { StaffLockProvider, useStaffLock } from './context/StaffLockContext';
+import LanguageSwitcher from '../components/LanguageSwitcher.jsx';
 import './styles/admin.css';
 
 const NAV = [
@@ -274,6 +275,9 @@ export default function AdminLayout() {
               <div className="adm-user-name">{displayName}</div>
               <div className="adm-user-email">{currentUser?.email ?? ''}</div>
             </div>
+          </div>
+          <div style={{ marginBottom: 8 }}>
+            <LanguageSwitcher dark />
           </div>
           <div className="adm-theme-row">
             <span className="adm-theme-label">{theme === 'dark' ? 'Dark mode' : 'Light mode'}</span>

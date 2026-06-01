@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import LanguageSwitcher from './LanguageSwitcher.jsx';
 
 const MENU_ITEMS = [
   { label: 'Appetizers',       path: '/coming-soon'  },
@@ -72,6 +73,7 @@ export default function MobileMenu({ onClose }) {
         </nav>
 
         <div className="mm-footer">
+          <LanguageSwitcher />
           <button className="mm-cta" onClick={() => handleNav('/coming-soon')}>
             Burgerizza Plus
           </button>

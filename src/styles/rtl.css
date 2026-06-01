@@ -1,0 +1,286 @@
+/* ══════════════════════════════════════════════════════════════
+   RTL (Right-to-Left) LAYOUT OVERRIDES
+   Applied when <html dir="rtl"> is set — Persian (fa), Arabic (ar).
+   Uses [dir="rtl"] selector so specificity matches original rules.
+══════════════════════════════════════════════════════════════ */
+
+/* ── Global text direction ── */
+[dir="rtl"] body,
+[dir="rtl"] input,
+[dir="rtl"] textarea,
+[dir="rtl"] select,
+[dir="rtl"] button {
+  text-align: right;
+}
+
+/* ── Smooth direction transition ── */
+html {
+  transition: direction 0.18s ease;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   NAVBAR
+══════════════════════════════════════════════════════════════ */
+
+[dir="rtl"] .nav {
+  flex-direction: row-reverse;
+}
+
+[dir="rtl"] .nav-icons {
+  flex-direction: row-reverse;
+}
+
+/* Brand name flows right-to-left */
+[dir="rtl"] .brand {
+  flex-direction: row-reverse;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   MOBILE MENU
+══════════════════════════════════════════════════════════════ */
+
+[dir="rtl"] .mm-sidebar {
+  right: auto;
+  left: 0;
+  /* Slide in from left instead of right */
+  transform: translateX(-100%);
+}
+
+[dir="rtl"] .mm-sidebar.mm-sidebar--open,
+[dir="rtl"] .mm-sidebar[class*="open"] {
+  transform: translateX(0);
+}
+
+[dir="rtl"] .mm-header {
+  flex-direction: row-reverse;
+}
+
+[dir="rtl"] .mm-brand {
+  flex-direction: row-reverse;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   CART + CHECKOUT
+══════════════════════════════════════════════════════════════ */
+
+[dir="rtl"] .co-form-header,
+[dir="rtl"] .co-form-sub,
+[dir="rtl"] .co-form-title {
+  text-align: right;
+}
+
+[dir="rtl"] .co-fields .co-row {
+  flex-direction: row-reverse;
+}
+
+[dir="rtl"] .co-next-btn,
+[dir="rtl"] .co-back-link,
+[dir="rtl"] .co-addr-new-btn {
+  flex-direction: row-reverse;
+}
+
+[dir="rtl"] .co-steps {
+  flex-direction: row-reverse;
+}
+
+[dir="rtl"] .co-step-line {
+  transform: scaleX(-1);
+}
+
+[dir="rtl"] .co-autofill-notice {
+  flex-direction: row-reverse;
+  text-align: right;
+}
+
+[dir="rtl"] .co-multi-addr-option {
+  flex-direction: row-reverse;
+  text-align: right;
+}
+
+[dir="rtl"] .co-multi-addr-label {
+  flex-direction: row-reverse;
+}
+
+[dir="rtl"] .co-saved-addr-card {
+  text-align: right;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   PROFILE
+══════════════════════════════════════════════════════════════ */
+
+[dir="rtl"] .pf-hero {
+  flex-direction: row-reverse;
+}
+
+[dir="rtl"] .pf-hero-info {
+  text-align: right;
+}
+
+[dir="rtl"] .pf-hero-stats {
+  flex-direction: row-reverse;
+  justify-content: flex-end;
+}
+
+[dir="rtl"] .pf-section-header {
+  flex-direction: row-reverse;
+}
+
+[dir="rtl"] .pf-info-grid {
+  direction: rtl;
+}
+
+[dir="rtl"] .pf-field-row {
+  flex-direction: row-reverse;
+}
+
+[dir="rtl"] .pf-info-row {
+  flex-direction: row-reverse;
+}
+
+/* Address cards */
+[dir="rtl"] .pf-addr-header {
+  flex-direction: row-reverse;
+}
+
+[dir="rtl"] .pf-addr-card-top {
+  flex-direction: row-reverse;
+}
+
+[dir="rtl"] .pf-addr-actions {
+  flex-direction: row-reverse;
+}
+
+[dir="rtl"] .pf-addr-modal-header {
+  flex-direction: row-reverse;
+}
+
+[dir="rtl"] .pf-addr-form-row--inline {
+  flex-direction: row-reverse;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   ADMIN PANEL
+══════════════════════════════════════════════════════════════ */
+
+[dir="rtl"] .adm-layout {
+  direction: rtl;
+}
+
+[dir="rtl"] .adm-sidebar {
+  right: auto;
+  left: 0;
+  border-right: none;
+  border-left: 1px solid var(--adm-border);
+}
+
+[dir="rtl"] .adm-main {
+  margin-right: 0;
+  margin-left: var(--adm-sidebar-w);
+}
+
+[dir="rtl"] .adm-nav-link {
+  flex-direction: row-reverse;
+}
+
+[dir="rtl"] .adm-nav-link svg.adm-nav-icon {
+  margin-right: 0;
+  margin-left: 10px;
+}
+
+[dir="rtl"] .adm-topbar {
+  flex-direction: row-reverse;
+}
+
+[dir="rtl"] .adm-section-head {
+  flex-direction: row-reverse;
+}
+
+[dir="rtl"] .adm-toolbar {
+  flex-direction: row-reverse;
+}
+
+[dir="rtl"] .adm-page-header {
+  flex-direction: row-reverse;
+}
+
+[dir="rtl"] .adm-table th,
+[dir="rtl"] .adm-table td {
+  text-align: right;
+}
+
+[dir="rtl"] .adm-stat-top {
+  flex-direction: row-reverse;
+}
+
+[dir="rtl"] .adm-user-row {
+  flex-direction: row-reverse;
+}
+
+[dir="rtl"] .adm-brand {
+  flex-direction: row-reverse;
+}
+
+[dir="rtl"] .adm-brand-logo {
+  flex-direction: row-reverse;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   LANGUAGE SWITCHER MENU POSITION IN RTL
+══════════════════════════════════════════════════════════════ */
+
+[dir="rtl"] .lang-sw-menu {
+  left: auto;
+  right: 0;
+}
+
+[dir="rtl"] .nav-icons .lang-sw-menu {
+  right: auto;
+  left: 0;
+}
+
+[dir="rtl"] .lang-sw-option {
+  flex-direction: row-reverse;
+  text-align: right;
+}
+
+[dir="rtl"] .lang-sw-check {
+  margin-left: 0;
+  margin-right: auto;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   FORM INPUTS (global RTL placeholder alignment)
+══════════════════════════════════════════════════════════════ */
+
+[dir="rtl"] input,
+[dir="rtl"] textarea,
+[dir="rtl"] select {
+  direction: rtl;
+}
+
+[dir="rtl"] input[type="email"],
+[dir="rtl"] input[type="tel"] {
+  /* Keep email and phone LTR even in RTL context */
+  direction: ltr;
+  text-align: right;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   SMOOTH PAGE TRANSITION WHEN SWITCHING DIRECTION
+══════════════════════════════════════════════════════════════ */
+
+html.rtl,
+html.ltr {
+  /* Subtle fade on the content when direction switches */
+}
+
+@keyframes dir-switch-fade {
+  from { opacity: 0.7; }
+  to   { opacity: 1; }
+}
+
+html.rtl .page,
+html.ltr .page {
+  animation: dir-switch-fade 0.22s ease both;
+}

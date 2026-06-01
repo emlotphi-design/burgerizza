@@ -1150,8 +1150,13 @@
   border-radius: 14px;
   background: rgba(255, 248, 238, 0.7);
   border: 1.5px solid rgba(200, 175, 100, 0.22);
-  transition: border-color 0.14s;
+  transition: border-color 0.14s, box-shadow 0.14s;
+  animation: pf-addr-card-enter 0.28s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
+.pf-addr-card:nth-child(2) { animation-delay: 0.05s; }
+.pf-addr-card:nth-child(3) { animation-delay: 0.10s; }
+.pf-addr-card:nth-child(4) { animation-delay: 0.15s; }
+.pf-addr-card:nth-child(n+5) { animation-delay: 0.18s; }
 .pf-addr-card--default {
   border-color: rgba(200, 150, 0, 0.50);
   background: rgba(255, 248, 220, 0.85);
@@ -1248,6 +1253,33 @@
   font-size: 13px;
   font-weight: 700;
   color: rgba(26, 10, 0, 0.38);
+}
+
+/* ── Address modal keyframes ────────────────────────────────
+   Defined here because they are only used by the address modal.
+   co-fade-in  → backdrop fade
+   co-slide-up → modal enters from below (desktop)
+   pf-addr-bottom-sheet-up → modal slides up from viewport bottom (mobile)
+   pf-addr-card-enter → card list entrance animation
+─────────────────────────────────────────────────────────── */
+@keyframes co-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes co-slide-up {
+  from { opacity: 0; transform: translateY(24px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0)    scale(1);    }
+}
+
+@keyframes pf-addr-bottom-sheet-up {
+  from { opacity: 0; transform: translateY(60px); }
+  to   { opacity: 1; transform: translateY(0);    }
+}
+
+@keyframes pf-addr-card-enter {
+  from { opacity: 0; transform: translateY(5px); }
+  to   { opacity: 1; transform: translateY(0);   }
 }
 
 /* ── Address form modal ──────────────────────────────────────
@@ -1406,4 +1438,146 @@
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
+}
+
+/* ══════════════════════════════════════════
+   ADDRESS — MOBILE RESPONSIVE
+   ≤640px: larger touch targets
+   ≤520px: bottom-sheet modal
+   ≤480px: single-column card grid
+══════════════════════════════════════════ */
+
+/* ── Larger touch targets on all phones ── */
+@media (max-width: 640px) {
+  .pf-addr-add-btn {
+    min-height: 40px;
+    padding: 9px 16px;
+    font-size: 13px;
+    touch-action: manipulation;
+  }
+
+  .pf-addr-btn {
+    min-height: 38px;
+    padding: 7px 12px;
+    font-size: 12px;
+    touch-action: manipulation;
+    /* Prevent double-tap zoom on iOS */
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .pf-addr-actions {
+    gap: 7px;
+    margin-top: 12px;
+  }
+}
+
+/* ── Single-column card grid on narrow phones ── */
+@media (max-width: 480px) {
+  .pf-addr-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .pf-addr-card {
+    padding: 15px 14px;
+  }
+
+  /* Full-width equal buttons at the bottom of each card */
+  .pf-addr-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 7px;
+  }
+
+  /* When there are 3 buttons (Bearbeiten + Standard + Löschen),
+     Bearbeiten spans both columns on top */
+  .pf-addr-actions .pf-addr-btn:first-child:not(:last-child) {
+    grid-column: 1 / -1;
+  }
+
+  /* If card is default (only 2 buttons: Bearbeiten + Löschen),
+     make them equal-width side by side — nothing extra needed. */
+
+  .pf-addr-btn {
+    min-height: 40px;
+    padding: 8px 10px;
+    font-size: 12.5px;
+    text-align: center;
+    justify-content: center;
+    display: flex;
+    align-items: center;
+  }
+
+  .pf-addr-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .pf-addr-add-btn {
+    width: 100%;
+    justify-content: center;
+    min-height: 44px;
+    font-size: 14px;
+    border-radius: 14px;
+  }
+}
+
+/* ── Bottom-sheet modal on phones ── */
+@media (max-width: 520px) {
+  .pf-addr-modal-overlay {
+    /* Anchor to bottom instead of centering */
+    align-items: flex-end;
+    /* No side padding — modal fills full width */
+    padding: 0;
+  }
+
+  .pf-addr-modal {
+    max-width: 100%;
+    /* Flat bottom, rounded top */
+    border-radius: 22px 22px 0 0;
+    /* More vertical space since we own the full width */
+    max-height: 92dvh;
+    /* Bottom-sheet slide-in instead of desktop scale-up */
+    animation-name: pf-addr-bottom-sheet-up;
+    animation-duration: 0.30s;
+  }
+
+  .pf-addr-modal-header {
+    padding: 20px 20px 14px;
+    /* Visual "handle" hint — a small pill above the title */
+    position: relative;
+  }
+
+  .pf-addr-modal-header::before {
+    content: '';
+    position: absolute;
+    top: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 36px;
+    height: 4px;
+    border-radius: 2px;
+    background: rgba(26, 10, 0, 0.14);
+  }
+
+  .pf-addr-modal-body {
+    padding: 12px 20px 4px;
+  }
+
+  .pf-addr-modal-footer {
+    padding: 12px 20px;
+    padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .pf-addr-form-2col {
+    /* Keep 2 columns on bottom sheet — there's enough width */
+    grid-template-columns: 1fr 1fr;
+  }
+
+  /* On very small phones, collapse to 1 column */
+  @media (max-width: 380px) {
+    .pf-addr-form-2col {
+      grid-template-columns: 1fr;
+    }
+  }
 }

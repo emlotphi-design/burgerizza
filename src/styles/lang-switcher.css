@@ -1,0 +1,181 @@
+/* ══════════════════════════════════════════════════
+   LANGUAGE SWITCHER
+   Used in navbar, mobile menu, and admin sidebar.
+   Two variants: default (light page) and --dark (admin).
+══════════════════════════════════════════════════ */
+
+.lang-sw {
+  position: relative;
+  display: inline-flex;
+}
+
+/* ── Trigger button ── */
+.lang-sw-trigger {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 10px;
+  border-radius: 20px;
+  border: 1.5px solid rgba(26, 10, 0, 0.14);
+  background: rgba(26, 10, 0, 0.04);
+  color: #1A0A00;
+  font-family: 'Nunito', sans-serif;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.14s ease, border-color 0.14s ease;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+.lang-sw-trigger:hover {
+  background: rgba(26, 10, 0, 0.08);
+  border-color: rgba(26, 10, 0, 0.24);
+}
+
+/* Dark variant (admin sidebar) */
+.lang-sw--dark .lang-sw-trigger {
+  border-color: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.80);
+}
+.lang-sw--dark .lang-sw-trigger:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.28);
+}
+
+.lang-sw-flag {
+  font-size: 16px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.lang-sw-name {
+  max-width: 80px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.lang-sw-chevron {
+  flex-shrink: 0;
+  transition: transform 0.18s ease;
+  opacity: 0.60;
+}
+.lang-sw-chevron--open { transform: rotate(180deg); }
+
+/* ── Dropdown menu ── */
+.lang-sw-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  /* Default: align left edge with trigger */
+  left: 0;
+  min-width: 180px;
+  background: #FFFDF5;
+  border: 1.5px solid rgba(200, 175, 100, 0.30);
+  border-radius: 14px;
+  padding: 5px;
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.12),
+    0 2px 8px rgba(0, 0, 0, 0.06);
+  z-index: 9000;
+  animation: lang-sw-appear 0.14s cubic-bezier(0.22, 1, 0.36, 1) both;
+  overflow: hidden;
+}
+
+/* In navbar (right-aligned icons), keep menu from going off-screen right */
+.nav-icons .lang-sw-menu {
+  left: auto;
+  right: 0;
+}
+
+/* Admin sidebar: align to right so it doesn't overflow sidebar */
+.adm-sidebar .lang-sw-menu {
+  left: 0;
+  right: auto;
+}
+
+/* Dark variant menu */
+.lang-sw--dark .lang-sw-menu {
+  background: #1E1E28;
+  border-color: rgba(255, 255, 255, 0.10);
+}
+
+@keyframes lang-sw-appear {
+  from { opacity: 0; transform: translateY(-6px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0)    scale(1);    }
+}
+
+/* ── Option buttons ── */
+.lang-sw-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 8px 10px;
+  border: none;
+  border-radius: 9px;
+  background: transparent;
+  color: #1A0A00;
+  font-family: 'Nunito', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.11s ease;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+.lang-sw-option:hover {
+  background: rgba(255, 213, 74, 0.16);
+}
+.lang-sw-option--active {
+  background: rgba(255, 213, 74, 0.22);
+  font-weight: 900;
+}
+
+/* Dark variant options */
+.lang-sw--dark .lang-sw-option {
+  color: rgba(255, 255, 255, 0.80);
+}
+.lang-sw--dark .lang-sw-option:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+.lang-sw--dark .lang-sw-option--active {
+  background: rgba(255, 213, 74, 0.14);
+  color: #FFD54A;
+}
+
+.lang-sw-option-flag {
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.lang-sw-option-name {
+  flex: 1;
+  min-width: 0;
+}
+
+.lang-sw-check {
+  flex-shrink: 0;
+  color: #C8A000;
+  margin-left: auto;
+}
+.lang-sw--dark .lang-sw-check { color: #FFD54A; }
+
+/* ── Mobile: full-width in mobile menu ── */
+.mm-sidebar .lang-sw {
+  width: 100%;
+}
+.mm-sidebar .lang-sw-trigger {
+  width: 100%;
+  justify-content: center;
+  min-height: 44px;
+  border-radius: 12px;
+  font-size: 14px;
+}
+.mm-sidebar .lang-sw-menu {
+  left: 0;
+  right: 0;
+  min-width: unset;
+  width: 100%;
+}

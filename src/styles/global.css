@@ -1,4 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@700,800,900&display=swap');
+/* Arabic + Persian — loaded only when needed, but declared globally so the
+   browser can use them immediately when dir="rtl" activates */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;700;800;900&display=swap');
 
 /* ══════════════════════════════════════════
    GLOBAL CUSTOM PROPERTIES

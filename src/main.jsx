@@ -2,6 +2,7 @@ import { BrowserRouter } from "react-router-dom";
 import { StrictMode, Component } from 'react'
 import { createRoot } from 'react-dom/client'
 import './styles/index.css'
+import './i18n'
 import App from './App.jsx'
 import { CartProvider } from './store/cartStore'
 import { PizzaProvider } from './store/PizzaContext'
