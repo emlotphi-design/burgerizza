@@ -1,6 +1,6 @@
 import { Fragment, useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { fetchOrders, updateOrderStatus, subscribeToOrders, assignDriverAndAdvance } from '../services/adminService';
+import { fetchOrders, updateOrderStatus, subscribeToOrders, assignDriverAndAdvance, getYesterdayStart, fetchActiveDrivers, createDriverAssignment } from '../services/adminService';
 import { useRestaurantMode } from '../../store/RestaurantModeContext';
 import {
   playOrderNotification,
@@ -63,6 +63,16 @@ function itemsSummary(items) {
 }
 function capitalize(s) {
   return s ? String(s).charAt(0).toUpperCase() + String(s).slice(1) : '';
+}
+// Returns true when an order's created_at falls within today or yesterday (local time).
+// Called both in the fetch and in the client-side filter so orders automatically
+// disappear when the day rolls over without requiring a manual refresh.
+function isInWindow(iso) {
+  if (!iso) return false;
+  const windowStart = new Date();
+  windowStart.setDate(windowStart.getDate() - 1);
+  windowStart.setHours(0, 0, 0, 0);
+  return new Date(iso) >= windowStart;
 }
 function getCustomizations(item) {
   const rows = [];
@@ -144,12 +154,12 @@ function InlineOrderItems({ items }) {
   );
 }
 
-const DRIVERS = ['Ali', 'Reza', 'Max', 'Julia'];
+const VEHICLE_ICON = { bicycle: '🚲', scooter: '🛵', car: '🚗' };
 
 /* ═══════════════════════════════════════════════════════════
    SMART PIPELINE — interactive workflow tracker
 ═══════════════════════════════════════════════════════════ */
-function SmartPipeline({ order, onStepClick, onDriverAndAdvance, saving }) {
+function SmartPipeline({ order, onStepClick, onDriverAndAdvance, saving, drivers }) {
   const [driverOpen, setDriverOpen] = useState(false);
   const wrapRef = useRef(null);
 
@@ -216,9 +226,9 @@ function SmartPipeline({ order, onStepClick, onDriverAndAdvance, saving }) {
     }
   }
 
-  function handleDriverSelect(driverName) {
+  function handleDriverSelect(driver) {
     setDriverOpen(false);
-    onDriverAndAdvance(order.id, driverName, 'ready');
+    onDriverAndAdvance(order.id, driver.full_name, 'ready', driver.id);
   }
 
   return (
@@ -271,14 +281,18 @@ function SmartPipeline({ order, onStepClick, onDriverAndAdvance, saving }) {
         <div className="adm-spipe-driver-panel">
           <div className="adm-spipe-driver-title">Assign &amp; dispatch</div>
           <div className="adm-spipe-driver-grid">
-            {DRIVERS.map(d => (
+            {drivers.length === 0 ? (
+              <div style={{ fontSize: 12, color: 'var(--adm-text-3)', padding: '8px 4px', gridColumn: '1/-1' }}>
+                No active drivers — add some in Drivers.
+              </div>
+            ) : drivers.map(d => (
               <button
-                key={d}
-                className={`adm-spipe-driver-opt${order.driver_name === d ? ' adm-spipe-driver-opt--current' : ''}`}
+                key={d.id}
+                className={`adm-spipe-driver-opt${order.driver_name === d.full_name ? ' adm-spipe-driver-opt--current' : ''}`}
                 onClick={() => handleDriverSelect(d)}
                 disabled={saving}
               >
-                🛵 {d}
+                {VEHICLE_ICON[d.vehicle_type] ?? '🛵'} {d.full_name}
               </button>
             ))}
           </div>
@@ -497,6 +511,7 @@ export default function Orders() {
   const [savingIds,    setSavingIds]    = useState(new Set());
   const [successIds,   setSuccessIds]   = useState(new Set());
   const [muted,        setMutedState]  = useState(() => getMuted());
+  const [activeDrivers, setActiveDrivers] = useState([]);
   const channelRef  = useRef(null);
   // Always-current orders snapshot for optimistic-UI rollback without stale closures
   const ordersRef   = useRef([]);
@@ -527,15 +542,24 @@ export default function Orders() {
 
   async function load() {
     setLoading(true); setError(null);
-    try { setOrders(await fetchOrders()); }
+    try {
+      // Fetch only today + yesterday using local restaurant time.
+      // limit:500 covers any realistic 2-day order volume.
+      setOrders(await fetchOrders({ since: getYesterdayStart(), limit: 500 }));
+    }
     catch (e) { setError(e.message); }
     finally { setLoading(false); }
   }
 
   useEffect(() => {
     load();
+    fetchActiveDrivers().then(setActiveDrivers).catch(() => {});
     channelRef.current = subscribeToOrders(({ eventType, new: row, old }) => {
       if (eventType === 'INSERT') {
+        // Only surface orders within today + yesterday.
+        // New orders are virtually always "now", but this guards against
+        // clock-skew or backdated POS entries falling outside the window.
+        if (!isInWindow(row.created_at)) return;
         setOrders(prev => [row, ...prev]);
         setNewIds(prev => new Set([...prev, row.id]));
         const notifBody = `${row.customer_name || 'Guest'} · ${fmtCurrency(row.total_price)}`;
@@ -581,7 +605,7 @@ export default function Orders() {
     }
   }, []);
 
-  const handleDriverAndAdvance = useCallback(async (orderId, driverName, status) => {
+  const handleDriverAndAdvance = useCallback(async (orderId, driverName, status, driverId) => {
     if (!driverName?.trim()) {
       console.warn('[handleDriverAndAdvance] called with empty driverName — aborting');
       return;
@@ -604,6 +628,7 @@ export default function Orders() {
       setSuccessIds(prev => new Set([...prev, orderId]));
       setTimeout(() => setSuccessIds(prev => { const n = new Set(prev); n.delete(orderId); return n; }), 2400);
       addToast('Driver assigned', `${driverName} is on the way! 🛵`, 'delivery', '🛵');
+      if (driverId) createDriverAssignment(orderId, driverId).catch(e => console.warn('[assignment record]', e?.message));
     } catch (err) {
       console.error('[handleDriverAndAdvance] assignment failed', {
         message: err?.message, code: err?.code,
@@ -625,6 +650,11 @@ export default function Orders() {
 
   /* Filters */
   const filtered = orders.filter(o => {
+    // Hard window: hide orders that have aged out of today + yesterday.
+    // This runs on every render so the list self-corrects at midnight without
+    // requiring a manual refresh.
+    if (!isInWindow(o.created_at)) return false;
+
     const q = search.toLowerCase();
     const matchSearch = !q ||
       o.id.toLowerCase().includes(q) ||
@@ -855,6 +885,7 @@ export default function Orders() {
                           onStepClick={handleAction}
                           onDriverAndAdvance={handleDriverAndAdvance}
                           saving={savingIds.has(o.id)}
+                          drivers={activeDrivers}
                         />
                         <button
                           className={`adm-info-btn adm-info-btn--mini${expandedId === o.id ? ' adm-info-btn--open' : ''}`}

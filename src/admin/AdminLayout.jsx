@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { NavLink, Outlet, Link } from 'react-router-dom';
 import { useAuth } from '../store/AuthContext';
 import { subscribeToOrders, fetchOrders } from './services/adminService';
+import { StaffLockProvider, useStaffLock } from './context/StaffLockContext';
 import './styles/admin.css';
 
 const NAV = [
@@ -9,9 +10,9 @@ const NAV = [
     section: 'Overview',
     items: [
       {
-        to: '/admin',
-        end: true,
+        to: '/admin/dashboard',
         label: 'Dashboard',
+        locked: true,
         icon: (
           <svg className="adm-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
             <rect x="3" y="3" width="7" height="7" rx="1.5"/>
@@ -62,6 +63,18 @@ const NAV = [
           </svg>
         ),
       },
+      {
+        to: '/admin/drivers',
+        label: 'Drivers',
+        icon: (
+          <svg className="adm-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="5.5" cy="17.5" r="2.5"/>
+            <circle cx="17.5" cy="17.5" r="2.5"/>
+            <path d="M8 17.5H15M15 17.5V9l-4-5H5L3 9v8.5"/>
+            <path d="M15 9h4l2 4v4.5h-3"/>
+          </svg>
+        ),
+      },
     ],
   },
   {
@@ -70,6 +83,7 @@ const NAV = [
       {
         to: '/admin/users',
         label: 'Users',
+        locked: true,
         icon: (
           <svg className="adm-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
@@ -81,6 +95,7 @@ const NAV = [
       {
         to: '/admin/settings',
         label: 'Settings',
+        locked: true,
         icon: (
           <svg className="adm-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
             <circle cx="12" cy="12" r="3"/>
@@ -91,6 +106,59 @@ const NAV = [
     ],
   },
 ];
+
+/* ── Small lock icon for protected nav items ── */
+const NavLockIcon = () => (
+  <svg
+    width="11" height="11" viewBox="0 0 24 24" fill="none"
+    stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round"
+    style={{ marginLeft: 'auto', opacity: 0.32, flexShrink: 0 }}
+  >
+    <rect x="3" y="11" width="18" height="11" rx="2"/>
+    <path d="M7 11V7a5 5 0 0110 0v4"/>
+  </svg>
+);
+
+/* ── Nav link that intercepts clicks on locked items ── */
+function LockedNavLink({ to, end, locked, onAfterClick, icon, label, badge }) {
+  const { unlocked, requestUnlock } = useStaffLock();
+
+  const inner = (
+    <>
+      {icon}
+      <span style={{ flex: 1 }}>{label}</span>
+      {badge}
+      {locked && !unlocked && <NavLockIcon />}
+    </>
+  );
+
+  if (!locked || unlocked) {
+    return (
+      <NavLink
+        to={to}
+        end={end}
+        className={({ isActive }) => `adm-nav-link${isActive ? ' adm-nav-link--active' : ''}`}
+        onClick={onAfterClick}
+      >
+        {inner}
+      </NavLink>
+    );
+  }
+
+  // Locked and not yet unlocked — show the password modal instead of navigating.
+  return (
+    <button
+      type="button"
+      className="adm-nav-link"
+      onClick={() => {
+        onAfterClick?.();
+        requestUnlock(to);
+      }}
+    >
+      {inner}
+    </button>
+  );
+}
 
 const MoonIcon = () => (
   <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" stroke="none">
@@ -163,7 +231,8 @@ export default function AdminLayout() {
   }, []);
 
   return (
-    <div className="adm-layout" ref={layoutRef} data-theme={theme}>
+    <StaffLockProvider>
+      <div className="adm-layout" ref={layoutRef} data-theme={theme}>
 
       {/* ── Sidebar ── */}
       <aside className={`adm-sidebar${sidebarOpen ? ' adm-sidebar--open' : ''}`}>
@@ -180,22 +249,19 @@ export default function AdminLayout() {
           {NAV.map(({ section, items }) => (
             <div key={section} className="adm-nav-section">
               <span className="adm-nav-section-label">{section}</span>
-              {items.map(({ to, end, label, icon, badgeKey }) => (
-                <NavLink
+              {items.map(({ to, end, label, icon, badgeKey, locked }) => (
+                <LockedNavLink
                   key={to}
                   to={to}
                   end={end}
-                  className={({ isActive }) =>
-                    `adm-nav-link${isActive ? ' adm-nav-link--active' : ''}`
-                  }
-                  onClick={close}
-                >
-                  {icon}
-                  {label}
-                  {badgeKey === 'pending' && pendingCount > 0 && (
-                    <span className="adm-nav-badge">{pendingCount}</span>
-                  )}
-                </NavLink>
+                  locked={locked}
+                  onAfterClick={close}
+                  icon={icon}
+                  label={label}
+                  badge={badgeKey === 'pending' && pendingCount > 0
+                    ? <span className="adm-nav-badge">{pendingCount}</span>
+                    : null}
+                />
               ))}
             </div>
           ))}
@@ -306,6 +372,7 @@ export default function AdminLayout() {
         </div>
       </div>
 
-    </div>
+      </div>
+    </StaffLockProvider>
   );
 }

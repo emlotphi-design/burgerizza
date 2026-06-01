@@ -1,5 +1,5 @@
 import './styles/App.css';
-import { Routes, Route, useLocation } from 'react-router-dom';
+import { Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
@@ -20,12 +20,15 @@ import ProtectedRoute from './components/ProtectedRoute';
 import AuthCallback from './pages/AuthCallback';
 import AdminLayout from './admin/AdminLayout';
 import AdminRoute from './admin/AdminRoute';
+import { StaffLockedRoute } from './admin/context/StaffLockContext';
 import AdminDashboard from './admin/pages/Dashboard';
 import AdminOrders from './admin/pages/Orders';
 import AdminProducts from './admin/pages/Products';
 import AdminUsers from './admin/pages/Users';
 import AdminSettings from './admin/pages/Settings';
 import AdminPOS from './admin/pages/POS';
+import AdminDrivers from './admin/pages/Drivers';
+import AdminDriverDetail from './admin/pages/DriverDetail';
 import RestaurantModeBanner from './components/RestaurantModeBanner';
 import RestaurantModeCartBar from './components/RestaurantModeCartBar';
 import RestaurantModeBuilderBar from './components/RestaurantModeBuilderBar';
@@ -100,12 +103,17 @@ function AnimatedRoutes() {
           path="/admin"
           element={<AdminRoute><AdminLayout /></AdminRoute>}
         >
-          <Route index          element={<AdminDashboard />} />
-          <Route path="orders"  element={<AdminOrders />} />
-          <Route path="products" element={<AdminProducts />} />
-          <Route path="users"   element={<AdminUsers />} />
-          <Route path="settings" element={<AdminSettings />} />
-          <Route path="pos"     element={<AdminPOS />} />
+          {/* /admin → orders: staff land on orders with no password prompt */}
+          <Route index element={<Navigate to="/admin/orders" replace />} />
+          <Route path="orders"    element={<AdminOrders />} />
+          {/* Protected routes — redirect to orders + show modal on direct URL entry */}
+          <Route path="dashboard" element={<StaffLockedRoute><AdminDashboard /></StaffLockedRoute>} />
+          <Route path="products"  element={<AdminProducts />} />
+          <Route path="users"     element={<StaffLockedRoute><AdminUsers /></StaffLockedRoute>} />
+          <Route path="settings"  element={<StaffLockedRoute><AdminSettings /></StaffLockedRoute>} />
+          <Route path="pos"       element={<AdminPOS />} />
+          <Route path="drivers"      element={<AdminDrivers />} />
+          <Route path="drivers/:id"  element={<AdminDriverDetail />} />
         </Route>
       </Routes>
     </div>

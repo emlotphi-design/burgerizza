@@ -135,7 +135,19 @@ export async function fetchTopItems(limit = 5) {
 
 // ── Orders ────────────────────────────────────────────────────
 
-export async function fetchOrders({ status = null, limit = 100, offset = 0 } = {}) {
+/**
+ * Returns the ISO timestamp for the very start of yesterday in local
+ * (restaurant) time. Used as the lower bound for the Orders panel window
+ * so only today + yesterday are fetched and displayed.
+ */
+export function getYesterdayStart() {
+  const d = new Date();
+  d.setDate(d.getDate() - 1); // go back one day
+  d.setHours(0, 0, 0, 0);    // midnight of yesterday, local time
+  return d.toISOString();     // Postgres expects ISO; toISOString() gives UTC which is correct for .gte()
+}
+
+export async function fetchOrders({ status = null, limit = 100, offset = 0, since = null } = {}) {
   let q = supabase
     .from('orders')
     .select('*')
@@ -143,6 +155,7 @@ export async function fetchOrders({ status = null, limit = 100, offset = 0 } = {
     .range(offset, offset + limit - 1);
 
   if (status) q = q.eq('status', status);
+  if (since)  q = q.gte('created_at', since);
 
   const { data, error } = await q;
   if (error) throw error;
@@ -288,6 +301,94 @@ export async function updateUserRole(id, role) {
     .update({ role })
     .eq('id', id)
     .select()
+    .single();
+  if (error) throw error;
+  return data;
+}
+
+
+// ── Drivers ───────────────────────────────────────────────────
+
+export async function fetchActiveDrivers() {
+  const { data, error } = await supabase
+    .from('drivers')
+    .select('id, full_name, phone, vehicle_type')
+    .eq('is_active', true)
+    .order('full_name');
+  if (error) throw error;
+  return data ?? [];
+}
+
+export async function fetchAllDrivers() {
+  const { data, error } = await supabase
+    .from('drivers')
+    .select('id, full_name, phone, email, vehicle_type, notes, is_active, created_at')
+    .order('full_name');
+  if (error) throw error;
+  return data ?? [];
+}
+
+export async function createDriver(driver) {
+  const { data, error } = await supabase
+    .from('drivers')
+    .insert(driver)
+    .select()
+    .single();
+  if (error) throw error;
+  return data;
+}
+
+export async function updateDriver(id, updates) {
+  const { data, error } = await supabase
+    .from('drivers')
+    .update(updates)
+    .eq('id', id)
+    .select()
+    .single();
+  if (error) throw error;
+  return data;
+}
+
+export async function toggleDriverActive(id, is_active) {
+  return updateDriver(id, { is_active });
+}
+
+export async function createDriverAssignment(orderId, driverId) {
+  const { data, error } = await supabase
+    .from('driver_assignments')
+    .insert({ order_id: orderId, driver_id: driverId, status: 'assigned' })
+    .select()
+    .single();
+  if (error) throw error;
+  return data;
+}
+
+export async function fetchAssignmentsWithOrders(since = null) {
+  let q = supabase
+    .from('driver_assignments')
+    .select('id, driver_id, assigned_at, status, orders(id, customer_name, delivery_address, total_price, status, created_at)')
+    .order('assigned_at', { ascending: false });
+  if (since) q = q.gte('assigned_at', since);
+  const { data, error } = await q;
+  if (error) throw error;
+  return data ?? [];
+}
+
+export async function fetchDriverHistory(driverId) {
+  const { data, error } = await supabase
+    .from('driver_assignments')
+    .select('id, assigned_at, completed_at, status, notes, orders(id, customer_name, delivery_address, total_price, status, created_at, items)')
+    .eq('driver_id', driverId)
+    .order('assigned_at', { ascending: false });
+  if (error) throw error;
+  return data ?? [];
+}
+
+export async function fetchDriverById(id) {
+  const { data, error } = await supabase
+    .from('drivers')
+    .select('id, full_name, phone, email, vehicle_type, notes, is_active, created_at')
+    .eq('id', id)
     .single();
   if (error) throw error;
   return data;

@@ -345,6 +345,14 @@
   letter-spacing: 0.1px;
 }
 
+/* button-reset when adm-nav-link is rendered as <button> (locked nav items) */
+button.adm-nav-link {
+  -webkit-appearance: none;
+  appearance: none;
+  box-sizing: border-box;
+  text-align: left;
+}
+
 .adm-nav-link:hover {
   background: rgba(255,213,74,0.10);
   color: var(--adm-text);

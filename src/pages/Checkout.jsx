@@ -12,7 +12,9 @@ import { useRestaurantMode } from '../store/RestaurantModeContext';
 import { createOrder } from '../admin/services/adminService';
 import PasswordInput from '../components/ui/PasswordInput';
 import CheckoutAddressSelector from '../components/checkout/CheckoutAddressSelector';
+import MultiAddressSelector from '../components/checkout/MultiAddressSelector';
 import { useDeliveryAddress } from '../hooks/useDeliveryAddress';
+import { useUserAddresses } from '../hooks/useUserAddresses';
 
 /* ─── Delivery profile helpers ─────────────────────────── */
 const EMPTY_PROFILE = {
@@ -784,6 +786,9 @@ function CheckoutNormal() {
   /* ── Canonical delivery address — profiles → last order fallback ──────── */
   const { address: savedAddress, hasSavedAddress, isLoading: addrLoading, saveAddress, refreshAddress } = useDeliveryAddress();
 
+  /* ── Multiple saved addresses (new system) ───────────────── */
+  const { addresses: savedAddresses, isLoading: multiAddrLoading, hasAddresses, defaultAddress } = useUserAddresses();
+
   /* Form state: pre-fill identity from auth for logged-in users.
      Address fields start empty — the confirm card handles saved addresses. */
   const [profile, setProfile] = useState(() =>
@@ -804,7 +809,7 @@ function CheckoutNormal() {
      addrLoading is checked unconditionally — mobile users with email-confirmation
      pending have isLoggedIn=false but still need the address fetch to complete
      before we decide whether to show the confirm card or the empty form. */
-  const isLoading = authLoading || addrLoading;
+  const isLoading = authLoading || addrLoading || (isLoggedIn && multiAddrLoading);
 
   const [step, setStep] = useState(1);
   const [done, setDone] = useState(false);
@@ -1022,6 +1027,36 @@ function CheckoutNormal() {
                 paymentStep={paymentStep}
                 onBack={handlePaymentBack}
                 onConfirm={handleConfirmed}
+              />
+            ) : step === 1 && hasAddresses ? (
+              <MultiAddressSelector
+                addresses={savedAddresses}
+                defaultAddress={defaultAddress}
+                onUseAddress={(addr) => {
+                  setProfile({
+                    fullName:     currentUser?.fullName || '',
+                    email:        currentUser?.email    || '',
+                    phone:        addr.phone || currentUser?.phone || '',
+                    street:       addr.street        || '',
+                    houseNumber:  addr.house_number  || '',
+                    postalCode:   addr.postal_code   || '',
+                    city:         addr.city          || '',
+                    floor:        addr.floor         || '',
+                    doorbellName: addr.bell_name     || '',
+                  });
+                  setSavedAddressConfirmed(true);
+                  setStep(paymentStep);
+                }}
+                onEnterNew={() => {
+                  setSavedAddressConfirmed(false);
+                  setShowNewAddressForm(true);
+                  setProfile({
+                    ...EMPTY_PROFILE,
+                    email:    currentUser?.email    || '',
+                    fullName: currentUser?.fullName || '',
+                    phone:    currentUser?.phone    || '',
+                  });
+                }}
               />
             ) : step === 1 && showConfirmCard ? (
               <CheckoutAddressSelector

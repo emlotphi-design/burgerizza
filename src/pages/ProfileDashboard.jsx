@@ -1,4 +1,5 @@
-import React, { useState, Component } from 'react';
+import React, { useEffect, useState, Component } from 'react';
+import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Socials from '../components/Socials';
@@ -7,7 +8,7 @@ import { supabase } from '../services/supabase';
 import { usePizzaStore } from '../store/PizzaContext';
 import { calcPrice } from '../utils/pizzaUtils';
 import { useMountDelay } from '../hooks/useMountDelay';
-import { useDeliveryAddress } from '../hooks/useDeliveryAddress';
+import { useUserAddresses } from '../hooks/useUserAddresses';
 import PasswordInput from '../components/ui/PasswordInput';
 
 // ─── Always-available fallback — page never goes blank ───────
@@ -259,67 +260,220 @@ function ChangePasswordSection() {
   );
 }
 
-// ─── Delivery address section ─────────────────────────────────
-// Reads and writes ONLY through useDeliveryAddress (profiles table).
-function AddressSection() {
-  const auth = useAuth();
-  const { address, hasSavedAddress, isLoading, saveAddress, refreshAddress } = useDeliveryAddress();
+// ─── Address form modal (add / edit) ─────────────────────────
+const LABEL_PRESETS = ['Zuhause', 'Arbeit', 'Freundin', 'Freund', 'Eltern', 'Andere'];
 
-  const [editing,   setEditing]   = useState(false);
-  const [saving,    setSaving]    = useState(false);
-  const [saveOk,    setSaveOk]    = useState(false);
-  const [saveError, setSaveError] = useState(null);
-  const [fields,    setFields]    = useState({
-    street: '', houseNumber: '', postalCode: '', city: '', floor: '', doorbellName: '',
-  });
+const EMPTY_ADDR_FORM = {
+  label: 'Zuhause', street: '', house_number: '', postal_code: '',
+  city: '', floor: '', bell_name: '', phone: '', is_default: false,
+};
 
-  function startEditing() {
-    setFields({
-      street: address?.street || '',
-      houseNumber: address?.houseNumber || '',
-      postalCode: address?.postalCode || '',
-      city: address?.city || '',
-      floor: address?.floor || '',
-      doorbellName: address?.doorbellName || '',
-    });
-    setEditing(true);
+function AddressFormModal({ address, isFirst, onSave, onClose }) {
+  const [form, setForm] = useState(address ? {
+    label:        address.label        || 'Zuhause',
+    street:       address.street       || '',
+    house_number: address.house_number || '',
+    postal_code:  address.postal_code  || '',
+    city:         address.city         || '',
+    floor:        address.floor        || '',
+    bell_name:    address.bell_name    || '',
+    phone:        address.phone        || '',
+    is_default:   address.is_default   ?? false,
+  } : { ...EMPTY_ADDR_FORM, is_default: isFirst });
+  const [saving, setSaving] = useState(false);
+  const [err,    setErr]    = useState('');
+
+  function set(k, v) { setForm(p => ({ ...p, [k]: v })); }
+
+  /* Lock background scroll while modal is open */
+  useEffect(() => {
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = prev; };
+  }, []);
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+    if (!form.street.trim())  { setErr('Straße ist erforderlich.'); return; }
+    if (!form.city.trim())    { setErr('Stadt ist erforderlich.');  return; }
+    if (!form.label.trim())   { setErr('Bezeichnung ist erforderlich.'); return; }
+    setSaving(true); setErr('');
+    try {
+      await onSave(address?.id ?? null, {
+        label:        form.label.trim(),
+        street:       form.street.trim(),
+        house_number: form.house_number.trim(),
+        postal_code:  form.postal_code.trim(),
+        city:         form.city.trim(),
+        floor:        form.floor.trim(),
+        bell_name:    form.bell_name.trim(),
+        phone:        form.phone.trim(),
+        is_default:   form.is_default,
+      });
+      onClose();
+    } catch (e) {
+      setErr(e.message);
+    } finally {
+      setSaving(false);
+    }
   }
 
-  async function handleSave() {
-    if (saving) return; // guard against double-invoke (onTouchStart + onClick)
-    console.log('[addr:profile-save] start', fields);
+  /* Rendered via portal so it escapes the glass-card backdrop-filter stacking context */
+  return createPortal(
+    <div className="pf-addr-modal-overlay" onClick={onClose}>
+      <div className="pf-addr-modal" onClick={e => e.stopPropagation()}>
 
-    setSaving(true);
-    setSaveOk(false);
-    setSaveError(null);
+        {/* ── Sticky header ── */}
+        <div className="pf-addr-modal-header">
+          <span className="pf-addr-modal-title">{address ? 'Adresse bearbeiten' : 'Neue Adresse'}</span>
+          <button type="button" className="pf-addr-modal-close" onClick={onClose}>✕</button>
+        </div>
 
-    const payload = {
-      fullName: auth?.currentUser?.fullName || '',
-      phone: auth?.currentUser?.phone || '',
-      ...fields,
-    };
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0, overflow: 'hidden' }}>
 
-    const { error } = await saveAddress(payload);
+          {/* ── Scrollable body ── */}
+          <div className="pf-addr-modal-body">
+            <div className="pf-addr-form">
 
-    setSaving(false);
+              <div className="pf-addr-form-row">
+                <label className="pf-addr-form-label">Bezeichnung *</label>
+                <input
+                  className="pf-inline-input"
+                  value={form.label}
+                  onChange={e => set('label', e.target.value)}
+                  list="pf-addr-label-list"
+                  placeholder="z.B. Zuhause, Arbeit"
+                />
+                <datalist id="pf-addr-label-list">
+                  {LABEL_PRESETS.map(l => <option key={l} value={l} />)}
+                </datalist>
+              </div>
 
-    if (error) {
-      const msg = typeof error === 'string' ? error : (error?.message ?? JSON.stringify(error));
-      console.error('[addr:profile-save] failed:', msg);
-      setSaveError(msg);
-      return;
+              <div className="pf-addr-form-row">
+                <label className="pf-addr-form-label">Straße *</label>
+                <input className="pf-inline-input" value={form.street}
+                  onChange={e => set('street', e.target.value)} placeholder="Musterstraße" />
+              </div>
+
+              <div className="pf-addr-form-2col">
+                <div className="pf-addr-form-row">
+                  <label className="pf-addr-form-label">Hausnr.</label>
+                  <input className="pf-inline-input" value={form.house_number}
+                    onChange={e => set('house_number', e.target.value)} placeholder="12A" />
+                </div>
+                <div className="pf-addr-form-row">
+                  <label className="pf-addr-form-label">PLZ</label>
+                  <input className="pf-inline-input" value={form.postal_code}
+                    onChange={e => set('postal_code', e.target.value)} placeholder="10115" />
+                </div>
+              </div>
+
+              <div className="pf-addr-form-row">
+                <label className="pf-addr-form-label">Stadt *</label>
+                <input className="pf-inline-input" value={form.city}
+                  onChange={e => set('city', e.target.value)} placeholder="Berlin" />
+              </div>
+
+              <div className="pf-addr-form-2col">
+                <div className="pf-addr-form-row">
+                  <label className="pf-addr-form-label">Etage</label>
+                  <input className="pf-inline-input" value={form.floor}
+                    onChange={e => set('floor', e.target.value)} placeholder="2. OG" />
+                </div>
+                <div className="pf-addr-form-row">
+                  <label className="pf-addr-form-label">Klingelname</label>
+                  <input className="pf-inline-input" value={form.bell_name}
+                    onChange={e => set('bell_name', e.target.value)} placeholder="Mustermann" />
+                </div>
+              </div>
+
+              <div className="pf-addr-form-row">
+                <label className="pf-addr-form-label">Telefon</label>
+                <input className="pf-inline-input" type="tel" value={form.phone}
+                  onChange={e => set('phone', e.target.value)} placeholder="+49 151 …" />
+              </div>
+
+              <div className="pf-addr-form-row pf-addr-form-row--inline">
+                <label className="pf-addr-form-label">Als Standard</label>
+                <button
+                  type="button"
+                  onClick={() => set('is_default', !form.is_default)}
+                  style={{
+                    width: 38, height: 22, borderRadius: 11, border: 'none', cursor: 'pointer',
+                    background: form.is_default ? '#FFD23F' : 'rgba(26,10,0,0.12)',
+                    display: 'flex', alignItems: 'center',
+                    padding: '0 3px', transition: 'background 0.18s',
+                    flexShrink: 0,
+                  }}
+                >
+                  <div style={{
+                    width: 16, height: 16, borderRadius: '50%',
+                    background: '#1A0A00', opacity: form.is_default ? 1 : 0.4,
+                    transform: form.is_default ? 'translateX(16px)' : 'translateX(0)',
+                    transition: 'transform 0.18s, opacity 0.18s',
+                  }} />
+                </button>
+              </div>
+
+              {err && (
+                <div style={{
+                  padding: '8px 12px', borderRadius: 10,
+                  background: 'rgba(200,0,30,0.07)', border: '1px solid rgba(200,0,30,0.22)',
+                  fontFamily: 'Nunito, sans-serif', fontSize: 12, fontWeight: 700, color: '#C8001E',
+                }}>
+                  {err}
+                </div>
+              )}
+
+            </div>
+          </div>
+
+          {/* ── Sticky footer ── */}
+          <div className="pf-addr-modal-footer">
+            <button type="button" className="pf-cancel-btn" onClick={onClose}>Abbrechen</button>
+            <button type="submit" className="pf-save-btn" disabled={saving} style={{ flex: 1 }}>
+              {saving ? 'Speichern…' : address ? 'Änderungen speichern' : 'Adresse hinzufügen'}
+            </button>
+          </div>
+
+        </form>
+      </div>
+    </div>,
+    document.body
+  );
+}
+
+// ─── Multi-address management section ────────────────────────
+function MultiAddressSection() {
+  const { addresses, isLoading, addAddress, updateAddress, deleteAddress, setDefault } = useUserAddresses();
+  const [modal,    setModal]    = useState(null); // null | 'add' | { address }
+  const [deleting, setDeleting] = useState(null);
+
+  async function handleSave(id, payload) {
+    if (id) {
+      const { error } = await updateAddress(id, payload);
+      if (error) throw new Error(error.message ?? 'Fehler beim Speichern.');
+    } else {
+      const { error } = await addAddress(payload);
+      if (error) throw new Error(error.message ?? 'Fehler beim Hinzufügen.');
     }
+  }
 
-    console.log('[addr:profile-save] ok');
-    refreshAddress();
-    setSaveOk(true);
-    setEditing(false);
-    setTimeout(() => setSaveOk(false), 4000);
+  async function handleDelete(id) {
+    setDeleting(id);
+    await deleteAddress(id);
+    setDeleting(null);
+  }
+
+  async function handleSetDefault(id) {
+    setDeleting(id); // reuse busy state
+    await setDefault(id);
+    setDeleting(null);
   }
 
   if (isLoading) {
     return (
-      <div style={{ padding: '16px 0', display: 'flex', alignItems: 'center', gap: 10 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '16px 0' }}>
         <div style={{
           width: 16, height: 16, borderRadius: '50%',
           border: '2.5px solid rgba(26,10,0,0.12)',
@@ -327,121 +481,95 @@ function AddressSection() {
           animation: 'co-spin 0.7s linear infinite',
         }} />
         <span style={{ fontFamily: 'Nunito, sans-serif', fontSize: 13, fontWeight: 700, color: 'rgba(26,10,0,0.40)' }}>
-          Lade Adresse…
+          Lade Adressen…
         </span>
       </div>
     );
   }
 
-  if (!editing) {
-    return (
-      <div className="pf-info-grid">
-        {saveOk && (
-          <div style={{
-            display: 'flex', alignItems: 'center', gap: 7,
-            padding: '8px 14px', marginBottom: 4,
-            background: 'rgba(61,185,110,0.10)',
-            border: '1px solid rgba(61,185,110,0.28)',
-            borderRadius: 10,
-          }}>
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#3db96e" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="20 6 9 17 4 12" />
-            </svg>
-            <span style={{ fontFamily: 'Nunito, sans-serif', fontSize: 12, fontWeight: 800, color: '#2a9655' }}>
-              Adresse gespeichert ✓
-            </span>
-          </div>
-        )}
-
-        {hasSavedAddress ? (
-          <>
-            <InfoRow label="Straße" value={address.street} />
-            <InfoRow label="Hausnummer" value={address.houseNumber} />
-            <InfoRow label="PLZ" value={address.postalCode} />
-            <InfoRow label="Stadt" value={address.city} />
-            {address.floor && <InfoRow label="Etage" value={address.floor} />}
-            {address.doorbellName && <InfoRow label="Klingelname" value={address.doorbellName} />}
-            <div style={{ padding: '6px 0 2px', display: 'flex', alignItems: 'center', gap: 5 }}>
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#3db96e" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="20 6 9 17 4 12" />
-              </svg>
-              <span style={{ fontFamily: 'Nunito, sans-serif', fontSize: 11, fontWeight: 700, color: '#3db96e' }}>
-                Beim Checkout automatisch vorausgefüllt
-              </span>
-            </div>
-          </>
-        ) : (
-          <p className="pf-empty-hint">
-            Keine Lieferadresse gespeichert. Einmal hier speichern — beim nächsten Checkout nie wieder eingeben.
-          </p>
-        )}
-
-        <button className="pf-edit-btn" onClick={startEditing}>
-          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"
-            strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: 5 }}>
-            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-          </svg>
-          {hasSavedAddress ? 'Bearbeiten' : 'Adresse hinzufügen'}
-        </button>
-
-      </div>
-    );
-  }
-
-  // ── Edit form ────────────────────────────────────────────────
   return (
-    <div className="pf-info-grid">
-      {[
-        { label: 'Straße', key: 'street', ph: 'Musterstraße', required: true },
-        { label: 'Hausnr.', key: 'houseNumber', ph: '12A', required: true },
-        { label: 'PLZ', key: 'postalCode', ph: '10115', required: true },
-        { label: 'Stadt', key: 'city', ph: 'Berlin', required: true },
-        { label: 'Etage', key: 'floor', ph: '2. OG' },
-        { label: 'Klingelname', key: 'doorbellName', ph: 'Mustermann' },
-      ].map(f => (
-        <div key={f.key} className="pf-field-row">
-          <label className="pf-info-label">
-            {f.label}
-            {f.required && <span style={{ color: '#C8001E', marginLeft: 2 }}>*</span>}
-          </label>
-          <input
-            className="pf-inline-input"
-            type="text"
-            value={fields[f.key]}
-            placeholder={f.ph}
-            onChange={e => setFields(p => ({ ...p, [f.key]: e.target.value }))}
-          />
-        </div>
-      ))}
-      {saveError && (
-        <div style={{
-          padding: '8px 14px', borderRadius: 10, marginTop: 6,
-          background: 'rgba(200,0,30,0.08)', border: '1px solid rgba(200,0,30,0.28)',
-          fontFamily: 'Nunito, sans-serif', fontSize: 12, fontWeight: 700, color: '#C8001E',
-          wordBreak: 'break-word',
-        }}>
-          ✗ Fehler: {saveError}
+    <>
+      {modal === 'add' && (
+        <AddressFormModal
+          isFirst={addresses.length === 0}
+          onSave={handleSave}
+          onClose={() => setModal(null)}
+        />
+      )}
+      {modal?.address && (
+        <AddressFormModal
+          address={modal.address}
+          isFirst={false}
+          onSave={handleSave}
+          onClose={() => setModal(null)}
+        />
+      )}
+
+      <div className="pf-addr-header">
+        <span style={{ fontFamily: 'Nunito, sans-serif', fontSize: 13, fontWeight: 800, color: 'rgba(26,10,0,0.50)' }}>
+          {addresses.length} {addresses.length === 1 ? 'Adresse' : 'Adressen'} gespeichert
+        </span>
+        <button className="pf-addr-add-btn" onClick={() => setModal('add')}>
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+          Neue Adresse
+        </button>
+      </div>
+
+      {addresses.length === 0 ? (
+        <p className="pf-empty-hint">
+          Noch keine Adresse gespeichert. Einmal hinzufügen — beim Checkout immer griffbereit.
+        </p>
+      ) : (
+        <div className="pf-addr-grid">
+          {addresses.map(addr => (
+            <div key={addr.id} className={`pf-addr-card${addr.is_default ? ' pf-addr-card--default' : ''}`}>
+              <div className="pf-addr-card-top">
+                <span className="pf-addr-label-name">{addr.label}</span>
+                {addr.is_default && <span className="pf-addr-default-chip">Standard</span>}
+              </div>
+              <div className="pf-addr-line">{addr.street} {addr.house_number}</div>
+              {addr.floor && <div className="pf-addr-line">{addr.floor}</div>}
+              <div className="pf-addr-line">{addr.postal_code} {addr.city}</div>
+              {addr.phone && <div className="pf-addr-phone">{addr.phone}</div>}
+              <div className="pf-addr-actions">
+                <button className="pf-addr-btn" onClick={() => setModal({ address: addr })}>
+                  Bearbeiten
+                </button>
+                {!addr.is_default && (
+                  <button
+                    className="pf-addr-btn pf-addr-btn--default-set"
+                    onClick={() => handleSetDefault(addr.id)}
+                    disabled={deleting === addr.id}
+                  >
+                    {deleting === addr.id ? '…' : 'Standard setzen'}
+                  </button>
+                )}
+                <button
+                  className="pf-addr-btn pf-addr-btn--danger"
+                  onClick={() => handleDelete(addr.id)}
+                  disabled={deleting === addr.id}
+                >
+                  {deleting === addr.id ? '…' : 'Löschen'}
+                </button>
+              </div>
+            </div>
+          ))}
         </div>
       )}
 
-      <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
-        <button
-          type="button"
-          className="pf-save-btn"
-          style={{ touchAction: 'manipulation' }}
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            handleSave();
-          }}
-          disabled={saving}
-        >
-          {saving ? 'Speichern…' : 'Speichern'}
-        </button>
-        <button type="button" className="pf-cancel-btn" onClick={() => setEditing(false)}>Abbrechen</button>
-      </div>
-    </div>
+      {addresses.length > 0 && (
+        <div style={{ marginTop: 10, display: 'flex', alignItems: 'center', gap: 5 }}>
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#3db96e" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="20 6 9 17 4 12" />
+          </svg>
+          <span style={{ fontFamily: 'Nunito, sans-serif', fontSize: 11, fontWeight: 700, color: '#3db96e' }}>
+            Beim Checkout automatisch zur Auswahl bereit
+          </span>
+        </div>
+      )}
+    </>
   );
 }
 
@@ -665,7 +793,7 @@ function ProfileContent() {
           </div>
 
           <SectionCard
-            title="Lieferadresse"
+            title="Lieferadressen"
             icon={
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
                 strokeLinecap="round" strokeLinejoin="round">
@@ -675,7 +803,7 @@ function ProfileContent() {
             }
           >
             <ProfileErrorBoundary>
-              <AddressSection />
+              <MultiAddressSection />
             </ProfileErrorBoundary>
           </SectionCard>
 
