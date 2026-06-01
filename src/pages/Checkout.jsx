@@ -7,7 +7,7 @@ import { useAuth } from '../store/AuthContext';
 import { calcPrice } from '../utils/pizzaUtils';
 import GlassInput from '../components/GlassInput';
 import { api } from '../services/api';
-import { supabase, storageType } from '../services/supabase';
+import { supabase } from '../services/supabase';
 import { useRestaurantMode } from '../store/RestaurantModeContext';
 import { createOrder } from '../admin/services/adminService';
 import PasswordInput from '../components/ui/PasswordInput';
@@ -782,7 +782,7 @@ function CheckoutNormal() {
   const { isLoggedIn, currentUser, addOrder, savePizzaToProfile, loading: authLoading } = useAuth();
 
   /* ── Canonical delivery address — profiles → last order fallback ──────── */
-  const { address: savedAddress, addressSource, hasSavedAddress, isLoading: addrLoading, saveAddress, refreshAddress } = useDeliveryAddress();
+  const { address: savedAddress, hasSavedAddress, isLoading: addrLoading, saveAddress, refreshAddress } = useDeliveryAddress();
 
   /* Form state: pre-fill identity from auth for logged-in users.
      Address fields start empty — the confirm card handles saved addresses. */
@@ -837,92 +837,9 @@ function CheckoutNormal() {
     }
   }, [pizzas.length, done, navigate]);
 
-  /* ── MOUNT diagnostic ── */
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setDbgSession(session); // populate debug panel immediately on mount
-      console.log('[checkout:mount]', {
-        isLoggedIn,
-        authLoading,
-        addrLoading,
-        hasSavedAddress,
-        addressSource,
-        address: savedAddress,
-        reactUserId: currentUser?.id ?? null,
-        sessionUserId: session?.user?.id ?? null,
-        storageType,
-        viewportWidth: window.innerWidth,
-        userAgent: navigator.userAgent,
-      });
-    });
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-  /* ── Mobile debug panel state ── */
-  const [dbgSession, setDbgSession] = useState(null);
-  const [dbgTestResult, setDbgTestResult] = useState(null);
-  const [dbgTesting, setDbgTesting] = useState(false);
-
-  async function runProfileWriteTest() {
-    setDbgTesting(true);
-    setDbgTestResult(null);
-
-    const { data: { session } } = await supabase.auth.getSession();
-    setDbgSession(session);
-    const uid = currentUser?.id ?? session?.user?.id ?? null;
-
-    if (!uid) {
-      setDbgTestResult({ ok: false, error: 'NO UID — not logged in (context or session)', uid: null, session: !!session });
-      setDbgTesting(false);
-      return;
-    }
-
-    const { data: writeData, error: writeErr } = await supabase
-      .from('profiles')
-      .upsert({ id: uid, city: 'DEBUG_TEST' }, { onConflict: 'id' })
-      .select('id, city');
-
-    if (writeErr) {
-      setDbgTestResult({ ok: false, error: `${writeErr.code}: ${writeErr.message} — ${writeErr.hint ?? ''}`, uid, session: !!session });
-      setDbgTesting(false);
-      return;
-    }
-
-    const { data: readData, error: readErr } = await supabase
-      .from('profiles')
-      .select('id, city, street, house_number, postal_code')
-      .eq('id', uid)
-      .single();
-
-    setDbgTestResult({
-      ok: !readErr,
-      writeData,
-      readData,
-      readCity: readData?.city ?? '(not read)',
-      readErr: readErr ? `${readErr.code}: ${readErr.message}` : null,
-      uid: uid.slice(0, 8),
-      session: !!session,
-    });
-    setDbgTesting(false);
-  }
-
   async function handleConfirmed(paymentMethod) {
     const total = grandTotal;
     setFinalTotal(total);
-
-    // ── DIAGNOSTIC: full state snapshot at payment confirm ──────────────
-    console.log('[handleConfirmed] ▶ payment confirmed:', {
-      paymentMethod,
-      total,
-      isLoggedIn,
-      userId: currentUser?.id?.slice(0, 8) ?? null,
-      profile_fullName: profile.fullName,
-      profile_street: profile.street,
-      profile_houseNumber: profile.houseNumber,
-      profile_postalCode: profile.postalCode,
-      profile_city: profile.city,
-      profile_phone: profile.phone,
-      willSaveAddress: isLoggedIn && !!(profile.street),
-    });
 
     if (isLoggedIn && currentUser) {
       const order = {
@@ -1050,19 +967,6 @@ function CheckoutNormal() {
 
   /* Persist delivery info for guests only; auth users use their profile */
   function handleDeliveryNext() {
-    // ── DIAGNOSTIC: snapshot profile state at delivery form submit ──────
-    console.log('[handleDeliveryNext] form submitted:', {
-      isLoggedIn,
-      userId: currentUser?.id?.slice(0, 8) ?? null,
-      fullName: profile.fullName,
-      street: profile.street,
-      houseNumber: profile.houseNumber,
-      postalCode: profile.postalCode,
-      city: profile.city,
-      phone: profile.phone,
-      email: profile.email,
-      allFieldsFilled: !!(profile.fullName && profile.street && profile.houseNumber && profile.postalCode && profile.city && profile.phone),
-    });
     if (!isLoggedIn) {
       saveGuestProfile(profile);
     } else {
@@ -1100,82 +1004,6 @@ function CheckoutNormal() {
         <div className="co-wrap">
           <StepDots step={displayStep} labels={stepLabels} />
 
-          {/* ── MOBILE DEBUG PANEL — remove before production ── */}
-          {window.innerWidth <= 900 && !done && (() => {
-            const ua = navigator.userAgent || '';
-            const inApp =
-              /Instagram|FBAV|FBAN|FB_IAB|FBIOS/i.test(ua) ? 'instagram/facebook' :
-              /Twitter|TweetDeck/i.test(ua)                 ? 'twitter'            :
-              /TikTok/i.test(ua)                            ? 'tiktok'             :
-              /Telegram/i.test(ua)                          ? 'telegram'           :
-              /WhatsApp/i.test(ua)                          ? 'whatsapp'           :
-              /wv\b/.test(ua) && /Android/i.test(ua)        ? 'android-webview'    : null;
-            const sessionExp = dbgSession?.expires_at
-              ? new Date(dbgSession.expires_at * 1000).toLocaleTimeString()
-              : null;
-            return (
-              <>
-                {inApp && (
-                  <div style={{
-                    background: '#fff3cd', border: '1.5px solid #ffc107',
-                    borderRadius: 10, padding: '10px 14px', marginBottom: 8,
-                    fontFamily: 'Nunito, sans-serif', fontSize: 12, fontWeight: 800, color: '#7a5800',
-                    lineHeight: 1.5,
-                  }}>
-                    ⚠ In-App-Browser erkannt ({inApp}). Für gespeicherte Adressen öffne diese Seite
-                    bitte in Safari oder Chrome.
-                  </div>
-                )}
-                <div style={{
-                  background: '#0a0a0a', color: '#00ff88', fontFamily: 'monospace',
-                  fontSize: 10, borderRadius: 10, padding: '10px 12px', marginBottom: 10,
-                  border: '1px solid #00ff4433', lineHeight: 1.7,
-                }}>
-                  <div style={{ color: '#ffff00', fontWeight: 700, marginBottom: 4 }}>⬡ mobile debug</div>
-                  <div>isLoggedIn: <b>{String(isLoggedIn)}</b></div>
-                  <div>authLoading: <b>{String(authLoading)}</b></div>
-                  <div>addrLoading: <b>{String(addrLoading)}</b></div>
-                  <div>hasSavedAddress: <b style={{ color: hasSavedAddress ? '#00ff88' : '#ff4444' }}>{String(hasSavedAddress)}</b></div>
-                  <div>addressSource: <b style={{ color: addressSource ? '#00ff88' : '#888' }}>{addressSource ?? 'null'}</b></div>
-                  <div>reactUid: <b>{currentUser?.id?.slice(0, 8) ?? 'null'}</b></div>
-                  <div>sessionUid: <b style={{ color: dbgSession?.user ? '#00ff88' : '#ff4444' }}>{dbgSession?.user?.id?.slice(0, 8) ?? 'null'}</b></div>
-                  {sessionExp && <div>session expires: <b>{sessionExp}</b></div>}
-                  <div>storage: <b style={{ color: storageType === 'localStorage' ? '#00ff88' : '#ffaa00' }}>{storageType}</b></div>
-                  <div>inAppBrowser: <b style={{ color: inApp ? '#ff4444' : '#00ff88' }}>{inApp ?? 'none'}</b></div>
-                  <div>address.street: <b>{savedAddress?.street || '(empty)'}</b></div>
-                  <div>address.city: <b>{savedAddress?.city || '(empty)'}</b></div>
-                  <div>viewport: <b>{window.innerWidth}×{window.innerHeight}</b></div>
-
-                  <button
-                    onClick={runProfileWriteTest}
-                    disabled={dbgTesting}
-                    style={{
-                      marginTop: 8, padding: '5px 12px', borderRadius: 6,
-                      background: dbgTesting ? '#333' : '#00ff88',
-                      color: '#000', fontFamily: 'monospace', fontSize: 10,
-                      fontWeight: 700, border: 'none', cursor: 'pointer', width: '100%',
-                    }}
-                  >
-                    {dbgTesting ? 'testing…' : '▶ TEST PROFILE WRITE (city=DEBUG_TEST)'}
-                  </button>
-
-                  {dbgTestResult && (
-                    <div style={{ marginTop: 6, padding: '6px 8px', borderRadius: 6, background: dbgTestResult.ok ? '#002200' : '#220000', border: `1px solid ${dbgTestResult.ok ? '#00aa44' : '#aa0000'}` }}>
-                      <div style={{ color: dbgTestResult.ok ? '#00ff88' : '#ff4444', fontWeight: 700 }}>
-                        {dbgTestResult.ok ? '✓ WRITE OK' : '✗ WRITE FAILED'}
-                      </div>
-                      <div>uid: {dbgTestResult.uid ?? 'null'}</div>
-                      <div>session: {String(dbgTestResult.session)}</div>
-                      {dbgTestResult.ok && <div>readCity: <b>{dbgTestResult.readCity}</b></div>}
-                      {dbgTestResult.ok && <div>readData: {JSON.stringify(dbgTestResult.readData)}</div>}
-                      {dbgTestResult.error && <div style={{ color: '#ff6666', wordBreak: 'break-all' }}>error: {dbgTestResult.error}</div>}
-                    </div>
-                  )}
-                </div>
-              </>
-            );
-          })()}
-
           <div className="co-panel">
             {done ? (
               <OrderSuccess
@@ -1185,11 +1013,9 @@ function CheckoutNormal() {
                 onTrack={() => navigate(savedOrderId ? `/order-tracking/${savedOrderId}` : '/')}
               />
             ) : isLoading ? (
-              /* eslint-disable-next-line no-sequences */
-              (console.log('[checkout:render] isLoading=true', { authLoading, addrLoading, isLoggedIn, reactUserId: currentUser?.id ?? null }),
-                <div className="co-form" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 240 }}>
-                  <span className="co-spinner" />
-                </div>)
+              <div className="co-form" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 240 }}>
+                <span className="co-spinner" />
+              </div>
             ) : (savedAddressConfirmed || step >= paymentStep) ? (
               <StepPayment
                 grandTotal={grandTotal}
@@ -1198,26 +1024,24 @@ function CheckoutNormal() {
                 onConfirm={handleConfirmed}
               />
             ) : step === 1 && showConfirmCard ? (
-              /* eslint-disable-next-line no-sequences */
-              (console.log('[checkout:render] → CONFIRM CARD', { hasSavedAddress, showNewAddressForm, address: savedAddress, viewportWidth: window.innerWidth }),
-                <CheckoutAddressSelector
-                  savedAddress={savedAddress}
-                  onUseThis={() => {
-                    setProfile({ ...savedAddress, email: currentUser?.email || '' });
-                    setSavedAddressConfirmed(true);
-                    setStep(paymentStep);
-                  }}
-                  onEnterNew={() => {
-                    setSavedAddressConfirmed(false);
-                    setShowNewAddressForm(true);
-                    setProfile({
-                      ...EMPTY_PROFILE,
-                      email: currentUser?.email || '',
-                      fullName: currentUser?.fullName || '',
-                      phone: currentUser?.phone || '',
-                    });
-                  }}
-                />)
+              <CheckoutAddressSelector
+                savedAddress={savedAddress}
+                onUseThis={() => {
+                  setProfile({ ...savedAddress, email: currentUser?.email || '' });
+                  setSavedAddressConfirmed(true);
+                  setStep(paymentStep);
+                }}
+                onEnterNew={() => {
+                  setSavedAddressConfirmed(false);
+                  setShowNewAddressForm(true);
+                  setProfile({
+                    ...EMPTY_PROFILE,
+                    email: currentUser?.email || '',
+                    fullName: currentUser?.fullName || '',
+                    phone: currentUser?.phone || '',
+                  });
+                }}
+              />
             ) : step === 1 && (!hasSavedAddress || showNewAddressForm) ? (
               <StepDelivery
                 profile={profile}

@@ -12,14 +12,14 @@ import PasswordInput from '../components/ui/PasswordInput';
 
 // ─── Always-available fallback — page never goes blank ───────
 const MOCK_USER = {
-  id:           'mock',
-  fullName:     'Azad',
-  email:        'emlotphi@gmail.com',
-  phone:        '+49 151 000 0000',
-  address:      {},
-  savedPizzas:  [],
+  id: 'mock',
+  fullName: 'Azad',
+  email: 'emlotphi@gmail.com',
+  phone: '+49 151 000 0000',
+  address: {},
+  savedPizzas: [],
   orderHistory: [],
-  createdAt:    '2025-01-01T00:00:00.000Z',
+  createdAt: '2025-01-01T00:00:00.000Z',
 };
 
 // ─── Error boundary — catches any sub-tree crash ─────────────
@@ -111,11 +111,11 @@ function SectionCard({ title, icon, children, defaultOpen = false }) {
 
 // ─── Personal info section ────────────────────────────────────
 function PersonalInfoSection({ user }) {
-  const auth      = useAuth();
+  const auth = useAuth();
   const [editing, setEditing] = useState(false);
-  const [fields,  setFields]  = useState({
+  const [fields, setFields] = useState({
     fullName: user?.fullName ?? '',
-    phone:    user?.phone    ?? '',
+    phone: user?.phone ?? '',
   });
 
   async function handleSave() {
@@ -126,14 +126,14 @@ function PersonalInfoSection({ user }) {
   if (!editing) {
     return (
       <div className="pf-info-grid">
-        <InfoRow label="Name"     value={user?.fullName} />
-        <InfoRow label="E-Mail"   value={user?.email} />
-        <InfoRow label="Telefon"  value={user?.phone} />
+        <InfoRow label="Name" value={user?.fullName} />
+        <InfoRow label="E-Mail" value={user?.email} />
+        <InfoRow label="Telefon" value={user?.phone} />
         <InfoRow label="Mitglied" value={fmt(user?.createdAt)} />
         <button className="pf-edit-btn" onClick={() => setEditing(true)}>
           <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: 5 }}>
-            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
           </svg>
           Bearbeiten
         </button>
@@ -151,8 +151,8 @@ function PersonalInfoSection({ user }) {
         </span>
       </div>
       {[
-        { label: 'Name',    key: 'fullName', type: 'text', ph: 'Vollständiger Name' },
-        { label: 'Telefon', key: 'phone',    type: 'tel',  ph: '+49 …'              },
+        { label: 'Name', key: 'fullName', type: 'text', ph: 'Vollständiger Name' },
+        { label: 'Telefon', key: 'phone', type: 'tel', ph: '+49 …' },
       ].map(f => (
         <div key={f.key} className="pf-field-row">
           <label className="pf-info-label">{f.label}</label>
@@ -176,17 +176,17 @@ function PersonalInfoSection({ user }) {
 // ─── Change password section ──────────────────────────────────
 function ChangePasswordSection() {
   const { changePassword } = useAuth();
-  const [newPw,    setNewPw]    = useState('');
-  const [confirm,  setConfirm]  = useState('');
-  const [errors,   setErrors]   = useState({});
-  const [saving,   setSaving]   = useState(false);
-  const [saveOk,   setSaveOk]   = useState(false);
+  const [newPw, setNewPw] = useState('');
+  const [confirm, setConfirm] = useState('');
+  const [errors, setErrors] = useState({});
+  const [saving, setSaving] = useState(false);
+  const [saveOk, setSaveOk] = useState(false);
 
   async function handleSave() {
     const errs = {};
-    if (!newPw)               errs.newPw   = 'Pflichtfeld';
-    else if (newPw.length < 8)errs.newPw   = 'Mindestens 8 Zeichen';
-    if (confirm !== newPw)    errs.confirm = 'Passwörter stimmen nicht überein';
+    if (!newPw) errs.newPw = 'Pflichtfeld';
+    else if (newPw.length < 8) errs.newPw = 'Mindestens 8 Zeichen';
+    if (confirm !== newPw) errs.confirm = 'Passwörter stimmen nicht überein';
     if (Object.keys(errs).length) { setErrors(errs); return; }
 
     setSaving(true);
@@ -212,7 +212,7 @@ function ChangePasswordSection() {
           border: '1px solid rgba(61,185,110,0.28)', borderRadius: 10,
         }}>
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#3db96e" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="20 6 9 17 4 12"/>
+            <polyline points="20 6 9 17 4 12" />
           </svg>
           <span style={{ fontFamily: 'Nunito, sans-serif', fontSize: 12, fontWeight: 800, color: '#2a9655' }}>
             Passwort erfolgreich geändert ✓
@@ -265,23 +265,23 @@ function AddressSection() {
   const auth = useAuth();
   const { address, hasSavedAddress, isLoading, saveAddress, refreshAddress, testWrite } = useDeliveryAddress();
 
-  const [editing,     setEditing]     = useState(false);
-  const [saving,      setSaving]      = useState(false);
-  const [saveOk,      setSaveOk]      = useState(false);
-  const [saveError,   setSaveError]   = useState(null);
-  const [fields,      setFields]      = useState({
+  const [editing, setEditing] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [saveOk, setSaveOk] = useState(false);
+  const [saveError, setSaveError] = useState(null);
+  const [fields, setFields] = useState({
     street: '', houseNumber: '', postalCode: '', city: '', floor: '', doorbellName: '',
   });
   const [testRunning, setTestRunning] = useState(false);
-  const [testResult,  setTestResult]  = useState(null);
+  const [testResult, setTestResult] = useState(null);
 
   function startEditing() {
     setFields({
-      street:       address?.street       || '',
-      houseNumber:  address?.houseNumber  || '',
-      postalCode:   address?.postalCode   || '',
-      city:         address?.city         || '',
-      floor:        address?.floor        || '',
+      street: address?.street || '',
+      houseNumber: address?.houseNumber || '',
+      postalCode: address?.postalCode || '',
+      city: address?.city || '',
+      floor: address?.floor || '',
       doorbellName: address?.doorbellName || '',
     });
     setEditing(true);
@@ -295,52 +295,28 @@ function AddressSection() {
     setSaveOk(false);
     setSaveError(null);
 
-    try {
-      // Resolve uid directly — avoids the useCallback closure timing bug in
-      // saveAddress() where currentUser?.id can be null if auth hadn't resolved
-      // when the callback was stamped. auth.currentUser is read here from the
-      // same useAuth() call that lives in AddressSection's scope, so it always
-      // reflects the current render.
-      const { data: sessData } = await supabase.auth.getSession();
-      const uid = auth?.currentUser?.id ?? sessData?.session?.user?.id ?? null;
+    const payload = {
+      fullName: auth?.currentUser?.fullName || '',
+      phone: auth?.currentUser?.phone || '',
+      ...fields,
+    };
 
-      if (!uid) {
-        console.error('[addr:profile-save] no uid — not logged in');
-        setSaveError('Nicht angemeldet — bitte neu einloggen.');
-        return;
-      }
+    const { error } = await saveAddress(payload);
 
-      const { error } = await supabase
-        .from('profiles')
-        .upsert({
-          id:           uid,
-          full_name:    auth?.currentUser?.fullName || '',
-          phone:        auth?.currentUser?.phone    || '',
-          street:       fields.street       || '',
-          house_number: fields.houseNumber  || '',
-          postal_code:  fields.postalCode   || '',
-          city:         fields.city         || '',
-          floor:        fields.floor        || '',
-          bell_name:    fields.doorbellName || '',
-        }, { onConflict: 'id' });
+    setSaving(false);
 
-      if (error) {
-        console.error('[addr:profile-save] upsert failed:', error.code, error.message);
-        setSaveError(error.message ?? 'Speichern fehlgeschlagen.');
-        return;
-      }
-
-      console.log('[addr:profile-save] ok — uid:', uid.slice(0, 8));
-      refreshAddress();
-      setSaveOk(true);
-      setEditing(false);
-      setTimeout(() => setSaveOk(false), 4000);
-    } catch (err) {
-      console.error('[addr:profile-save] threw:', err?.message);
-      setSaveError(err?.message ?? 'Unbekannter Fehler beim Speichern.');
-    } finally {
-      setSaving(false);
+    if (error) {
+      const msg = typeof error === 'string' ? error : (error?.message ?? JSON.stringify(error));
+      console.error('[addr:profile-save] failed:', msg);
+      setSaveError(msg);
+      return;
     }
+
+    console.log('[addr:profile-save] ok');
+    refreshAddress();
+    setSaveOk(true);
+    setEditing(false);
+    setTimeout(() => setSaveOk(false), 4000);
   }
 
   if (isLoading) {
@@ -371,7 +347,7 @@ function AddressSection() {
             borderRadius: 10,
           }}>
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#3db96e" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="20 6 9 17 4 12"/>
+              <polyline points="20 6 9 17 4 12" />
             </svg>
             <span style={{ fontFamily: 'Nunito, sans-serif', fontSize: 12, fontWeight: 800, color: '#2a9655' }}>
               Adresse gespeichert ✓
@@ -381,15 +357,15 @@ function AddressSection() {
 
         {hasSavedAddress ? (
           <>
-            <InfoRow label="Straße"       value={address.street} />
-            <InfoRow label="Hausnummer"   value={address.houseNumber} />
-            <InfoRow label="PLZ"          value={address.postalCode} />
-            <InfoRow label="Stadt"        value={address.city} />
-            {address.floor        && <InfoRow label="Etage"       value={address.floor} />}
+            <InfoRow label="Straße" value={address.street} />
+            <InfoRow label="Hausnummer" value={address.houseNumber} />
+            <InfoRow label="PLZ" value={address.postalCode} />
+            <InfoRow label="Stadt" value={address.city} />
+            {address.floor && <InfoRow label="Etage" value={address.floor} />}
             {address.doorbellName && <InfoRow label="Klingelname" value={address.doorbellName} />}
             <div style={{ padding: '6px 0 2px', display: 'flex', alignItems: 'center', gap: 5 }}>
               <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#3db96e" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="20 6 9 17 4 12"/>
+                <polyline points="20 6 9 17 4 12" />
               </svg>
               <span style={{ fontFamily: 'Nunito, sans-serif', fontSize: 11, fontWeight: 700, color: '#3db96e' }}>
                 Beim Checkout automatisch vorausgefüllt
@@ -405,8 +381,8 @@ function AddressSection() {
         <button className="pf-edit-btn" onClick={startEditing}>
           <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"
             strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: 5 }}>
-            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
           </svg>
           {hasSavedAddress ? 'Bearbeiten' : 'Adresse hinzufügen'}
         </button>
@@ -447,8 +423,8 @@ function AddressSection() {
               ? <div>returned: {JSON.stringify(testResult.data)}</div>
               : <div>error: {testResult.error?.message ?? String(testResult.error)}</div>
             }
-            {testResult.error?.code    && <div>code: {testResult.error.code}</div>}
-            {testResult.error?.hint    && <div>hint: {testResult.error.hint}</div>}
+            {testResult.error?.code && <div>code: {testResult.error.code}</div>}
+            {testResult.error?.hint && <div>hint: {testResult.error.hint}</div>}
             {testResult.error?.details && <div>details: {testResult.error.details}</div>}
           </div>
         )}
@@ -460,12 +436,12 @@ function AddressSection() {
   return (
     <div className="pf-info-grid">
       {[
-        { label: 'Straße',      key: 'street',       ph: 'Musterstraße', required: true  },
-        { label: 'Hausnr.',     key: 'houseNumber',  ph: '12A',          required: true  },
-        { label: 'PLZ',         key: 'postalCode',   ph: '10115',        required: true  },
-        { label: 'Stadt',       key: 'city',         ph: 'Berlin',       required: true  },
-        { label: 'Etage',       key: 'floor',        ph: '2. OG'                         },
-        { label: 'Klingelname', key: 'doorbellName', ph: 'Mustermann'                    },
+        { label: 'Straße', key: 'street', ph: 'Musterstraße', required: true },
+        { label: 'Hausnr.', key: 'houseNumber', ph: '12A', required: true },
+        { label: 'PLZ', key: 'postalCode', ph: '10115', required: true },
+        { label: 'Stadt', key: 'city', ph: 'Berlin', required: true },
+        { label: 'Etage', key: 'floor', ph: '2. OG' },
+        { label: 'Klingelname', key: 'doorbellName', ph: 'Mustermann' },
       ].map(f => (
         <div key={f.key} className="pf-field-row">
           <label className="pf-info-label">
@@ -514,9 +490,9 @@ function AddressSection() {
 
 // ─── Order history section ────────────────────────────────────
 function OrderHistorySection({ orders }) {
-  const navigate  = useNavigate();
-  const store     = usePizzaStore();
-  const list      = Array.isArray(orders) ? orders : [];
+  const navigate = useNavigate();
+  const store = usePizzaStore();
+  const list = Array.isArray(orders) ? orders : [];
 
   if (!list.length) {
     return <p className="pf-empty-hint">Noch keine Bestellungen aufgegeben.</p>;
@@ -541,7 +517,7 @@ function OrderHistorySection({ orders }) {
           </div>
           <button className="pf-reorder-btn" onClick={() => handleReorder(order)}>
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.5"/>
+              <polyline points="1 4 1 10 7 10" /><path d="M3.51 15a9 9 0 1 0 .49-3.5" />
             </svg>
             Erneut bestellen
           </button>
@@ -630,20 +606,20 @@ function ProfileContent() {
   const navigate = useNavigate();
 
   // Safe context access — if context is null for any reason, fall back gracefully
-  const auth        = useAuth();
+  const auth = useAuth();
   const currentUser = auth?.currentUser ?? null;
-  const isLoggedIn  = auth?.isLoggedIn  ?? false;
-  const logout      = auth?.logout;
+  const isLoggedIn = auth?.isLoggedIn ?? false;
+  const logout = auth?.logout;
 
-  const store      = usePizzaStore();
+  const store = usePizzaStore();
   const savedItems = store?.savedItems ?? [];
-  const savedPizzas  = savedItems.filter(i => i.type !== 'burger');
+  const savedPizzas = savedItems.filter(i => i.type !== 'burger');
   const savedBurgers = savedItems.filter(i => i.type === 'burger');
 
   const ready = useMountDelay(280);
 
   // Always render with real or mock data — no redirect, no blank page
-  const user       = currentUser ?? MOCK_USER;
+  const user = currentUser ?? MOCK_USER;
   const orderCount = user?.orderHistory?.length ?? 0;
 
   if (!ready) return <ProfileSkeleton />;
@@ -672,7 +648,7 @@ function ProfileContent() {
               {isLoggedIn && (
                 <span className="pf-hero-stat" style={{ color: '#2a7a4a' }}>
                   <svg width="9" height="9" viewBox="0 0 10 10" fill="#3db96e">
-                    <circle cx="5" cy="5" r="5"/>
+                    <circle cx="5" cy="5" r="5" />
                   </svg>
                   Angemeldet · Sitzung gespeichert
                 </span>
@@ -680,8 +656,8 @@ function ProfileContent() {
               {isLoggedIn && <span className="pf-hero-stat-sep">·</span>}
               <span className="pf-hero-stat">
                 <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                  <polyline points="14 2 14 8 20 8"/>
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                  <polyline points="14 2 14 8 20 8" />
                 </svg>
                 {orderCount} {orderCount === 1 ? 'Bestellung' : 'Bestellungen'}
               </span>
@@ -696,16 +672,16 @@ function ProfileContent() {
               onClick={() => document.getElementById('pf-info-section')?.scrollIntoView({ behavior: 'smooth' })}
             >
               <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: 4 }}>
-                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
               </svg>
               Edit Profile
             </button>
             <button className="pf-logout-btn" onClick={handleLogout}>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-                <polyline points="16 17 21 12 16 7"/>
-                <line x1="21" y1="12" x2="9" y2="12"/>
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                <polyline points="16 17 21 12 16 7" />
+                <line x1="21" y1="12" x2="9" y2="12" />
               </svg>
               Logout
             </button>
@@ -721,7 +697,7 @@ function ProfileContent() {
               title="Persönliche Informationen"
               icon={
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" />
                 </svg>
               }
             >
@@ -736,8 +712,8 @@ function ProfileContent() {
             icon={
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
                 strokeLinecap="round" strokeLinejoin="round">
-                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-                <circle cx="12" cy="10" r="3"/>
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                <circle cx="12" cy="10" r="3" />
               </svg>
             }
           >
@@ -750,9 +726,9 @@ function ProfileContent() {
             title={`My Pizzas${savedPizzas.length ? ` (${savedPizzas.length})` : ''}`}
             icon={
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M12 2 2.5 21.5h19L12 2z"/>
-                <path d="M3 21 Q12 16.5 21 21"/>
-                <circle cx="12" cy="15.5" r="1.1" fill="currentColor" stroke="none"/>
+                <path d="M12 2 2.5 21.5h19L12 2z" />
+                <path d="M3 21 Q12 16.5 21 21" />
+                <circle cx="12" cy="15.5" r="1.1" fill="currentColor" stroke="none" />
               </svg>
             }
           >
@@ -769,9 +745,9 @@ function ProfileContent() {
             title={`My Burgers${savedBurgers.length ? ` (${savedBurgers.length})` : ''}`}
             icon={
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M4 11a8 8 0 0 1 16 0H4z"/>
-                <rect x="3" y="11" width="18" height="3" rx="1"/>
-                <path d="M3 14h18v1.5A1.5 1.5 0 0 1 19.5 17h-15A1.5 1.5 0 0 1 3 15.5V14z"/>
+                <path d="M4 11a8 8 0 0 1 16 0H4z" />
+                <rect x="3" y="11" width="18" height="3" rx="1" />
+                <path d="M3 14h18v1.5A1.5 1.5 0 0 1 19.5 17h-15A1.5 1.5 0 0 1 3 15.5V14z" />
               </svg>
             }
           >
@@ -788,10 +764,10 @@ function ProfileContent() {
             title={`Bestellhistorie${orderCount ? ` (${orderCount})` : ''}`}
             icon={
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                <polyline points="14 2 14 8 20 8"/>
-                <line x1="16" y1="13" x2="8" y2="13"/>
-                <line x1="16" y1="17" x2="8" y2="17"/>
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                <polyline points="14 2 14 8 20 8" />
+                <line x1="16" y1="13" x2="8" y2="13" />
+                <line x1="16" y1="17" x2="8" y2="17" />
               </svg>
             }
           >
@@ -804,8 +780,8 @@ function ProfileContent() {
             title="Passwort ändern"
             icon={
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
               </svg>
             }
           >
@@ -818,7 +794,7 @@ function ProfileContent() {
             title="Zahlungsmethoden"
             icon={
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/>
+                <rect x="2" y="5" width="20" height="14" rx="2" /><line x1="2" y1="10" x2="22" y2="10" />
               </svg>
             }
           >
@@ -830,9 +806,9 @@ function ProfileContent() {
         {/* ── Mobile logout ── */}
         <button className="pf-logout-bottom" onClick={handleLogout}>
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-            <polyline points="16 17 21 12 16 7"/>
-            <line x1="21" y1="12" x2="9" y2="12"/>
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+            <polyline points="16 17 21 12 16 7" />
+            <line x1="21" y1="12" x2="9" y2="12" />
           </svg>
           Abmelden
         </button>
