@@ -17,9 +17,8 @@ function rowToAddress(row) {
 }
 
 /* Resolve the authenticated user id.
-   Falls back to a live Supabase session query so mobile users who registered
-   with email-confirmation pending (isLoggedIn=false in React context but a
-   real session exists) are handled identically to already-logged-in users. */
+   Falls back to a live Supabase session query so the hook works even when
+   the React AuthContext hasn't hydrated yet (common on mobile cold-starts). */
 async function resolveUid(contextUserId) {
   if (contextUserId) return contextUserId;
   const { data: { session } } = await supabase.auth.getSession();
@@ -28,35 +27,37 @@ async function resolveUid(contextUserId) {
 
 /**
  * Single canonical source for the logged-in user's delivery address.
- * Reads from and writes to public.profiles ONLY.
+ * Read strategy: (1) profiles table, (2) most recent order's delivery_address.
  *
  * Returns:
- *   address          — current address object (null when not resolved yet)
- *   hasSavedAddress  — true when street + houseNumber + postalCode + city are all non-empty
- *   isLoading        — true while the initial profiles fetch is in-flight
+ *   address           — current address object (null when not resolved yet)
+ *   addressSource     — 'profiles' | 'last_order' | null
+ *   hasSavedAddress   — true when street + houseNumber + postalCode + city are non-empty
+ *   isLoading         — true while the initial fetch is in-flight
  *   saveAddress(addr) — upserts to profiles, updates local state immediately
- *   refreshAddress() — force re-fetch from DB (call after external writes)
+ *   refreshAddress()  — force re-fetch from DB
+ *   testWrite()       — isolated write test for debugging
  */
 export function useDeliveryAddress() {
-  const { currentUser, isLoggedIn } = useAuth();
+  const { currentUser } = useAuth();
 
-  const [address,   setAddress]   = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [address,       setAddress]       = useState(null);
+  const [addressSource, setAddressSource] = useState(null);
+  const [isLoading,     setIsLoading]     = useState(true);
 
-  /* ── Core read ── */
-  const fetchAddress = useCallback(async () => {
+  /* ── Core read ──────────────────────────────────────────────────────────── */
+  const doFetch = useCallback(async () => {
     const uid = await resolveUid(currentUser?.id);
 
     if (!uid) {
-      console.log('[addr] no uid — skipping fetch');
       setAddress(null);
       setIsLoading(false);
       return;
     }
 
     setIsLoading(true);
-    console.log('[addr] reading profile for uid', uid);
 
+    // ── Step 1: profiles table (primary source) ───────────────────────────
     const { data, error } = await supabase
       .from('profiles')
       .select('full_name, phone, street, house_number, postal_code, city, floor, bell_name')
@@ -64,40 +65,119 @@ export function useDeliveryAddress() {
       .single();
 
     if (error) {
-      console.error('[addr] READ error:', { code: error.code, message: error.message, hint: error.hint });
+      // 42703 = column does not exist → migration 008 not applied in production
+      // PGRST116 = no rows found → profiles row missing for this user
+      // 42501 = RLS violation → SELECT policy missing or auth.uid() is null
+      console.error('[addr] profiles fetch failed — code:', error.code,
+        '| hint:', error.hint ?? '—',
+        '| message:', error.message,
+        '| uid:', uid?.slice(0, 8));
     } else {
-      console.log('[addr] raw profile row', data);
+      console.log('[addr] profiles ok — street:', data?.street || '(empty)',
+        '| city:', data?.city || '(empty)');
     }
 
-    if (!error && data) setAddress(rowToAddress(data));
+    const profAddr   = (!error && data) ? rowToAddress(data) : null;
+    const profComplete = !!profAddr?.street?.trim() && !!profAddr?.city?.trim();
+
+    if (profComplete) {
+      setAddress(profAddr);
+      setAddressSource('profiles');
+      setIsLoading(false);
+      return;
+    }
+
+    // ── Step 2: most recent order's delivery_address (fallback) ──────────
+    // Used when profiles has no complete address — covers first-time mobile
+    // users and cases where the earlier profile-write bug prevented the save.
+    // Query is authenticated: RLS enforces auth.uid() = user_id, so this
+    // only ever returns the signed-in user's own orders.
+    const { data: lastOrder, error: orderErr } = await supabase
+      .from('orders')
+      .select('delivery_address, customer_name, customer_phone')
+      .eq('user_id', uid)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (orderErr) {
+      console.error('[addr] orders fallback failed — code:', orderErr.code,
+        '| message:', orderErr.message, '| uid:', uid?.slice(0, 8));
+    }
+
+    const da = lastOrder?.delivery_address;
+    if (da?.street?.trim() && da?.city?.trim()) {
+      console.log('[addr] using last order address — street:', da.street, '| city:', da.city);
+      setAddress({
+        fullName:     da.fullName     || lastOrder.customer_name  || '',
+        phone:        da.phone        || lastOrder.customer_phone || '',
+        street:       da.street       || '',
+        houseNumber:  da.houseNumber  || '',
+        postalCode:   da.postalCode   || '',
+        city:         da.city         || '',
+        floor:        da.floor        || '',
+        doorbellName: da.doorbellName || '',
+      });
+      setAddressSource('last_order');
+    } else if (profAddr) {
+      // Profiles row exists but address is incomplete — use what we have
+      // (name/phone are still useful for pre-filling the delivery form)
+      setAddress(profAddr);
+      setAddressSource(null);
+    } else {
+      setAddress(null);
+      setAddressSource(null);
+    }
+
     setIsLoading(false);
   }, [currentUser?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  /* Re-fetch whenever auth identity changes (login, logout, registration) */
+  /* Re-fetch when currentUser.id changes (normal login/logout path) */
   useEffect(() => {
-    fetchAddress();
-  }, [fetchAddress]);
+    doFetch();
+  }, [doFetch]);
 
-  /* ── Public refresh for callers that need to force a re-read ── */
-  const refreshAddress = useCallback(() => {
-    fetchAddress();
-  }, [fetchAddress]);
+  /* Also subscribe to Supabase auth events directly.
+     This catches the case where SIGNED_IN fires (e.g. after a PKCE redirect on
+     mobile) but the React render cycle hasn't propagated currentUser yet — the
+     address would be fetched from the live session instead of waiting for state. */
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'INITIAL_SESSION') {
+          doFetch();
+        }
+        if (event === 'SIGNED_OUT') {
+          setAddress(null);
+          setIsLoading(false);
+        }
+      }
+    );
+    return () => subscription.unsubscribe();
+  }, [doFetch]);
 
-  /* ── Derived state ── */
+  /* ── Public refresh ─────────────────────────────────────────────────────── */
+  const refreshAddress = useCallback(() => { doFetch(); }, [doFetch]);
+
+  /* ── Derived state ──────────────────────────────────────────────────────── */
   const hasSavedAddress =
     !!address?.street?.trim() &&
     !!address?.houseNumber?.trim() &&
     !!address?.postalCode?.trim() &&
     !!address?.city?.trim();
 
-  console.log('[addr] current address state', address);
-  console.log('[addr] hasSavedAddress', hasSavedAddress);
-
-  /* ── Write ── */
+  /* ── Write ──────────────────────────────────────────────────────────────── */
   const saveAddress = useCallback(async (addr) => {
-    const uid = await resolveUid(currentUser?.id);
+    const contextUid  = currentUser?.id ?? null;
+    const { data: { session } } = await supabase.auth.getSession();
+    const sessionUid  = session?.user?.id ?? null;
+    const uid         = contextUid ?? sessionUid ?? null;
+
+    console.log('[addr:save] uid:', uid?.slice(0, 8) ?? 'null',
+      '| source:', contextUid ? 'context' : sessionUid ? 'session' : 'NONE');
+
     if (!uid) {
-      console.error('[addr] WRITE blocked — no user id in context or session');
+      console.error('[addr:save] blocked — no uid');
       return { error: 'not-logged-in' };
     }
 
@@ -113,27 +193,62 @@ export function useDeliveryAddress() {
       bell_name:    addr.doorbellName || '',
     };
 
-    console.log('[addr] save payload', payload);
-
     const { data: upsertData, error } = await supabase
       .from('profiles')
       .upsert(payload, { onConflict: 'id' })
-      .select('street, house_number, postal_code, city, floor, bell_name');
+      .select('id, street, house_number, postal_code, city');
 
     if (error) {
-      console.error('[addr] WRITE error:', {
-        code: error.code, message: error.message,
-        hint: error.hint, details: error.details,
-      });
+      // 42703 = address columns missing → migration 008 not applied
+      // 42501 = RLS violation → UPDATE/INSERT policy missing or no session
+      console.error('[addr:save] upsert failed — code:', error.code,
+        '| message:', error.message,
+        '| hint:', error.hint ?? '—',
+        '| uid:', uid?.slice(0, 8));
     } else {
-      console.log('[addr] upsert success', upsertData);
-      // Update local state immediately — rowToAddress(payload) uses the same
-      // mapping as the read path so hasSavedAddress flips to true instantly.
+      console.log('[addr:save] ok — street:', upsertData?.[0]?.street || '(empty)',
+        '| city:', upsertData?.[0]?.city || '(empty)');
       setAddress(rowToAddress(payload));
     }
 
     return { error };
   }, [currentUser?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  return { address, hasSavedAddress, isLoading, saveAddress, refreshAddress };
+  /* ── Isolated test write (debug only) ──────────────────────────────────── */
+  async function testWrite() {
+    const { data: { session } } = await supabase.auth.getSession();
+    const uid = session?.user?.id ?? null;
+    if (!uid) return { ok: false, uid: null, sessionExists: false, error: 'AUTH SESSION NOT READY — no session in localStorage', data: null };
+
+    // First: verify the columns exist by doing a SELECT
+    const { data: readData, error: readErr } = await supabase
+      .from('profiles')
+      .select('id, street, house_number, city')
+      .eq('id', uid)
+      .single();
+
+    if (readErr?.code === '42703') {
+      return { ok: false, uid: uid.slice(0, 8), sessionExists: true,
+        error: 'COLUMN MISSING — migration 008 not applied (42703: ' + readErr.message + ')', data: null };
+    }
+
+    // Then: try writing
+    const { data, error } = await supabase
+      .from('profiles')
+      .upsert({ id: uid, city: 'DEBUG_TEST' })
+      .select();
+
+    return {
+      ok:            !error,
+      uid:           uid.slice(0, 8),
+      sessionExists: !!session,
+      readRow:       readData,
+      data,
+      error: error
+        ? `${error.code}: ${error.message}${error.hint ? ' (' + error.hint + ')' : ''}`
+        : null,
+    };
+  }
+
+  return { address, addressSource, hasSavedAddress, isLoading, saveAddress, refreshAddress, testWrite };
 }

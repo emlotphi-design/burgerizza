@@ -192,6 +192,12 @@
   padding: 0;
   cursor: pointer;
   transition: opacity 0.18s ease;
+  /* Constrain touch target to header row only — prevents iOS from expanding
+     the hit area downward over the section body and intercepting inner buttons */
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  position: relative;
+  z-index: 1;
 }
 
 .pf-section-header:hover {
@@ -199,10 +205,13 @@
 }
 
 /* ── Accordion body ── */
+/* z-index: 2 ensures inner buttons sit above the header's touch area on iOS */
 .pf-section-body {
   display: grid;
   grid-template-rows: 0fr;
   transition: grid-template-rows 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+  position: relative;
+  z-index: 2;
 }
 
 .pf-section-body--open {
@@ -210,9 +219,16 @@
 }
 
 .pf-section-body__inner {
+  /* overflow:hidden is required for the collapse animation but clips pointer-event
+     hit areas on iOS Safari. Switch to overflow:visible when fully open so inner
+     buttons receive touch events normally. */
   overflow: hidden;
   min-height: 0;
   padding-top: 16px;
+}
+
+.pf-section-body--open .pf-section-body__inner {
+  overflow: visible;
 }
 
 /* ── Section chevron ── */

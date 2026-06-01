@@ -89,7 +89,12 @@ export function AuthProvider({ children }) {
     // Step 1 — quick render: set basic user from session cache (no DB call)
     // then enrich async from profiles table so address is available immediately.
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!session?.user) { setCurrentUser(null); setLoading(false); return; }
+      // If getSession() returns null, DON'T set loading=false here.
+      // On mobile, GoTrue can return null from getSession() before its auth-header
+      // interceptor is ready, even when a valid session is in localStorage.
+      // onAuthStateChange(INITIAL_SESSION) is the authoritative signal — it fires
+      // only after GoTrue is fully initialized and the JWT is in memory.
+      if (!session?.user) return;
       setCurrentUser(toAppUser(session.user)); // fast, from localStorage cache
       setLoading(false);
       hydrateUser(session.user).then(enriched => setCurrentUser(enriched)); // DB fetch

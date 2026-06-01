@@ -3,6 +3,41 @@ import { createClient } from '@supabase/supabase-js';
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
+// Probe which storage backend is usable in this browser context.
+// iOS Safari private mode and most in-app WebViews (Instagram, Telegram, WhatsApp)
+// throw QuotaExceededError on localStorage.setItem, silently breaking Supabase
+// session persistence. We cascade: localStorage → sessionStorage → in-memory.
+// sessionStorage survives in-page navigation but not new tabs.
+// Memory survives only the current page load — user must re-login after a hard
+// refresh, but at least the session works for the current visit.
+function probeStorage() {
+  function canUse(store) {
+    try {
+      store.setItem('__sb_probe__', '1');
+      store.removeItem('__sb_probe__');
+      return true;
+    } catch {
+      return false;
+    }
+  }
+  if (typeof window !== 'undefined') {
+    if (canUse(window.localStorage))   return { type: 'localStorage',   store: window.localStorage };
+    if (canUse(window.sessionStorage)) return { type: 'sessionStorage', store: window.sessionStorage };
+  }
+  const mem = new Map();
+  return {
+    type: 'memory',
+    store: {
+      getItem:    (k) => mem.get(k) ?? null,
+      setItem:    (k, v) => mem.set(k, v),
+      removeItem: (k) => mem.delete(k),
+    },
+  };
+}
+
+const { type: _storageType, store: _robustStorage } = probeStorage();
+export const storageType = _storageType;
+
 export const SITE_URL = (import.meta.env.VITE_SITE_URL ?? window.location.origin)
   .replace(/\/$/, '');
 
@@ -35,7 +70,7 @@ if (!canInit) {
 const supabaseStub = {
   auth: {
     getSession:               async ()  => ({ data: { session: null }, error: null }),
-    onAuthStateChange:        ()        => ({ data: { subscription: { unsubscribe: () => {} } } }),
+    onAuthStateChange:        (cb)      => { setTimeout(() => cb('INITIAL_SESSION', null), 0); return { data: { subscription: { unsubscribe: () => {} } } }; },
     signUp:                   async ()  => ({ data: { user: null, session: null }, error: { message: 'Supabase not configured' } }),
     signInWithPassword:       async ()  => ({ data: { user: null, session: null }, error: { message: 'Supabase not configured' } }),
     signOut:                  async ()  => ({ error: null }),
@@ -56,6 +91,7 @@ export const supabase = canInit
         detectSessionInUrl: true,
         autoRefreshToken:   true,
         persistSession:     true,
+        storage:            _robustStorage,
       },
     })
   : supabaseStub;

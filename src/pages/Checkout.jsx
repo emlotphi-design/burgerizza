@@ -7,7 +7,7 @@ import { useAuth } from '../store/AuthContext';
 import { calcPrice } from '../utils/pizzaUtils';
 import GlassInput from '../components/GlassInput';
 import { api } from '../services/api';
-import { supabase } from '../services/supabase';
+import { supabase, storageType } from '../services/supabase';
 import { useRestaurantMode } from '../store/RestaurantModeContext';
 import { createOrder } from '../admin/services/adminService';
 import PasswordInput from '../components/ui/PasswordInput';
@@ -781,8 +781,8 @@ function CheckoutNormal() {
   const { pizzas, clearCart } = usePizzaStore();
   const { isLoggedIn, currentUser, addOrder, savePizzaToProfile, loading: authLoading } = useAuth();
 
-  /* ── Canonical delivery address — profiles table only ──────────────────── */
-  const { address: savedAddress, hasSavedAddress, isLoading: addrLoading, saveAddress, refreshAddress } = useDeliveryAddress();
+  /* ── Canonical delivery address — profiles → last order fallback ──────── */
+  const { address: savedAddress, addressSource, hasSavedAddress, isLoading: addrLoading, saveAddress, refreshAddress } = useDeliveryAddress();
 
   /* Form state: pre-fill identity from auth for logged-in users.
      Address fields start empty — the confirm card handles saved addresses. */
@@ -840,19 +840,70 @@ function CheckoutNormal() {
   /* ── MOUNT diagnostic ── */
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
+      setDbgSession(session); // populate debug panel immediately on mount
       console.log('[checkout:mount]', {
         isLoggedIn,
         authLoading,
         addrLoading,
         hasSavedAddress,
+        addressSource,
         address: savedAddress,
         reactUserId: currentUser?.id ?? null,
         sessionUserId: session?.user?.id ?? null,
+        storageType,
         viewportWidth: window.innerWidth,
         userAgent: navigator.userAgent,
       });
     });
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  /* ── Mobile debug panel state ── */
+  const [dbgSession, setDbgSession] = useState(null);
+  const [dbgTestResult, setDbgTestResult] = useState(null);
+  const [dbgTesting, setDbgTesting] = useState(false);
+
+  async function runProfileWriteTest() {
+    setDbgTesting(true);
+    setDbgTestResult(null);
+
+    const { data: { session } } = await supabase.auth.getSession();
+    setDbgSession(session);
+    const uid = currentUser?.id ?? session?.user?.id ?? null;
+
+    if (!uid) {
+      setDbgTestResult({ ok: false, error: 'NO UID — not logged in (context or session)', uid: null, session: !!session });
+      setDbgTesting(false);
+      return;
+    }
+
+    const { data: writeData, error: writeErr } = await supabase
+      .from('profiles')
+      .upsert({ id: uid, city: 'DEBUG_TEST' }, { onConflict: 'id' })
+      .select('id, city');
+
+    if (writeErr) {
+      setDbgTestResult({ ok: false, error: `${writeErr.code}: ${writeErr.message} — ${writeErr.hint ?? ''}`, uid, session: !!session });
+      setDbgTesting(false);
+      return;
+    }
+
+    const { data: readData, error: readErr } = await supabase
+      .from('profiles')
+      .select('id, city, street, house_number, postal_code')
+      .eq('id', uid)
+      .single();
+
+    setDbgTestResult({
+      ok: !readErr,
+      writeData,
+      readData,
+      readCity: readData?.city ?? '(not read)',
+      readErr: readErr ? `${readErr.code}: ${readErr.message}` : null,
+      uid: uid.slice(0, 8),
+      session: !!session,
+    });
+    setDbgTesting(false);
+  }
 
   async function handleConfirmed(paymentMethod) {
     const total = grandTotal;
@@ -950,26 +1001,35 @@ function CheckoutNormal() {
     }
 
     // ── Persist delivery address to profiles ─────────────────────────────
-    // saveAddress() resolves the uid itself (context or live session fallback)
-    // and updates hasSavedAddress immediately via setAddress on success.
-    // No profile.street guard — saveAddress returns early if no uid exists.
-    console.log('[checkout] profile before save', profile);
-    {
-      const { error: addrErr } = await saveAddress({
-        fullName: profile.fullName,
-        phone: profile.phone,
-        street: profile.street,
-        houseNumber: profile.houseNumber,
-        postalCode: profile.postalCode,
-        city: profile.city,
-        floor: profile.floor || '',
-        doorbellName: profile.doorbellName || '',
-      });
-      if (addrErr) {
-        console.error('[checkout] address save failed', addrErr);
+    // Direct upsert — uses currentUser?.id from this function's outer scope,
+    // the same uid already used for the orders INSERT above. Avoids the
+    // useCallback closure timing bug where saveAddress() can capture
+    // currentUser?.id === null on iOS Safari before auth has resolved.
+    if (profile.street?.trim()) {
+      const { data: { session: _addrSess } } = await supabase.auth.getSession();
+      const addrUid = currentUser?.id ?? _addrSess?.user?.id ?? null;
+      if (addrUid) {
+        const { error: addrErr } = await supabase
+          .from('profiles')
+          .upsert({
+            id:           addrUid,
+            full_name:    profile.fullName     || '',
+            phone:        profile.phone        || '',
+            street:       profile.street       || '',
+            house_number: profile.houseNumber  || '',
+            postal_code:  profile.postalCode   || '',
+            city:         profile.city         || '',
+            floor:        profile.floor        || '',
+            bell_name:    profile.doorbellName || '',
+          }, { onConflict: 'id' });
+        if (addrErr) {
+          console.error('[checkout] profiles upsert failed:', addrErr.code, addrErr.message);
+        } else {
+          console.log('[checkout] profiles upsert ok — street:', profile.street, '| uid:', addrUid.slice(0, 8));
+          refreshAddress();
+        }
       } else {
-        console.log('[checkout] address saved successfully');
-        refreshAddress(); // force re-read so confirm card shows on next checkout
+        console.warn('[checkout] profiles upsert skipped — no uid');
       }
     }
 
@@ -1003,7 +1063,24 @@ function CheckoutNormal() {
       email: profile.email,
       allFieldsFilled: !!(profile.fullName && profile.street && profile.houseNumber && profile.postalCode && profile.city && profile.phone),
     });
-    if (!isLoggedIn) saveGuestProfile(profile);
+    if (!isLoggedIn) {
+      saveGuestProfile(profile);
+    } else {
+      // Eagerly persist to profiles as soon as the delivery step is confirmed.
+      // Fire-and-forget — checkout advances immediately while the write runs async.
+      // This fires earlier than payment, so currentUser and the Supabase JWT
+      // are both settled by the time this runs on mobile.
+      saveAddress({
+        fullName:     profile.fullName,
+        phone:        profile.phone,
+        street:       profile.street,
+        houseNumber:  profile.houseNumber,
+        postalCode:   profile.postalCode,
+        city:         profile.city,
+        floor:        profile.floor        || '',
+        doorbellName: profile.doorbellName || '',
+      });
+    }
     stepForward();
   }
 
@@ -1022,6 +1099,82 @@ function CheckoutNormal() {
       <main className="co-main">
         <div className="co-wrap">
           <StepDots step={displayStep} labels={stepLabels} />
+
+          {/* ── MOBILE DEBUG PANEL — remove before production ── */}
+          {window.innerWidth <= 900 && !done && (() => {
+            const ua = navigator.userAgent || '';
+            const inApp =
+              /Instagram|FBAV|FBAN|FB_IAB|FBIOS/i.test(ua) ? 'instagram/facebook' :
+              /Twitter|TweetDeck/i.test(ua)                 ? 'twitter'            :
+              /TikTok/i.test(ua)                            ? 'tiktok'             :
+              /Telegram/i.test(ua)                          ? 'telegram'           :
+              /WhatsApp/i.test(ua)                          ? 'whatsapp'           :
+              /wv\b/.test(ua) && /Android/i.test(ua)        ? 'android-webview'    : null;
+            const sessionExp = dbgSession?.expires_at
+              ? new Date(dbgSession.expires_at * 1000).toLocaleTimeString()
+              : null;
+            return (
+              <>
+                {inApp && (
+                  <div style={{
+                    background: '#fff3cd', border: '1.5px solid #ffc107',
+                    borderRadius: 10, padding: '10px 14px', marginBottom: 8,
+                    fontFamily: 'Nunito, sans-serif', fontSize: 12, fontWeight: 800, color: '#7a5800',
+                    lineHeight: 1.5,
+                  }}>
+                    ⚠ In-App-Browser erkannt ({inApp}). Für gespeicherte Adressen öffne diese Seite
+                    bitte in Safari oder Chrome.
+                  </div>
+                )}
+                <div style={{
+                  background: '#0a0a0a', color: '#00ff88', fontFamily: 'monospace',
+                  fontSize: 10, borderRadius: 10, padding: '10px 12px', marginBottom: 10,
+                  border: '1px solid #00ff4433', lineHeight: 1.7,
+                }}>
+                  <div style={{ color: '#ffff00', fontWeight: 700, marginBottom: 4 }}>⬡ mobile debug</div>
+                  <div>isLoggedIn: <b>{String(isLoggedIn)}</b></div>
+                  <div>authLoading: <b>{String(authLoading)}</b></div>
+                  <div>addrLoading: <b>{String(addrLoading)}</b></div>
+                  <div>hasSavedAddress: <b style={{ color: hasSavedAddress ? '#00ff88' : '#ff4444' }}>{String(hasSavedAddress)}</b></div>
+                  <div>addressSource: <b style={{ color: addressSource ? '#00ff88' : '#888' }}>{addressSource ?? 'null'}</b></div>
+                  <div>reactUid: <b>{currentUser?.id?.slice(0, 8) ?? 'null'}</b></div>
+                  <div>sessionUid: <b style={{ color: dbgSession?.user ? '#00ff88' : '#ff4444' }}>{dbgSession?.user?.id?.slice(0, 8) ?? 'null'}</b></div>
+                  {sessionExp && <div>session expires: <b>{sessionExp}</b></div>}
+                  <div>storage: <b style={{ color: storageType === 'localStorage' ? '#00ff88' : '#ffaa00' }}>{storageType}</b></div>
+                  <div>inAppBrowser: <b style={{ color: inApp ? '#ff4444' : '#00ff88' }}>{inApp ?? 'none'}</b></div>
+                  <div>address.street: <b>{savedAddress?.street || '(empty)'}</b></div>
+                  <div>address.city: <b>{savedAddress?.city || '(empty)'}</b></div>
+                  <div>viewport: <b>{window.innerWidth}×{window.innerHeight}</b></div>
+
+                  <button
+                    onClick={runProfileWriteTest}
+                    disabled={dbgTesting}
+                    style={{
+                      marginTop: 8, padding: '5px 12px', borderRadius: 6,
+                      background: dbgTesting ? '#333' : '#00ff88',
+                      color: '#000', fontFamily: 'monospace', fontSize: 10,
+                      fontWeight: 700, border: 'none', cursor: 'pointer', width: '100%',
+                    }}
+                  >
+                    {dbgTesting ? 'testing…' : '▶ TEST PROFILE WRITE (city=DEBUG_TEST)'}
+                  </button>
+
+                  {dbgTestResult && (
+                    <div style={{ marginTop: 6, padding: '6px 8px', borderRadius: 6, background: dbgTestResult.ok ? '#002200' : '#220000', border: `1px solid ${dbgTestResult.ok ? '#00aa44' : '#aa0000'}` }}>
+                      <div style={{ color: dbgTestResult.ok ? '#00ff88' : '#ff4444', fontWeight: 700 }}>
+                        {dbgTestResult.ok ? '✓ WRITE OK' : '✗ WRITE FAILED'}
+                      </div>
+                      <div>uid: {dbgTestResult.uid ?? 'null'}</div>
+                      <div>session: {String(dbgTestResult.session)}</div>
+                      {dbgTestResult.ok && <div>readCity: <b>{dbgTestResult.readCity}</b></div>}
+                      {dbgTestResult.ok && <div>readData: {JSON.stringify(dbgTestResult.readData)}</div>}
+                      {dbgTestResult.error && <div style={{ color: '#ff6666', wordBreak: 'break-all' }}>error: {dbgTestResult.error}</div>}
+                    </div>
+                  )}
+                </div>
+              </>
+            );
+          })()}
 
           <div className="co-panel">
             {done ? (

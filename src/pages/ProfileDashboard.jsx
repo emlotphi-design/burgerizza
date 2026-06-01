@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Socials from '../components/Socials';
 import { useAuth } from '../store/AuthContext';
+import { supabase } from '../services/supabase';
 import { usePizzaStore } from '../store/PizzaContext';
 import { calcPrice } from '../utils/pizzaUtils';
 import { useMountDelay } from '../hooks/useMountDelay';
@@ -262,14 +263,17 @@ function ChangePasswordSection() {
 // Reads and writes ONLY through useDeliveryAddress (profiles table).
 function AddressSection() {
   const auth = useAuth();
-  const { address, hasSavedAddress, isLoading, saveAddress } = useDeliveryAddress();
+  const { address, hasSavedAddress, isLoading, saveAddress, refreshAddress, testWrite } = useDeliveryAddress();
 
-  const [editing, setEditing] = useState(false);
-  const [saving,  setSaving]  = useState(false);
-  const [saveOk,  setSaveOk]  = useState(false);
-  const [fields,  setFields]  = useState({
+  const [editing,     setEditing]     = useState(false);
+  const [saving,      setSaving]      = useState(false);
+  const [saveOk,      setSaveOk]      = useState(false);
+  const [saveError,   setSaveError]   = useState(null);
+  const [fields,      setFields]      = useState({
     street: '', houseNumber: '', postalCode: '', city: '', floor: '', doorbellName: '',
   });
+  const [testRunning, setTestRunning] = useState(false);
+  const [testResult,  setTestResult]  = useState(null);
 
   function startEditing() {
     setFields({
@@ -284,19 +288,56 @@ function AddressSection() {
   }
 
   async function handleSave() {
+    if (saving) return; // guard against double-invoke (onTouchStart + onClick)
+    console.log('[addr:profile-save] start', fields);
+
     setSaving(true);
     setSaveOk(false);
+    setSaveError(null);
+
     try {
-      const { error } = await saveAddress({
-        fullName: auth?.currentUser?.fullName || '',
-        phone:    auth?.currentUser?.phone    || '',
-        ...fields,
-      });
-      if (!error) {
-        setSaveOk(true);
-        setTimeout(() => setSaveOk(false), 3000);
-        setEditing(false);
+      // Resolve uid directly — avoids the useCallback closure timing bug in
+      // saveAddress() where currentUser?.id can be null if auth hadn't resolved
+      // when the callback was stamped. auth.currentUser is read here from the
+      // same useAuth() call that lives in AddressSection's scope, so it always
+      // reflects the current render.
+      const { data: sessData } = await supabase.auth.getSession();
+      const uid = auth?.currentUser?.id ?? sessData?.session?.user?.id ?? null;
+
+      if (!uid) {
+        console.error('[addr:profile-save] no uid — not logged in');
+        setSaveError('Nicht angemeldet — bitte neu einloggen.');
+        return;
       }
+
+      const { error } = await supabase
+        .from('profiles')
+        .upsert({
+          id:           uid,
+          full_name:    auth?.currentUser?.fullName || '',
+          phone:        auth?.currentUser?.phone    || '',
+          street:       fields.street       || '',
+          house_number: fields.houseNumber  || '',
+          postal_code:  fields.postalCode   || '',
+          city:         fields.city         || '',
+          floor:        fields.floor        || '',
+          bell_name:    fields.doorbellName || '',
+        }, { onConflict: 'id' });
+
+      if (error) {
+        console.error('[addr:profile-save] upsert failed:', error.code, error.message);
+        setSaveError(error.message ?? 'Speichern fehlgeschlagen.');
+        return;
+      }
+
+      console.log('[addr:profile-save] ok — uid:', uid.slice(0, 8));
+      refreshAddress();
+      setSaveOk(true);
+      setEditing(false);
+      setTimeout(() => setSaveOk(false), 4000);
+    } catch (err) {
+      console.error('[addr:profile-save] threw:', err?.message);
+      setSaveError(err?.message ?? 'Unbekannter Fehler beim Speichern.');
     } finally {
       setSaving(false);
     }
@@ -369,6 +410,48 @@ function AddressSection() {
           </svg>
           {hasSavedAddress ? 'Bearbeiten' : 'Adresse hinzufügen'}
         </button>
+
+        {/* ── TEMP DEBUG BUTTON — remove after diagnosis ── */}
+        <button
+          onClick={async () => {
+            setTestRunning(true);
+            setTestResult(null);
+            const result = await testWrite();
+            setTestResult(result);
+            setTestRunning(false);
+          }}
+          disabled={testRunning}
+          style={{
+            marginTop: 8, width: '100%', padding: '10px 16px',
+            borderRadius: 10, border: '1.5px solid #C8001E',
+            background: testRunning ? '#f5f5f5' : 'rgba(200,0,30,0.06)',
+            color: '#C8001E', fontFamily: 'Nunito, sans-serif',
+            fontWeight: 800, fontSize: 12, cursor: 'pointer',
+          }}
+        >
+          {testRunning ? 'Testing…' : '🔴 TEST PROFILE WRITE'}
+        </button>
+
+        {testResult && (
+          <div style={{
+            marginTop: 8, padding: '10px 14px', borderRadius: 10, fontFamily: 'monospace',
+            fontSize: 11, lineHeight: 1.8, wordBreak: 'break-all',
+            background: testResult.ok ? 'rgba(61,185,110,0.08)' : 'rgba(200,0,30,0.08)',
+            border: `1px solid ${testResult.ok ? 'rgba(61,185,110,0.30)' : 'rgba(200,0,30,0.30)'}`,
+            color: testResult.ok ? '#1a4a2a' : '#5a0010',
+          }}>
+            <div><b>{testResult.ok ? '✓ WRITE OK' : '✗ WRITE FAILED'}</b></div>
+            <div>uid: {testResult.uid ?? 'null'}</div>
+            <div>session: {String(testResult.sessionExists)}</div>
+            {testResult.ok
+              ? <div>returned: {JSON.stringify(testResult.data)}</div>
+              : <div>error: {testResult.error?.message ?? String(testResult.error)}</div>
+            }
+            {testResult.error?.code    && <div>code: {testResult.error.code}</div>}
+            {testResult.error?.hint    && <div>hint: {testResult.error.hint}</div>}
+            {testResult.error?.details && <div>details: {testResult.error.details}</div>}
+          </div>
+        )}
       </div>
     );
   }
@@ -398,11 +481,32 @@ function AddressSection() {
           />
         </div>
       ))}
+      {saveError && (
+        <div style={{
+          padding: '8px 14px', borderRadius: 10, marginTop: 6,
+          background: 'rgba(200,0,30,0.08)', border: '1px solid rgba(200,0,30,0.28)',
+          fontFamily: 'Nunito, sans-serif', fontSize: 12, fontWeight: 700, color: '#C8001E',
+          wordBreak: 'break-word',
+        }}>
+          ✗ Fehler: {saveError}
+        </div>
+      )}
+
       <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
-        <button className="pf-save-btn" onClick={handleSave} disabled={saving}>
+        <button
+          type="button"
+          className="pf-save-btn"
+          style={{ touchAction: 'manipulation' }}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            handleSave();
+          }}
+          disabled={saving}
+        >
           {saving ? 'Speichern…' : 'Speichern'}
         </button>
-        <button className="pf-cancel-btn" onClick={() => setEditing(false)}>Abbrechen</button>
+        <button type="button" className="pf-cancel-btn" onClick={() => setEditing(false)}>Abbrechen</button>
       </div>
     </div>
   );
