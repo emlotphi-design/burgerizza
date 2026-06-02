@@ -1,10 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Socials from '../components/Socials';
 import { usePizzaStore } from '../store/PizzaContext';
-import { useAuth } from '../store/AuthContext';
-import { api } from '../services/api';
 import { calcBurgerPrice, BURGER_LABEL } from '../features/burger/utils/burgerUtils';
 import SkeletonImage from '../components/SkeletonImage';
 import { useMountDelay } from '../hooks/useMountDelay';
@@ -31,6 +29,7 @@ function meatEntries(burger) {
 }
 
 function SavedBurgerCard({ burger, isExiting, onEdit, onReorder, onDelete }) {
+  const [ingredientsOpen, setIngredientsOpen] = useState(false);
   const price   = calcBurgerPrice(burger);
   const meats   = meatEntries(burger);
   const cheeses = cheeseEntries(burger);
@@ -44,7 +43,7 @@ function SavedBurgerCard({ burger, isExiting, onEdit, onReorder, onDelete }) {
   ].filter(Boolean);
 
   return (
-    <div className={`cart-pizza-card${isExiting ? ' cart-pizza-card--exit' : ''}`}>
+    <div className={`cart-pizza-card glass-card${isExiting ? ' cart-pizza-card--exit' : ''}`}>
       <div className="cart-layout">
 
         <div className="cart-preview">
@@ -81,17 +80,36 @@ function SavedBurgerCard({ burger, isExiting, onEdit, onReorder, onDelete }) {
             <p className="saved-item-date">Gespeichert {fmt(burger.savedAt)}</p>
           )}
 
-          <p className="cart-section-label">Zutaten</p>
-          <div className="cart-ingredients">
-            {rows.map(row => (
-              <div key={row.cat} className="ingredient-row">
-                <span className="ingredient-cat">{row.cat}</span>
-                <span className="ingredient-vals">{row.val}</span>
+          <button
+            className={`cart-ing-toggle${ingredientsOpen ? ' cart-ing-toggle--open' : ''}`}
+            onClick={() => setIngredientsOpen(o => !o)}
+            aria-expanded={ingredientsOpen}
+          >
+            <span>Zutaten</span>
+            <svg
+              className="cart-ing-toggle__chevron"
+              width="11" height="11" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" strokeWidth="2.5"
+              strokeLinecap="round" strokeLinejoin="round"
+            >
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+          </button>
+
+          <div className={`cart-ing-body${ingredientsOpen ? ' cart-ing-body--open' : ''}`}>
+            <div className="cart-ing-body__inner">
+              <div className="cart-ingredients">
+                {rows.map(row => (
+                  <div key={row.cat} className="ingredient-row">
+                    <span className="ingredient-cat">{row.cat}</span>
+                    <span className="ingredient-vals">{row.val}</span>
+                  </div>
+                ))}
               </div>
-            ))}
+            </div>
           </div>
 
-          <div className="cart-divider" />
+          <div className="cart-divider cart-divider--ing" />
 
           <div className="cart-price-block">
             <div className="cart-price-row cart-price-total">
@@ -100,7 +118,7 @@ function SavedBurgerCard({ burger, isExiting, onEdit, onReorder, onDelete }) {
             </div>
           </div>
 
-          <div className="cart-divider" />
+          <div className="cart-divider cart-divider--actions" />
 
           <div className="cart-card-actions saved-item-actions">
             <button className="cart-edit-btn" onClick={onEdit} aria-label="Bearbeiten">
@@ -170,39 +188,13 @@ function BurgersSkeleton() {
 export default function MyBurgersPage() {
   const navigate = useNavigate();
   const { savedItems, removeSavedItem, addToCart } = usePizzaStore();
-  const { isLoggedIn } = useAuth();
 
-  const [exitingIds,  setExitingIds]  = useState([]);
-  const [dbBurgers,   setDbBurgers]   = useState([]);
-  const [fetching,    setFetching]    = useState(false);
-  const [fetchError,  setFetchError]  = useState(null);
+  const [exitingIds, setExitingIds] = useState([]);
   const ready = useMountDelay(280);
 
-  // Fetch saved burgers from database when logged in
-  useEffect(() => {
-    if (!isLoggedIn) return;
-    setFetching(true);
-    setFetchError(null);
-    api.burgers.list()
-      .then(data => {
-        setDbBurgers(
-          (data.burgers ?? []).map(b => ({
-            ...b,
-            type:    'burger',
-            savedAt: b.createdAt,
-          }))
-        );
-      })
-      .catch(() => setFetchError('Deine Burgers konnten nicht geladen werden.'))
-      .finally(() => setFetching(false));
-  }, [isLoggedIn]);
+  if (!ready) return <BurgersSkeleton />;
 
-  if (!ready || (isLoggedIn && fetching)) return <BurgersSkeleton />;
-
-  // Logged-in: use DB as source of truth. Guest: use localStorage.
-  const burgers = isLoggedIn
-    ? dbBurgers
-    : (savedItems ?? []).filter(i => i.type === 'burger');
+  const burgers = (savedItems ?? []).filter(i => i.type === 'burger');
 
   function handleEdit(burger) {
     // Write to bz_burger_draft localStorage so BurgerBuilder picks it up on mount
@@ -228,12 +220,7 @@ export default function MyBurgersPage() {
   function handleDelete(id) {
     setExitingIds(prev => [...prev, id]);
     setTimeout(() => {
-      if (isLoggedIn) {
-        setDbBurgers(prev => prev.filter(b => b.id !== id));
-        api.burgers.remove(id).catch(() => {});
-      } else {
-        removeSavedItem(id);
-      }
+      removeSavedItem(id);
       setExitingIds(prev => prev.filter(x => x !== id));
     }, 400);
   }
@@ -263,10 +250,6 @@ export default function MyBurgersPage() {
             ← Back
           </button>
         </div>
-
-        {fetchError && (
-          <p className="auth-error-banner" style={{ marginBottom: 16 }}>{fetchError}</p>
-        )}
 
         {burgers.length === 0 ? (
           <div className="saved-page-empty">

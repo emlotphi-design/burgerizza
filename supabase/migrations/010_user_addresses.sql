@@ -16,16 +16,15 @@ CREATE TABLE IF NOT EXISTS public.user_addresses (
   id           uuid        DEFAULT gen_random_uuid() PRIMARY KEY,
   user_id      uuid        NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   label        text        NOT NULL DEFAULT 'Zuhause',
-  street       text        NOT NULL,
+  street       text        NOT NULL DEFAULT '',
   house_number text        NOT NULL DEFAULT '',
   postal_code  text        NOT NULL DEFAULT '',
-  city         text        NOT NULL,
-  floor        text                 DEFAULT '',
-  bell_name    text                 DEFAULT '',
-  phone        text                 DEFAULT '',
+  city         text        NOT NULL DEFAULT '',
+  floor        text        NOT NULL DEFAULT '',
+  bell_name    text        NOT NULL DEFAULT '',
+  phone        text        NOT NULL DEFAULT '',
   is_default   boolean     NOT NULL DEFAULT false,
-  created_at   timestamptz NOT NULL DEFAULT now(),
-  updated_at   timestamptz NOT NULL DEFAULT now()
+  created_at   timestamptz NOT NULL DEFAULT now()
 );
 
 COMMENT ON TABLE  public.user_addresses             IS 'Multiple saved delivery addresses per user.';
@@ -65,24 +64,6 @@ CREATE POLICY "Users can delete own addresses"
   ON public.user_addresses FOR DELETE
   TO authenticated
   USING (auth.uid() = user_id);
-
-
--- ── updated_at trigger ────────────────────────────────────────
--- Uses CREATE OR REPLACE so it is safe to run even if the function
--- already exists from migration 009 (drivers table).
-
-CREATE OR REPLACE FUNCTION public.set_updated_at()
-RETURNS trigger LANGUAGE plpgsql AS $$
-BEGIN
-  NEW.updated_at = now();
-  RETURN NEW;
-END;
-$$;
-
-DROP TRIGGER IF EXISTS trg_user_addresses_updated_at ON public.user_addresses;
-CREATE TRIGGER trg_user_addresses_updated_at
-  BEFORE UPDATE ON public.user_addresses
-  FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
 
 
 -- ── Migrate existing single-address users ─────────────────────

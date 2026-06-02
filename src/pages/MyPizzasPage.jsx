@@ -13,6 +13,7 @@ function fmt(iso) {
 }
 
 function SavedPizzaCard({ pizza, isExiting, onEdit, onReorder, onDelete }) {
+  const [ingredientsOpen, setIngredientsOpen] = useState(false);
   const price = calcPrice(pizza);
 
   const rows = [
@@ -24,7 +25,7 @@ function SavedPizzaCard({ pizza, isExiting, onEdit, onReorder, onDelete }) {
   ].filter(Boolean);
 
   return (
-    <div className={`cart-pizza-card${isExiting ? ' cart-pizza-card--exit' : ''}`}>
+    <div className={`cart-pizza-card glass-card${isExiting ? ' cart-pizza-card--exit' : ''}`}>
       <div className="cart-layout">
 
         <div className="cart-preview">
@@ -48,17 +49,36 @@ function SavedPizzaCard({ pizza, isExiting, onEdit, onReorder, onDelete }) {
             <p className="saved-item-date">Gespeichert {fmt(pizza.savedAt)}</p>
           )}
 
-          <p className="cart-section-label">Zutaten</p>
-          <div className="cart-ingredients">
-            {rows.map(row => (
-              <div key={row.cat} className="ingredient-row">
-                <span className="ingredient-cat">{row.cat}</span>
-                <span className="ingredient-vals">{row.val}</span>
+          <button
+            className={`cart-ing-toggle${ingredientsOpen ? ' cart-ing-toggle--open' : ''}`}
+            onClick={() => setIngredientsOpen(o => !o)}
+            aria-expanded={ingredientsOpen}
+          >
+            <span>Zutaten</span>
+            <svg
+              className="cart-ing-toggle__chevron"
+              width="11" height="11" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" strokeWidth="2.5"
+              strokeLinecap="round" strokeLinejoin="round"
+            >
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+          </button>
+
+          <div className={`cart-ing-body${ingredientsOpen ? ' cart-ing-body--open' : ''}`}>
+            <div className="cart-ing-body__inner">
+              <div className="cart-ingredients">
+                {rows.map(row => (
+                  <div key={row.cat} className="ingredient-row">
+                    <span className="ingredient-cat">{row.cat}</span>
+                    <span className="ingredient-vals">{row.val}</span>
+                  </div>
+                ))}
               </div>
-            ))}
+            </div>
           </div>
 
-          <div className="cart-divider" />
+          <div className="cart-divider cart-divider--ing" />
 
           <div className="cart-price-block">
             <div className="cart-price-row cart-price-total">
@@ -67,7 +87,7 @@ function SavedPizzaCard({ pizza, isExiting, onEdit, onReorder, onDelete }) {
             </div>
           </div>
 
-          <div className="cart-divider" />
+          <div className="cart-divider cart-divider--actions" />
 
           <div className="cart-card-actions saved-item-actions">
             <button className="cart-edit-btn" onClick={onEdit} aria-label="Bearbeiten">

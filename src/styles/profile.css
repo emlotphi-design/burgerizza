@@ -1074,6 +1074,12 @@
   .saved-item-actions .cart-delete-btn {
     min-height: 40px;
   }
+
+  /* Saved-item card: fix flex-order and keep price visible on mobile.
+     cart.css sets order on .cart-details children for cart items — saved items
+     need different ordering since they have no cart-price-compact or qty row. */
+  .saved-items-list .cart-details > .saved-item-date  { order: 2; }
+  .saved-items-list .cart-details > .cart-price-block { display: flex; order: 3; }
 }
 
 /* ── iOS zoom fix: inline inputs must be ≥16px on mobile ── */
