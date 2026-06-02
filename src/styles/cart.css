@@ -4,15 +4,22 @@
 .cart-page {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  /* Lock the container to the viewport — body no longer scrolls */
+  height: 100vh;
+  height: 100dvh;   /* dvh adjusts for mobile browser chrome */
+  overflow: hidden;
 }
 
 .cart-main {
   flex: 1;
+  min-height: 0;    /* must be 0, not auto — lets the flex child shrink and scroll internally */
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: calc(var(--nav-h) + 12px) 32px 100px;
+  padding: calc(var(--nav-safe) + 12px) 32px 160px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;  /* prevents iOS rubber-band propagating to the window */
   position: relative;
   z-index: 2;
 }
@@ -330,6 +337,7 @@
 /* ── Empty cart ── */
 .cart-empty {
   flex: 1;
+  min-height: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -514,7 +522,15 @@
 ══════════════════════════════════════════ */
 @media (max-width: 900px) {
   .cart-main {
-    padding: calc(var(--nav-h) + 12px) 20px 80px;
+    padding: calc(var(--nav-safe) + 12px) 20px 160px;
+  }
+
+  .cart-checkout-bar {
+    bottom: 16px;
+    /* inherit left:0, right:0, margin:auto from base — no override needed */
+    width: min(860px, calc(100vw - 48px));
+    border-radius: 24px;
+    padding: 14px 18px;
   }
 
   .cart-layout {
@@ -551,29 +567,29 @@
   align-items: center;
   justify-content: center;
   gap: 10px;
-  padding: 18px 32px;
+  padding: 19px 32px;
   border: none;
-  border-radius: 20px;
+  border-radius: 18px;
   cursor: pointer;
   font-family: 'Nunito', sans-serif;
   font-weight: 900;
-  font-size: 15px;
-  letter-spacing: 1.4px;
+  font-size: 16px;
+  letter-spacing: 1.6px;
   text-transform: uppercase;
   color: #1A0A00;
   background: linear-gradient(145deg,
-      rgba(255, 255, 240, 0.98) 0%,
-      rgba(255, 235, 130, 0.97) 42%,
-      rgba(255, 215, 63, 0.98) 100%);
+      rgba(255, 255, 200, 0.99) 0%,
+      rgba(255, 225, 80, 0.99) 40%,
+      rgba(255, 195, 20, 1.00) 100%);
   box-shadow:
-    0 10px 40px rgba(200, 140, 0, 0.28),
-    0 4px 14px rgba(0, 0, 0, 0.12),
-    inset 0 1.5px 0 rgba(255, 255, 255, 0.85),
-    inset 0 -1px 0 rgba(160, 100, 0, 0.10);
+    0 10px 36px rgba(200, 130, 0, 0.36),
+    0 4px 12px rgba(0, 0, 0, 0.13),
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.90),
+    inset 0 -1px 0 rgba(140, 80, 0, 0.12);
   transition:
-    transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1),
-    box-shadow 0.28s ease,
-    filter 0.28s ease;
+    transform 0.26s cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow 0.26s ease,
+    filter 0.26s ease;
 }
 
 .btn-checkout-shine {
@@ -581,12 +597,12 @@
   inset: 0;
   background: linear-gradient(105deg,
       rgba(255, 255, 255, 0) 30%,
-      rgba(255, 255, 255, 0.55) 50%,
+      rgba(255, 255, 255, 0.60) 50%,
       rgba(255, 255, 255, 0) 70%);
   border-radius: inherit;
   pointer-events: none;
   transform: translateX(-100%);
-  transition: transform 0.55s ease;
+  transition: transform 0.52s ease;
 }
 
 .btn-checkout-premium::before {
@@ -596,20 +612,20 @@
   left: 8%;
   right: 8%;
   height: 44%;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.65) 0%, rgba(255, 255, 255, 0.01) 100%);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.70) 0%, rgba(255, 255, 255, 0.01) 100%);
   border-radius: 0 0 50% 50%;
   pointer-events: none;
 }
 
 .btn-checkout-premium:hover {
-  transform: translateY(-4px) scale(1.02);
-  filter: brightness(1.06);
+  transform: translateY(-3px) scale(1.015);
+  filter: brightness(1.05);
   box-shadow:
-    0 18px 56px rgba(200, 140, 0, 0.36),
-    0 6px 22px rgba(0, 0, 0, 0.14),
-    0 0 32px rgba(255, 210, 60, 0.30),
-    inset 0 1.5px 0 rgba(255, 255, 255, 0.92),
-    inset 0 -1px 0 rgba(160, 100, 0, 0.12);
+    0 22px 56px rgba(190, 120, 0, 0.42),
+    0 8px 24px rgba(0, 0, 0, 0.15),
+    0 0 40px rgba(255, 200, 30, 0.35),
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.94),
+    inset 0 -1px 0 rgba(140, 80, 0, 0.14);
 }
 
 .btn-checkout-premium:hover .btn-checkout-shine {
@@ -619,6 +635,84 @@
 .btn-checkout-premium:active {
   transform: translateY(-1px) scale(0.98);
   filter: brightness(1.0);
+}
+
+/* ══════════════════════════════════════════
+   CART — FIXED BOTTOM CHECKOUT BAR
+   Floats above content on desktop,
+   anchors to bottom on mobile.
+══════════════════════════════════════════ */
+.cart-checkout-bar {
+  position: fixed;
+  bottom: 24px;
+  /* left+right+margin:auto centers without transform — immune to
+     overflow:hidden ancestor clipping transform-based centering */
+  left: 0;
+  right: 0;
+  margin-left: auto;
+  margin-right: auto;
+  width: min(900px, calc(100vw - 48px));
+  box-sizing: border-box;
+  z-index: 50;
+
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px 20px;
+
+  background: rgba(255, 251, 228, 0.97);
+  backdrop-filter: blur(28px) saturate(1.6);
+  -webkit-backdrop-filter: blur(28px) saturate(1.6);
+  border: 1px solid rgba(255, 210, 50, 0.45);
+  border-radius: 26px;
+  box-shadow:
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.92),
+    0 20px 60px rgba(0, 0, 0, 0.16),
+    0 8px 24px rgba(0, 0, 0, 0.10),
+    0 2px 6px rgba(0, 0, 0, 0.06);
+
+  animation: pageEnter 0.42s cubic-bezier(0.22, 1, 0.36, 1) 0.18s both;
+}
+
+/* Total row inside the bar */
+.cart-checkout-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 900;
+  font-size: 16px;
+  color: #1A0A00;
+  padding: 0 4px;
+}
+
+/* Restaurant-mode green order button */
+.cart-checkout-rm-btn {
+  width: 100%;
+  height: 54px;
+  border-radius: 16px;
+  border: none;
+  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+  color: #fff;
+  font-family: 'Nunito', sans-serif;
+  font-size: 15px;
+  font-weight: 900;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  box-shadow: 0 6px 20px rgba(22, 163, 74, 0.30);
+  transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.18s ease;
+}
+
+.cart-checkout-rm-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 28px rgba(22, 163, 74, 0.42);
+}
+
+.cart-checkout-rm-btn:active {
+  transform: translateY(0) scale(0.98);
 }
 
 /* ══════════════════════════════════════════
@@ -675,9 +769,29 @@
    card without changing desktop source order.
 ══════════════════════════════════════════ */
 @media (max-width: 520px) {
-  /* Page shell */
+  /* Page shell — extra bottom padding clears the fixed checkout bar */
   .cart-main {
-    padding: calc(var(--nav-h) + 6px) 12px 88px;
+    padding: calc(var(--nav-safe) + 6px) 12px 160px;
+  }
+
+  /* Checkout bar — bottom sheet on phones, inset 16px each side */
+  .cart-checkout-bar {
+    bottom: 0;
+    left: 16px;
+    right: 16px;
+    margin-left: 0;
+    margin-right: 0;
+    width: auto;
+    box-sizing: border-box;
+    border-radius: 22px 22px 0 0;
+    border-bottom: none;
+    padding: 14px 16px;
+    padding-bottom: max(16px, env(safe-area-inset-bottom, 16px));
+    gap: 8px;
+  }
+
+  .cart-checkout-total {
+    font-size: 15px;
   }
 
   /* Page title */
@@ -916,10 +1030,10 @@
   }
 
   .btn-checkout-premium {
-    padding: 14px 20px;
-    font-size: 13px;
-    letter-spacing: 1.2px;
-    border-radius: 18px;
+    padding: 16px 20px;
+    font-size: 14px;
+    letter-spacing: 1.4px;
+    border-radius: 16px;
   }
 }
 
@@ -928,7 +1042,7 @@
 ══════════════════════════════════════════ */
 @media (max-width: 380px) {
   .cart-main {
-    padding: calc(var(--nav-h) + 4px) 10px 80px;
+    padding: calc(var(--nav-safe) + 4px) 10px 156px;
   }
 
   /* Shrink the image column so details have more room */

@@ -20,7 +20,9 @@
 
 /* ── Page shell ─────────────────────────────────────────── */
 .ot-page {
-  min-height: 100dvh;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
   background:
@@ -31,6 +33,7 @@
 
 .ot-wrap {
   flex: 1;
+  min-height: 0;
   display: flex;
   flex-direction: column;
   align-items: stretch;
@@ -38,8 +41,11 @@
   width: 100%;
   max-width: 600px;
   margin: 0 auto;
-  padding: calc(var(--nav-h, 64px) + 24px) 16px 80px;
+  padding: calc(var(--nav-safe, 86px) + 12px) 16px 80px;
   box-sizing: border-box;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
 }
 
 .ot-wrap--center {

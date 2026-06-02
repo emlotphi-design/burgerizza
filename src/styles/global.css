@@ -7,12 +7,15 @@
    GLOBAL CUSTOM PROPERTIES
 ══════════════════════════════════════════ */
 :root {
-  --nav-h: 72px;
+  --nav-h:    72px;
+  --nav-top:  14px;                              /* navbar top: 14px offset */
+  --nav-safe: calc(var(--nav-h) + var(--nav-top)); /* true visual clearance = 86px */
 }
 
 @media (max-width: 900px) {
   :root {
-    --nav-h: 68px;
+    --nav-h:    68px;
+    --nav-safe: calc(var(--nav-h) + var(--nav-top)); /* 82px on tablet/mobile */
   }
 }
 
@@ -229,6 +232,28 @@ body {
 
 .page-enter {
   animation: pageEnter 0.42s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* ══════════════════════════════════════════
+   APP-SHELL UTILITIES
+   .app-page  — viewport-locked page wrapper
+   .app-content — the sole scrollable zone
+   Combine: <div class="app-page page-enter">
+══════════════════════════════════════════ */
+.app-page {
+  height: 100vh;
+  height: 100dvh;   /* dvh adjusts for mobile browser chrome */
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-content {
+  flex: 1;
+  min-height: 0;    /* required for flex children to scroll internally */
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
 }
 
 @keyframes pageExit {

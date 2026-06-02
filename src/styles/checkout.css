@@ -1,14 +1,28 @@
 /* ══════════════════════════════════════════
    CHECKOUT PAGE LAYOUT
 ══════════════════════════════════════════ */
+
+/* Outer shell — overrides inline minHeight so the window never scrolls */
+.co-page {
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
 .co-main {
   flex: 1;
+  min-height: 0;
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  padding: calc(var(--nav-h) + 32px) 20px calc(80px + env(safe-area-inset-bottom, 0px));
+  padding: calc(var(--nav-safe) + 20px) 20px calc(80px + env(safe-area-inset-bottom, 0px));
   position: relative;
   z-index: 2;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
 }
 
 .co-wrap {
@@ -454,7 +468,7 @@
 /* ── Tablet / large phone ── */
 @media (max-width: 640px) {
   .co-main {
-    padding: calc(var(--nav-h) + 16px) 14px calc(72px + env(safe-area-inset-bottom, 0px));
+    padding: calc(var(--nav-safe) + 8px) 14px calc(72px + env(safe-area-inset-bottom, 0px));
     align-items: flex-start;
   }
 
@@ -493,7 +507,7 @@
 /* ── Phone ── */
 @media (max-width: 480px) {
   .co-main {
-    padding: calc(var(--nav-h) + 12px) 12px calc(80px + env(safe-area-inset-bottom, 0px));
+    padding: calc(var(--nav-safe) + 6px) 12px calc(80px + env(safe-area-inset-bottom, 0px));
   }
 
   .co-wrap {
@@ -572,7 +586,7 @@
 /* ── Small phone ── */
 @media (max-width: 360px) {
   .co-main {
-    padding: calc(var(--nav-h) + 10px) 10px calc(80px + env(safe-area-inset-bottom, 0px));
+    padding: calc(var(--nav-safe) + 4px) 10px calc(80px + env(safe-area-inset-bottom, 0px));
   }
 
   .co-panel {

@@ -659,7 +659,7 @@ function PaymentSection() {
 // ─── Skeleton ────────────────────────────────────────────────
 function ProfileSkeleton() {
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+    <div className="app-page">
       <Navbar />
       <main className="pf-main">
         <div className="pf-hero">
@@ -717,7 +717,7 @@ function ProfileContent() {
   console.log('[Profile] mounting — user:', user?.fullName, '| isLoggedIn:', isLoggedIn);
 
   return (
-    <div className="page-enter" style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+    <div className="app-page page-enter">
       <Navbar />
 
       <main className="pf-main">

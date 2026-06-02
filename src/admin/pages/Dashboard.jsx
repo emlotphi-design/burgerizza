@@ -266,7 +266,7 @@ export default function Dashboard() {
         <div className="adm-page-header-left">
           <h1 className="adm-page-title">Dashboard</h1>
           <p className="adm-page-subtitle">
-            Burgerizza Operations
+            Pibu Operations
             <span className="adm-live-indicator">
               <span className="adm-live-dot" />
               LIVE

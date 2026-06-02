@@ -379,59 +379,40 @@ export default function Cart() {
           })}
         </div>
 
-        <div className="cart-summary">
-          {visibleCount > 1 && (
-            <div className="cart-summary-total">
-              <span>Gesamtbetrag ({visibleCount} {itemWord})</span>
-              <span>€{grandTotal.toFixed(2)}</span>
-            </div>
-          )}
-          {isRestaurantMode ? (
-            <button
-              onClick={() => navigate('/checkout')}
-              style={{
-                width: '100%',
-                height: 54,
-                borderRadius: 16,
-                border: 'none',
-                background: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)',
-                color: '#fff',
-                fontFamily: 'Nunito, sans-serif',
-                fontSize: 15,
-                fontWeight: 900,
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: 10,
-                boxShadow: '0 6px 20px rgba(22,163,74,0.30)',
-                transition: 'transform 0.14s ease, box-shadow 0.14s ease',
-                marginTop: 4,
-              }}
-              onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 10px 28px rgba(22,163,74,0.40)'; }}
-              onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 6px 20px rgba(22,163,74,0.30)'; }}
-            >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M22 2L11 13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
-              </svg>
-              Place Order · €{grandTotal.toFixed(2)}
-            </button>
-          ) : (
-            <button className="btn-checkout-premium" onClick={() => navigate('/checkout')}>
-              <span className="btn-checkout-shine" />
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
-                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
-              </svg>
-              Zur Kasse · €{grandTotal.toFixed(2)}
-            </button>
-          )}
-        </div>
-
         <button className="cart-back-btn" onClick={() => navigate(backPath)}>
           {backLabel}
         </button>
       </main>
+
+      {/* ── Fixed bottom checkout bar ── */}
+      <div className="cart-checkout-bar">
+        {visibleCount > 1 && (
+          <div className="cart-checkout-total">
+            <span>Gesamtbetrag ({visibleCount} {itemWord})</span>
+            <span>€{grandTotal.toFixed(2)}</span>
+          </div>
+        )}
+        {isRestaurantMode ? (
+          <button
+            className="cart-checkout-rm-btn"
+            onClick={() => navigate('/checkout')}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M22 2L11 13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+            </svg>
+            Place Order · €{grandTotal.toFixed(2)}
+          </button>
+        ) : (
+          <button className="btn-checkout-premium" onClick={() => navigate('/checkout')}>
+            <span className="btn-checkout-shine" />
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+              <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+            </svg>
+            Zur Kasse · €{grandTotal.toFixed(2)}
+          </button>
+        )}
+      </div>
 
       <Socials />
     </div>

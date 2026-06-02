@@ -3,29 +3,35 @@
 ══════════════════════════════════════════ */
 .pf-main {
   flex: 1;
+  min-height: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: calc(var(--nav-h) + 28px) 20px 80px;
+  padding: calc(var(--nav-safe) + 20px) 20px 80px;
   position: relative;
   z-index: 2;
   gap: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
 }
 
 /* ── Hero banner ── */
 .pf-hero {
   width: 100%;
   max-width: 680px;
+  min-height: 110px;
   background: linear-gradient(145deg,
       rgba(255, 255, 245, 0.96) 0%,
       rgba(255, 232, 120, 0.92) 55%,
       rgba(255, 210, 63, 0.94) 100%);
   border: 1px solid rgba(255, 215, 63, 0.45);
-  border-radius: 28px;
-  padding: 28px 28px 24px;
+  border-radius: 32px;
+  padding: 26px 28px;
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 18px;
+  overflow: hidden;
   box-shadow:
     0 10px 40px rgba(180, 120, 0, 0.18),
     0 2px 10px rgba(0, 0, 0, 0.08),
@@ -33,7 +39,6 @@
   margin-bottom: 24px;
   animation: pageEnter 0.44s cubic-bezier(0.22, 1, 0.36, 1) both;
   position: relative;
-  overflow: hidden;
 }
 
 .pf-hero::before {
@@ -116,15 +121,20 @@
 .pf-hero-actions {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
   flex-shrink: 0;
+  min-width: 136px;    /* fixed column width — both buttons share the same measure */
+  align-self: center;
 }
 
 .pf-edit-profile-btn {
-  display: inline-flex;
+  width: 100%;
+  box-sizing: border-box;
+  display: flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
-  padding: 9px 16px;
+  padding: 9px 14px;
   border-radius: 50px;
   border: 1.5px solid rgba(26, 10, 0, 0.18);
   background: rgba(255, 255, 255, 0.65);
@@ -143,11 +153,13 @@
 }
 
 .pf-logout-btn {
+  width: 100%;
+  box-sizing: border-box;
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
-  flex-shrink: 0;
-  padding: 9px 16px;
+  padding: 9px 14px;
   border-radius: 50px;
   border: 1.5px solid rgba(26, 10, 0, 0.18);
   background: rgba(255, 255, 255, 0.65);
@@ -156,8 +168,8 @@
   font-size: 12px;
   color: rgba(26, 10, 0, 0.60);
   cursor: pointer;
-  transition: background 0.2s, color 0.2s;
   white-space: nowrap;
+  transition: background 0.2s, color 0.2s;
 }
 
 .pf-logout-btn:hover {
@@ -723,31 +735,35 @@
 /* ── Responsive ── */
 @media (max-width: 640px) {
   .pf-main {
-    padding: calc(var(--nav-h) + 16px) 14px 60px;
+    padding: calc(var(--nav-safe) + 8px) 14px 60px;
   }
 
   .pf-hero {
     flex-wrap: wrap;
     gap: 14px;
-    padding: 20px;
-    border-radius: 22px;
+    padding: 20px 20px 18px;
+    border-radius: 24px;
+    min-height: 0;
   }
 
   .pf-hero-actions {
     flex-direction: row;
     width: 100%;
+    min-width: 0;
     justify-content: flex-end;
     gap: 8px;
+    align-self: auto;
   }
 
   .pf-edit-profile-btn {
+    width: auto;
     flex: 1;
-    justify-content: center;
     min-height: 44px;
   }
 
   .pf-logout-btn {
     display: none;
+    width: auto;
   }
 
   .pf-logout-bottom {
@@ -770,7 +786,7 @@
 /* ── Small phone ≤ 480px ── */
 @media (max-width: 480px) {
   .pf-main {
-    padding: calc(var(--nav-h) + 12px) 12px 56px;
+    padding: calc(var(--nav-safe) + 4px) 12px 56px;
   }
 
   .pf-content {
@@ -847,12 +863,16 @@
 
 .saved-page-main {
   flex: 1;
+  min-height: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: calc(var(--nav-h) + 20px) 32px 100px;
+  padding: calc(var(--nav-safe) + 12px) 32px 100px;
   position: relative;
   z-index: 2;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
 }
 
 /* ── Page hero banner ── */
@@ -927,6 +947,146 @@
 /* ── List of saved item cards (reuses cart-pizzas-list) ── */
 .saved-items-list {
   animation: pageEnter 0.46s cubic-bezier(0.22, 1, 0.36, 1) 0.06s both;
+}
+
+/* ══════════════════════════════════════════
+   SAVED-ITEMS — RESPONSIVE GRID + VERTICAL CARD
+   4 cols desktop · 2 cols tablet · 1 col mobile
+══════════════════════════════════════════ */
+
+.saved-items-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 20px;
+  width: 100%;
+  max-width: 1400px;
+  align-items: start;
+  animation: pageEnter 0.46s cubic-bezier(0.22, 1, 0.36, 1) 0.06s both;
+}
+
+/* ── Vertical card shell ── */
+.saved-card {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition:
+    transform 0.25s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.25s ease;
+  animation: pageEnter 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.saved-card:hover {
+  transform: translateY(-4px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.95),
+    0 20px 60px rgba(0, 0, 0, 0.12),
+    0 6px 20px rgba(0, 0, 0, 0.08);
+}
+
+.saved-card--exit {
+  animation: cartCardOut 0.38s cubic-bezier(0.4, 0, 0.6, 1) both !important;
+  pointer-events: none;
+}
+
+/* ── Card header: name + date left, price right ── */
+.saved-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 18px 18px 10px;
+}
+
+.saved-card-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+  flex: 1;
+}
+
+.saved-card-name {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 900;
+  font-size: 16px;
+  color: #1A0A00;
+  letter-spacing: -0.2px;
+  line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.saved-card-date {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 700;
+  font-size: 10px;
+  color: rgba(26, 10, 0, 0.38);
+  letter-spacing: 0.2px;
+}
+
+.saved-card-price {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 900;
+  font-size: 17px;
+  color: #1A0A00;
+  flex-shrink: 0;
+}
+
+/* ── Image area — centered, fixed height so all cards align ── */
+.saved-card-image {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 18px 18px;
+  min-height: 168px;
+}
+
+/* Burger placeholder adapts to grid size */
+.saved-card .saved-burger-placeholder {
+  width: 160px;
+  height: 160px;
+  border-radius: 50%;
+}
+
+/* ── Body: collapsible accordion ── */
+.saved-card-body {
+  padding: 0 14px;
+  flex: 1;
+}
+
+/* ── Action buttons ── */
+.saved-card-actions {
+  display: flex;
+  gap: 6px;
+  padding: 10px 14px 16px;
+}
+
+.saved-card-actions .cart-edit-btn,
+.saved-card-actions .cart-delete-btn {
+  flex: 1;
+  font-size: 11px;
+  padding: 9px 6px;
+  min-height: 36px;
+}
+
+/* ── Grid responsive ── */
+@media (max-width: 900px) {
+  .saved-items-grid { gap: 14px; }
+}
+
+@media (max-width: 520px) {
+  .saved-items-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .saved-card:hover { transform: none; }
+
+  .saved-card-header  { padding: 14px 16px 8px; }
+  .saved-card-image   { padding: 4px 16px 14px; min-height: 148px; }
+  .saved-card-body    { padding: 0 12px; }
+  .saved-card-actions { padding: 8px 12px 14px; gap: 5px; }
 }
 
 /* ── Saved-item date label ── */
@@ -1053,13 +1213,13 @@
 /* ── Responsive ── */
 @media (max-width: 900px) {
   .saved-page-main {
-    padding: calc(var(--nav-h) + 12px) 20px 80px;
+    padding: calc(var(--nav-safe) + 4px) 20px 80px;
   }
 }
 
 @media (max-width: 520px) {
   .saved-page-main {
-    padding: calc(var(--nav-h) + 8px) 14px 80px;
+    padding: calc(var(--nav-safe) + 2px) 14px 80px;
   }
 
   .saved-page-title {
@@ -1091,7 +1251,7 @@
 
 @media (max-width: 380px) {
   .saved-page-main {
-    padding: calc(var(--nav-h) + 6px) 10px 72px;
+    padding: calc(var(--nav-safe) + 2px) 10px 72px;
   }
 
   /* Shrink hero icon so title + back-btn have room */
