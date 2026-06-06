@@ -230,7 +230,30 @@
     "completedOrders": "سفارشات تکمیل شده",
     "topItems": "پرفروش‌ترین‌ها",
     "registeredUsers": "کاربران ثبت‌نام شده",
-    "openRestaurantMode": "باز کردن حالت رستوران"
+    "openRestaurantMode": "باز کردن حالت رستوران",
+    "restaurantStatus": "وضعیت رستوران",
+    "orderingEnabled": "پذیرش سفارش",
+    "orderingEnabledDesc": "مشتریان می‌توانند سفارش دهند",
+    "orderingDisabledDesc": "سفارش‌گیری برای مشتریان غیرفعال است"
+  },
+  "restaurant": {
+    "online": "آنلاین",
+    "busy": "شلوغ",
+    "closed": "بسته",
+    "openForOrders": "باز",
+    "closedTitle": "سفارش‌گیری موقتاً غیرفعال است.",
+    "closedMessage": "رستوران در حال حاضر بسته است.",
+    "busyTitle": "در حال حاضر حجم سفارش‌ها بسیار بالاست.",
+    "busyMessage": "سفارش‌گیری موقتاً متوقف شده است.",
+    "busyDelay": "زمان انتظار اضافی: ۱۵–۳۰ دقیقه",
+    "busyBtn": "در حال حاضر بسیار شلوغ هستیم",
+    "closedBtn": "رستوران در حال حاضر بسته است",
+    "openStatus": "در حال پذیرش سفارش",
+    "busyStatus": "حجم سفارش بالا",
+    "closedStatus": "سفارش‌گیری غیرفعال",
+    "onlineDesc": "سفارش‌گیری به صورت عادی",
+    "busyDesc": "باز — هشدار تأخیر نشان داده می‌شود",
+    "closedDesc": "سفارش‌گیری برای مشتریان غیرفعال"
   },
   "orders": {
     "title": "سفارشات",

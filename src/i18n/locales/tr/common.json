@@ -230,7 +230,30 @@
     "completedOrders": "Tamamlanan siparişler",
     "topItems": "En Çok Satanlar",
     "registeredUsers": "Kayıtlı Kullanıcılar",
-    "openRestaurantMode": "Restoran Modunu Aç"
+    "openRestaurantMode": "Restoran Modunu Aç",
+    "restaurantStatus": "Restoran Durumu",
+    "orderingEnabled": "Sipariş al",
+    "orderingEnabledDesc": "Müşteriler sipariş verebilir",
+    "orderingDisabledDesc": "Müşteriler için sipariş devre dışı"
+  },
+  "restaurant": {
+    "online": "Çevrimiçi",
+    "busy": "Yoğun",
+    "closed": "Kapalı",
+    "openForOrders": "Açık",
+    "closedTitle": "Sipariş geçici olarak kullanılamıyor.",
+    "closedMessage": "Restoran şu anda kapalı.",
+    "busyTitle": "Şu anda çok yüksek sipariş hacmi yaşıyoruz.",
+    "busyMessage": "Siparişler geçici olarak duraklatıldı.",
+    "busyDelay": "Tahmini ek bekleme: 15–30 dk",
+    "busyBtn": "Şu anda yoğunuz",
+    "closedBtn": "Restoran şu anda kapalı",
+    "openStatus": "Sipariş alınıyor",
+    "busyStatus": "Yüksek sipariş hacmi",
+    "closedStatus": "Sipariş devre dışı",
+    "onlineDesc": "Siparişler normal şekilde kabul ediliyor",
+    "busyDesc": "Açık — gecikme uyarısı gösteriliyor",
+    "closedDesc": "Müşteriler için sipariş devre dışı"
   },
   "orders": {
     "title": "Siparişler",

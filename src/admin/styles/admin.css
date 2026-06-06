@@ -3130,3 +3130,546 @@ textarea.adm-input { height: auto; padding: 10px 14px; resize: vertical; min-hei
   .adm-info-items-section { padding: 14px 16px; }
   .adm-info-actions { padding: 14px 16px; }
 }
+
+/* ══════════════════════════════════════════════
+   RESTAURANT STATUS CONTROL (Dashboard)
+══════════════════════════════════════════════ */
+.adm-status-control {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 20px 24px;
+  border-radius: var(--adm-radius);
+  border: 2px solid transparent;
+  margin-bottom: 20px;
+  transition: background 0.25s, border-color 0.25s, box-shadow 0.25s;
+}
+
+.adm-status-control--open {
+  background: color-mix(in srgb, #22c55e 8%, var(--adm-surface));
+  border-color: rgba(34, 197, 94, 0.35);
+  box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.06);
+}
+
+.adm-status-control--closed {
+  background: color-mix(in srgb, #ef4444 8%, var(--adm-surface));
+  border-color: rgba(239, 68, 68, 0.35);
+  box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.06);
+}
+
+.adm-status-control-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-width: 0;
+}
+
+.adm-status-control-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  transition: background 0.25s;
+}
+
+.adm-status-control--open  .adm-status-control-dot { background: #22c55e; box-shadow: 0 0 0 4px rgba(34,197,94,0.18); }
+.adm-status-control--closed .adm-status-control-dot { background: #ef4444; box-shadow: 0 0 0 4px rgba(239,68,68,0.18); }
+
+.adm-status-control-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--adm-text-1);
+  letter-spacing: 0.02em;
+}
+
+.adm-status-control-desc {
+  font-size: 12px;
+  color: var(--adm-text-3);
+  margin-top: 2px;
+}
+
+.adm-status-control-right {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-shrink: 0;
+}
+
+.adm-status-badge {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 20px;
+}
+
+.adm-status-control--open  .adm-status-badge { background: rgba(34,197,94,0.15); color: #16a34a; }
+.adm-status-control--closed .adm-status-badge { background: rgba(239,68,68,0.15); color: #dc2626; }
+
+.adm-status-toggle-btn {
+  position: relative;
+  width: 52px;
+  height: 28px;
+  border-radius: 14px;
+  border: none;
+  cursor: pointer;
+  transition: background 0.25s, opacity 0.2s;
+  flex-shrink: 0;
+}
+
+.adm-status-toggle-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.adm-status-toggle-btn--on  { background: #22c55e; }
+.adm-status-toggle-btn--off { background: #d1d5db; }
+
+[data-theme="dark"] .adm-status-toggle-btn--off { background: #4b5563; }
+
+.adm-status-toggle-knob {
+  position: absolute;
+  top: 3px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+  transition: left 0.2s cubic-bezier(0.4,0,0.2,1);
+}
+
+.adm-status-toggle-btn--on  .adm-status-toggle-knob { left: 27px; }
+.adm-status-toggle-btn--off .adm-status-toggle-knob { left: 3px; }
+
+@media (max-width: 480px) {
+  .adm-status-control { flex-direction: column; align-items: flex-start; gap: 14px; }
+  .adm-status-control-right { align-self: flex-end; }
+}
+
+/* ----------------------------------------------
+   ORDERING TOGGLE � Orders page header
+---------------------------------------------- */
+.adm-ordering-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 38px;
+  padding: 0 14px;
+  border-radius: 10px;
+  border: 1.5px solid transparent;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  transition: background 0.22s, border-color 0.22s, box-shadow 0.22s, opacity 0.15s;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.adm-ordering-toggle:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.adm-ordering-toggle--open {
+  background: rgba(34, 197, 94, 0.12);
+  border-color: rgba(34, 197, 94, 0.4);
+  color: #15803d;
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.08);
+}
+
+[data-theme="dark"] .adm-ordering-toggle--open {
+  background: rgba(34, 197, 94, 0.14);
+  border-color: rgba(34, 197, 94, 0.45);
+  color: #4ade80;
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.10);
+}
+
+.adm-ordering-toggle--open:not(:disabled):hover {
+  background: rgba(34, 197, 94, 0.2);
+  border-color: rgba(34, 197, 94, 0.6);
+  box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.12);
+}
+
+.adm-ordering-toggle--closed {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.38);
+  color: #dc2626;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.07);
+}
+
+[data-theme="dark"] .adm-ordering-toggle--closed {
+  background: rgba(239, 68, 68, 0.14);
+  border-color: rgba(239, 68, 68, 0.45);
+  color: #f87171;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.10);
+}
+
+.adm-ordering-toggle--closed:not(:disabled):hover {
+  background: rgba(239, 68, 68, 0.18);
+  border-color: rgba(239, 68, 68, 0.55);
+  box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.11);
+}
+
+/* Pulsing status dot */
+.adm-ordering-toggle-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  transition: background 0.22s;
+}
+
+.adm-ordering-toggle--open  .adm-ordering-toggle-dot {
+  background: #22c55e;
+  box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.5);
+  animation: adm-dot-pulse-green 2s ease-in-out infinite;
+}
+
+.adm-ordering-toggle--closed .adm-ordering-toggle-dot {
+  background: #ef4444;
+  box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.5);
+  animation: adm-dot-pulse-red 2s ease-in-out infinite;
+}
+
+@keyframes adm-dot-pulse-green {
+  0%,100% { box-shadow: 0 0 0 0 rgba(34,197,94,0.45); }
+  50%      { box-shadow: 0 0 0 5px rgba(34,197,94,0); }
+}
+
+@keyframes adm-dot-pulse-red {
+  0%,100% { box-shadow: 0 0 0 0 rgba(239,68,68,0.45); }
+  50%      { box-shadow: 0 0 0 5px rgba(239,68,68,0); }
+}
+
+/* Label */
+.adm-ordering-toggle-label {
+  min-width: 42px;
+  text-align: center;
+}
+
+/* Mini toggle track */
+.adm-ordering-toggle-track {
+  position: relative;
+  width: 30px;
+  height: 16px;
+  border-radius: 8px;
+  transition: background 0.22s;
+  flex-shrink: 0;
+}
+
+.adm-ordering-toggle-track--on  { background: #22c55e; }
+.adm-ordering-toggle-track--off { background: #d1d5db; }
+
+[data-theme="dark"] .adm-ordering-toggle-track--off { background: #4b5563; }
+
+.adm-ordering-toggle-knob {
+  position: absolute;
+  top: 2px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.25);
+  transition: left 0.2s cubic-bezier(0.4,0,0.2,1);
+}
+
+.adm-ordering-toggle-track--on  .adm-ordering-toggle-knob { left: 16px; }
+.adm-ordering-toggle-track--off .adm-ordering-toggle-knob { left: 2px; }
+
+/* Hide label on very small screens, keep dot + track */
+@media (max-width: 600px) {
+  .adm-ordering-toggle-label { display: none; }
+  .adm-ordering-toggle { padding: 0 10px; gap: 6px; }
+}
+
+/* ----------------------------------------------
+   STATUS MINI BADGE � Dashboard header
+---------------------------------------------- */
+.adm-status-mini-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  border: 1.5px solid transparent;
+  align-self: center;
+  flex-shrink: 0;
+  transition: background 0.25s, border-color 0.25s;
+}
+
+.adm-status-mini-badge--open {
+  background: rgba(34, 197, 94, 0.1);
+  border-color: rgba(34, 197, 94, 0.35);
+  color: #15803d;
+}
+
+[data-theme="dark"] .adm-status-mini-badge--open {
+  background: rgba(34, 197, 94, 0.13);
+  border-color: rgba(34, 197, 94, 0.4);
+  color: #4ade80;
+}
+
+.adm-status-mini-badge--closed {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.35);
+  color: #dc2626;
+}
+
+[data-theme="dark"] .adm-status-mini-badge--closed {
+  background: rgba(239, 68, 68, 0.13);
+  border-color: rgba(239, 68, 68, 0.4);
+  color: #f87171;
+}
+
+.adm-status-mini-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.adm-status-mini-badge--open  .adm-status-mini-dot {
+  background: #22c55e;
+  animation: adm-dot-pulse-green 2s ease-in-out infinite;
+}
+
+.adm-status-mini-badge--closed .adm-status-mini-dot {
+  background: #ef4444;
+  animation: adm-dot-pulse-red 2s ease-in-out infinite;
+}
+
+@media (max-width: 640px) {
+  .adm-status-mini-badge { display: none; }
+}
+
+/* ----------------------------------------------
+   3-STATE STATUS SELECTOR � Dashboard card
+---------------------------------------------- */
+.adm-status-selector {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px 22px;
+  border-radius: var(--adm-radius);
+  border: 1.5px solid transparent;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  transition: background 0.25s, border-color 0.25s;
+}
+
+.adm-status-selector--online {
+  background: color-mix(in srgb, #22c55e 7%, var(--adm-surface));
+  border-color: rgba(34,197,94,0.3);
+}
+.adm-status-selector--busy {
+  background: color-mix(in srgb, #f97316 7%, var(--adm-surface));
+  border-color: rgba(249,115,22,0.3);
+}
+.adm-status-selector--closed {
+  background: color-mix(in srgb, #ef4444 7%, var(--adm-surface));
+  border-color: rgba(239,68,68,0.3);
+}
+
+.adm-status-selector-info {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+}
+
+.adm-status-selector-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.adm-status-selector-dot--online { background: #22c55e; animation: adm-dot-pulse-green 2s ease-in-out infinite; }
+.adm-status-selector-dot--busy   { background: #f97316; animation: adm-dot-pulse-orange 2s ease-in-out infinite; }
+.adm-status-selector-dot--closed { background: #ef4444; animation: adm-dot-pulse-red 2s ease-in-out infinite; }
+
+@keyframes adm-dot-pulse-orange {
+  0%,100% { box-shadow: 0 0 0 0 rgba(249,115,22,0.45); }
+  50%      { box-shadow: 0 0 0 5px rgba(249,115,22,0); }
+}
+
+.adm-status-selector-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--adm-text-1);
+}
+.adm-status-selector-desc {
+  font-size: 12px;
+  color: var(--adm-text-3);
+  margin-top: 2px;
+}
+
+/* Segmented control */
+.adm-status-seg {
+  display: flex;
+  gap: 4px;
+  background: var(--adm-bg);
+  border: 1px solid var(--adm-border);
+  border-radius: 10px;
+  padding: 3px;
+  flex-shrink: 0;
+}
+
+.adm-status-seg-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 7px;
+  border: none;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  background: transparent;
+  color: var(--adm-text-2);
+  transition: background 0.18s, color 0.18s, box-shadow 0.18s;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.adm-status-seg-btn:disabled:not(.adm-status-seg-btn--active) {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.adm-status-seg-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.adm-status-seg-btn--online .adm-status-seg-dot { background: #22c55e; }
+.adm-status-seg-btn--busy   .adm-status-seg-dot { background: #f97316; }
+.adm-status-seg-btn--closed .adm-status-seg-dot { background: #ef4444; }
+
+.adm-status-seg-btn--online.adm-status-seg-btn--active {
+  background: rgba(34,197,94,0.15);
+  color: #15803d;
+  box-shadow: 0 0 0 1.5px rgba(34,197,94,0.35);
+}
+.adm-status-seg-btn--busy.adm-status-seg-btn--active {
+  background: rgba(249,115,22,0.15);
+  color: #c2410c;
+  box-shadow: 0 0 0 1.5px rgba(249,115,22,0.35);
+}
+.adm-status-seg-btn--closed.adm-status-seg-btn--active {
+  background: rgba(239,68,68,0.15);
+  color: #dc2626;
+  box-shadow: 0 0 0 1.5px rgba(239,68,68,0.35);
+}
+
+[data-theme="dark"] .adm-status-seg-btn--online.adm-status-seg-btn--active { color: #4ade80; }
+[data-theme="dark"] .adm-status-seg-btn--busy.adm-status-seg-btn--active   { color: #fb923c; }
+[data-theme="dark"] .adm-status-seg-btn--closed.adm-status-seg-btn--active { color: #f87171; }
+
+.adm-status-seg-btn--online:not(.adm-status-seg-btn--active):not(:disabled):hover { background: rgba(34,197,94,0.08); color: #15803d; }
+.adm-status-seg-btn--busy:not(.adm-status-seg-btn--active):not(:disabled):hover   { background: rgba(249,115,22,0.08); color: #c2410c; }
+.adm-status-seg-btn--closed:not(.adm-status-seg-btn--active):not(:disabled):hover { background: rgba(239,68,68,0.08); color: #dc2626; }
+
+@media (max-width: 560px) {
+  .adm-status-selector { flex-direction: column; align-items: flex-start; }
+  .adm-status-seg { align-self: stretch; justify-content: stretch; }
+  .adm-status-seg-btn { flex: 1; justify-content: center; }
+}
+
+/* ----------------------------------------------
+   3-STATE STATUS SEG � Orders page header
+   (compact inline version)
+---------------------------------------------- */
+.adm-orders-status-seg {
+  display: flex;
+  gap: 3px;
+  background: var(--adm-bg);
+  border: 1px solid var(--adm-border);
+  border-radius: 10px;
+  padding: 3px;
+  flex-shrink: 0;
+}
+
+.adm-orders-seg-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 32px;
+  padding: 0 11px;
+  border-radius: 7px;
+  border: none;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  background: transparent;
+  color: var(--adm-text-3);
+  transition: background 0.15s, color 0.15s, box-shadow 0.15s;
+  white-space: nowrap;
+}
+
+.adm-orders-seg-btn:disabled:not(.adm-orders-seg-btn--active) {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.adm-orders-seg-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.adm-orders-seg-btn--online .adm-orders-seg-dot { background: #22c55e; }
+.adm-orders-seg-btn--busy   .adm-orders-seg-dot { background: #f97316; }
+.adm-orders-seg-btn--closed .adm-orders-seg-dot { background: #ef4444; }
+
+.adm-orders-seg-btn--online.adm-orders-seg-btn--active {
+  background: rgba(34,197,94,0.14);
+  color: #15803d;
+  box-shadow: 0 0 0 1.5px rgba(34,197,94,0.3);
+}
+.adm-orders-seg-btn--busy.adm-orders-seg-btn--active {
+  background: rgba(249,115,22,0.14);
+  color: #c2410c;
+  box-shadow: 0 0 0 1.5px rgba(249,115,22,0.3);
+}
+.adm-orders-seg-btn--closed.adm-orders-seg-btn--active {
+  background: rgba(239,68,68,0.14);
+  color: #dc2626;
+  box-shadow: 0 0 0 1.5px rgba(239,68,68,0.3);
+}
+
+[data-theme="dark"] .adm-orders-seg-btn--online.adm-orders-seg-btn--active { color: #4ade80; }
+[data-theme="dark"] .adm-orders-seg-btn--busy.adm-orders-seg-btn--active   { color: #fb923c; }
+[data-theme="dark"] .adm-orders-seg-btn--closed.adm-orders-seg-btn--active { color: #f87171; }
+
+.adm-orders-seg-btn--online:not(.adm-orders-seg-btn--active):not(:disabled):hover { background: rgba(34,197,94,0.08); }
+.adm-orders-seg-btn--busy:not(.adm-orders-seg-btn--active):not(:disabled):hover   { background: rgba(249,115,22,0.08); }
+.adm-orders-seg-btn--closed:not(.adm-orders-seg-btn--active):not(:disabled):hover { background: rgba(239,68,68,0.08); }
+
+/* Also update the mini badge to support all 3 states */
+.adm-status-mini-badge--online {
+  background: rgba(34,197,94,0.10);
+  border-color: rgba(34,197,94,0.35);
+  color: #15803d;
+}
+[data-theme="dark"] .adm-status-mini-badge--online { background: rgba(34,197,94,0.13); border-color: rgba(34,197,94,0.4); color: #4ade80; }
+
+.adm-status-mini-badge--busy {
+  background: rgba(249,115,22,0.10);
+  border-color: rgba(249,115,22,0.35);
+  color: #c2410c;
+}
+[data-theme="dark"] .adm-status-mini-badge--busy { background: rgba(249,115,22,0.13); border-color: rgba(249,115,22,0.4); color: #fb923c; }
+
+.adm-status-mini-badge--online .adm-status-mini-dot { background: #22c55e; animation: adm-dot-pulse-green 2s ease-in-out infinite; }
+.adm-status-mini-badge--busy   .adm-status-mini-dot { background: #f97316; animation: adm-dot-pulse-orange 2s ease-in-out infinite; }

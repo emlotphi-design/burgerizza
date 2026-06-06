@@ -2,6 +2,7 @@ import { Fragment, useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { fetchOrders, updateOrderStatus, subscribeToOrders, assignDriverAndAdvance, getYesterdayStart, fetchActiveDrivers, createDriverAssignment } from '../services/adminService';
 import { useRestaurantMode } from '../../store/RestaurantModeContext';
+import { useOrdering } from '../../store/OrderingContext';
 import {
   playOrderNotification,
   showBrowserNotification,
@@ -499,9 +500,18 @@ function Toast({ toasts }) {
 export default function Orders() {
   const navigate = useNavigate();
   const { enterRestaurantMode } = useRestaurantMode();
+  const { restaurantStatus, setRestaurantStatus } = useOrdering();
+  const [savingStatus,  setSavingStatus] = useState(false);
   const [orders,       setOrders]       = useState([]);
   const [loading,      setLoading]      = useState(true);
   const [error,        setError]        = useState(null);
+
+  async function handleStatusChange(newStatus) {
+    if (savingStatus || newStatus === restaurantStatus) return;
+    setSavingStatus(true);
+    await setRestaurantStatus(newStatus);
+    setSavingStatus(false);
+  }
   const [search,       setSearch]       = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [dateFilter,   setDateFilter]   = useState('all');
@@ -734,6 +744,26 @@ export default function Orders() {
           )}
           <span style={{ marginLeft: 5 }}>{muted ? 'Muted' : 'Sound'}</span>
         </button>
+
+        {/* 3-state restaurant status */}
+        <div className="adm-orders-status-seg" role="group" aria-label="Restaurant status">
+          {[
+            { value: 'online', label: 'Online' },
+            { value: 'busy',   label: 'Busy'   },
+            { value: 'closed', label: 'Closed' },
+          ].map(opt => (
+            <button
+              key={opt.value}
+              className={`adm-orders-seg-btn adm-orders-seg-btn--${opt.value}${restaurantStatus === opt.value ? ' adm-orders-seg-btn--active' : ''}`}
+              onClick={() => handleStatusChange(opt.value)}
+              disabled={savingStatus || restaurantStatus === opt.value}
+              aria-pressed={restaurantStatus === opt.value}
+            >
+              <span className="adm-orders-seg-dot" />
+              {opt.label}
+            </button>
+          ))}
+        </div>
 
         <button className="adm-btn adm-btn--ghost" onClick={load} style={{ height: 38, fontSize: 12 }}>
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">

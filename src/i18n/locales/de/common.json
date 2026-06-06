@@ -230,7 +230,30 @@
     "completedOrders": "Abgeschlossene Bestellungen",
     "topItems": "Top-Artikel",
     "registeredUsers": "Registrierte Nutzer",
-    "openRestaurantMode": "Restaurant-Modus öffnen"
+    "openRestaurantMode": "Restaurant-Modus öffnen",
+    "restaurantStatus": "Restaurant-Status",
+    "orderingEnabled": "Bestellungen annehmen",
+    "orderingEnabledDesc": "Kunden können jetzt Bestellungen aufgeben",
+    "orderingDisabledDesc": "Bestellungen sind für Kunden deaktiviert"
+  },
+  "restaurant": {
+    "online": "Online",
+    "busy": "Ausgelastet",
+    "closed": "Geschlossen",
+    "openForOrders": "Geöffnet",
+    "closedTitle": "Bestellungen sind momentan nicht verfügbar.",
+    "closedMessage": "Das Restaurant ist derzeit geschlossen.",
+    "busyTitle": "Wir haben derzeit ein sehr hohes Bestellaufkommen.",
+    "busyMessage": "Bestellungen sind vorübergehend pausiert.",
+    "busyDelay": "Geschätzte Mehrwartezeit: 15–30 Min.",
+    "busyBtn": "Wir sind momentan ausgelastet",
+    "closedBtn": "Das Restaurant ist derzeit geschlossen",
+    "openStatus": "Bestellungen werden angenommen",
+    "busyStatus": "Hohes Bestellaufkommen",
+    "closedStatus": "Bestellungen deaktiviert",
+    "onlineDesc": "Bestellungen werden normal angenommen",
+    "busyDesc": "Offen – Hinweis auf Verzögerung wird angezeigt",
+    "closedDesc": "Bestellungen für Kunden deaktiviert"
   },
   "orders": {
     "title": "Bestellungen",

@@ -9,6 +9,8 @@ import GlassInput from '../components/GlassInput';
 import { api } from '../services/api';
 import { supabase } from '../services/supabase';
 import { useRestaurantMode } from '../store/RestaurantModeContext';
+import { useOrdering } from '../store/OrderingContext';
+import { useTranslation } from 'react-i18next';
 import { createOrder } from '../admin/services/adminService';
 import PasswordInput from '../components/ui/PasswordInput';
 import CheckoutAddressSelector from '../components/checkout/CheckoutAddressSelector';
@@ -378,9 +380,11 @@ const PAYMENT_METHODS = [
 function StepPayment({ grandTotal, paymentStep, onBack, onConfirm }) {
   const [selected, setSelected] = useState(null);
   const [confirming, setConfirming] = useState(false);
+  const { isOrderingEnabled, isBusy } = useOrdering();
+  const { t } = useTranslation();
 
   function handleConfirm() {
-    if (!selected) return;
+    if (!selected || !isOrderingEnabled) return;
     setConfirming(true);
     setTimeout(() => onConfirm(selected), 1200);
   }
@@ -418,10 +422,27 @@ function StepPayment({ grandTotal, paymentStep, onBack, onConfirm }) {
       </div>
 
       <button type="button"
-        className={`co-next-btn co-next-btn--pay${!selected ? ' co-next-btn--disabled' : ''}`}
-        onClick={handleConfirm} disabled={!selected || confirming}>
-        {confirming ? <span className="co-spinner" /> : (
-          <>Jetzt bestellen · €{grandTotal.toFixed(2)}
+        className={`co-next-btn co-next-btn--pay${(!selected || !isOrderingEnabled) ? ' co-next-btn--disabled' : ''}`}
+        onClick={handleConfirm}
+        disabled={!selected || confirming || !isOrderingEnabled}>
+        {confirming ? (
+          <span className="co-spinner" />
+        ) : !isOrderingEnabled ? (
+          <>
+            {isBusy ? (
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+              </svg>
+            ) : (
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+              </svg>
+            )}
+            {isBusy ? t('restaurant.busyBtn') : t('restaurant.closedBtn')}
+          </>
+        ) : (
+          <>
+            Jetzt bestellen · €{grandTotal.toFixed(2)}
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="M5 12h14M12 5l7 7-7 7" />
             </svg>
@@ -782,6 +803,8 @@ function CheckoutNormal() {
   const navigate = useNavigate();
   const { pizzas, clearCart } = usePizzaStore();
   const { isLoggedIn, currentUser, addOrder, savePizzaToProfile, loading: authLoading } = useAuth();
+  const { isOrderingEnabled } = useOrdering();
+  const { t } = useTranslation();
 
   /* ── Canonical delivery address — profiles → last order fallback ──────── */
   const { address: savedAddress, hasSavedAddress, isLoading: addrLoading, saveAddress, refreshAddress } = useDeliveryAddress();
@@ -843,6 +866,7 @@ function CheckoutNormal() {
   }, [pizzas.length, done, navigate]);
 
   async function handleConfirmed(paymentMethod) {
+    if (!isOrderingEnabled) return;
     const total = grandTotal;
     setFinalTotal(total);
 

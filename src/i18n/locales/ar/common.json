@@ -230,7 +230,30 @@
     "completedOrders": "الطلبات المكتملة",
     "topItems": "الأكثر مبيعاً",
     "registeredUsers": "المستخدمون المسجلون",
-    "openRestaurantMode": "فتح وضع المطعم"
+    "openRestaurantMode": "فتح وضع المطعم",
+    "restaurantStatus": "حالة المطعم",
+    "orderingEnabled": "قبول الطلبات",
+    "orderingEnabledDesc": "يمكن للعملاء تقديم الطلبات الآن",
+    "orderingDisabledDesc": "الطلبات معطلة للعملاء"
+  },
+  "restaurant": {
+    "online": "متاح",
+    "busy": "مشغول",
+    "closed": "مغلق",
+    "openForOrders": "مفتوح",
+    "closedTitle": "الطلبات غير متاحة مؤقتاً.",
+    "closedMessage": "المطعم مغلق حالياً.",
+    "busyTitle": "نواجه حالياً حجماً كبيراً جداً من الطلبات.",
+    "busyMessage": "الطلبات متوقفة مؤقتاً.",
+    "busyDelay": "وقت الانتظار الإضافي: ١٥–٣٠ دقيقة",
+    "busyBtn": "نحن مشغولون حالياً",
+    "closedBtn": "المطعم مغلق حالياً",
+    "openStatus": "يستقبل الطلبات",
+    "busyStatus": "حجم طلبات مرتفع",
+    "closedStatus": "الطلبات معطلة",
+    "onlineDesc": "يستقبل الطلبات بشكل طبيعي",
+    "busyDesc": "مفتوح — تحذير التأخير معروض",
+    "closedDesc": "الطلبات معطلة للعملاء"
   },
   "orders": {
     "title": "الطلبات",

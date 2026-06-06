@@ -4,6 +4,7 @@ import {
   fetchDashboardStats, fetchTodayStats, fetchRevenueByDay,
   fetchStatusBreakdown, fetchTopItems, subscribeToOrders,
 } from '../services/adminService';
+import { useOrdering } from '../../store/OrderingContext';
 
 /* ── Helpers ───────────────────────────────────────────────── */
 function fmtCurrency(n) {
@@ -144,6 +145,42 @@ function Sparkline({ data, color }) {
   );
 }
 
+/* ── 3-state Restaurant Status Selector ────────────────────── */
+const STATUS_META = {
+  online: { label: 'Online', desc: 'Accepting orders normally',                    cls: 'online' },
+  busy:   { label: 'Busy',   desc: 'Open — delay warning shown to customers',      cls: 'busy'   },
+  closed: { label: 'Closed', desc: 'Ordering disabled — customers cannot checkout', cls: 'closed' },
+};
+
+function RestaurantStatusSelector({ status, onChange, saving }) {
+  const meta = STATUS_META[status] ?? STATUS_META.online;
+  return (
+    <div className={`adm-status-selector adm-status-selector--${meta.cls}`}>
+      <div className="adm-status-selector-info">
+        <span className={`adm-status-selector-dot adm-status-selector-dot--${meta.cls}`} />
+        <div>
+          <div className="adm-status-selector-title">Restaurant Status</div>
+          <div className="adm-status-selector-desc">{meta.desc}</div>
+        </div>
+      </div>
+      <div className="adm-status-seg" role="group" aria-label="Restaurant status">
+        {Object.entries(STATUS_META).map(([val, m]) => (
+          <button
+            key={val}
+            className={`adm-status-seg-btn adm-status-seg-btn--${m.cls}${status === val ? ' adm-status-seg-btn--active' : ''}`}
+            onClick={() => onChange(val)}
+            disabled={saving || status === val}
+            aria-pressed={status === val}
+          >
+            <span className="adm-status-seg-dot" />
+            {m.label}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 /* ════════════════════════════════════════════════════════════
    DASHBOARD PAGE
 ════════════════════════════════════════════════════════════ */
@@ -155,7 +192,16 @@ export default function Dashboard() {
   const [topItems,    setTopItems]    = useState([]);
   const [loading,     setLoading]     = useState(true);
   const [error,       setError]       = useState(null);
+  const [savingStatus, setSavingStatus] = useState(false);
   const channelRef = useRef(null);
+
+  const { restaurantStatus, setRestaurantStatus, isOrderingEnabled } = useOrdering();
+
+  async function handleStatusChange(val) {
+    setSavingStatus(true);
+    await setRestaurantStatus(val);
+    setSavingStatus(false);
+  }
 
   async function load() {
     try {
@@ -273,7 +319,18 @@ export default function Dashboard() {
             </span>
           </p>
         </div>
+        <span className={`adm-status-mini-badge adm-status-mini-badge--${restaurantStatus ?? 'online'}`}>
+          <span className="adm-status-mini-dot" />
+          {restaurantStatus === 'busy' ? 'Busy' : restaurantStatus === 'closed' ? 'Closed' : 'Online'}
+        </span>
       </div>
+
+      {/* ── Restaurant Status ── */}
+      <RestaurantStatusSelector
+        status={restaurantStatus}
+        onChange={handleStatusChange}
+        saving={savingStatus}
+      />
 
       {error && (
         <div className="adm-card" style={{ marginBottom: 16, color: 'var(--adm-red)', fontSize: 13, padding: '14px 18px' }}>

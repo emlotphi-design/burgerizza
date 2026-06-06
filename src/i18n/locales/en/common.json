@@ -230,7 +230,30 @@
     "completedOrders": "Completed orders",
     "topItems": "Top Items",
     "registeredUsers": "Registered Users",
-    "openRestaurantMode": "Open Restaurant Mode"
+    "openRestaurantMode": "Open Restaurant Mode",
+    "restaurantStatus": "Restaurant Status",
+    "orderingEnabled": "Accept orders",
+    "orderingEnabledDesc": "Customers can place orders now",
+    "orderingDisabledDesc": "Ordering is disabled for customers"
+  },
+  "restaurant": {
+    "online": "Online",
+    "busy": "Busy",
+    "closed": "Closed",
+    "openForOrders": "Open for Orders",
+    "closedTitle": "Ordering is temporarily unavailable.",
+    "closedMessage": "The restaurant is currently closed.",
+    "busyTitle": "We are currently experiencing very high order volume.",
+    "busyMessage": "Ordering is temporarily paused.",
+    "busyDelay": "Estimated extra wait: 15–30 min",
+    "busyBtn": "We are currently busy",
+    "closedBtn": "Restaurant is currently closed",
+    "openStatus": "Accepting orders",
+    "busyStatus": "High order volume",
+    "closedStatus": "Ordering disabled",
+    "onlineDesc": "Accepting orders normally",
+    "busyDesc": "Open — delay warning shown to customers",
+    "closedDesc": "Ordering disabled for customers"
   },
   "orders": {
     "title": "Orders",
