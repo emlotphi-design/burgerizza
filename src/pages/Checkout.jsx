@@ -461,6 +461,15 @@ function StepPayment({ grandTotal, paymentStep, onBack, onConfirm, submitError, 
         ))}
       </div>
 
+      {/* ── Inline status block — always visible when restaurant is not online ── */}
+      {!isOrderingEnabled && !confirming && (
+        <div className={`co-status-block co-status-block--${isBusy ? 'busy' : 'closed'}`}>
+          <span className="co-status-block-text" style={{ whiteSpace: 'pre-line' }}>
+            {isBusy ? t('restaurant.busyBtn') : t('restaurant.closedBtn')}
+          </span>
+        </div>
+      )}
+
       {/* ── Submit error banner (shown after a failed order attempt) ── */}
       {submitError && (
         <div className="co-submit-error" role="alert">
@@ -472,7 +481,7 @@ function StepPayment({ grandTotal, paymentStep, onBack, onConfirm, submitError, 
                 : <><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></>
             }
           </svg>
-          <span>
+          <span style={{ whiteSpace: 'pre-line' }}>
             {submitError === 'busy'
               ? t('restaurant.busyBtn')
               : submitError === 'closed'
@@ -490,18 +499,9 @@ function StepPayment({ grandTotal, paymentStep, onBack, onConfirm, submitError, 
         {confirming ? (
           <span className="co-spinner" />
         ) : !isOrderingEnabled ? (
-          <>
-            {isBusy ? (
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
-              </svg>
-            ) : (
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-              </svg>
-            )}
+          <span className="co-btn-blocked-text" style={{ whiteSpace: 'pre-line' }}>
             {isBusy ? t('restaurant.busyBtn') : t('restaurant.closedBtn')}
-          </>
+          </span>
         ) : (
           <>
             Jetzt bestellen · €{grandTotal.toFixed(2)}

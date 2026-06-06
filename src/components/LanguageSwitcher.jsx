@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { LANGUAGES, RTL_LANGUAGES } from '../i18n/index.js';
+import { LANGUAGES } from '../i18n/index.js';
 
 /**
  * Language switcher dropdown.
@@ -54,10 +54,7 @@ export default function LanguageSwitcher({ compact = false, dark = false }) {
       >
         <span className="lang-sw-flag">{currentLang.flag}</span>
         {!compact && (
-          <span
-            className="lang-sw-name"
-            style={{ fontFamily: RTL_LANGUAGES.has(currentLang.code) ? 'Noto Sans Arabic, Nunito, sans-serif' : 'inherit' }}
-          >
+          <span className="lang-sw-name">
             {currentLang.nativeName}
           </span>
         )}
@@ -74,8 +71,7 @@ export default function LanguageSwitcher({ compact = false, dark = false }) {
       {open && (
         <div className="lang-sw-menu" role="listbox" aria-label="Select language">
           {LANGUAGES.map(lang => {
-            const isActive  = lang.code === i18n.language;
-            const isRTL     = RTL_LANGUAGES.has(lang.code);
+            const isActive = lang.code === i18n.language;
             return (
               <button
                 key={lang.code}
@@ -84,13 +80,9 @@ export default function LanguageSwitcher({ compact = false, dark = false }) {
                 aria-selected={isActive}
                 className={`lang-sw-option${isActive ? ' lang-sw-option--active' : ''}`}
                 onClick={() => handleSelect(lang.code)}
-                dir={isRTL ? 'rtl' : 'ltr'}
               >
                 <span className="lang-sw-option-flag">{lang.flag}</span>
-                <span
-                  className="lang-sw-option-name"
-                  style={{ fontFamily: isRTL ? 'Noto Sans Arabic, Nunito, sans-serif' : 'inherit' }}
-                >
+                <span className="lang-sw-option-name">
                   {lang.nativeName}
                 </span>
                 {isActive && (

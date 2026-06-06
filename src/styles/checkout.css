@@ -1141,6 +1141,49 @@
   color: #f97316;
 }
 
+/* -- Inline status block (payment step, shown when busy/closed) -- */
+.co-status-block {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 18px;
+  margin-bottom: 14px;
+  border-radius: 14px;
+  text-align: center;
+}
+
+.co-status-block--busy {
+  background: rgba(234, 179, 8, 0.10);
+  border: 1.5px solid rgba(234, 179, 8, 0.35);
+}
+
+.co-status-block--closed {
+  background: rgba(239, 68, 68, 0.08);
+  border: 1.5px solid rgba(239, 68, 68, 0.28);
+}
+
+.co-status-block-text {
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1.55;
+}
+
+.co-status-block--busy .co-status-block-text  { color: #92600a; }
+.co-status-block--closed .co-status-block-text { color: #b91c1c; }
+
+/* blocked button: taller to fit two lines */
+.co-next-btn--pay.co-next-btn--disabled {
+  height: auto;
+  min-height: 56px;
+  padding: 14px 24px;
+}
+
+.co-btn-blocked-text {
+  display: block;
+  text-align: center;
+  line-height: 1.5;
+}
+
 /* -- Submit error banner (payment step) -- */
 .co-submit-error {
   display: flex;

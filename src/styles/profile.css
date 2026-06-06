@@ -21,6 +21,7 @@
   width: 100%;
   max-width: 680px;
   min-height: 110px;
+  flex-shrink: 0;
   background: linear-gradient(145deg,
       rgba(255, 255, 245, 0.96) 0%,
       rgba(255, 232, 120, 0.92) 55%,
@@ -181,6 +182,7 @@
 .pf-content {
   width: 100%;
   max-width: 680px;
+  flex-shrink: 0;
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -710,6 +712,7 @@
 /* ── Bottom logout (mobile) ── */
 .pf-logout-bottom {
   display: none;
+  flex-shrink: 0;
   align-items: center;
   gap: 7px;
   margin-top: 28px;
@@ -732,50 +735,95 @@
   color: #1A0A00;
 }
 
+/* ── Tablet (641px – 900px) ── */
+@media (min-width: 641px) and (max-width: 900px) {
+  .pf-main {
+    padding: calc(var(--nav-safe) + 16px) 24px 80px;
+  }
+}
+
 /* ── Responsive ── */
 @media (max-width: 640px) {
   .pf-main {
-    padding: calc(var(--nav-safe) + 8px) 14px 60px;
+    padding: calc(var(--nav-safe) + 10px) 16px 72px;
   }
 
+  /* ── Mobile hero: centered vertical stack ── */
   .pf-hero {
-    flex-wrap: wrap;
-    gap: 14px;
-    padding: 20px 20px 18px;
-    border-radius: 24px;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    padding: 36px 24px 30px;
+    border-radius: 28px;
     min-height: 0;
+    margin-bottom: 20px;
+  }
+
+  .pf-avatar {
+    width: 76px;
+    height: 76px;
+    font-size: 28px;
+    margin-bottom: 16px;
+  }
+
+  .pf-hero-info {
+    flex: none;
+    width: 100%;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+
+  .pf-hero-name {
+    font-size: 22px;
+    margin-bottom: 5px;
+  }
+
+  .pf-hero-email {
+    text-align: center;
+    white-space: normal;
+    word-break: break-word;
+    overflow: visible;
+    text-overflow: unset;
+    margin-bottom: 8px;
+  }
+
+  .pf-hero-stats {
+    justify-content: center;
+    margin-top: 6px;
   }
 
   .pf-hero-actions {
     flex-direction: row;
     width: 100%;
     min-width: 0;
-    justify-content: flex-end;
-    gap: 8px;
+    justify-content: center;
+    gap: 10px;
     align-self: auto;
   }
 
   .pf-edit-profile-btn {
-    width: auto;
     flex: 1;
-    min-height: 44px;
+    min-height: 46px;
+    width: auto;
   }
 
   .pf-logout-btn {
-    display: none;
+    display: flex;
+    flex: 1;
+    min-height: 46px;
     width: auto;
   }
 
   .pf-logout-bottom {
-    display: flex;
+    display: none;
   }
 
-  .pf-hero-name {
-    font-size: 18px;
+  .pf-content {
+    gap: 14px;
   }
 
   .pf-section {
-    padding: 18px 16px;
+    padding: 20px 18px;
   }
 
   .pf-pizza-grid {
@@ -786,7 +834,7 @@
 /* ── Small phone ≤ 480px ── */
 @media (max-width: 480px) {
   .pf-main {
-    padding: calc(var(--nav-safe) + 4px) 12px 56px;
+    padding: calc(var(--nav-safe) + 6px) 14px 64px;
   }
 
   .pf-content {
@@ -794,28 +842,37 @@
   }
 
   .pf-hero {
-    padding: 16px;
-    gap: 12px;
-    border-radius: 20px;
+    padding: 30px 20px 26px;
+    border-radius: 24px;
     margin-bottom: 16px;
   }
 
   .pf-avatar {
-    width: 52px;
-    height: 52px;
-    font-size: 20px;
+    width: 70px;
+    height: 70px;
+    font-size: 25px;
+    margin-bottom: 14px;
+  }
+
+  .pf-hero-info {
+    margin-bottom: 18px;
   }
 
   .pf-hero-name {
-    font-size: 16px;
+    font-size: 20px;
   }
 
   .pf-hero-email {
-    font-size: 12px;
+    font-size: 13px;
+  }
+
+  .pf-edit-profile-btn,
+  .pf-logout-btn {
+    min-height: 44px;
   }
 
   .pf-section {
-    padding: 16px 14px;
+    padding: 18px 16px;
   }
 
   .pf-section-title {
@@ -823,8 +880,8 @@
   }
 
   .pf-info-label {
-    min-width: 68px;
-    font-size: 10px;
+    min-width: 72px;
+    font-size: 10.5px;
   }
 
   .pf-info-value {
@@ -854,6 +911,37 @@
 
   .co-account-summary {
     flex-direction: column;
+  }
+}
+
+/* ── Very small phone ≤ 360px ── */
+@media (max-width: 360px) {
+  .pf-main {
+    padding: calc(var(--nav-safe) + 4px) 12px 60px;
+  }
+
+  .pf-hero {
+    padding: 26px 16px 22px;
+    border-radius: 22px;
+  }
+
+  .pf-avatar {
+    width: 64px;
+    height: 64px;
+    font-size: 23px;
+    margin-bottom: 12px;
+  }
+
+  .pf-hero-info {
+    margin-bottom: 16px;
+  }
+
+  .pf-hero-name {
+    font-size: 19px;
+  }
+
+  .pf-section {
+    padding: 16px 14px;
   }
 }
 
