@@ -176,7 +176,6 @@ export default function Cart() {
   const { pizzas, setQuantity, removePizza, startEditing } = usePizzaStore();
   const { setDraft: setBurgerDraft } = useBurgerStore();
   const { isRestaurantMode } = useRestaurantMode();
-  const { t } = useTranslation();
 
   const [exitingIds, setExitingIds] = useState([]);
 

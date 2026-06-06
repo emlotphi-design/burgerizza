@@ -804,7 +804,6 @@ function CheckoutNormal() {
   const { pizzas, clearCart } = usePizzaStore();
   const { isLoggedIn, currentUser, addOrder, savePizzaToProfile, loading: authLoading } = useAuth();
   const { isOrderingEnabled } = useOrdering();
-  const { t } = useTranslation();
 
   /* ── Canonical delivery address — profiles → last order fallback ──────── */
   const { address: savedAddress, hasSavedAddress, isLoading: addrLoading, saveAddress, refreshAddress } = useDeliveryAddress();

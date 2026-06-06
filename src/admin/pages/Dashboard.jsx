@@ -195,7 +195,7 @@ export default function Dashboard() {
   const [savingStatus, setSavingStatus] = useState(false);
   const channelRef = useRef(null);
 
-  const { restaurantStatus, setRestaurantStatus, isOrderingEnabled } = useOrdering();
+  const { restaurantStatus, setRestaurantStatus } = useOrdering();
 
   async function handleStatusChange(val) {
     setSavingStatus(true);
