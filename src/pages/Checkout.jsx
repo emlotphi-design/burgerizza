@@ -377,16 +377,56 @@ const PAYMENT_METHODS = [
   },
 ];
 
+/* ─── Live server status check ─────────────────────────────────────────────
+ * Called at the moment of payment to verify the restaurant is still ONLINE.
+ * Returns the live status string, or null if the server can't be reached.
+ * We never block on a null result — stale client state is the fallback.
+ * ─────────────────────────────────────────────────────────────────────────── */
+async function fetchLiveStatus() {
+  try {
+    const { data } = await supabase
+      .from('restaurant_settings')
+      .select('restaurant_status, ordering_enabled')
+      .eq('id', 1)
+      .maybeSingle();
+    if (!data) return null;
+    return ['online', 'busy', 'closed'].includes(data.restaurant_status)
+      ? data.restaurant_status
+      : (data.ordering_enabled === false ? 'closed' : 'online');
+  } catch {
+    return null;  // network error — don't block the order on connectivity issues
+  }
+}
+
 function StepPayment({ grandTotal, paymentStep, onBack, onConfirm }) {
   const [selected, setSelected] = useState(null);
   const [confirming, setConfirming] = useState(false);
-  const { isOrderingEnabled, isBusy } = useOrdering();
+  const { isOrderingEnabled, isBusy, statusLoaded, setRestaurantStatus } = useOrdering();
   const { t } = useTranslation();
 
-  function handleConfirm() {
+  async function handleConfirm() {
     if (!selected || !isOrderingEnabled) return;
     setConfirming(true);
-    setTimeout(() => onConfirm(selected), 1200);
+
+    /*
+     * Live server check runs in parallel with the 1200 ms confirmation
+     * animation.  Even if the client state is stale (realtime missed on
+     * mobile, or no localStorage from a fresh visit), the server truth
+     * wins here before any order data is written.
+     */
+    const [liveStatus] = await Promise.all([
+      fetchLiveStatus(),
+      new Promise(r => setTimeout(r, 1200)),
+    ]);
+
+    if (liveStatus && liveStatus !== 'online') {
+      /* Sync the context so the button immediately shows the correct blocked state */
+      await setRestaurantStatus(liveStatus);
+      setConfirming(false);
+      return;
+    }
+
+    onConfirm(selected);
   }
 
   return (
@@ -422,9 +462,9 @@ function StepPayment({ grandTotal, paymentStep, onBack, onConfirm }) {
       </div>
 
       <button type="button"
-        className={`co-next-btn co-next-btn--pay${(!selected || !isOrderingEnabled) ? ' co-next-btn--disabled' : ''}`}
+        className={`co-next-btn co-next-btn--pay${(!selected || !isOrderingEnabled || !statusLoaded) ? ' co-next-btn--disabled' : ''}`}
         onClick={handleConfirm}
-        disabled={!selected || confirming || !isOrderingEnabled}>
+        disabled={!selected || confirming || !isOrderingEnabled || !statusLoaded}>
         {confirming ? (
           <span className="co-spinner" />
         ) : !isOrderingEnabled ? (
@@ -866,6 +906,13 @@ function CheckoutNormal() {
 
   async function handleConfirmed(paymentMethod) {
     if (!isOrderingEnabled) return;
+
+    /* Defense-in-depth: re-verify with the server before writing any order data.
+     * This catches the edge case where the button was clicked during a brief
+     * window when client state was stale (e.g. realtime missed on mobile). */
+    const liveStatus = await fetchLiveStatus();
+    if (liveStatus && liveStatus !== 'online') return;
+
     const total = grandTotal;
     setFinalTotal(total);
 
