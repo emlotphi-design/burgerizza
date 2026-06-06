@@ -3246,7 +3246,7 @@ textarea.adm-input { height: auto; padding: 10px 14px; resize: vertical; min-hei
 }
 
 /* ----------------------------------------------
-   ORDERING TOGGLE — Orders page header
+   ORDERING TOGGLE â€” Orders page header
 ---------------------------------------------- */
 .adm-ordering-toggle {
   display: inline-flex;
@@ -3384,7 +3384,7 @@ textarea.adm-input { height: auto; padding: 10px 14px; resize: vertical; min-hei
 }
 
 /* ----------------------------------------------
-   STATUS MINI BADGE — Dashboard header
+   STATUS MINI BADGE â€” Dashboard header
 ---------------------------------------------- */
 .adm-status-mini-badge {
   display: inline-flex;
@@ -3447,7 +3447,7 @@ textarea.adm-input { height: auto; padding: 10px 14px; resize: vertical; min-hei
 }
 
 /* ----------------------------------------------
-   3-STATE STATUS SELECTOR — Dashboard card
+   3-STATE STATUS SELECTOR â€” Dashboard card
 ---------------------------------------------- */
 .adm-status-selector {
   display: flex;
@@ -3584,7 +3584,7 @@ textarea.adm-input { height: auto; padding: 10px 14px; resize: vertical; min-hei
 }
 
 /* ----------------------------------------------
-   3-STATE STATUS SEG — Orders page header
+   3-STATE STATUS SEG â€” Orders page header
    (compact inline version)
 ---------------------------------------------- */
 .adm-orders-status-seg {
