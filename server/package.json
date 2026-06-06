@@ -1,7 +1,7 @@
 {
   "name": "burgerizza-server",
   "version": "1.0.0",
-  "description": "Pibu REST API — Express + PostgreSQL",
+  "description": "Burgerizza REST API — Express + PostgreSQL",
   "type": "commonjs",
   "main": "server.js",
   "scripts": {

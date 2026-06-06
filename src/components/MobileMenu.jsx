@@ -49,7 +49,7 @@ export default function MobileMenu({ onClose }) {
               <line x1="12" y1="34" x2="34" y2="12"
                 stroke="#F5C518" strokeWidth="2.5" strokeLinecap="round" />
             </svg>
-            <span className="mm-brand-name">PIBU</span>
+            <span className="mm-brand-name">BURGERIZZA</span>
           </div>
           <button className="mm-close-btn" onClick={onClose} aria-label="Close menu">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
@@ -75,7 +75,7 @@ export default function MobileMenu({ onClose }) {
         <div className="mm-footer">
           <LanguageSwitcher />
           <button className="mm-cta" onClick={() => handleNav('/coming-soon')}>
-            Pibu Plus
+            Burgerizza Plus
           </button>
         </div>
       </aside>

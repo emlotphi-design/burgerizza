@@ -50,7 +50,7 @@ app.use((err, _req, res, _next) => {
 /* ── Boot: create DB tables, then listen ────────────────── */
 async function start() {
   await createTables();
-  app.listen(PORT, () => console.log(`Pibu API on port ${PORT}`));
+  app.listen(PORT, () => console.log(`Burgerizza API on port ${PORT}`));
 }
 
 start().catch((err) => {
