@@ -753,29 +753,29 @@
     flex-direction: column;
     align-items: center;
     gap: 0;
-    padding: 36px 24px 30px;
+    padding: 28px 22px 24px;
     border-radius: 28px;
     min-height: 0;
     margin-bottom: 20px;
   }
 
   .pf-avatar {
-    width: 76px;
-    height: 76px;
-    font-size: 28px;
-    margin-bottom: 16px;
+    width: 68px;
+    height: 68px;
+    font-size: 25px;
+    margin-bottom: 12px;
   }
 
   .pf-hero-info {
     flex: none;
     width: 100%;
     text-align: center;
-    margin-bottom: 20px;
+    margin-bottom: 14px;
   }
 
   .pf-hero-name {
-    font-size: 22px;
-    margin-bottom: 5px;
+    font-size: 21px;
+    margin-bottom: 4px;
   }
 
   .pf-hero-email {
@@ -784,12 +784,12 @@
     word-break: break-word;
     overflow: visible;
     text-overflow: unset;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
   }
 
   .pf-hero-stats {
     justify-content: center;
-    margin-top: 6px;
+    margin-top: 4px;
   }
 
   .pf-hero-actions {
@@ -803,14 +803,14 @@
 
   .pf-edit-profile-btn {
     flex: 1;
-    min-height: 46px;
+    min-height: 44px;
     width: auto;
   }
 
   .pf-logout-btn {
     display: flex;
     flex: 1;
-    min-height: 46px;
+    min-height: 44px;
     width: auto;
   }
 
@@ -842,24 +842,24 @@
   }
 
   .pf-hero {
-    padding: 30px 20px 26px;
+    padding: 22px 18px 20px;
     border-radius: 24px;
     margin-bottom: 16px;
   }
 
   .pf-avatar {
-    width: 70px;
-    height: 70px;
-    font-size: 25px;
-    margin-bottom: 14px;
+    width: 62px;
+    height: 62px;
+    font-size: 23px;
+    margin-bottom: 10px;
   }
 
   .pf-hero-info {
-    margin-bottom: 18px;
+    margin-bottom: 12px;
   }
 
   .pf-hero-name {
-    font-size: 20px;
+    font-size: 19px;
   }
 
   .pf-hero-email {
@@ -868,7 +868,7 @@
 
   .pf-edit-profile-btn,
   .pf-logout-btn {
-    min-height: 44px;
+    min-height: 42px;
   }
 
   .pf-section {
@@ -921,23 +921,23 @@
   }
 
   .pf-hero {
-    padding: 26px 16px 22px;
+    padding: 20px 14px 18px;
     border-radius: 22px;
   }
 
   .pf-avatar {
-    width: 64px;
-    height: 64px;
-    font-size: 23px;
-    margin-bottom: 12px;
+    width: 56px;
+    height: 56px;
+    font-size: 20px;
+    margin-bottom: 8px;
   }
 
   .pf-hero-info {
-    margin-bottom: 16px;
+    margin-bottom: 10px;
   }
 
   .pf-hero-name {
-    font-size: 19px;
+    font-size: 17px;
   }
 
   .pf-section {
