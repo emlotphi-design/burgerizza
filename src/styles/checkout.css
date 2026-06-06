@@ -1140,3 +1140,38 @@
   border-color: rgba(249, 115, 22, 0.25);
   color: #f97316;
 }
+
+/* -- Submit error banner (payment step) -- */
+.co-submit-error {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  margin-bottom: 14px;
+  background: rgba(239, 68, 68, 0.08);
+  border: 1.5px solid rgba(239, 68, 68, 0.3);
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #dc2626;
+  line-height: 1.4;
+}
+
+.co-submit-error svg { flex-shrink: 0; color: #ef4444; }
+
+.co-submit-error span { flex: 1; }
+
+.co-submit-error-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #ef4444;
+  font-size: 12px;
+  padding: 2px 4px;
+  opacity: 0.7;
+  flex-shrink: 0;
+  line-height: 1;
+  font-family: inherit;
+}
+
+.co-submit-error-close:hover { opacity: 1; }

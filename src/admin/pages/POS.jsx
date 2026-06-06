@@ -504,6 +504,7 @@ export default function POS() {
       customer_phone:   customer.phone.trim() || null,
       customer_email:   null,
       delivery_address: {
+        source:      'pos',          // identifies this as a staff POS order for RLS policy
         mode:        orderType,
         tableNumber: orderType === 'dine_in' ? (customer.tableNumber || null) : undefined,
       },
@@ -513,7 +514,6 @@ export default function POS() {
       order_type:     orderType,
       kitchen_notes:  notes || null,
       status:         'preparing',   // POS orders go straight to kitchen
-      source:         'pos',
     };
 
     setSending(true);

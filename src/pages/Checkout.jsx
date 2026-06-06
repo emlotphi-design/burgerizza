@@ -398,7 +398,7 @@ async function fetchLiveStatus() {
   }
 }
 
-function StepPayment({ grandTotal, paymentStep, onBack, onConfirm }) {
+function StepPayment({ grandTotal, paymentStep, onBack, onConfirm, submitError, onClearError }) {
   const [selected, setSelected] = useState(null);
   const [confirming, setConfirming] = useState(false);
   const { isOrderingEnabled, isBusy, statusLoaded, setRestaurantStatus } = useOrdering();
@@ -460,6 +460,28 @@ function StepPayment({ grandTotal, paymentStep, onBack, onConfirm }) {
           </button>
         ))}
       </div>
+
+      {/* ── Submit error banner (shown after a failed order attempt) ── */}
+      {submitError && (
+        <div className="co-submit-error" role="alert">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+            {submitError === 'busy'
+              ? <><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></>
+              : submitError === 'closed'
+                ? <><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></>
+                : <><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></>
+            }
+          </svg>
+          <span>
+            {submitError === 'busy'
+              ? t('restaurant.busyBtn')
+              : submitError === 'closed'
+                ? t('restaurant.closedBtn')
+                : 'Fehler beim Aufgeben der Bestellung. Bitte versuche es erneut.'}
+          </span>
+          <button className="co-submit-error-close" onClick={onClearError} aria-label="Dismiss">✕</button>
+        </div>
+      )}
 
       <button type="button"
         className={`co-next-btn co-next-btn--pay${(!selected || !isOrderingEnabled || !statusLoaded) ? ' co-next-btn--disabled' : ''}`}
@@ -843,7 +865,8 @@ function CheckoutNormal() {
   const navigate = useNavigate();
   const { pizzas, clearCart } = usePizzaStore();
   const { isLoggedIn, currentUser, addOrder, savePizzaToProfile, loading: authLoading } = useAuth();
-  const { isOrderingEnabled } = useOrdering();
+  const { isOrderingEnabled, isBusy } = useOrdering();
+  const [submitError, setSubmitError] = useState(null); // 'busy' | 'closed' | 'error'
 
   /* ── Canonical delivery address — profiles → last order fallback ──────── */
   const { address: savedAddress, hasSavedAddress, isLoading: addrLoading, saveAddress, refreshAddress } = useDeliveryAddress();
@@ -905,35 +928,32 @@ function CheckoutNormal() {
   }, [pizzas.length, done, navigate]);
 
   async function handleConfirmed(paymentMethod) {
-    if (!isOrderingEnabled) return;
+    setSubmitError(null);
 
-    /* Defense-in-depth: re-verify with the server before writing any order data.
-     * This catches the edge case where the button was clicked during a brief
-     * window when client state was stale (e.g. realtime missed on mobile). */
+    /* ── Layer 1: client-side state check (fast) ── */
+    if (!isOrderingEnabled) {
+      setSubmitError(isBusy ? 'busy' : 'closed');
+      return;
+    }
+
+    /* ── Layer 2: live server re-verify (catches stale mobile state) ── */
     const liveStatus = await fetchLiveStatus();
-    if (liveStatus && liveStatus !== 'online') return;
+    if (liveStatus === 'busy' || liveStatus === 'closed') {
+      setSubmitError(liveStatus);
+      return;
+    }
 
     const total = grandTotal;
     setFinalTotal(total);
 
-    if (isLoggedIn && currentUser) {
-      const order = {
-        id: crypto.randomUUID(),
-        date: new Date().toISOString(),
-        pizzas: pizzas.map(p => ({ ...p })),
-        total,
-        address: { ...profile },
-        paymentMethod,
-      };
-      addOrder(order);
-      pizzas.forEach(p => savePizzaToProfile({ ...p }));
-    }
-
+    /* Fire-and-forget to Express backend (informational only, not the real order) */
     api.orders.create({
       items: pizzas.map(p => ({ ...p })),
       totalPrice: total,
-    }).catch(err => console.warn('[checkout] order not saved to backend:', err.message));
+    }).catch(err => console.warn('[checkout] backend log failed:', err.message));
 
+    /* ── Layer 3: Supabase insert — protected by RLS on the orders table ── */
+    let savedOid = null;
     try {
       const { data: savedOrder, error: orderError } = await supabase.from('orders').insert({
         user_id: currentUser?.id ?? null,
@@ -955,13 +975,11 @@ function CheckoutNormal() {
             quantity: p.quantity ?? 1,
             price: calcPrice(p),
           };
-          // Pizza customizations
           if (p.dough) item.dough = p.dough;
           if (p.sauce) item.sauce = p.sauce;
           if (p.cheese) item.cheese = p.cheese;
           if (p.meats?.length) item.meats = p.meats;
           if (p.vegetables?.length) item.vegetables = p.vegetables;
-          // Burger customizations
           if (p.bun) item.bun = p.bun;
           if (p.sauces?.length) item.sauces = p.sauces;
           if (p.cheeses && Object.keys(p.cheeses).length) item.cheeses = p.cheeses;
@@ -976,20 +994,49 @@ function CheckoutNormal() {
         payment_method: paymentMethod,
       }).select('id').single();
 
-      console.log('[checkout] Supabase response', { savedOrder, orderError });
-
       if (orderError) {
-        console.warn('[checkout] Supabase SELECT error (order was still created):', orderError);
+        /*
+         * Insert was rejected. Two causes:
+         *   a) RLS policy (restaurant closed/busy) — orderError.code '42501'
+         *   b) Technical error (schema, network, etc.)
+         * Either way: do NOT show the success screen.
+         */
+        console.error('[checkout] order insert rejected:', orderError.code, orderError.message);
+        const isRlsBlock = orderError.code === '42501' ||
+          (orderError.message ?? '').toLowerCase().includes('security policy');
+        if (isRlsBlock) {
+          /* DB confirmed the restaurant is not accepting orders — re-fetch status */
+          const freshStatus = await fetchLiveStatus();
+          setSubmitError(freshStatus === 'busy' ? 'busy' : 'closed');
+        } else {
+          setSubmitError('error');
+        }
+        return; /* ← critical: stop here, never call setDone(true) */
       }
 
-      if (savedOrder?.id) {
-        const oid = savedOrder.id;
-        console.log('[checkout] orderId:', oid, '| tracking:', `/order-tracking/${oid}`);
-        setSavedOrderId(oid);
-        localStorage.setItem('bz_last_order_id', oid);
+      savedOid = savedOrder?.id ?? null;
+      if (savedOid) {
+        setSavedOrderId(savedOid);
+        localStorage.setItem('bz_last_order_id', savedOid);
       }
     } catch (insertErr) {
-      console.error('[checkout] insert threw — order may or may not have been created:', insertErr);
+      console.error('[checkout] insert threw:', insertErr);
+      setSubmitError('error');
+      return; /* ← critical: stop here */
+    }
+
+    /* INSERT SUCCEEDED — now update local order history */
+    if (isLoggedIn && currentUser) {
+      const order = {
+        id: savedOid || crypto.randomUUID(),
+        date: new Date().toISOString(),
+        pizzas: pizzas.map(p => ({ ...p })),
+        total,
+        address: { ...profile },
+        paymentMethod,
+      };
+      addOrder(order);
+      pizzas.forEach(p => savePizzaToProfile({ ...p }));
     }
 
     // ── Persist delivery address to profiles ─────────────────────────────
@@ -1097,6 +1144,8 @@ function CheckoutNormal() {
                 paymentStep={paymentStep}
                 onBack={handlePaymentBack}
                 onConfirm={handleConfirmed}
+                submitError={submitError}
+                onClearError={() => setSubmitError(null)}
               />
             ) : step === 1 && hasAddresses ? (
               <MultiAddressSelector
