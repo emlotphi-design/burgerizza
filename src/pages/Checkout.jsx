@@ -21,7 +21,7 @@ import { useUserAddresses } from '../hooks/useUserAddresses';
 /* ─── Delivery profile helpers ─────────────────────────── */
 const EMPTY_PROFILE = {
   fullName: '', street: '', houseNumber: '', postalCode: '',
-  city: '', floor: '', doorbellName: '', phone: '', email: '',
+  city: '', floor: '', doorbellName: '', phone: '', email: '', notes: '',
 };
 
 /* Guest-only: cache delivery info in localStorage */
@@ -191,6 +191,18 @@ function StepDelivery({ profile, setProfile, onNext, autofilled, lockedFields = 
             {errors.email && <span className="co-field-error">{errors.email}</span>}
           </>
         )}
+
+        <div className="co-field">
+          <label className="co-notes-label">Anmerkungen zur Bestellung (optional)</label>
+          <textarea
+            name="notes"
+            value={profile.notes || ''}
+            onChange={handleChange}
+            placeholder="Besondere Wünsche, Allergien, Hinweise für die Küche…"
+            className="co-notes-textarea"
+            rows={3}
+          />
+        </div>
       </div>
 
       <button type="submit" className="co-next-btn">
@@ -967,6 +979,7 @@ function CheckoutNormal() {
           city: profile.city || '',
           floor: profile.floor || '',
           doorbellName: profile.doorbellName || '',
+          ...(profile.notes?.trim() ? { notes: profile.notes.trim() } : {}),
         },
         items: pizzas.map(p => {
           const item = {

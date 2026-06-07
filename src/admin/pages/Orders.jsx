@@ -26,6 +26,7 @@ const STATUS_MAP = Object.fromEntries(STATUS_FLOW.map(s => [s.value, s]));
 
 const PIPELINE = [
   { value: 'pending',   label: 'Pending',    icon: '🕐' },
+  { value: 'confirmed', label: 'Approved',   icon: '✓'  },
   { value: 'preparing', label: 'Preparing',  icon: '👨‍🍳' },
   { value: 'ready',     label: 'On the way', icon: '🛵' },
   { value: 'delivered', label: 'Delivered',  icon: '✅' },
@@ -179,6 +180,40 @@ function SmartPipeline({ order, onStepClick, onDriverAndAdvance, saving, drivers
   const isRmPending =
     status === 'waiting_confirmation' ||
     (status === 'pending' && order.delivery_address?.source === 'restaurant_mode');
+
+  /* Regular web order awaiting admin approval → show Approve / Reject */
+  const isWebPending = status === 'pending' && !isRmPending;
+
+  if (isWebPending) {
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+        <span style={{
+          display: 'inline-flex', alignItems: 'center', gap: 4,
+          padding: '3px 8px', borderRadius: 6,
+          background: 'rgba(99,102,241,0.14)', border: '1px solid rgba(99,102,241,0.35)',
+          color: '#4338ca', fontSize: 10, fontWeight: 800, whiteSpace: 'nowrap',
+        }}>
+          📋 Awaiting Approval
+        </span>
+        <button
+          className="adm-row-btn adm-row-btn--accept"
+          style={{ background: 'linear-gradient(135deg,#3b82f6,#1d4ed8)', fontSize: 10.5, padding: '5px 12px' }}
+          onClick={() => !saving && onStepClick(order.id, 'confirmed')}
+          disabled={saving}
+        >
+          ✓ Approve
+        </button>
+        <button
+          className="adm-row-btn adm-row-btn--cancel"
+          style={{ fontSize: 10.5, padding: '5px 10px' }}
+          onClick={() => !saving && onStepClick(order.id, 'cancelled')}
+          disabled={saving}
+        >
+          ✗ Reject
+        </button>
+      </div>
+    );
+  }
 
   if (isRmPending) {
     return (

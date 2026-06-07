@@ -251,6 +251,44 @@
   flex: 1;
 }
 
+.co-notes-label {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
+  font-size: 11px;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: rgba(26, 10, 0, 0.45);
+  display: block;
+  margin-bottom: 6px;
+}
+
+.co-notes-textarea {
+  width: 100%;
+  padding: 10px 14px;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1.5px solid rgba(255, 255, 255, 0.13);
+  border-radius: 10px;
+  color: #1a0a00;
+  font-family: 'Nunito', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  resize: vertical;
+  min-height: 72px;
+  box-sizing: border-box;
+  transition: border-color 0.18s;
+  outline: none;
+}
+
+.co-notes-textarea::placeholder {
+  color: rgba(26, 10, 0, 0.35);
+  font-weight: 500;
+}
+
+.co-notes-textarea:focus {
+  border-color: rgba(200, 0, 30, 0.45);
+  background: rgba(255, 255, 255, 0.11);
+}
+
 .co-label {
   font-family: 'Nunito', sans-serif;
   font-weight: 800;

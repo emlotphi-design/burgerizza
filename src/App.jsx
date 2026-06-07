@@ -30,6 +30,7 @@ import AdminSettings from './admin/pages/Settings';
 import AdminPOS from './admin/pages/POS';
 import AdminDrivers from './admin/pages/Drivers';
 import AdminDriverDetail from './admin/pages/DriverDetail';
+import KitchenDisplay from './kitchen/KitchenDisplay';
 import RestaurantModeBanner from './components/RestaurantModeBanner';
 import RestaurantModeCartBar from './components/RestaurantModeCartBar';
 import RestaurantModeBuilderBar from './components/RestaurantModeBuilderBar';
@@ -99,6 +100,9 @@ function AnimatedRoutes() {
         <Route path="/pizza"   element={<CategoryPage />} />
         <Route path="/dessert" element={<CategoryPage />} />
         <Route path="/drinks"  element={<CategoryPage />} />
+
+        {/* Kitchen Display System — full-screen, admin-protected, no sidebar */}
+        <Route path="/kitchen" element={<AdminRoute><KitchenDisplay /></AdminRoute>} />
 
         {/* Admin panel — protected, own layout (no AnimatedRoutes animation) */}
         <Route
