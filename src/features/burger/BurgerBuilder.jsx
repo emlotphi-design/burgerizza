@@ -1,5 +1,6 @@
 import Navbar from '../../components/Navbar';
 import Socials from '../../components/Socials';
+import { useIngredientConfig } from '../../context/IngredientConfigContext';
 import BurgerSidebar from './components/BurgerSidebar';
 import BurgerPreviewCard from './components/BurgerPreviewCard';
 import { useBurgerBuilder } from './hooks/useBurgerBuilder';
@@ -20,6 +21,8 @@ const previewBtn = {
 };
 
 export default function BurgerBuilder() {
+  const { isEnabled: ingEnabled } = useIngredientConfig();
+
   const {
     activeItem, setActiveItem,
     isOrdering, toastVisible, exitingBurgerIds,
@@ -93,11 +96,12 @@ export default function BurgerBuilder() {
           {/* ── Orbital previews (hidden during ordering animation) ── */}
 
           {!isOrdering && activeItem === 'bun' && BURGER_BUNS.map((bun, i) => {
-            const isSelected = draft.bun === bun.id;
+            const isSelected    = draft.bun === bun.id;
+            const adminDisabled = !ingEnabled('burger', bun.id);
             return (
               <div
                 key={bun.id}
-                className={`bb-preview-wrap${isSelected ? ' bb-preview-wrap--selected' : ''}`}
+                className={`bb-preview-wrap${isSelected ? ' bb-preview-wrap--selected' : ''}${adminDisabled ? ' bb-preview-wrap--disabled' : ''}`}
                 style={{
                   position: 'absolute', width: '16%', height: '16%',
                   zIndex: 30, animationDelay: `${i * 55}ms`,
@@ -106,6 +110,7 @@ export default function BurgerBuilder() {
               >
                 <button
                   className="bb-preview-btn"
+                  disabled={adminDisabled}
                   onClick={() => handleSelectBun(bun.id)}
                   aria-label={bun.name}
                   aria-pressed={isSelected}
@@ -119,8 +124,8 @@ export default function BurgerBuilder() {
           })}
 
           {!isOrdering && activeItem === 'sauce' && BURGER_SAUCES.map((sauce, i) => {
-            const isSelected = selectedSauces.includes(sauce.id);
-            const isDisabled = selectedSauces.length >= SAUCE_LIMIT && !isSelected;
+            const isSelected    = selectedSauces.includes(sauce.id);
+            const isDisabled    = !ingEnabled('burger', sauce.id) || (selectedSauces.length >= SAUCE_LIMIT && !isSelected);
             return (
               <div
                 key={sauce.id}
@@ -147,12 +152,13 @@ export default function BurgerBuilder() {
           })}
 
           {!isOrdering && activeItem === 'meat' && BURGER_MEATS.map((meat, i) => {
-            const qty        = selectedMeats[meat.id] ?? 0;
-            const isSelected = qty > 0;
+            const qty           = selectedMeats[meat.id] ?? 0;
+            const isSelected    = qty > 0;
+            const adminDisabled = !ingEnabled('burger', meat.id);
             return (
               <div
                 key={meat.id}
-                className={`bb-preview-wrap${isSelected ? ' bb-preview-wrap--selected' : ''}`}
+                className={`bb-preview-wrap${isSelected ? ' bb-preview-wrap--selected' : ''}${adminDisabled ? ' bb-preview-wrap--disabled' : ''}`}
                 style={{
                   position: 'absolute', width: '16%', height: '16%',
                   zIndex: 30, animationDelay: `${i * 55}ms`,
@@ -161,6 +167,7 @@ export default function BurgerBuilder() {
               >
                 <button
                   className="bb-preview-btn"
+                  disabled={adminDisabled}
                   onClick={() => handleToggleMeat(meat)}
                   aria-label={meat.name}
                   aria-pressed={isSelected}
@@ -186,12 +193,13 @@ export default function BurgerBuilder() {
           })}
 
           {!isOrdering && activeItem === 'cheese' && BURGER_CHEESES.map((cheese, i) => {
-            const qty        = (selectedCheeses)[cheese.id] ?? 0;
-            const isSelected = qty > 0;
+            const qty           = (selectedCheeses)[cheese.id] ?? 0;
+            const isSelected    = qty > 0;
+            const adminDisabled = !ingEnabled('burger', cheese.id);
             return (
               <div
                 key={cheese.id}
-                className={`bb-preview-wrap${isSelected ? ' bb-preview-wrap--selected' : ''}`}
+                className={`bb-preview-wrap${isSelected ? ' bb-preview-wrap--selected' : ''}${adminDisabled ? ' bb-preview-wrap--disabled' : ''}`}
                 style={{
                   position: 'absolute', width: '16%', height: '16%',
                   zIndex: 30, animationDelay: `${i * 55}ms`,
@@ -200,6 +208,7 @@ export default function BurgerBuilder() {
               >
                 <button
                   className="bb-preview-btn"
+                  disabled={adminDisabled}
                   onClick={() => handleToggleCheese(cheese)}
                   aria-label={cheese.name}
                   aria-pressed={isSelected}
@@ -228,8 +237,8 @@ export default function BurgerBuilder() {
 
           {!isOrdering && activeItem === 'vegetables' && BURGER_VEGETABLES.map((veg, i) => {
             const selectedVegetables = draft.vegetables ?? [];
-            const isSelected = selectedVegetables.includes(veg.id);
-            const isDisabled = selectedVegetables.length >= MAX_VEG_QTY && !isSelected;
+            const isSelected    = selectedVegetables.includes(veg.id);
+            const isDisabled    = !ingEnabled('burger', veg.id) || (selectedVegetables.length >= MAX_VEG_QTY && !isSelected);
             return (
               <div
                 key={veg.id}

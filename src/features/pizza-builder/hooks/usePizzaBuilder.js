@@ -1,5 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { usePizzaStore } from '../../../store/PizzaContext';
+import { useIngredientConfig } from '../../../context/IngredientConfigContext';
 
 const LOCK_MSG_DURATION = 2200;
 const TOAST_DURATION    = 2800;
@@ -33,11 +34,44 @@ export function usePizzaBuilder() {
     draftName, editingId, editingName,
   } = draft;
 
+  const { isEnabled, config } = useIngredientConfig();
+
   const [lockMsg,     setLockMsg]     = useState('');
   const [exitingIds,  setExitingIds]  = useState([]);
   const [toastVisible, setToastVisible] = useState(false);
   const lockTimerRef  = useRef(null);
   const toastTimerRef = useRef(null);
+
+  // Auto-deselect any pizza ingredient that becomes disabled via admin dashboard.
+  // Runs on mount (initial localStorage config) and whenever config changes
+  // (realtime event or cross-tab storage event).
+  useEffect(() => {
+    const updates = {};
+
+    if (selectedDough && !isEnabled('pizza', selectedDough)) {
+      updates.selectedDough = null;
+    }
+    if (selectedSauce && !isEnabled('pizza', selectedSauce)) {
+      updates.selectedSauce = null;
+    }
+    if (selectedCheese && !isEnabled('pizza', selectedCheese)) {
+      updates.selectedCheese = null;
+    }
+
+    const validMeats = selectedMeats.filter(id => isEnabled('pizza', id));
+    if (validMeats.length !== selectedMeats.length) {
+      updates.selectedMeats = validMeats;
+    }
+
+    const validVegs = selectedVegetables.filter(id => isEnabled('pizza', id));
+    if (validVegs.length !== selectedVegetables.length) {
+      updates.selectedVegetables = validVegs;
+    }
+
+    if (Object.keys(updates).length > 0) {
+      setDraft(updates);
+    }
+  }, [config]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Lock page scroll while builder is mounted
   useEffect(() => {

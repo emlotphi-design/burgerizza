@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { flushSync } from 'react-dom';
+import { useIngredientConfig } from '../../../context/IngredientConfigContext';
 import { useBurgerStore } from '../store/burgerStore.jsx';
 import { usePizzaStore } from '../../../store/PizzaContext';
 import { useAuth } from '../../../store/AuthContext';
@@ -39,11 +40,70 @@ export function useBurgerBuilder() {
   const { draft, setDraft, clearDraft } = useBurgerStore();
   const { addBurger, pizzas, removePizza } = usePizzaStore();
   const { isLoggedIn } = useAuth();
+  const { isEnabled, config } = useIngredientConfig();
 
   const orderSnapshotRef = useRef(null);
   const toastTimerRef    = useRef(null);
   const prevBunRef       = useRef(draft.bun);
   const initWrapperIdx   = useRef(Math.floor(Math.random() * wrappers.length));
+
+  // Auto-deselect any burger ingredient that becomes disabled via admin dashboard.
+  // Runs on mount (initial localStorage config) and whenever config changes
+  // (realtime event or cross-tab storage event).
+  useEffect(() => {
+    const {
+      bun,
+      sauces      = [],
+      meats       = {},
+      cheeses     = {},
+      vegetables  = [],
+      selectionOrder = [],
+    } = draft;
+
+    const updates = {};
+
+    if (bun && !isEnabled('burger', bun)) {
+      updates.bun = null;
+    }
+
+    const validSauces = sauces.filter(id => isEnabled('burger', id));
+    if (validSauces.length !== sauces.length) updates.sauces = validSauces;
+
+    const validMeats = Object.fromEntries(
+      Object.entries(meats).filter(([id]) => isEnabled('burger', id)),
+    );
+    if (Object.keys(validMeats).length !== Object.keys(meats).length) {
+      updates.meats = validMeats;
+    }
+
+    const validCheeses = Object.fromEntries(
+      Object.entries(cheeses).filter(([id]) => isEnabled('burger', id)),
+    );
+    if (Object.keys(validCheeses).length !== Object.keys(cheeses).length) {
+      updates.cheeses = validCheeses;
+    }
+
+    const validVegs = vegetables.filter(id => isEnabled('burger', id));
+    if (validVegs.length !== vegetables.length) updates.vegetables = validVegs;
+
+    if (Object.keys(updates).length > 0) {
+      // Rebuild selectionOrder to match the surviving selections
+      const meatIds   = new Set(Object.keys(updates.meats    ?? meats));
+      const cheeseIds = new Set(Object.keys(updates.cheeses  ?? cheeses));
+      const sauceIds  = new Set(updates.sauces    ?? sauces);
+      const vegIds    = new Set(updates.vegetables ?? vegetables);
+
+      updates.selectionOrder = selectionOrder.filter(e => {
+        if (e.type === 'meat')      return meatIds.has(e.id);
+        if (e.type === 'cheese')    return cheeseIds.has(e.id);
+        if (e.type === 'sauce')     return sauceIds.has(e.id);
+        if (e.type === 'vegetable') return vegIds.has(e.id);
+        return true;
+      });
+
+      setDraft(updates);
+    }
+  }, [config]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Clear any stale active-tab key left by previous versions
   useEffect(() => {

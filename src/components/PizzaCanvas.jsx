@@ -1,4 +1,5 @@
 import React from 'react';
+import { useIngredientConfig } from '../context/IngredientConfigContext';
 
 import trayImg       from '../assets/pizzas/base/full/tray-full.png';
 import americanFull  from '../assets/pizzas/base/full/american-full.png';
@@ -285,6 +286,8 @@ export default function PizzaCanvas({
   onVegetableToggle  = () => {},
   size               = 'min(540px, 88vw, calc(100vh - 180px))',
 }) {
+  const { isEnabled } = useIngredientConfig();
+
   const activeDough   = selectedDough  ? DOUGHS.find(d => d.id === selectedDough)   : null;
   const activeSauce   = selectedSauce  ? SAUCES.find(s => s.id === selectedSauce)   : null;
   const activeCheese  = selectedCheese ? CHEESES.find(c => c.id === selectedCheese) : null;
@@ -364,69 +367,82 @@ export default function PizzaCanvas({
       ))}
 
       {/* ── Dough previews (triangle) ── */}
-      {activeCategory === 'dough' && DOUGHS.map(d => (
-        <div
-          key={d.id}
-          className="preview-wrapper"
-          style={{ position: 'absolute', width: '17%', height: '17%', zIndex: 10, ...d.pos }}
-        >
-          <button
-            className="pizza-preview-btn"
-            onClick={() => onDoughSelect(d.id)}
-            aria-label={d.label}
-            style={previewBtn}
+      {activeCategory === 'dough' && DOUGHS.map(d => {
+        const adminDisabled = !isEnabled('pizza', d.id);
+        return (
+          <div
+            key={d.id}
+            className={['preview-wrapper', adminDisabled ? 'preview-wrapper--disabled' : ''].filter(Boolean).join(' ')}
+            style={{ position: 'absolute', width: '17%', height: '17%', zIndex: 10, ...d.pos }}
           >
-            <img src={d.preview} alt={d.label}
-              style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} />
-          </button>
-          <span className="dough-label">{d.label}</span>
-        </div>
-      ))}
+            <button
+              className="pizza-preview-btn"
+              onClick={() => !adminDisabled && onDoughSelect(d.id)}
+              aria-label={d.label}
+              disabled={adminDisabled}
+              style={previewBtn}
+            >
+              <img src={d.preview} alt={d.label}
+                style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} />
+            </button>
+            <span className="dough-label">{d.label}</span>
+          </div>
+        );
+      })}
 
       {/* ── Sauce previews (pentagon) ── */}
-      {activeCategory === 'sauces' && SAUCES.map(s => (
-        <div
-          key={s.id}
-          className="preview-wrapper"
-          style={{ position: 'absolute', width: s.previewSize ?? '17%', height: s.previewSize ?? '17%', zIndex: 10, ...s.pos }}
-        >
-          <button
-            className="pizza-preview-btn"
-            onClick={() => onSauceSelect(s.id)}
-            aria-label={s.label}
-            style={previewBtn}
+      {activeCategory === 'sauces' && SAUCES.map(s => {
+        const adminDisabled = !isEnabled('pizza', s.id);
+        return (
+          <div
+            key={s.id}
+            className={['preview-wrapper', adminDisabled ? 'preview-wrapper--disabled' : ''].filter(Boolean).join(' ')}
+            style={{ position: 'absolute', width: s.previewSize ?? '17%', height: s.previewSize ?? '17%', zIndex: 10, ...s.pos }}
           >
-            <img src={s.preview} alt={s.label}
-              style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} />
-          </button>
-          <span className="dough-label">{s.label}</span>
-        </div>
-      ))}
+            <button
+              className="pizza-preview-btn"
+              onClick={() => !adminDisabled && onSauceSelect(s.id)}
+              aria-label={s.label}
+              disabled={adminDisabled}
+              style={previewBtn}
+            >
+              <img src={s.preview} alt={s.label}
+                style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} />
+            </button>
+            <span className="dough-label">{s.label}</span>
+          </div>
+        );
+      })}
 
       {/* ── Cheese previews (triangle) ── */}
-      {activeCategory === 'cheese' && CHEESES.map(c => (
-        <div
-          key={c.id}
-          className="preview-wrapper"
-          style={{ position: 'absolute', width: '17%', height: '17%', zIndex: 10, ...c.pos }}
-        >
-          <button
-            className="pizza-preview-btn"
-            onClick={() => onCheeseSelect(c.id)}
-            aria-label={c.label}
-            style={previewBtn}
+      {activeCategory === 'cheese' && CHEESES.map(c => {
+        const adminDisabled = !isEnabled('pizza', c.id);
+        return (
+          <div
+            key={c.id}
+            className={['preview-wrapper', adminDisabled ? 'preview-wrapper--disabled' : ''].filter(Boolean).join(' ')}
+            style={{ position: 'absolute', width: '17%', height: '17%', zIndex: 10, ...c.pos }}
           >
-            <img src={c.preview} alt={c.label}
-              style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} />
-          </button>
-          <span className="dough-label">{c.label}</span>
-        </div>
-      ))}
+            <button
+              className="pizza-preview-btn"
+              onClick={() => !adminDisabled && onCheeseSelect(c.id)}
+              aria-label={c.label}
+              disabled={adminDisabled}
+              style={previewBtn}
+            >
+              <img src={c.preview} alt={c.label}
+                style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} />
+            </button>
+            <span className="dough-label">{c.label}</span>
+          </div>
+        );
+      })}
 
       {/* ── Meat previews (9-point circle) ── */}
       {activeCategory === 'meat' && MEATS.map((m, i) => {
-        const isSelected = selectedMeats.includes(m.id);
-        const isDisabled = atMeatLimit && !isSelected;
+        const isSelected    = selectedMeats.includes(m.id);
+        const adminDisabled = !isEnabled('pizza', m.id);
+        const isDisabled    = adminDisabled || (atMeatLimit && !isSelected);
         return (
           <div
             key={m.id}
@@ -459,8 +475,9 @@ export default function PizzaCanvas({
 
       {/* ── Vegetable previews (14-point circle) ── */}
       {activeCategory === 'vegetables' && VEGETABLES.map((v, i) => {
-        const isSelected = selectedVegetables.includes(v.id);
-        const isDisabled = atVeggieLimit && !isSelected;
+        const isSelected    = selectedVegetables.includes(v.id);
+        const adminDisabled = !isEnabled('pizza', v.id);
+        const isDisabled    = adminDisabled || (atVeggieLimit && !isSelected);
         return (
           <div
             key={v.id}

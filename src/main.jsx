@@ -10,6 +10,7 @@ import { AuthProvider } from './store/AuthContext'
 import { BurgerProvider } from './features/burger/store/burgerStore'
 import { RestaurantModeProvider } from './store/RestaurantModeContext'
 import { OrderingProvider } from './store/OrderingContext'
+import { IngredientConfigProvider } from './context/IngredientConfigContext'
 
 class ErrorBoundary extends Component {
   state = { error: null };
@@ -62,17 +63,19 @@ createRoot(rootElement).render(
     <ErrorBoundary>
       <BrowserRouter>
         <AuthProvider>
-          <CartProvider>
-            <PizzaProvider>
-              <BurgerProvider>
-                <RestaurantModeProvider>
-                  <OrderingProvider>
-                    <App />
-                  </OrderingProvider>
-                </RestaurantModeProvider>
-              </BurgerProvider>
-            </PizzaProvider>
-          </CartProvider>
+          <IngredientConfigProvider>
+            <CartProvider>
+              <PizzaProvider>
+                <BurgerProvider>
+                  <RestaurantModeProvider>
+                    <OrderingProvider>
+                      <App />
+                    </OrderingProvider>
+                  </RestaurantModeProvider>
+                </BurgerProvider>
+              </PizzaProvider>
+            </CartProvider>
+          </IngredientConfigProvider>
         </AuthProvider>
       </BrowserRouter>
     </ErrorBoundary>
