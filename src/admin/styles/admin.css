@@ -90,39 +90,47 @@
   --adm-spark-orders:      #2563eb;
 }
 
-/* ── Dark mode overrides ────────────────────── */
+/* ── Dark mode overrides — warm Burgerizza atmosphere ─────────── */
 .adm-layout[data-theme="dark"] {
-  /* Surfaces */
-  --adm-bg:          #111113;
-  --adm-surface-0:   #1A1A22;
-  --adm-surface-1:   #111113;
-  --adm-surface-2:   #1E1E28;
-  --adm-surface-3:   #242430;
-  --adm-surface-4:   #2C2C3C;
+  /* Warm cinematic background — pizza oven glow, golden ceiling, ember floor */
+  background:
+    radial-gradient(ellipse 85% 60% at 5%  95%, rgba(200,  80, 15, 0.11) 0%, transparent 55%),
+    radial-gradient(ellipse 65% 50% at 95%  8%, rgba(230, 145, 30, 0.09) 0%, transparent 52%),
+    radial-gradient(ellipse 55% 45% at 50% 52%, rgba(160,  60, 10, 0.06) 0%, transparent 52%),
+    #090704;
 
-  /* Legacy aliases */
-  --adm-sidebar-bg:  #161622;
-  --adm-topbar-bg:   rgba(20,20,28,0.95);
-  --adm-card-bg:     #1E1E28;
-  --adm-card-border: rgba(255,255,255,0.08);
+  /* Surfaces — warm dark browns */
+  --adm-bg:          #090704;
+  --adm-surface-0:   rgba(28, 22, 13, 0.88);
+  --adm-surface-1:   rgba(20, 15,  9, 0.85);
+  --adm-surface-2:   rgba(36, 28, 17, 0.82);
+  --adm-surface-3:   rgba(45, 35, 21, 0.78);
+  --adm-surface-4:   rgba(54, 42, 25, 0.72);
 
-  /* Text */
-  --adm-text:    #F0F0F5;
-  --adm-text-2:  #9090A8;
-  --adm-text-3:  #60606E;
-  --adm-text-4:  #404050;
+  /* Legacy aliases — warm dark */
+  --adm-sidebar-bg:  rgba(8, 6, 3, 0.97);
+  --adm-topbar-bg:   rgba(7, 5, 2, 0.94);
+  --adm-card-bg:     rgba(28, 22, 13, 0.72);
+  --adm-card-border: rgba(255, 195, 100, 0.10);
+  --adm-blur:        blur(20px);
 
-  /* Borders */
-  --adm-border:        rgba(255,255,255,0.09);
-  --adm-border-2:      rgba(255,255,255,0.04);
-  --adm-border-focus:  rgba(255,213,74,0.50);
+  /* Text — warm cream */
+  --adm-text:    #f6f0e6;
+  --adm-text-2:  #b89a70;
+  --adm-text-3:  #7a6040;
+  --adm-text-4:  #4a3820;
 
-  /* Brand — yellow remains premium on dark */
+  /* Borders — warm golden tint */
+  --adm-border:        rgba(255, 195, 100, 0.11);
+  --adm-border-2:      rgba(255, 195, 100, 0.05);
+  --adm-border-focus:  rgba(255, 213, 74, 0.55);
+
+  /* Brand — golden stays premium */
   --adm-accent:      #FFD54A;
   --adm-accent-text: #FFD54A;
   --adm-accent-deep: #FFD54A;
 
-  /* Semantic — lighter for dark backgrounds */
+  /* Semantic — lightened for dark warm bg */
   --adm-green:   #4ade80;
   --adm-blue:    #60a5fa;
   --adm-red:     #f87171;
@@ -130,41 +138,41 @@
   --adm-purple:  #a78bfa;
   --adm-danger:  #f87171;
 
-  /* Shadows — deeper on dark */
+  /* Shadows — warm amber depth */
   --adm-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.05),
-    0 1px 3px rgba(0,0,0,0.45),
-    0 4px 16px rgba(0,0,0,0.35),
-    0 10px 32px rgba(0,0,0,0.25);
+    inset 0 1px 0 rgba(255, 200, 100, 0.07),
+    0 1px 3px rgba(0,0,0,0.55),
+    0 4px 16px rgba(0,0,0,0.42),
+    0 10px 32px rgba(0,0,0,0.30);
   --adm-shadow-lg:
-    inset 0 1px 0 rgba(255,255,255,0.05),
-    0 8px 28px rgba(0,0,0,0.55),
-    0 16px 48px rgba(0,0,0,0.38);
+    inset 0 1px 0 rgba(255, 200, 100, 0.07),
+    0 8px 28px rgba(0,0,0,0.62),
+    0 16px 48px rgba(0,0,0,0.44);
   --adm-shadow-xl:
-    0 20px 60px rgba(0,0,0,0.70),
-    0 4px 16px rgba(0,0,0,0.40);
+    0 20px 60px rgba(0,0,0,0.74),
+    0 4px 16px rgba(0,0,0,0.48);
 
-  /* Theme-specific helpers */
-  --adm-shimmer-start:     rgba(255,255,255,0.04);
-  --adm-shimmer-mid:       rgba(255,255,255,0.09);
-  --adm-table-head-bg:     rgba(255,255,255,0.02);
-  --adm-status-bar-bg:     rgba(255,255,255,0.06);
-  --adm-row-hover:         rgba(255,255,255,0.02);
-  --adm-row-hover-action:  rgba(255,213,74,0.04);
-  --adm-overlay-bg:        rgba(0,0,0,0.72);
-  --adm-sidebar-shadow:    4px 0 32px rgba(0,0,0,0.45);
-  --adm-topbar-shadow:     0 2px 16px rgba(0,0,0,0.45);
-  --adm-toggle-bg:         rgba(255,255,255,0.10);
-  --adm-toggle-on-bg:      rgba(74,222,128,0.22);
-  --adm-toggle-on-border:  rgba(74,222,128,0.35);
+  /* Theme-specific helpers — warm */
+  --adm-shimmer-start:     rgba(255, 200, 100, 0.03);
+  --adm-shimmer-mid:       rgba(255, 200, 100, 0.08);
+  --adm-table-head-bg:     rgba(255, 195, 100, 0.04);
+  --adm-status-bar-bg:     rgba(255, 195, 100, 0.06);
+  --adm-row-hover:         rgba(255, 195, 100, 0.04);
+  --adm-row-hover-action:  rgba(255, 213, 74, 0.06);
+  --adm-overlay-bg:        rgba(0,0,0,0.76);
+  --adm-sidebar-shadow:    4px 0 32px rgba(0,0,0,0.60);
+  --adm-topbar-shadow:     0 2px 16px rgba(0,0,0,0.52);
+  --adm-toggle-bg:         rgba(255, 195, 100, 0.12);
+  --adm-toggle-on-bg:      rgba(74,222,128,0.20);
+  --adm-toggle-on-border:  rgba(74,222,128,0.34);
 
-  /* Chart / sparkline */
+  /* Chart / sparkline — warm palette */
   --adm-chart-bar-today:   #FFD54A;
-  --adm-chart-bar-other:   rgba(255,255,255,0.12);
+  --adm-chart-bar-other:   rgba(255, 195, 100, 0.15);
   --adm-chart-text-today:  #FFD54A;
-  --adm-chart-text-other:  rgba(240,240,245,0.35);
+  --adm-chart-text-other:  rgba(246, 240, 230, 0.32);
   --adm-spark-revenue:     #FFD54A;
-  --adm-spark-orders:      #60a5fa;
+  --adm-spark-orders:      #e8a020;
 }
 
 /* ══════════════════════════════════════════════
@@ -196,6 +204,51 @@
     border-color 0.24s ease,
     color 0.24s ease,
     box-shadow 0.30s ease !important;
+}
+
+/* ══════════════════════════════════════════════
+   DARK MODE — GLASSMORPHISM SURFACES
+   Warm glass cards / sidebar / topbar
+══════════════════════════════════════════════ */
+.adm-layout[data-theme="dark"] .adm-sidebar {
+  backdrop-filter: blur(24px) saturate(1.3);
+  -webkit-backdrop-filter: blur(24px) saturate(1.3);
+  border-right-color: rgba(255, 195, 100, 0.09);
+}
+
+.adm-layout[data-theme="dark"] .adm-card,
+.adm-layout[data-theme="dark"] .adm-stat-card {
+  backdrop-filter: blur(16px) saturate(1.4);
+  -webkit-backdrop-filter: blur(16px) saturate(1.4);
+}
+
+/* Warm golden shimmer on card top edges */
+.adm-layout[data-theme="dark"] .adm-card::before,
+.adm-layout[data-theme="dark"] .adm-stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 5%, rgba(255, 200, 90, 0.14) 35%, rgba(255, 190, 70, 0.07) 72%, transparent 100%);
+  pointer-events: none;
+  z-index: 1;
+  border-radius: var(--adm-radius) var(--adm-radius) 0 0;
+}
+
+.adm-layout[data-theme="dark"] .adm-stat-card::before {
+  border-radius: var(--adm-radius-sm) var(--adm-radius-sm) 0 0;
+}
+
+.adm-layout[data-theme="dark"] .adm-order-card {
+  backdrop-filter: blur(12px) saturate(1.3);
+  -webkit-backdrop-filter: blur(12px) saturate(1.3);
+  background: rgba(28, 22, 13, 0.70);
+  border-color: rgba(255, 195, 100, 0.10);
+}
+
+.adm-layout[data-theme="dark"] .adm-order-card:hover {
+  background: rgba(36, 28, 17, 0.82);
+  border-color: rgba(255, 213, 74, 0.28);
 }
 
 /* ══════════════════════════════════════════════
@@ -532,7 +585,7 @@ button.adm-nav-link {
 }
 
 .adm-layout[data-theme="dark"] .adm-back-link:hover {
-  background: rgba(255,255,255,0.04);
+  background: rgba(255, 195, 100, 0.06);
 }
 
 /* ══════════════════════════════════════════════
@@ -585,7 +638,7 @@ button.adm-nav-link {
 .adm-hamburger:hover { background: rgba(255,213,74,0.18); }
 
 .adm-layout[data-theme="dark"] .adm-hamburger {
-  background: rgba(255,255,255,0.05);
+  background: rgba(255, 195, 100, 0.06);
 }
 
 .adm-topbar-brand {
@@ -625,7 +678,7 @@ button.adm-nav-link {
 }
 
 .adm-layout[data-theme="dark"] .adm-topbar-theme-btn {
-  background: rgba(255,255,255,0.04);
+  background: rgba(255, 195, 100, 0.05);
 }
 
 /* ══════════════════════════════════════════════
@@ -688,6 +741,8 @@ button.adm-nav-link {
   border-radius: var(--adm-radius);
   box-shadow: var(--adm-shadow);
   margin-bottom: 20px;
+  position: relative;
+  overflow: hidden;
 }
 
 /* ══════════════════════════════════════════════
@@ -1107,7 +1162,7 @@ button.adm-nav-link {
 .adm-layout[data-theme="dark"] .adm-badge--blue   { background: rgba(96,165,250,0.14);  color: #60a5fa; }
 .adm-layout[data-theme="dark"] .adm-badge--red    { background: rgba(248,113,113,0.14); color: #f87171; }
 .adm-layout[data-theme="dark"] .adm-badge--orange { background: rgba(251,146,60,0.14);  color: #fb923c; }
-.adm-layout[data-theme="dark"] .adm-badge--gray   { background: rgba(255,255,255,0.07); color: #9090A8; }
+.adm-layout[data-theme="dark"] .adm-badge--gray   { background: rgba(255, 195, 100, 0.07); color: #b89a70; }
 .adm-layout[data-theme="dark"] .adm-badge--indigo  { background: rgba(129,140,248,0.14); color: #818cf8; }
 .adm-layout[data-theme="dark"] .adm-badge--waiting { background: rgba(234,179,8,0.16);   color: #fbbf24; }
 
@@ -1166,7 +1221,7 @@ button.adm-nav-link {
 }
 
 .adm-layout[data-theme="dark"] .adm-select {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%2360606E' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23b89a70' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
 }
 
 .adm-select option { background: var(--adm-surface-0); color: var(--adm-text); }
@@ -1344,7 +1399,7 @@ button.adm-nav-link {
 
 .adm-modal-close:hover { background: rgba(220,38,38,0.10); color: var(--adm-red); }
 
-.adm-layout[data-theme="dark"] .adm-modal-close { background: rgba(255,255,255,0.05); }
+.adm-layout[data-theme="dark"] .adm-modal-close { background: rgba(255, 195, 100, 0.06); }
 
 .adm-modal-body { padding: 22px; overflow-y: auto; flex: 1; }
 .adm-modal-body--order { padding: 0; }
@@ -1550,7 +1605,7 @@ button.adm-nav-link {
 }
 
 .adm-layout[data-theme="dark"] .adm-status-select {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5' viewBox='0 0 8 5'%3E%3Cpath d='M1 1l3 3 3-3' stroke='%2360606E' stroke-width='1.2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5' viewBox='0 0 8 5'%3E%3Cpath d='M1 1l3 3 3-3' stroke='%23b89a70' stroke-width='1.2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
 }
 
 .adm-status-select:focus { border-color: var(--adm-border-focus); }
@@ -2300,7 +2355,7 @@ textarea.adm-input { height: auto; padding: 10px 14px; resize: vertical; min-hei
    DARK MODE — info panel overrides
 ══════════════════════════════════════════════ */
 .adm-layout[data-theme="dark"] .adm-order-expanded-row {
-  background: rgba(255,255,255,0.02);
+  background: rgba(255, 195, 100, 0.02);
 }
 .adm-layout[data-theme="dark"] .adm-order-expanded-row > td {
   border-top-color: rgba(255,213,74,0.18);
@@ -2312,21 +2367,21 @@ textarea.adm-input { height: auto; padding: 10px 14px; resize: vertical; min-hei
   background: var(--adm-card-bg);
 }
 .adm-layout[data-theme="dark"] .adm-info-tag {
-  background: rgba(255,255,255,0.06);
-  border-color: rgba(255,255,255,0.10);
+  background: rgba(255, 195, 100, 0.06);
+  border-color: rgba(255, 195, 100, 0.10);
   color: var(--adm-text-2);
 }
 .adm-layout[data-theme="dark"] .adm-info-item {
-  background: rgba(255,255,255,0.04);
-  border-color: rgba(255,255,255,0.08);
+  background: rgba(255, 195, 100, 0.04);
+  border-color: rgba(255, 195, 100, 0.08);
 }
 .adm-layout[data-theme="dark"] .adm-info-items-section,
 .adm-layout[data-theme="dark"] .adm-info-actions {
   background: var(--adm-surface-0);
 }
 .adm-layout[data-theme="dark"] .adm-info-btn {
-  background: rgba(255,255,255,0.05);
-  border-color: rgba(255,255,255,0.10);
+  background: rgba(255, 195, 100, 0.05);
+  border-color: rgba(255, 195, 100, 0.10);
   color: var(--adm-text-2);
 }
 .adm-layout[data-theme="dark"] .adm-info-btn:hover {
@@ -2824,32 +2879,32 @@ textarea.adm-input { height: auto; padding: 10px 14px; resize: vertical; min-hei
 }
 
 /* ── Dark mode: orow ── */
-.adm-layout[data-theme="dark"] .adm-orow { border-color: rgba(255,255,255,0.06); }
+.adm-layout[data-theme="dark"] .adm-orow { border-color: rgba(255, 195, 100, 0.08); }
 .adm-layout[data-theme="dark"] .adm-orow-main { background: transparent; }
 .adm-layout[data-theme="dark"] .adm-orow--open { border-left-color: rgba(255,213,74,0.35); }
 .adm-layout[data-theme="dark"] .adm-orow--open .adm-orow-main { background: rgba(255,213,74,0.025); }
-.adm-layout[data-theme="dark"] .adm-orow-left { border-color: rgba(255,255,255,0.06); }
-.adm-layout[data-theme="dark"] .adm-orow-center { border-color: rgba(255,255,255,0.06); }
-.adm-layout[data-theme="dark"] .adm-cpipe-dot { background: var(--adm-card-bg); border-color: rgba(255,255,255,0.12); }
-.adm-layout[data-theme="dark"] .adm-cpipe-line { background: rgba(255,255,255,0.10); }
+.adm-layout[data-theme="dark"] .adm-orow-left { border-color: rgba(255, 195, 100, 0.08); }
+.adm-layout[data-theme="dark"] .adm-orow-center { border-color: rgba(255, 195, 100, 0.08); }
+.adm-layout[data-theme="dark"] .adm-cpipe-dot { background: var(--adm-card-bg); border-color: rgba(255, 195, 100, 0.16); }
+.adm-layout[data-theme="dark"] .adm-cpipe-line { background: rgba(255, 195, 100, 0.10); }
 .adm-layout[data-theme="dark"] .adm-cpipe-cancelled {
   background: rgba(248,113,113,0.10);
   border-color: rgba(248,113,113,0.20);
   color: #f87171;
 }
 .adm-layout[data-theme="dark"] .adm-row-btn--cancel {
-  border-color: rgba(255,255,255,0.10);
-  color: rgba(255,255,255,0.40);
+  border-color: rgba(255, 195, 100, 0.12);
+  color: rgba(246, 240, 230, 0.40);
 }
 .adm-layout[data-theme="dark"] .adm-row-btn--cancel:hover:not(:disabled) {
   color: #f87171;
   border-color: rgba(248,113,113,0.30);
   background: rgba(248,113,113,0.08);
 }
-.adm-layout[data-theme="dark"] .adm-orow-drawer { border-top-color: rgba(255,255,255,0.06); }
+.adm-layout[data-theme="dark"] .adm-orow-drawer { border-top-color: rgba(255, 195, 100, 0.07); }
 .adm-layout[data-theme="dark"] .adm-driver-btn {
-  background: rgba(255,255,255,0.05);
-  border-color: rgba(255,255,255,0.10);
+  background: rgba(255, 195, 100, 0.05);
+  border-color: rgba(255, 195, 100, 0.12);
   color: var(--adm-text-2);
 }
 .adm-layout[data-theme="dark"] .adm-driver-btn:hover:not(:disabled) {
@@ -3055,9 +3110,9 @@ textarea.adm-input { height: auto; padding: 10px 14px; resize: vertical; min-hei
 /* ── Dark mode: smart pipeline ── */
 .adm-layout[data-theme="dark"] .adm-spipe-dot {
   background: var(--adm-card-bg);
-  border-color: rgba(255,255,255,0.12);
+  border-color: rgba(255, 195, 100, 0.16);
 }
-.adm-layout[data-theme="dark"] .adm-spipe-line { background: rgba(255,255,255,0.10); }
+.adm-layout[data-theme="dark"] .adm-spipe-line { background: rgba(255, 195, 100, 0.10); }
 .adm-layout[data-theme="dark"] .adm-spipe-step--next.adm-spipe-step--clickable .adm-spipe-dot {
   border-color: rgba(255,213,74,0.45);
   background: rgba(255,213,74,0.06);
@@ -3078,8 +3133,8 @@ textarea.adm-input { height: auto; padding: 10px 14px; resize: vertical; min-hei
 }
 .adm-layout[data-theme="dark"] .adm-spipe-driver-title { color: #FFD54A; }
 .adm-layout[data-theme="dark"] .adm-spipe-driver-opt {
-  background: rgba(255,255,255,0.04);
-  border-color: rgba(255,255,255,0.10);
+  background: rgba(255, 195, 100, 0.04);
+  border-color: rgba(255, 195, 100, 0.10);
   color: var(--adm-text-2);
 }
 .adm-layout[data-theme="dark"] .adm-spipe-driver-opt:hover:not(:disabled) {
@@ -3224,7 +3279,7 @@ textarea.adm-input { height: auto; padding: 10px 14px; resize: vertical; min-hei
 .adm-status-toggle-btn--on  { background: #22c55e; }
 .adm-status-toggle-btn--off { background: #d1d5db; }
 
-[data-theme="dark"] .adm-status-toggle-btn--off { background: #4b5563; }
+[data-theme="dark"] .adm-status-toggle-btn--off { background: #3a2c1a; }
 
 .adm-status-toggle-knob {
   position: absolute;
@@ -3361,7 +3416,7 @@ textarea.adm-input { height: auto; padding: 10px 14px; resize: vertical; min-hei
 .adm-ordering-toggle-track--on  { background: #22c55e; }
 .adm-ordering-toggle-track--off { background: #d1d5db; }
 
-[data-theme="dark"] .adm-ordering-toggle-track--off { background: #4b5563; }
+[data-theme="dark"] .adm-ordering-toggle-track--off { background: #3a2c1a; }
 
 .adm-ordering-toggle-knob {
   position: absolute;
