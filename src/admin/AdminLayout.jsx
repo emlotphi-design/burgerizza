@@ -197,7 +197,7 @@ const SunIcon = () => (
 export default function AdminLayout() {
   const [sidebarOpen,  setSidebarOpen]  = useState(false);
   const [pendingCount, setPendingCount] = useState(0);
-  const [theme,        setTheme]        = useState(() => localStorage.getItem('adminTheme') ?? 'light');
+  const [theme,        setTheme]        = useState(() => localStorage.getItem('adminTheme') ?? 'dark');
   const { currentUser } = useAuth();
   const channelRef  = useRef(null);
   const layoutRef   = useRef(null);
@@ -220,6 +220,25 @@ export default function AdminLayout() {
 
   /* Track actionable order count for sidebar badge (pending + waiting_confirmation) */
   const NEEDS_ACTION = new Set(['pending', 'waiting_confirmation']);
+
+  /* Tag <body> so admin.css can drive the real background system.
+     On unmount (navigating away), clear the html inline style set
+     by the index.html anti-flash script so the main site background
+     is not blocked by the leftover dark html style. */
+  useEffect(() => {
+    document.body.dataset.context = 'admin';
+    return () => {
+      delete document.body.dataset.context;
+      document.documentElement.style.backgroundColor = '';
+      document.documentElement.style.backgroundImage  = '';
+    };
+  }, []);
+
+  /* Keep body data-admin-theme in sync — drives background-attachment:fixed gradient */
+  useEffect(() => {
+    document.body.dataset.adminTheme = theme;
+    return () => { delete document.body.dataset.adminTheme; };
+  }, [theme]);
 
   useEffect(() => {
     Promise.all([

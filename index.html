@@ -6,9 +6,139 @@
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>BURGERIZZA</title>
+
+  <!--
+    ANTI-FLASH — STEP 1 of 3
+    ─────────────────────────────────────────────────────────────
+    Classic (non-module) inline <script> in <head>.
+
+    document.documentElement (<html>) is always available in
+    <head> scripts — even before <body> is parsed. We target it
+    here because <body> has zero rendered height before React
+    mounts content. If only body is dark and html is yellow
+    (#F5C518 from global.css), the yellow bleeds through for the
+    full viewport height above the zero-height body.
+
+    Setting html background dark here covers the viewport
+    at the earliest possible moment — same frame as the
+    first HTML parse, before any CSS, before any paint.
+    ─────────────────────────────────────────────────────────────
+  -->
+  <script>
+    (function () {
+      var p = location.pathname;
+      var isAdmin   = p === '/admin'   || p.startsWith('/admin/');
+      var isKitchen = p === '/kitchen' || p.startsWith('/kitchen/');
+      if (isAdmin) {
+        var t = localStorage.getItem('adminTheme') || 'dark';
+        document.documentElement.style.backgroundColor = t === 'dark' ? '#030201' : '#FFF9EC';
+        document.documentElement.style.backgroundImage  = 'none';
+      } else if (isKitchen) {
+        document.documentElement.style.backgroundColor = '#030201';
+        document.documentElement.style.backgroundImage  = 'none';
+      }
+    }());
+  </script>
+
+  <!--
+    ANTI-FLASH — STEP 2 of 3
+    ─────────────────────────────────────────────────────────────
+    Critical inline CSS — available the moment <head> is parsed,
+    no network round-trip, no async load.
+
+    The key addition vs. the previous attempt:
+      min-height: 100dvh on body[data-context]
+
+    Without this, body has zero height before React renders and
+    the html background bleeds through for the entire viewport.
+    With it, body fills the viewport immediately, html is fully
+    covered, and there is no surface for yellow to appear on.
+
+    Full cinematic gradients are included here so the final
+    background is shown from frame 1 — not just the base color.
+    ─────────────────────────────────────────────────────────────
+  -->
+  <style>
+    /* Body must fill the viewport the instant it gets a context —
+       before React renders a single element into #root.          */
+    body[data-context="admin"],
+    body[data-context="kitchen"] {
+      min-height: 100vh  !important;
+      min-height: 100dvh !important;
+    }
+
+    /* ── Admin dark — full Burgerizza cinematic atmosphere ──────── */
+    body[data-context="admin"][data-admin-theme="dark"] {
+      background-color:      #030201 !important;
+      background-image:
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.045'/%3E%3C/svg%3E"),
+        radial-gradient(ellipse 110% 110% at 50% 50%, transparent 36%, rgba(0,0,0,0.72) 100%),
+        radial-gradient(ellipse 145%  92% at  -8% 112%, rgba(185, 52,  4, 0.44) 0%, transparent 46%),
+        radial-gradient(ellipse 105%  78% at 110%  -6%, rgba(215,112, 10, 0.36) 0%, transparent 44%),
+        radial-gradient(ellipse  80%  64% at  48%  60%, rgba(122, 32,  0, 0.28) 0%, transparent 52%),
+        radial-gradient(ellipse  54%  42% at  20%   5%, rgba(198, 82,  6, 0.20) 0%, transparent 46%) !important;
+      background-size:       200px 200px, cover, cover, cover, cover, cover !important;
+      background-repeat:     repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat !important;
+      background-attachment: fixed !important;
+      color-scheme:          dark;
+    }
+
+    /* ── Admin light — warm cream, no gradient ──────────────────── */
+    body[data-context="admin"][data-admin-theme="light"] {
+      background-color:      #FFF9EC !important;
+      background-image:      none !important;
+      background-attachment: scroll !important;
+    }
+
+    /* ── Kitchen — cinematic dark atmosphere ────────────────────── */
+    body[data-context="kitchen"] {
+      background-color:      #030201 !important;
+      background-image:
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.055'/%3E%3C/svg%3E"),
+        radial-gradient(ellipse 108% 108% at 50% 50%, transparent 32%, rgba(0,0,0,0.78) 100%),
+        radial-gradient(ellipse 150%  95% at  -6% 115%, rgba(190, 55,  4, 0.48) 0%, transparent 46%),
+        radial-gradient(ellipse 110%  82% at 112%  -4%, rgba(218,118, 10, 0.38) 0%, transparent 44%),
+        radial-gradient(ellipse  85%  68% at  72%  62%, rgba(135, 38,  2, 0.30) 0%, transparent 52%),
+        radial-gradient(ellipse  58%  45% at  18%   8%, rgba(205, 88,  8, 0.22) 0%, transparent 46%) !important;
+      background-size:       200px 200px, cover, cover, cover, cover, cover !important;
+      background-repeat:     repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat !important;
+      background-attachment: fixed !important;
+      color-scheme:          dark;
+    }
+  </style>
 </head>
 
 <body>
+  <!--
+    ANTI-FLASH — STEP 3 of 3
+    ─────────────────────────────────────────────────────────────
+    Classic (non-module) inline <script>: synchronous, runs
+    during HTML parsing, before any module or deferred script,
+    before React, before any CSS bundle injection.
+
+    Sets data-context and data-admin-theme on <body>. The
+    critical CSS above matches these selectors immediately.
+    By the time the browser makes its first paint decision:
+
+      • <html>  → dark (#030201) — set by Step 1
+      • <body>  → dark + full gradient + min-height: 100dvh
+                  set by critical CSS matching Step 3 attributes
+
+    No frame where yellow or white is visible.
+    ─────────────────────────────────────────────────────────────
+  -->
+  <script>
+    (function () {
+      var p = location.pathname;
+      if (p === '/admin' || p.startsWith('/admin/')) {
+        document.body.dataset.context    = 'admin';
+        document.body.dataset.adminTheme = localStorage.getItem('adminTheme') || 'dark';
+      } else if (p === '/kitchen' || p.startsWith('/kitchen/')) {
+        document.body.dataset.context = 'kitchen';
+      }
+    }());
+  </script>
+
   <div id="root"></div>
   <script type="module" src="/src/main.jsx"></script>
 </body>

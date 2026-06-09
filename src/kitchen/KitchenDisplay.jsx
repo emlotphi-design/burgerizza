@@ -537,6 +537,18 @@ export default function KitchenDisplay() {
     return () => supabase.removeChannel(ch);
   }, []);
 
+  /* Tag <body> so kitchen.css can drive the real cinematic background.
+     On unmount, clear the html inline style set by the index.html
+     anti-flash script so the main site background is not blocked. */
+  useEffect(() => {
+    document.body.dataset.context = 'kitchen';
+    return () => {
+      delete document.body.dataset.context;
+      document.documentElement.style.backgroundColor = '';
+      document.documentElement.style.backgroundImage  = '';
+    };
+  }, []);
+
   /* 30-second tick — refreshes urgency colours */
   useEffect(() => {
     const id = setInterval(() => setTick(t => t + 1), 30_000);

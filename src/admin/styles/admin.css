@@ -3,6 +3,58 @@
    Restaurant management · Real-time · Modern
 ══════════════════════════════════════════════ */
 
+/* ══════════════════════════════════════════════
+   BODY — CINEMATIC BACKGROUND SYSTEM
+   ─────────────────────────────────────────────
+   AdminLayout mounts → sets data-context="admin"
+   and data-admin-theme on <body>.
+
+   background-attachment:fixed keeps the gradient
+   locked to the viewport (doesn't scroll with
+   page content). Cards' backdrop-filter then
+   blurs THIS fixed gradient — true glassmorphism.
+══════════════════════════════════════════════ */
+
+/* Dark mode — full Burgerizza cinematic atmosphere */
+body[data-context="admin"][data-admin-theme="dark"] {
+  /*
+   * Layered system — back to front:
+   * 1. Pure near-black warm base
+   * 2. Bottom-left: open grill ember (orange-red, heavy)
+   * 3. Top-right: pizza oven hood glow (golden, medium)
+   * 4. Centre: deep radiant heat (dark red, soft)
+   * 5. Top-left: distant ceiling wash (amber, subtle)
+   * 6. Vignette overlay: dark edges pull focus inward
+   * 7. Film grain: subtle noise adds material texture
+   */
+  background-color:   #030201 !important;
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.045'/%3E%3C/svg%3E"),
+    radial-gradient(ellipse 110% 110% at 50% 50%, transparent 36%, rgba(0,0,0,0.72) 100%),
+    radial-gradient(ellipse 145% 92% at  -8% 112%, rgba(185,  52,  4, 0.44) 0%, transparent 46%),
+    radial-gradient(ellipse 105% 78% at 110%  -6%, rgba(215, 112, 10, 0.36) 0%, transparent 44%),
+    radial-gradient(ellipse  80% 64% at  48%  60%, rgba(122,  32,  0, 0.28) 0%, transparent 52%),
+    radial-gradient(ellipse  54% 42% at  20%   5%, rgba(198,  82,  6, 0.20) 0%, transparent 46%) !important;
+  background-size:
+    200px 200px,
+    cover, cover, cover, cover, cover !important;
+  background-repeat:
+    repeat,
+    no-repeat, no-repeat, no-repeat, no-repeat, no-repeat !important;
+  background-attachment: fixed !important;
+}
+
+/* Admin layout is TRANSPARENT in dark mode —
+   the body gradient shows through glass panels */
+body[data-context="admin"][data-admin-theme="dark"] .adm-layout {
+  background: transparent !important;
+}
+
+/* Light mode — keep warm cream from global.css, just override brand yellow */
+body[data-context="admin"][data-admin-theme="light"] {
+  background-color: #FFF9EC !important;
+}
+
 /* ── Light mode design tokens ───────────────── */
 :root {
   --adm-sidebar-w:   260px;
@@ -90,47 +142,42 @@
   --adm-spark-orders:      #2563eb;
 }
 
-/* ── Dark mode overrides — warm Burgerizza atmosphere ─────────── */
+/* ── Dark mode — CSS variable tokens (background handled by body) ─ */
 .adm-layout[data-theme="dark"] {
-  /* Warm cinematic background — pizza oven glow, golden ceiling, ember floor */
-  background:
-    radial-gradient(ellipse 85% 60% at 5%  95%, rgba(200,  80, 15, 0.11) 0%, transparent 55%),
-    radial-gradient(ellipse 65% 50% at 95%  8%, rgba(230, 145, 30, 0.09) 0%, transparent 52%),
-    radial-gradient(ellipse 55% 45% at 50% 52%, rgba(160,  60, 10, 0.06) 0%, transparent 52%),
-    #090704;
+  /* background is transparent — set by the body rule above */
+  --adm-bg: #030201;
 
-  /* Surfaces — warm dark browns */
-  --adm-bg:          #090704;
-  --adm-surface-0:   rgba(28, 22, 13, 0.88);
-  --adm-surface-1:   rgba(20, 15,  9, 0.85);
-  --adm-surface-2:   rgba(36, 28, 17, 0.82);
-  --adm-surface-3:   rgba(45, 35, 21, 0.78);
-  --adm-surface-4:   rgba(54, 42, 25, 0.72);
+  /* Glass surfaces — semi-transparent so gradient bleeds through */
+  --adm-surface-0:   rgba(16, 10,  4, 0.50);
+  --adm-surface-1:   rgba(12,  8,  3, 0.44);
+  --adm-surface-2:   rgba(22, 14,  6, 0.54);
+  --adm-surface-3:   rgba(28, 18,  8, 0.60);
+  --adm-surface-4:   rgba(34, 22, 10, 0.66);
 
-  /* Legacy aliases — warm dark */
-  --adm-sidebar-bg:  rgba(8, 6, 3, 0.97);
-  --adm-topbar-bg:   rgba(7, 5, 2, 0.94);
-  --adm-card-bg:     rgba(28, 22, 13, 0.72);
-  --adm-card-border: rgba(255, 195, 100, 0.10);
-  --adm-blur:        blur(20px);
+  /* Legacy aliases */
+  --adm-sidebar-bg:  rgba(3, 2, 1, 0.80);
+  --adm-topbar-bg:   rgba(3, 2, 1, 0.86);
+  --adm-card-bg:     rgba(16, 10,  4, 0.44);
+  --adm-card-border: rgba(255, 195, 100, 0.15);
+  --adm-blur:        blur(28px);
 
   /* Text — warm cream */
-  --adm-text:    #f6f0e6;
-  --adm-text-2:  #b89a70;
-  --adm-text-3:  #7a6040;
-  --adm-text-4:  #4a3820;
+  --adm-text:    #f8f2e8;
+  --adm-text-2:  #c4a878;
+  --adm-text-3:  #8a6a45;
+  --adm-text-4:  #503c22;
 
-  /* Borders — warm golden tint */
-  --adm-border:        rgba(255, 195, 100, 0.11);
-  --adm-border-2:      rgba(255, 195, 100, 0.05);
-  --adm-border-focus:  rgba(255, 213, 74, 0.55);
+  /* Borders — golden warm */
+  --adm-border:        rgba(255, 195, 100, 0.14);
+  --adm-border-2:      rgba(255, 195, 100, 0.07);
+  --adm-border-focus:  rgba(255, 213, 74, 0.60);
 
-  /* Brand — golden stays premium */
+  /* Brand */
   --adm-accent:      #FFD54A;
   --adm-accent-text: #FFD54A;
-  --adm-accent-deep: #FFD54A;
+  --adm-accent-deep: #FFc107;
 
-  /* Semantic — lightened for dark warm bg */
+  /* Semantic status colors — kept functional */
   --adm-green:   #4ade80;
   --adm-blue:    #60a5fa;
   --adm-red:     #f87171;
@@ -138,39 +185,41 @@
   --adm-purple:  #a78bfa;
   --adm-danger:  #f87171;
 
-  /* Shadows — warm amber depth */
+  /* Shadows — deep + warm inner glow */
   --adm-shadow:
-    inset 0 1px 0 rgba(255, 200, 100, 0.07),
-    0 1px 3px rgba(0,0,0,0.55),
-    0 4px 16px rgba(0,0,0,0.42),
-    0 10px 32px rgba(0,0,0,0.30);
+    inset 0 1px 0 rgba(255, 210, 120, 0.14),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.28),
+    0 2px  6px rgba(0, 0, 0, 0.60),
+    0 6px 24px rgba(0, 0, 0, 0.48),
+    0 12px 40px rgba(0, 0, 0, 0.32);
   --adm-shadow-lg:
-    inset 0 1px 0 rgba(255, 200, 100, 0.07),
-    0 8px 28px rgba(0,0,0,0.62),
-    0 16px 48px rgba(0,0,0,0.44);
+    inset 0 1px 0 rgba(255, 210, 120, 0.14),
+    0 8px 32px rgba(0, 0, 0, 0.65),
+    0 20px 56px rgba(0, 0, 0, 0.48);
   --adm-shadow-xl:
-    0 20px 60px rgba(0,0,0,0.74),
-    0 4px 16px rgba(0,0,0,0.48);
+    0 24px 64px rgba(0, 0, 0, 0.78),
+    0 6px 20px rgba(0, 0, 0, 0.55);
 
-  /* Theme-specific helpers — warm */
-  --adm-shimmer-start:     rgba(255, 200, 100, 0.03);
-  --adm-shimmer-mid:       rgba(255, 200, 100, 0.08);
-  --adm-table-head-bg:     rgba(255, 195, 100, 0.04);
-  --adm-status-bar-bg:     rgba(255, 195, 100, 0.06);
-  --adm-row-hover:         rgba(255, 195, 100, 0.04);
-  --adm-row-hover-action:  rgba(255, 213, 74, 0.06);
-  --adm-overlay-bg:        rgba(0,0,0,0.76);
-  --adm-sidebar-shadow:    4px 0 32px rgba(0,0,0,0.60);
-  --adm-topbar-shadow:     0 2px 16px rgba(0,0,0,0.52);
-  --adm-toggle-bg:         rgba(255, 195, 100, 0.12);
-  --adm-toggle-on-bg:      rgba(74,222,128,0.20);
-  --adm-toggle-on-border:  rgba(74,222,128,0.34);
+  /* Helpers */
+  --adm-shimmer-start:     rgba(255, 210, 120, 0.04);
+  --adm-shimmer-mid:       rgba(255, 210, 120, 0.10);
+  --adm-table-head-bg:     rgba(255, 200, 100, 0.05);
+  --adm-status-bar-bg:     rgba(255, 200, 100, 0.07);
+  --adm-row-hover:         rgba(255, 200, 100, 0.05);
+  --adm-row-hover-action:  rgba(255, 213, 74, 0.07);
+  --adm-overlay-bg:        rgba(0, 0, 0, 0.82);
+  --adm-sidebar-shadow:    4px 0 40px rgba(0, 0, 0, 0.70),
+                           inset -1px 0 0 rgba(255, 195, 100, 0.08);
+  --adm-topbar-shadow:     0 2px 20px rgba(0, 0, 0, 0.60);
+  --adm-toggle-bg:         rgba(255, 195, 100, 0.14);
+  --adm-toggle-on-bg:      rgba(74,222,128,0.18);
+  --adm-toggle-on-border:  rgba(74,222,128,0.32);
 
-  /* Chart / sparkline — warm palette */
+  /* Chart */
   --adm-chart-bar-today:   #FFD54A;
-  --adm-chart-bar-other:   rgba(255, 195, 100, 0.15);
+  --adm-chart-bar-other:   rgba(255, 195, 100, 0.18);
   --adm-chart-text-today:  #FFD54A;
-  --adm-chart-text-other:  rgba(246, 240, 230, 0.32);
+  --adm-chart-text-other:  rgba(248, 242, 232, 0.32);
   --adm-spark-revenue:     #FFD54A;
   --adm-spark-orders:      #e8a020;
 }
@@ -207,48 +256,110 @@
 }
 
 /* ══════════════════════════════════════════════
-   DARK MODE — GLASSMORPHISM SURFACES
-   Warm glass cards / sidebar / topbar
+   DARK MODE — PREMIUM GLASSMORPHISM
+   True glass: transparent + backdrop-blur so the
+   cinematic background gradient shines through.
 ══════════════════════════════════════════════ */
+
+/* Sidebar — frosted dark glass panel */
 .adm-layout[data-theme="dark"] .adm-sidebar {
-  backdrop-filter: blur(24px) saturate(1.3);
-  -webkit-backdrop-filter: blur(24px) saturate(1.3);
-  border-right-color: rgba(255, 195, 100, 0.09);
+  backdrop-filter: blur(32px) saturate(1.6) brightness(0.9);
+  -webkit-backdrop-filter: blur(32px) saturate(1.6) brightness(0.9);
+  border-right: 1px solid rgba(255, 195, 100, 0.10);
+  box-shadow: 4px 0 40px rgba(0,0,0,0.70), inset -1px 0 0 rgba(255,195,100,0.08);
 }
 
+/* Brand name — premium golden glow */
+.adm-layout[data-theme="dark"] .adm-brand-name {
+  text-shadow: 0 0 20px rgba(255, 200, 80, 0.30);
+}
+
+/* Cards — true glass panels */
 .adm-layout[data-theme="dark"] .adm-card,
 .adm-layout[data-theme="dark"] .adm-stat-card {
-  backdrop-filter: blur(16px) saturate(1.4);
-  -webkit-backdrop-filter: blur(16px) saturate(1.4);
+  backdrop-filter: blur(28px) saturate(1.8) brightness(1.05);
+  -webkit-backdrop-filter: blur(28px) saturate(1.8) brightness(1.05);
+  box-shadow:
+    inset 0  1px 0 rgba(255, 210, 120, 0.18),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.32),
+    0  2px  6px rgba(0, 0, 0, 0.60),
+    0  8px 28px rgba(0, 0, 0, 0.50),
+    0 16px 48px rgba(0, 0, 0, 0.36);
 }
 
-/* Warm golden shimmer on card top edges */
+.adm-layout[data-theme="dark"] .adm-card:hover,
+.adm-layout[data-theme="dark"] .adm-stat-card:hover {
+  box-shadow:
+    inset 0  1px 0 rgba(255, 210, 120, 0.22),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.32),
+    0  4px 12px rgba(0, 0, 0, 0.62),
+    0 12px 36px rgba(0, 0, 0, 0.52),
+    0 20px 56px rgba(0, 0, 0, 0.40);
+}
+
+/* Warm golden shimmer on card top edge */
 .adm-layout[data-theme="dark"] .adm-card::before,
 .adm-layout[data-theme="dark"] .adm-stat-card::before {
   content: '';
   position: absolute;
   top: 0; left: 0; right: 0;
   height: 1px;
-  background: linear-gradient(90deg, transparent 5%, rgba(255, 200, 90, 0.14) 35%, rgba(255, 190, 70, 0.07) 72%, transparent 100%);
+  background: linear-gradient(
+    90deg,
+    transparent 4%,
+    rgba(255, 200, 90, 0.28) 32%,
+    rgba(255, 185, 60, 0.18) 65%,
+    transparent 96%
+  );
   pointer-events: none;
   z-index: 1;
-  border-radius: var(--adm-radius) var(--adm-radius) 0 0;
 }
 
-.adm-layout[data-theme="dark"] .adm-stat-card::before {
-  border-radius: var(--adm-radius-sm) var(--adm-radius-sm) 0 0;
-}
-
+/* Order cards — glass with warm border */
 .adm-layout[data-theme="dark"] .adm-order-card {
-  backdrop-filter: blur(12px) saturate(1.3);
-  -webkit-backdrop-filter: blur(12px) saturate(1.3);
-  background: rgba(28, 22, 13, 0.70);
-  border-color: rgba(255, 195, 100, 0.10);
+  backdrop-filter: blur(22px) saturate(1.6);
+  -webkit-backdrop-filter: blur(22px) saturate(1.6);
+  background: rgba(16, 10, 4, 0.42);
+  border: 1px solid rgba(255, 195, 100, 0.12);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 210, 120, 0.12),
+    0 2px 10px rgba(0,0,0,0.55),
+    0 6px 22px rgba(0,0,0,0.40);
 }
 
 .adm-layout[data-theme="dark"] .adm-order-card:hover {
-  background: rgba(36, 28, 17, 0.82);
-  border-color: rgba(255, 213, 74, 0.28);
+  background: rgba(22, 14, 6, 0.55);
+  border-color: rgba(255, 213, 74, 0.30);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 210, 120, 0.16),
+    0 4px 16px rgba(0,0,0,0.58),
+    0 10px 30px rgba(0,0,0,0.44);
+}
+
+/* Nav active link — warm amber glow */
+.adm-layout[data-theme="dark"] .adm-nav-link--active {
+  background: rgba(255, 195, 60, 0.12) !important;
+  box-shadow: inset 3px 0 0 #FFD54A, inset 0 0 16px rgba(255, 195, 60, 0.08);
+}
+
+/* Stat card tints — warmer in dark mode */
+.adm-layout[data-theme="dark"] .adm-stat-card--amber {
+  background: linear-gradient(145deg, rgba(255, 195, 60, 0.12) 0%, rgba(16, 10, 4, 0.44) 60%) !important;
+}
+.adm-layout[data-theme="dark"] .adm-stat-card--green {
+  background: linear-gradient(145deg, rgba(74, 222, 128, 0.08) 0%, rgba(16, 10, 4, 0.44) 60%) !important;
+}
+.adm-layout[data-theme="dark"] .adm-stat-card--blue {
+  background: linear-gradient(145deg, rgba(96, 165, 250, 0.08) 0%, rgba(16, 10, 4, 0.44) 60%) !important;
+}
+.adm-layout[data-theme="dark"] .adm-stat-card--orange {
+  background: linear-gradient(145deg, rgba(251, 146, 60, 0.10) 0%, rgba(16, 10, 4, 0.44) 60%) !important;
+}
+.adm-layout[data-theme="dark"] .adm-stat-card--purple {
+  background: linear-gradient(145deg, rgba(167, 139, 250, 0.07) 0%, rgba(16, 10, 4, 0.44) 60%) !important;
+}
+.adm-layout[data-theme="dark"] .adm-stat-card--red {
+  background: linear-gradient(145deg, rgba(248, 113, 113, 0.08) 0%, rgba(16, 10, 4, 0.44) 60%) !important;
 }
 
 /* ══════════════════════════════════════════════
