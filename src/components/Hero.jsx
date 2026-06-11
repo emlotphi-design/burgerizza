@@ -10,12 +10,12 @@ export default function Hero() {
     <main className="hero">
       <h1 className="heading">
         <span className="h-dark">BAU DEINE </span>
-        <span className="h-red">BURIZZA</span>
+        <span className="h-red">BURGERIZZA</span>
         <span className="h-dark">!!!</span>
       </h1>
 
       <div className="food-wrap">
-        <img src={heroImg} alt="BURIZZA" className="food-img" />
+        <img src={heroImg} alt="BURGERIZZA" className="food-img" />
       </div>
 
       <div className="ctas">

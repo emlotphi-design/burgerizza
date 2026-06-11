@@ -4,7 +4,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;700;800;900&display=swap');
 
 /* ══════════════════════════════════════════
-   BURIZZA DESIGN TOKENS
+   BURGERIZZA DESIGN TOKENS
 ══════════════════════════════════════════ */
 :root {
   --nav-h:    72px;
@@ -221,7 +221,7 @@
 
 /* ══════════════════════════════════════════
    CUSTOMER-FACING BACKGROUND SYSTEM
-   Original BURIZZA brand palette:
+   Original BURGERIZZA brand palette:
    warm yellow background.png fully visible,
    soft edge vignette only for depth.
    NO dark overlay. Light & warm.

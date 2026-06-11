@@ -53,5 +53,5 @@ app.use((err, _req, res, _next) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`BURIZZA API running on port ${PORT}`);
+  console.log(`BURGERIZZA API running on port ${PORT}`);
 });

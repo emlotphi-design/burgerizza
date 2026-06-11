@@ -1,7 +1,7 @@
 {
-  "name": "BURIZZA",
-  "short_name": "BURIZZA",
-  "description": "Build your perfect pizza or burger — BURIZZA",
+  "name": "BURGERIZZA",
+  "short_name": "BURGERIZZA",
+  "description": "Build your perfect pizza or burger — BURGERIZZA",
   "start_url": "/",
   "display": "standalone",
   "orientation": "portrait",

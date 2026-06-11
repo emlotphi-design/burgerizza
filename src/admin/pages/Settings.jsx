@@ -38,7 +38,7 @@ export default function Settings() {
             <div className="adm-form-row">
               <div className="adm-form-group">
                 <label className="adm-label">Restaurant Name</label>
-                <input className="adm-input" defaultValue="BURIZZA" />
+                <input className="adm-input" defaultValue="BURGERIZZA" />
               </div>
               <div className="adm-form-group">
                 <label className="adm-label">Phone Number</label>
@@ -54,7 +54,7 @@ export default function Settings() {
             <div className="adm-form-row">
               <div className="adm-form-group">
                 <label className="adm-label">Contact Email</label>
-                <input className="adm-input" placeholder="hello@burizza.de" />
+                <input className="adm-input" placeholder="hello@burgerizza.de" />
               </div>
               <div className="adm-form-group">
                 <label className="adm-label">Currency</label>

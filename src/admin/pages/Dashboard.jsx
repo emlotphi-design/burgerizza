@@ -325,7 +325,7 @@ export default function Dashboard() {
           <div className="dash-title-group">
             <h1 className="dash-title">Dashboard</h1>
             <div className="dash-subtitle">
-              BURIZZA Operations
+              BURGERIZZA Operations
               <span className="dash-live-chip">
                 <span className="dash-live-dot" />
                 LIVE

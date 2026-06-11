@@ -1,7 +1,7 @@
 {
   "name": "burgerizza-server",
   "version": "1.0.0",
-  "description": "BURIZZA REST API — Express + PostgreSQL",
+  "description": "BURGERIZZA REST API — Express + PostgreSQL",
   "type": "commonjs",
   "main": "server.js",
   "scripts": {

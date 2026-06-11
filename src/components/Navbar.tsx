@@ -108,7 +108,7 @@ export default function Navbar() {
           <line x1="12" y1="34" x2="34" y2="12"
             stroke="#1A0A00" strokeWidth="2.5" strokeLinecap="round" strokeOpacity="0.42"/>
         </svg>
-        <span className="brand-name">BURIZZA</span>
+        <span className="brand-name">BURGERIZZA</span>
       </button>
 
       <div className="nav-icons">

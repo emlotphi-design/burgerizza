@@ -1,5 +1,5 @@
 ﻿/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-   BURIZZA ADMIN â€” PREMIUM LIGHT + DARK THEME
+   BURGERIZZA ADMINâ€” PREMIUM LIGHT + DARK THEME
    Restaurant management Â· Real-time Â· Modern
 â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
@@ -15,7 +15,7 @@
    blurs THIS fixed gradient â€” true glassmorphism.
 â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
-/* Dark mode â€” full BURIZZA cinematic atmosphere */
+/* Dark mode â€” full BURGERIZZA cinematic atmosphere */
 body[data-context="admin"][data-admin-theme="dark"] {
   /*
    * Layered system â€” back to front:
@@ -3839,7 +3839,7 @@ textarea.adm-input { height: auto; padding: 10px 14px; resize: vertical; min-hei
 
 
 /* ══════════════════════════════════════════════════════════════════
-   BURIZZA DASHBOARD — Complete structural redesign
+   BURGERIZZA DASHBOARD — Complete structural redesign
    Apple / Stripe / Linear aesthetic — guaranteed loading via admin.css
    All rules scoped under .dash-page
 ══════════════════════════════════════════════════════════════════ */
