@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom';
+﻿import { useNavigate } from 'react-router-dom';
 import { useRestaurantMode } from '../store/RestaurantModeContext';
 
 const ORDER_TYPES = [
@@ -18,7 +18,7 @@ export default function RestaurantModeBanner() {
       position: 'sticky',
       top: 0,
       zIndex: 9999,
-      background: '#1A0A00',
+      background: 'rgba(14,14,14,0.92)',
       color: '#FFD54A',
       fontFamily: 'Nunito, sans-serif',
       borderBottom: '2px solid #FFD54A',
@@ -39,7 +39,7 @@ export default function RestaurantModeBanner() {
           alignItems: 'center',
           gap: 6,
           background: '#FFD54A',
-          color: '#1A0A00',
+          color: 'rgba(255,255,255,0.88)',
           borderRadius: 8,
           padding: '4px 10px',
           fontSize: 11,

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Socials from '../components/Socials';
@@ -73,7 +73,7 @@ function SavedBurgerCard({ burger, isExiting, onEdit, onReorder, onDelete }) {
           />
         ) : (
           <div className="saved-burger-placeholder">
-            <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'rgba(26,10,0,0.18)' }}>
+            <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'rgba(255,255,255,0.18)' }}>
               <path d="M4 11a8 8 0 0 1 16 0H4z"/>
               <rect x="3" y="11" width="18" height="3" rx="1"/>
               <path d="M3 14h18v1.5A1.5 1.5 0 0 1 19.5 17h-15A1.5 1.5 0 0 1 3 15.5V14z"/>

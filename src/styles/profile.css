@@ -1,6 +1,6 @@
-/* ══════════════════════════════════════════
+﻿/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    PROFILE DASHBOARD
-══════════════════════════════════════════ */
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 .pf-main {
   flex: 1;
   min-height: 0;
@@ -16,17 +16,14 @@
   overscroll-behavior: contain;
 }
 
-/* ── Hero banner ── */
+/* â”€â”€ Hero banner â”€â”€ */
 .pf-hero {
   width: 100%;
   max-width: 680px;
   min-height: 110px;
   flex-shrink: 0;
-  background: linear-gradient(145deg,
-      rgba(255, 255, 245, 0.96) 0%,
-      rgba(255, 232, 120, 0.92) 55%,
-      rgba(255, 210, 63, 0.94) 100%);
-  border: 1px solid rgba(255, 215, 63, 0.45);
+  background: rgba(255, 255, 255, 0.60);
+  border: 1.5px solid rgba(255, 255, 255, 0.82);
   border-radius: 32px;
   padding: 26px 28px;
   display: flex;
@@ -34,12 +31,14 @@
   gap: 18px;
   overflow: hidden;
   box-shadow:
-    0 10px 40px rgba(180, 120, 0, 0.18),
-    0 2px 10px rgba(0, 0, 0, 0.08),
-    inset 0 1.5px 0 rgba(255, 255, 255, 0.85);
+    inset 0 2px 0 rgba(255, 255, 255, 0.95),
+    0 8px 28px rgba(0, 0, 0, 0.08),
+    0 2px 8px rgba(0, 0, 0, 0.05);
   margin-bottom: 24px;
   animation: pageEnter 0.44s cubic-bezier(0.22, 1, 0.36, 1) both;
   position: relative;
+  backdrop-filter: blur(18px) saturate(1.4);
+  -webkit-backdrop-filter: blur(18px) saturate(1.4);
 }
 
 .pf-hero::before {
@@ -58,8 +57,8 @@
   width: 64px;
   height: 64px;
   border-radius: 50%;
-  background: #1A0A00;
-  color: #FFD23F;
+  background: #C8001E;
+  color: #fff;
   font-family: 'Nunito', sans-serif;
   font-weight: 900;
   font-size: 24px;
@@ -67,7 +66,7 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  box-shadow: 0 4px 16px rgba(26, 10, 0, 0.22);
+  box-shadow: 0 4px 16px rgba(200, 0, 30, 0.30);
 }
 
 .pf-hero-info {
@@ -118,13 +117,13 @@
   color: rgba(26, 10, 0, 0.25);
 }
 
-/* ── Hero action buttons ── */
+/* â”€â”€ Hero action buttons â”€â”€ */
 .pf-hero-actions {
   display: flex;
   flex-direction: column;
   gap: 6px;
   flex-shrink: 0;
-  min-width: 136px;    /* fixed column width — both buttons share the same measure */
+  min-width: 136px;    /* fixed column width â€” both buttons share the same measure */
   align-self: center;
 }
 
@@ -137,8 +136,8 @@
   gap: 6px;
   padding: 9px 14px;
   border-radius: 50px;
-  border: 1.5px solid rgba(26, 10, 0, 0.18);
-  background: rgba(255, 255, 255, 0.65);
+  border: 1.5px solid rgba(255, 255, 255, 0.72);
+  background: rgba(255, 255, 255, 0.60);
   font-family: 'Nunito', sans-serif;
   font-weight: 800;
   font-size: 12px;
@@ -149,7 +148,7 @@
 }
 
 .pf-edit-profile-btn:hover {
-  background: rgba(255, 210, 63, 0.28);
+  background: rgba(255, 255, 255, 0.80);
   transform: translateY(-1px);
 }
 
@@ -162,23 +161,23 @@
   gap: 6px;
   padding: 9px 14px;
   border-radius: 50px;
-  border: 1.5px solid rgba(26, 10, 0, 0.18);
-  background: rgba(255, 255, 255, 0.65);
+  border: 1.5px solid rgba(200, 0, 30, 0.22);
+  background: rgba(200, 0, 30, 0.07);
   font-family: 'Nunito', sans-serif;
   font-weight: 800;
   font-size: 12px;
-  color: rgba(26, 10, 0, 0.60);
+  color: rgba(200, 0, 30, 0.75);
   cursor: pointer;
   white-space: nowrap;
   transition: background 0.2s, color 0.2s;
 }
 
 .pf-logout-btn:hover {
-  background: rgba(255, 255, 255, 0.95);
-  color: #1A0A00;
+  background: rgba(200, 0, 30, 0.12);
+  color: #C8001E;
 }
 
-/* ── Content area ── */
+/* â”€â”€ Content area â”€â”€ */
 .pf-content {
   width: 100%;
   max-width: 680px;
@@ -188,7 +187,7 @@
   gap: 16px;
 }
 
-/* ── Section card ── */
+/* â”€â”€ Section card â”€â”€ */
 .pf-section {
   padding: 22px 24px;
   animation: pageEnter 0.42s cubic-bezier(0.22, 1, 0.36, 1) both;
@@ -206,7 +205,7 @@
   padding: 0;
   cursor: pointer;
   transition: opacity 0.18s ease;
-  /* Constrain touch target to header row only — prevents iOS from expanding
+  /* Constrain touch target to header row only â€” prevents iOS from expanding
      the hit area downward over the section body and intercepting inner buttons */
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
@@ -218,7 +217,7 @@
   opacity: 0.78;
 }
 
-/* ── Accordion body ── */
+/* â”€â”€ Accordion body â”€â”€ */
 /* z-index: 2 ensures inner buttons sit above the header's touch area on iOS */
 .pf-section-body {
   display: grid;
@@ -245,7 +244,7 @@
   overflow: visible;
 }
 
-/* ── Section chevron ── */
+/* â”€â”€ Section chevron â”€â”€ */
 .pf-section-chevron {
   margin-left: auto;
   flex-shrink: 0;
@@ -255,15 +254,15 @@
 
 .pf-section-chevron--open {
   transform: rotate(180deg);
-  color: rgba(26, 10, 0, 0.52);
+  color: rgba(26, 10, 0, 0.55);
 }
 
 .pf-section-icon {
   width: 34px;
   height: 34px;
   border-radius: 10px;
-  background: rgba(255, 210, 63, 0.18);
-  color: #1A0A00;
+  background: rgba(200, 0, 30, 0.10);
+  color: #C8001E;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -282,7 +281,7 @@
   flex-shrink: 0;
 }
 
-/* ── Info grid ── */
+/* â”€â”€ Info grid â”€â”€ */
 .pf-info-grid {
   display: flex;
   flex-direction: column;
@@ -295,7 +294,7 @@
   align-items: baseline;
   gap: 12px;
   padding: 6px 0;
-  border-bottom: 1px solid rgba(26, 10, 0, 0.05);
+  border-bottom: 1px solid rgba(26, 10, 0, 0.06);
 }
 
 .pf-info-row:last-of-type {
@@ -322,13 +321,13 @@
   word-break: break-word;
 }
 
-/* ── Inline edit field row ── */
+/* â”€â”€ Inline edit field row â”€â”€ */
 .pf-field-row {
   display: flex;
   align-items: center;
   gap: 12px;
   padding: 6px 0;
-  border-bottom: 1px solid rgba(26, 10, 0, 0.05);
+  border-bottom: 1px solid rgba(26, 10, 0, 0.06);
 }
 
 .pf-inline-input {
@@ -337,8 +336,8 @@
   font-weight: 700;
   font-size: 14px;
   color: #1A0A00;
-  background: rgba(26, 10, 0, 0.04);
-  border: 1.5px solid rgba(26, 10, 0, 0.12);
+  background: rgba(255, 255, 255, 0.55);
+  border: 1.5px solid rgba(255, 255, 255, 0.72);
   border-radius: 10px;
   padding: 7px 12px;
   outline: none;
@@ -352,20 +351,20 @@
 .pf-save-btn {
   padding: 10px 22px;
   border-radius: 50px;
-  border: none;
-  background: linear-gradient(135deg, rgba(255, 235, 120, 0.95), rgba(255, 210, 63, 0.95));
+  border: 1.5px solid rgba(255, 255, 255, 0.80);
+  background: linear-gradient(160deg, rgba(255,255,255,0.92) 0%, rgba(255,235,100,0.65) 100%);
   font-family: 'Nunito', sans-serif;
   font-weight: 900;
   font-size: 13px;
   color: #1A0A00;
   cursor: pointer;
-  box-shadow: 0 3px 12px rgba(180, 120, 0, 0.20);
+  box-shadow: inset 0 1.5px 0 rgba(255,255,255,1), 0 3px 12px rgba(0,0,0,0.08);
   transition: transform 0.18s ease, box-shadow 0.18s ease;
 }
 
 .pf-save-btn:hover {
   transform: translateY(-1px);
-  box-shadow: 0 5px 18px rgba(180, 120, 0, 0.28);
+  box-shadow: inset 0 1.5px 0 rgba(255,255,255,1), 0 5px 18px rgba(0,0,0,0.12);
 }
 
 .pf-edit-btn {
@@ -375,18 +374,18 @@
   margin-top: 10px;
   padding: 8px 18px;
   border-radius: 50px;
-  border: 1.5px solid rgba(26, 10, 0, 0.12);
-  background: rgba(26, 10, 0, 0.04);
+  border: 1.5px solid rgba(255, 255, 255, 0.68);
+  background: rgba(255, 255, 255, 0.50);
   font-family: 'Nunito', sans-serif;
   font-weight: 800;
   font-size: 12px;
-  color: rgba(26, 10, 0, 0.55);
+  color: rgba(26, 10, 0, 0.60);
   cursor: pointer;
   transition: background 0.18s, color 0.18s;
 }
 
 .pf-edit-btn:hover {
-  background: rgba(255, 210, 63, 0.18);
+  background: rgba(255, 255, 255, 0.72);
   color: #1A0A00;
 }
 
@@ -425,7 +424,7 @@
   padding: 16px 0 8px;
 }
 
-/* ── Order history ── */
+/* â”€â”€ Order history â”€â”€ */
 .pf-order-list {
   display: flex;
   flex-direction: column;
@@ -433,8 +432,8 @@
 }
 
 .pf-order-card {
-  background: rgba(255, 252, 240, 0.65);
-  border: 1px solid rgba(26, 10, 0, 0.07);
+  background: rgba(255, 255, 255, 0.58);
+  border: 1px solid rgba(255, 255, 255, 0.72);
   border-radius: 16px;
   padding: 16px 18px;
   display: flex;
@@ -465,7 +464,7 @@
   font-family: 'Nunito', sans-serif;
   font-weight: 700;
   font-size: 11px;
-  color: #3db96e;
+  color: #22c55e;
   letter-spacing: 0.3px;
 }
 
@@ -473,7 +472,7 @@
   font-family: 'Nunito', sans-serif;
   font-weight: 900;
   font-size: 16px;
-  color: #1A0A00;
+  color: #16A34A;
 }
 
 .pf-order-pizzas {
@@ -527,24 +526,25 @@
   align-self: flex-start;
   padding: 9px 18px;
   border-radius: 50px;
-  border: none;
-  background: linear-gradient(135deg, rgba(255, 235, 120, 0.95), rgba(255, 210, 63, 0.95));
+  border: 1.5px solid rgba(200, 0, 30, 0.28);
+  background: rgba(200, 0, 30, 0.08);
   font-family: 'Nunito', sans-serif;
   font-weight: 900;
   font-size: 12px;
   letter-spacing: 0.4px;
-  color: #1A0A00;
+  color: #C8001E;
   cursor: pointer;
-  box-shadow: 0 3px 12px rgba(180, 120, 0, 0.20);
-  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 2px 8px rgba(200, 0, 30, 0.12);
+  transition: transform 0.2s, box-shadow 0.2s, background 0.18s;
 }
 
 .pf-reorder-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(180, 120, 0, 0.28);
+  background: rgba(200, 0, 30, 0.13);
+  box-shadow: 0 6px 18px rgba(200, 0, 30, 0.18);
 }
 
-/* ── Saved pizzas grid ── */
+/* â”€â”€ Saved pizzas grid â”€â”€ */
 .pf-pizza-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
@@ -552,8 +552,8 @@
 }
 
 .pf-pizza-card {
-  background: rgba(255, 252, 240, 0.65);
-  border: 1px solid rgba(26, 10, 0, 0.07);
+  background: rgba(255, 255, 255, 0.58);
+  border: 1px solid rgba(255, 255, 255, 0.72);
   border-radius: 16px;
   padding: 14px;
   display: flex;
@@ -599,7 +599,7 @@
   font-size: 13px;
   color: #1A0A00;
   border: none;
-  border-bottom: 1.5px solid rgba(200, 0, 30, 0.45);
+  border-bottom: 1.5px solid rgba(200, 0, 30, 0.40);
   background: transparent;
   outline: none;
   text-align: center;
@@ -611,7 +611,7 @@
   font-family: 'Nunito', sans-serif;
   font-weight: 700;
   font-size: 11px;
-  color: rgba(26, 10, 0, 0.40);
+  color: rgba(26, 10, 0, 0.42);
   text-align: center;
   line-height: 1.4;
 }
@@ -627,8 +627,8 @@
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  border: 1.5px solid rgba(26, 10, 0, 0.10);
-  background: rgba(255, 255, 255, 0.70);
+  border: 1.5px solid rgba(255, 255, 255, 0.68);
+  background: rgba(255, 255, 255, 0.55);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -639,8 +639,8 @@
 
 .pf-fav-btn--active {
   border-color: rgba(200, 0, 30, 0.30);
-  background: rgba(200, 0, 30, 0.06);
-  color: #C8001E;
+  background: rgba(239, 68, 68, 0.06);
+  color: #ef4444;
 }
 
 .pf-fav-btn:hover {
@@ -658,22 +658,22 @@
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  border: 1.5px solid rgba(200, 0, 30, 0.12);
-  background: rgba(200, 0, 30, 0.05);
+  border: 1.5px solid rgba(239, 68, 68, 0.20);
+  background: rgba(239, 68, 68, 0.06);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  color: rgba(200, 0, 30, 0.55);
+  color: rgba(239, 68, 68, 0.70);
   transition: background 0.18s, transform 0.18s;
 }
 
 .pf-remove-btn:hover {
-  background: rgba(200, 0, 30, 0.14);
+  background: rgba(239, 68, 68, 0.12);
   transform: scale(1.10);
 }
 
-/* ── Payment placeholder list ── */
+/* â”€â”€ Payment placeholder list â”€â”€ */
 .pf-payment-list {
   display: flex;
   flex-direction: column;
@@ -686,8 +686,8 @@
   align-items: center;
   padding: 12px 16px;
   border-radius: 14px;
-  background: rgba(255, 255, 255, 0.60);
-  border: 1px solid rgba(26, 10, 0, 0.07);
+  background: rgba(255, 255, 255, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.72);
 }
 
 .pf-payment-label {
@@ -703,13 +703,13 @@
   font-size: 10px;
   letter-spacing: 0.5px;
   text-transform: uppercase;
-  color: rgba(26, 10, 0, 0.35);
-  background: rgba(26, 10, 0, 0.06);
+  color: rgba(26, 10, 0, 0.40);
+  background: rgba(255, 255, 255, 0.60);
   border-radius: 50px;
   padding: 4px 10px;
 }
 
-/* ── Bottom logout (mobile) ── */
+/* â”€â”€ Bottom logout (mobile) â”€â”€ */
 .pf-logout-bottom {
   display: none;
   flex-shrink: 0;
@@ -720,35 +720,35 @@
   padding: 14px 32px;
   min-height: 50px;
   border-radius: 50px;
-  border: 1.5px solid rgba(26, 10, 0, 0.14);
-  background: rgba(255, 255, 255, 0.65);
+  border: 1.5px solid rgba(200, 0, 30, 0.22);
+  background: rgba(200, 0, 30, 0.07);
   font-family: 'Nunito', sans-serif;
   font-weight: 800;
   font-size: 13px;
-  color: rgba(26, 10, 0, 0.50);
+  color: rgba(200, 0, 30, 0.75);
   cursor: pointer;
   transition: background 0.2s, color 0.2s;
 }
 
 .pf-logout-bottom:hover {
-  background: rgba(255, 255, 255, 0.95);
-  color: #1A0A00;
+  background: rgba(200, 0, 30, 0.12);
+  color: #C8001E;
 }
 
-/* ── Tablet (641px – 900px) ── */
+/* â”€â”€ Tablet (641px â€“ 900px) â”€â”€ */
 @media (min-width: 641px) and (max-width: 900px) {
   .pf-main {
     padding: calc(var(--nav-safe) + 16px) 24px 80px;
   }
 }
 
-/* ── Responsive ── */
+/* â”€â”€ Responsive â”€â”€ */
 @media (max-width: 640px) {
   .pf-main {
     padding: calc(var(--nav-safe) + 10px) 16px 72px;
   }
 
-  /* ── Mobile hero: centered vertical stack ── */
+  /* â”€â”€ Mobile hero: centered vertical stack â”€â”€ */
   .pf-hero {
     flex-direction: column;
     align-items: center;
@@ -831,7 +831,7 @@
   }
 }
 
-/* ── Small phone ≤ 480px ── */
+/* â”€â”€ Small phone â‰¤ 480px â”€â”€ */
 @media (max-width: 480px) {
   .pf-main {
     padding: calc(var(--nav-safe) + 6px) 14px 64px;
@@ -914,7 +914,7 @@
   }
 }
 
-/* ── Very small phone ≤ 360px ── */
+/* â”€â”€ Very small phone â‰¤ 360px â”€â”€ */
 @media (max-width: 360px) {
   .pf-main {
     padding: calc(var(--nav-safe) + 4px) 12px 60px;
@@ -945,9 +945,9 @@
   }
 }
 
-/* ══════════════════════════════════════════
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    SAVED-ITEMS PAGES (My Pizzas / My Burgers)
-══════════════════════════════════════════ */
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
 .saved-page-main {
   flex: 1;
@@ -963,7 +963,7 @@
   overscroll-behavior: contain;
 }
 
-/* ── Page hero banner ── */
+/* â”€â”€ Page hero banner â”€â”€ */
 .saved-page-hero {
   width: 100%;
   max-width: 860px;
@@ -978,8 +978,8 @@
   width: 48px;
   height: 48px;
   border-radius: 14px;
-  background: rgba(255, 210, 63, 0.18);
-  color: #1A0A00;
+  background: rgba(200, 0, 30, 0.10);
+  color: #C8001E;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -999,7 +999,7 @@
   font-family: 'Nunito', sans-serif;
   font-weight: 700;
   font-size: 13px;
-  color: rgba(26, 10, 0, 0.48);
+  color: rgba(26, 10, 0, 0.45);
 }
 
 .saved-page-back-btn {
@@ -1032,15 +1032,15 @@
   padding: 60px 24px;
 }
 
-/* ── List of saved item cards (reuses cart-pizzas-list) ── */
+/* â”€â”€ List of saved item cards (reuses cart-pizzas-list) â”€â”€ */
 .saved-items-list {
   animation: pageEnter 0.46s cubic-bezier(0.22, 1, 0.36, 1) 0.06s both;
 }
 
-/* ══════════════════════════════════════════
-   SAVED-ITEMS — RESPONSIVE GRID + VERTICAL CARD
-   4 cols desktop · 2 cols tablet · 1 col mobile
-══════════════════════════════════════════ */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+   SAVED-ITEMS â€” RESPONSIVE GRID + VERTICAL CARD
+   4 cols desktop Â· 2 cols tablet Â· 1 col mobile
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
 .saved-items-grid {
   display: grid;
@@ -1052,7 +1052,7 @@
   animation: pageEnter 0.46s cubic-bezier(0.22, 1, 0.36, 1) 0.06s both;
 }
 
-/* ── Vertical card shell ── */
+/* â”€â”€ Vertical card shell â”€â”€ */
 .saved-card {
   display: flex;
   flex-direction: column;
@@ -1067,8 +1067,8 @@
   transform: translateY(-4px);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.95),
-    0 20px 60px rgba(0, 0, 0, 0.12),
-    0 6px 20px rgba(0, 0, 0, 0.08);
+    0 20px 60px rgba(0, 0, 0, 0.50),
+    0 6px 20px rgba(0, 0, 0, 0.35);
 }
 
 .saved-card--exit {
@@ -1076,7 +1076,7 @@
   pointer-events: none;
 }
 
-/* ── Card header: name + date left, price right ── */
+/* â”€â”€ Card header: name + date left, price right â”€â”€ */
 .saved-card-header {
   display: flex;
   align-items: flex-start;
@@ -1117,11 +1117,11 @@
   font-family: 'Nunito', sans-serif;
   font-weight: 900;
   font-size: 17px;
-  color: #1A0A00;
+  color: #16A34A;
   flex-shrink: 0;
 }
 
-/* ── Image area — centered, fixed height so all cards align ── */
+/* â”€â”€ Image area â€” centered, fixed height so all cards align â”€â”€ */
 .saved-card-image {
   display: flex;
   align-items: center;
@@ -1137,13 +1137,13 @@
   border-radius: 50%;
 }
 
-/* ── Body: collapsible accordion ── */
+/* â”€â”€ Body: collapsible accordion â”€â”€ */
 .saved-card-body {
   padding: 0 14px;
   flex: 1;
 }
 
-/* ── Action buttons ── */
+/* â”€â”€ Action buttons â”€â”€ */
 .saved-card-actions {
   display: flex;
   gap: 6px;
@@ -1158,7 +1158,7 @@
   min-height: 36px;
 }
 
-/* ── Grid responsive ── */
+/* â”€â”€ Grid responsive â”€â”€ */
 @media (max-width: 900px) {
   .saved-items-grid { gap: 14px; }
 }
@@ -1177,7 +1177,7 @@
   .saved-card-actions { padding: 8px 12px 14px; gap: 5px; }
 }
 
-/* ── Saved-item date label ── */
+/* â”€â”€ Saved-item date label â”€â”€ */
 .saved-item-date {
   font-family: 'Nunito', sans-serif;
   font-weight: 700;
@@ -1187,7 +1187,7 @@
   letter-spacing: 0.2px;
 }
 
-/* ── Three-button action row for saved items ── */
+/* â”€â”€ Three-button action row for saved items â”€â”€ */
 .saved-item-actions {
   flex-wrap: wrap;
   gap: 6px;
@@ -1199,30 +1199,31 @@
   min-width: 80px;
 }
 
-/* ── Reorder button (amber accent) ── */
+/* â”€â”€ Reorder button (amber accent) â”€â”€ */
 .saved-reorder-btn {
-  background: rgba(255, 185, 0, 0.12) !important;
-  color: #8B6200 !important;
+  background: rgba(200, 0, 30, 0.08) !important;
+  color: #C8001E !important;
+  border-color: rgba(200, 0, 30, 0.22) !important;
 }
 
 .saved-reorder-btn:hover {
-  background: rgba(255, 185, 0, 0.22) !important;
+  background: rgba(200, 0, 30, 0.13) !important;
 }
 
-/* ── Burger image placeholder ── */
+/* â”€â”€ Burger image placeholder â”€â”€ */
 .saved-burger-placeholder {
   width: min(200px, 48vw);
   height: min(200px, 48vw);
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(26, 10, 0, 0.04);
+  background: rgba(255, 255, 255, 0.50);
   border-radius: 16px;
 }
 
-/* ═══════════════════════════════════════════
-   PROFILE — Saved-items summary sections
-═══════════════════════════════════════════ */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+   PROFILE â€” Saved-items summary sections
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
 .pf-saved-summary {
   display: flex;
@@ -1242,7 +1243,7 @@
   align-items: baseline;
   gap: 12px;
   padding: 6px 0;
-  border-bottom: 1px solid rgba(26, 10, 0, 0.05);
+  border-bottom: 1px solid rgba(26, 10, 0, 0.06);
 }
 
 .pf-saved-preview-row:last-of-type {
@@ -1264,7 +1265,7 @@
   font-family: 'Nunito', sans-serif;
   font-weight: 900;
   font-size: 13px;
-  color: rgba(26, 10, 0, 0.62);
+  color: #16A34A;
   flex-shrink: 0;
 }
 
@@ -1279,26 +1280,27 @@
 
 .pf-view-all-btn {
   align-self: flex-start;
-  background: none;
-  border: 1.5px solid rgba(26, 10, 0, 0.14);
+  background: rgba(255, 255, 255, 0.50);
+  border: 1.5px solid rgba(255, 255, 255, 0.68);
   border-radius: 50px;
   padding: 8px 18px;
   font-family: 'Nunito', sans-serif;
   font-weight: 800;
   font-size: 12px;
-  color: #1A0A00;
+  color: rgba(26, 10, 0, 0.70);
   cursor: pointer;
   letter-spacing: 0.3px;
   transition: background 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
 }
 
 .pf-view-all-btn:hover {
-  background: rgba(255, 210, 63, 0.18);
-  border-color: rgba(255, 185, 0, 0.45);
+  background: rgba(200, 0, 30, 0.08);
+  border-color: rgba(200, 0, 30, 0.25);
+  color: #C8001E;
   transform: translateX(2px);
 }
 
-/* ── Responsive ── */
+/* â”€â”€ Responsive â”€â”€ */
 @media (max-width: 900px) {
   .saved-page-main {
     padding: calc(var(--nav-safe) + 4px) 20px 80px;
@@ -1324,13 +1326,13 @@
   }
 
   /* Saved-item card: fix flex-order and keep price visible on mobile.
-     cart.css sets order on .cart-details children for cart items — saved items
+     cart.css sets order on .cart-details children for cart items â€” saved items
      need different ordering since they have no cart-price-compact or qty row. */
   .saved-items-list .cart-details > .saved-item-date  { order: 2; }
   .saved-items-list .cart-details > .cart-price-block { display: flex; order: 3; }
 }
 
-/* ── iOS zoom fix: inline inputs must be ≥16px on mobile ── */
+/* â”€â”€ iOS zoom fix: inline inputs must be â‰¥16px on mobile â”€â”€ */
 @media (max-width: 480px) {
   .pf-inline-input {
     font-size: 16px;
@@ -1363,9 +1365,9 @@
   }
 }
 
-/* ══════════════════════════════════════════
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    MULTI-ADDRESS MANAGEMENT
-══════════════════════════════════════════ */
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
 .pf-addr-header {
   display: flex;
@@ -1383,15 +1385,15 @@
   padding: 7px 14px;
   border-radius: 20px;
   border: none;
-  background: #1A0A00;
-  color: #FFD23F;
+  background: #C8001E;
+  color: #fff;
   font-family: 'Nunito', sans-serif;
   font-weight: 800;
   font-size: 12px;
   cursor: pointer;
   transition: opacity 0.14s;
 }
-.pf-addr-add-btn:hover { opacity: 0.82; }
+.pf-addr-add-btn:hover { opacity: 0.85; }
 
 .pf-addr-grid {
   display: grid;
@@ -1402,8 +1404,8 @@
 .pf-addr-card {
   padding: 14px;
   border-radius: 14px;
-  background: rgba(255, 248, 238, 0.7);
-  border: 1.5px solid rgba(200, 175, 100, 0.22);
+  background: rgba(255, 255, 255, 0.55);
+  border: 1.5px solid rgba(255, 255, 255, 0.72);
   transition: border-color 0.14s, box-shadow 0.14s;
   animation: pf-addr-card-enter 0.28s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
@@ -1412,9 +1414,9 @@
 .pf-addr-card:nth-child(4) { animation-delay: 0.15s; }
 .pf-addr-card:nth-child(n+5) { animation-delay: 0.18s; }
 .pf-addr-card--default {
-  border-color: rgba(200, 150, 0, 0.50);
-  background: rgba(255, 248, 220, 0.85);
-  box-shadow: 0 2px 10px rgba(180, 120, 0, 0.10);
+  border-color: rgba(200, 0, 30, 0.28);
+  background: rgba(255, 255, 255, 0.68);
+  box-shadow: 0 2px 10px rgba(200, 0, 30, 0.08);
 }
 
 .pf-addr-card-top {
@@ -1435,8 +1437,8 @@
 .pf-addr-default-chip {
   padding: 2px 7px;
   border-radius: 20px;
-  background: #FFD23F;
-  color: #5A3800;
+  background: #C8001E;
+  color: #fff;
   font-family: 'Nunito', sans-serif;
   font-weight: 800;
   font-size: 10px;
@@ -1448,7 +1450,7 @@
   font-family: 'Nunito', sans-serif;
   font-size: 12px;
   font-weight: 700;
-  color: rgba(26, 10, 0, 0.60);
+  color: rgba(26, 10, 0, 0.58);
   line-height: 1.55;
 }
 
@@ -1470,9 +1472,9 @@
 .pf-addr-btn {
   padding: 4px 10px;
   border-radius: 8px;
-  border: 1px solid rgba(26, 10, 0, 0.14);
-  background: rgba(255, 255, 255, 0.65);
-  color: rgba(26, 10, 0, 0.60);
+  border: 1px solid rgba(255, 255, 255, 0.68);
+  background: rgba(255, 255, 255, 0.55);
+  color: rgba(26, 10, 0, 0.65);
   font-family: 'Nunito', sans-serif;
   font-weight: 800;
   font-size: 11px;
@@ -1481,23 +1483,23 @@
   white-space: nowrap;
 }
 .pf-addr-btn:hover {
-  background: rgba(255, 210, 63, 0.18);
+  background: rgba(255, 255, 255, 0.80);
   color: #1A0A00;
-  border-color: rgba(200, 150, 0, 0.30);
+  border-color: rgba(255, 255, 255, 0.80);
 }
 .pf-addr-btn--default-set {
-  color: #8B6914;
-  background: rgba(255, 210, 63, 0.12);
-  border-color: rgba(200, 150, 0, 0.28);
-}
-.pf-addr-btn--danger {
   color: #C8001E;
+  background: rgba(200, 0, 30, 0.07);
   border-color: rgba(200, 0, 30, 0.22);
 }
+.pf-addr-btn--danger {
+  color: #ef4444;
+  border-color: rgba(239, 68, 68, 0.25);
+}
 .pf-addr-btn--danger:hover {
-  background: rgba(200, 0, 30, 0.08);
-  border-color: rgba(200, 0, 30, 0.35);
-  color: #C8001E;
+  background: rgba(239, 68, 68, 0.08);
+  border-color: rgba(239, 68, 68, 0.35);
+  color: #ef4444;
 }
 
 .pf-addr-empty {
@@ -1509,13 +1511,13 @@
   color: rgba(26, 10, 0, 0.38);
 }
 
-/* ── Address modal keyframes ────────────────────────────────
+/* â”€â”€ Address modal keyframes â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
    Defined here because they are only used by the address modal.
-   co-fade-in  → backdrop fade
-   co-slide-up → modal enters from below (desktop)
-   pf-addr-bottom-sheet-up → modal slides up from viewport bottom (mobile)
-   pf-addr-card-enter → card list entrance animation
-─────────────────────────────────────────────────────────── */
+   co-fade-in  â†’ backdrop fade
+   co-slide-up â†’ modal enters from below (desktop)
+   pf-addr-bottom-sheet-up â†’ modal slides up from viewport bottom (mobile)
+   pf-addr-card-enter â†’ card list entrance animation
+â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 @keyframes co-fade-in {
   from { opacity: 0; }
   to   { opacity: 1; }
@@ -1536,11 +1538,11 @@
   to   { opacity: 1; transform: translateY(0);   }
 }
 
-/* ── Address form modal ──────────────────────────────────────
-   Rendered via React Portal → document.body.
+/* â”€â”€ Address form modal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+   Rendered via React Portal â†’ document.body.
    This escapes glass-card's backdrop-filter stacking context
    so position:fixed is relative to the real viewport.
-─────────────────────────────────────────────────────────── */
+â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .pf-addr-modal-overlay {
   position: fixed;
   inset: 0;
@@ -1560,19 +1562,22 @@
   width: 100%;
   max-width: 440px;
   /* dvh keeps the modal inside the visual viewport when the mobile
-     browser toolbar is visible — prevents the footer from hiding */
+     browser toolbar is visible â€” prevents the footer from hiding */
   max-height: min(90dvh, 640px);
   display: flex;
   flex-direction: column;
-  background: #FFFDF5;
+  background: rgba(255, 252, 245, 0.97);
+  backdrop-filter: blur(28px) saturate(1.5);
+  -webkit-backdrop-filter: blur(28px) saturate(1.5);
+  border: 1px solid rgba(255, 255, 255, 0.80);
   border-radius: 20px;
   /* Overflow hidden here: only the body div scrolls */
   overflow: hidden;
-  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.24);
+  box-shadow: inset 0 1.5px 0 rgba(255,255,255,0.95), 0 24px 64px rgba(0, 0, 0, 0.16);
   animation: co-slide-up 0.22s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
-/* Sticky header — never scrolled off-screen */
+/* Sticky header â€” never scrolled off-screen */
 .pf-addr-modal-header {
   display: flex;
   align-items: center;
@@ -1594,7 +1599,7 @@
   height: 30px;
   border-radius: 50%;
   border: none;
-  background: rgba(26, 10, 0, 0.07);
+  background: rgba(26, 10, 0, 0.06);
   color: rgba(26, 10, 0, 0.50);
   font-size: 14px;
   display: flex;
@@ -1604,7 +1609,7 @@
   transition: background 0.12s;
   flex-shrink: 0;
 }
-.pf-addr-modal-close:hover { background: rgba(26, 10, 0, 0.14); }
+.pf-addr-modal-close:hover { background: rgba(26, 10, 0, 0.10); }
 
 /* Scrollable form body */
 .pf-addr-modal-body {
@@ -1626,7 +1631,7 @@
   padding: 12px 20px;
   padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
   border-top: 1px solid rgba(26, 10, 0, 0.07);
-  background: #FFFDF5;
+  background: rgba(255, 252, 245, 0.97);
   flex-shrink: 0;
 }
 
@@ -1634,7 +1639,7 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
-  /* Contain everything — never let form content push past modal width */
+  /* Contain everything â€” never let form content push past modal width */
   width: 100%;
   min-width: 0;
   overflow: hidden;
@@ -1653,7 +1658,7 @@
   font-family: 'Nunito', sans-serif;
   font-size: 11.5px;
   font-weight: 800;
-  color: rgba(26, 10, 0, 0.55);
+  color: rgba(26, 10, 0, 0.45);
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
@@ -1664,7 +1669,7 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 10px;
-  /* Must set min-width here too — grid tracks inherit the container constraint */
+  /* Must set min-width here too â€” grid tracks inherit the container constraint */
   min-width: 0;
 }
 
@@ -1694,14 +1699,14 @@
   justify-content: space-between;
 }
 
-/* ══════════════════════════════════════════
-   ADDRESS — MOBILE RESPONSIVE
-   ≤640px: larger touch targets
-   ≤520px: bottom-sheet modal
-   ≤480px: single-column card grid
-══════════════════════════════════════════ */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+   ADDRESS â€” MOBILE RESPONSIVE
+   â‰¤640px: larger touch targets
+   â‰¤520px: bottom-sheet modal
+   â‰¤480px: single-column card grid
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
-/* ── Larger touch targets on all phones ── */
+/* â”€â”€ Larger touch targets on all phones â”€â”€ */
 @media (max-width: 640px) {
   .pf-addr-add-btn {
     min-height: 40px;
@@ -1725,7 +1730,7 @@
   }
 }
 
-/* ── Single-column card grid on narrow phones ── */
+/* â”€â”€ Single-column card grid on narrow phones â”€â”€ */
 @media (max-width: 480px) {
   .pf-addr-grid {
     grid-template-columns: 1fr;
@@ -1743,14 +1748,14 @@
     gap: 7px;
   }
 
-  /* When there are 3 buttons (Bearbeiten + Standard + Löschen),
+  /* When there are 3 buttons (Bearbeiten + Standard + LÃ¶schen),
      Bearbeiten spans both columns on top */
   .pf-addr-actions .pf-addr-btn:first-child:not(:last-child) {
     grid-column: 1 / -1;
   }
 
-  /* If card is default (only 2 buttons: Bearbeiten + Löschen),
-     make them equal-width side by side — nothing extra needed. */
+  /* If card is default (only 2 buttons: Bearbeiten + LÃ¶schen),
+     make them equal-width side by side â€” nothing extra needed. */
 
   .pf-addr-btn {
     min-height: 40px;
@@ -1776,12 +1781,12 @@
   }
 }
 
-/* ── Bottom-sheet modal on phones ── */
+/* â”€â”€ Bottom-sheet modal on phones â”€â”€ */
 @media (max-width: 520px) {
   .pf-addr-modal-overlay {
     /* Anchor to bottom instead of centering */
     align-items: flex-end;
-    /* No side padding — modal fills full width */
+    /* No side padding â€” modal fills full width */
     padding: 0;
   }
 
@@ -1798,7 +1803,7 @@
 
   .pf-addr-modal-header {
     padding: 20px 20px 14px;
-    /* Visual "handle" hint — a small pill above the title */
+    /* Visual "handle" hint â€” a small pill above the title */
     position: relative;
   }
 
@@ -1811,7 +1816,7 @@
     width: 36px;
     height: 4px;
     border-radius: 2px;
-    background: rgba(26, 10, 0, 0.14);
+    background: rgba(255, 255, 255, 0.08);
   }
 
   .pf-addr-modal-body {
@@ -1824,7 +1829,7 @@
   }
 
   .pf-addr-form-2col {
-    /* Keep 2 columns on bottom sheet — there's enough width */
+    /* Keep 2 columns on bottom sheet â€” there's enough width */
     grid-template-columns: 1fr 1fr;
   }
 
@@ -1835,3 +1840,4 @@
     }
   }
 }
+

@@ -1,14 +1,14 @@
-/* ══════════════════════════════════════════════════
-   BURGERIZZA — SKELETON LOADER SYSTEM
+﻿/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+   BURIZZAâ€” SKELETON LOADER SYSTEM
    Warm shimmer that matches the glass/liquid aesthetic
-══════════════════════════════════════════════════ */
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
 @keyframes skeletonShimmer {
   0%   { background-position: -200% center; }
   100% { background-position:  200% center; }
 }
 
-/* ── Base shimmer element ───────────────────────── */
+/* â”€â”€ Base shimmer element â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .sk {
   background: linear-gradient(
     90deg,
@@ -22,11 +22,11 @@
   flex-shrink: 0;
 }
 
-/* ── Shape overrides ────────────────────────────── */
+/* â”€â”€ Shape overrides â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .sk-circle { border-radius: 50% !important; }
 .sk-pill   { border-radius: 50px !important; }
 
-/* ── Text line placeholders ─────────────────────── */
+/* â”€â”€ Text line placeholders â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .sk-line         { height: 13px; border-radius: 6px; }
 .sk-line--title  { height: 20px; border-radius: 8px; }
 .sk-line--short  { width: 36%; }
@@ -34,17 +34,17 @@
 .sk-line--long   { width: 80%; }
 .sk-line--full   { width: 100%; }
 
-/* ── Skeleton card — mirrors .glass-card ───────── */
+/* â”€â”€ Skeleton card â€” mirrors .glass-card â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .sk-card {
-  background: rgba(255, 252, 240, 0.78);
-  border: 1px solid rgba(255, 255, 255, 0.65);
+  background: rgba(255, 255, 255, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.72);
   border-radius: 24px;
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.92),
     0 4px 22px rgba(0, 0, 0, 0.05);
 }
 
-/* ── Reveal animation for content after skeleton ── */
+/* â”€â”€ Reveal animation for content after skeleton â”€â”€ */
 .sk-reveal {
   animation: skReveal 0.30s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
@@ -54,7 +54,8 @@
   to   { opacity: 1; transform: translateY(0); }
 }
 
-/* ── Responsive ─────────────────────────────────── */
+/* â”€â”€ Responsive â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 @media (max-width: 520px) {
   .sk-card { border-radius: 18px; }
 }
+

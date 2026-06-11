@@ -1,6 +1,6 @@
-/* ══════════════════════════════════════════
-   PIZZA BUILDER — preview buttons & labels
-══════════════════════════════════════════ */
+﻿/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+   PIZZA BUILDER â€” preview buttons & labels
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 .pizza-preview-btn {
   transition: transform 0.2s ease;
   will-change: transform;
@@ -15,8 +15,8 @@
   bottom: calc(100% + 7px);
   left: 50%;
   transform: translateX(-50%);
-  background: rgba(26, 10, 0, 0.70);
-  color: #fff;
+  background: rgba(255, 255, 255, 0.82);
+  color: #1A0A00;
   font-family: 'Nunito', sans-serif;
   font-size: clamp(9px, 1.4vw, 11px);
   font-weight: 800;
@@ -26,9 +26,12 @@
   white-space: nowrap;
   pointer-events: none;
   z-index: 20;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.22);
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.10);
   opacity: 0;
   transition: opacity 0.22s ease;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 
 .preview-wrapper:hover .dough-label {
@@ -44,7 +47,7 @@
   background: transparent;
   filter: saturate(1.08);
 
-  /* feathered edge: fully opaque core → soft fade → transparent rim */
+  /* feathered edge: fully opaque core â†’ soft fade â†’ transparent rim */
   mask-image: radial-gradient(circle at 50% 50%,
       black 52%,
       rgba(0, 0, 0, 0.90) 64%,
@@ -110,7 +113,7 @@
   }
 }
 
-/* ── Meat topping layers ── */
+/* â”€â”€ Meat topping layers â”€â”€ */
 .meat-layer {
   background: transparent;
   filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.38)) drop-shadow(0 1px 2px rgba(0, 0, 0, 0.22));
@@ -127,7 +130,7 @@
   }
 }
 
-/* ── Vegetable topping layers ── */
+/* â”€â”€ Vegetable topping layers â”€â”€ */
 .veggie-layer {
   background: transparent;
   filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.32)) drop-shadow(0 1px 2px rgba(0, 0, 0, 0.18));
@@ -135,7 +138,7 @@
   will-change: transform, opacity;
 }
 
-/* ── Meat preview circle ── */
+/* â”€â”€ Meat preview circle â”€â”€ */
 .preview-wrapper {
   animation: previewItemIn 0.26s cubic-bezier(0.22, 1, 0.36, 1) both;
   transition: opacity 0.2s ease;
@@ -162,8 +165,8 @@
   bottom: 3%;
   left: 50%;
   transform: translateX(-50%);
-  background: rgba(26, 10, 0, 0.82);
-  color: #fff;
+  background: rgba(255, 255, 255, 0.88);
+  color: #C8001E;
   font-family: 'Nunito', sans-serif;
   font-weight: 800;
   font-size: 11px;
@@ -174,6 +177,10 @@
   z-index: 20;
   opacity: 0;
   transition: opacity 0.25s ease;
+  border: 1px solid rgba(200, 0, 30, 0.20);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.10);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 
 .topping-limit-msg--visible {
@@ -192,7 +199,7 @@
   }
 }
 
-/* ── Selection halo — soft radial glow behind the item ── */
+/* â”€â”€ Selection halo â€” soft radial glow behind the item â”€â”€ */
 .preview-wrapper::before {
   content: '';
   position: absolute;
@@ -228,9 +235,9 @@
   transition: none;
 }
 
-/* ══════════════════════════════════════════
-   PIZZA BUILDER — stage layout
-══════════════════════════════════════════ */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+   PIZZA BUILDER â€” stage layout
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 .builder-stage {
   display: flex;
   align-items: center;
@@ -244,7 +251,7 @@
 }
 
 
-/* ── Pizza canvas subtle hover ── */
+/* â”€â”€ Pizza canvas subtle hover â”€â”€ */
 .pizza-canvas-wrap {
   transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
   contain: layout style;
@@ -255,9 +262,9 @@
   transform: scale(1.015);
 }
 
-/* ══════════════════════════════════════════
-   CATEGORY TOOLBAR — floating icon rail
-══════════════════════════════════════════ */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+   CATEGORY TOOLBAR â€” floating icon rail
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 .category-toolbar {
   position: fixed;
   left: 86px;
@@ -294,21 +301,19 @@
 }
 
 .cat-btn:hover .cat-icon-img {
-  filter: drop-shadow(0 2px 8px rgba(255, 140, 0, 0.42));
+  filter: drop-shadow(0 3px 10px rgba(245, 155, 0, 0.45));
 }
 
 .cat-btn--active {
-  background: rgba(255, 210, 63, 0.22);
-  box-shadow:
-    0 0 22px rgba(255, 200, 0, 0.50),
-    0 4px 14px rgba(255, 155, 0, 0.22);
+  background: transparent;
+  box-shadow: none;
+  transform: scale(1.08);
 }
 
 .cat-btn--active:hover {
-  transform: scale(1.18);
-  box-shadow:
-    0 0 32px rgba(255, 200, 0, 0.65),
-    0 6px 18px rgba(255, 155, 0, 0.32);
+  background: transparent;
+  box-shadow: none;
+  transform: scale(1.14);
 }
 
 .cat-icon {
@@ -330,10 +335,11 @@
 
 .cat-btn--active .cat-icon-img,
 .cat-btn--active:hover .cat-icon-img {
-  filter: drop-shadow(0 0 6px rgba(255, 140, 0, 0.80));
+  transform: scale(1.10);
+  filter: drop-shadow(0 3px 10px rgba(245, 155, 0, 0.55));
 }
 
-/* ── locked category ───────────────────── */
+/* â”€â”€ locked category â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .cat-btn--locked {
   opacity: 0.28;
   cursor: not-allowed;
@@ -350,7 +356,7 @@
   filter: none;
 }
 
-/* ── completed (done) category ─────────── */
+/* â”€â”€ completed (done) category â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .cat-btn--done .cat-icon-img {
   filter: none;
 }
@@ -376,14 +382,14 @@
   z-index: 2;
 }
 
-/* ── lock message ──────────────────────── */
+/* â”€â”€ lock message â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .lock-msg {
   position: absolute;
   left: calc(100% + 14px);
   top: 50%;
   transform: translateY(-50%);
-  background: rgba(26, 10, 0, 0.82);
-  color: #fff;
+  background: rgba(255, 255, 255, 0.88);
+  color: #1A0A00;
   font-family: 'Nunito', sans-serif;
   font-weight: 800;
   font-size: 12px;
@@ -395,6 +401,10 @@
   opacity: 0;
   transition: opacity 0.25s ease;
   z-index: 200;
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.10);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 
 .lock-msg--visible {
@@ -405,19 +415,22 @@
   display: none;
 }
 
-/* Tablet / mobile — static horizontal bar below canvas */
+/* Tablet / mobile â€” static horizontal bar below canvas */
 @media (max-width: 900px) {
   .category-toolbar {
     position: static;
     transform: none;
     flex-direction: row;
     gap: 8px;
-    background: rgba(255, 255, 255, 0.82);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
+    background: rgba(255, 255, 255, 0.65);
+    border: 1.5px solid rgba(255, 255, 255, 0.82);
+    backdrop-filter: blur(18px) saturate(1.4);
+    -webkit-backdrop-filter: blur(18px) saturate(1.4);
     border-radius: 50px;
     padding: 8px 12px;
-    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.12);
+    box-shadow:
+      inset 0 2px 0 rgba(255, 255, 255, 0.92),
+      0 6px 20px rgba(0, 0, 0, 0.08);
     order: 2;
   }
 
@@ -447,6 +460,21 @@
     height: 42px;
   }
 
+  /* Active state inside horizontal pill — warm yellow glow, matches burger */
+  .cat-btn--active {
+    background: rgba(255, 210, 63, 0.22);
+    box-shadow:
+      0 0 22px rgba(255, 200, 0, 0.50),
+      0 4px 14px rgba(255, 155, 0, 0.22);
+    border-radius: 18px;
+    transform: none;
+  }
+
+  .cat-btn--active:hover {
+    background: rgba(255, 210, 63, 0.28);
+    transform: none;
+  }
+
   /* pizza hover effect disabled on touch devices */
   .pizza-canvas-wrap:hover {
     transform: none;
@@ -454,7 +482,7 @@
 
 }
 
-/* Small mobile — iPhone SE and similar */
+/* Small mobile â€” iPhone SE and similar */
 @media (max-width: 480px) {
   .category-toolbar {
     gap: 2px;
@@ -505,9 +533,9 @@
   }
 }
 
-/* ══════════════════════════════════════════
-   ORDER NOW BUTTON — matches burger builder
-══════════════════════════════════════════ */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+   ORDER NOW BUTTON â€” matches burger builder
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 .pb-order-btn {
   position: fixed;
   bottom: 30px;
@@ -583,7 +611,7 @@
   transform: translateX(-50%) translateY(-1px);
 }
 
-/* ── Pizza builder main layout ── */
+/* â”€â”€ Pizza builder main layout â”€â”€ */
 .pb-main {
   flex: 1;
   display: flex;
@@ -594,9 +622,9 @@
   min-height: 0;
 }
 
-/* ══════════════════════════════════════════
-   BUILDER — editing banner
-══════════════════════════════════════════ */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+   BUILDER â€” editing banner
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 .builder-edit-banner {
   position: fixed;
   top: 80px;
@@ -617,7 +645,7 @@
   animation: pageEnter 0.3s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
-/* ── Builder pizza name input ── */
+/* â”€â”€ Builder pizza name input â”€â”€ */
 .builder-name-wrap {
   margin-top: -8px;
   display: flex;
@@ -651,7 +679,7 @@
 }
 
 .builder-name-input::placeholder {
-  color: rgba(26, 10, 0, 0.30);
+  color: rgba(26, 10, 0, 0.28);
   font-weight: 700;
   font-style: italic;
 }
@@ -666,9 +694,9 @@
     inset 0 1px 0 rgba(255, 255, 255, 0.95);
 }
 
-/* ══════════════════════════════════════════
-   ORDER BUTTON — mobile responsive
-══════════════════════════════════════════ */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+   ORDER BUTTON â€” mobile responsive
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 @media (max-width: 900px) {
   .pb-order-btn {
     bottom: 88px;
@@ -731,9 +759,9 @@
 }
 
 
-/* ══════════════════════════════════════════
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    PIZZA BUILDER TOAST
-══════════════════════════════════════════ */
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 .pb-toast {
   position: fixed;
   top: calc(var(--nav-h, 72px) + 12px);
@@ -746,8 +774,8 @@
   align-items: center;
   gap: 8px;
 
-  background: rgba(26, 10, 0, 0.88);
-  color: #fff;
+  background: rgba(255, 255, 255, 0.90);
+  color: #1A0A00;
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
   border-radius: 50px;
@@ -758,7 +786,7 @@
   font-size: 12px;
   letter-spacing: 0.4px;
   white-space: nowrap;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.28);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
 
   animation: pbToastIn 0.32s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
@@ -766,4 +794,218 @@
 @keyframes pbToastIn {
   from { opacity: 0; translate: 0 -12px; }
   to   { opacity: 1; translate: 0 0;     }
+}
+
+/* ══════════════════════════════════════════════════
+   PIZZA BUILDER — VISUAL POLISH
+   Cinematic atmosphere, premium glass, brand orange.
+   NO logic or layout properties changed.
+══════════════════════════════════════════════════ */
+
+/* ── Page atmosphere: ambient glow behind pizza ────────────────── */
+.pb-main {
+  position: relative;
+}
+
+.pb-main::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -52%);
+  width: clamp(320px, 58vw, 720px);
+  height: clamp(320px, 58vw, 720px);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+  background: radial-gradient(ellipse at center,
+    rgba(255, 107, 26, 0.10) 0%,
+    rgba(255, 140, 58, 0.06) 38%,
+    rgba(185, 52,   4, 0.04) 58%,
+    transparent 72%);
+}
+
+/* Ensure stage content sits above the glow */
+.builder-stage {
+  position: relative;
+  z-index: 1;
+}
+
+/* ── Pizza center: depth separation + hero glow ───────────────── */
+.builder-center {
+  position: relative;
+  isolation: isolate;
+}
+
+.builder-center::before {
+  content: '';
+  position: absolute;
+  inset: -18% -22%;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: -1;
+  background: radial-gradient(ellipse at 50% 48%,
+    rgba(255, 107, 26, 0.13) 0%,
+    rgba(215, 112,  10, 0.07) 42%,
+    transparent 68%);
+}
+
+/* Minimal depth — faint warm shadow only, no black bloom on yellow bg */
+.pizza-canvas-wrap {
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.06));
+  transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.35s ease;
+}
+
+.pizza-canvas-wrap:hover {
+  transform: scale(1.018) translateY(-3px);
+  filter: drop-shadow(0 3px 10px rgba(0, 0, 0, 0.08));
+}
+
+/* ── Category toolbar buttons — floating, no glass ──────────── */
+.cat-btn {
+  background: transparent;
+  border: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-shadow: none;
+}
+
+.cat-btn:hover {
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+}
+
+.cat-btn--active {
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+}
+
+.cat-btn--active:hover {
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+}
+
+.cat-btn:hover .cat-icon-img {
+  filter: drop-shadow(0 3px 10px rgba(245, 155, 0, 0.48));
+}
+
+.cat-btn--active .cat-icon-img,
+.cat-btn--active:hover .cat-icon-img {
+  filter: drop-shadow(0 3px 10px rgba(245, 155, 0, 0.55));
+}
+
+/* Selection halo — orange brand (was yellow) */
+.preview-wrapper::before {
+  background: radial-gradient(circle at center,
+    transparent 0%,
+    transparent 36%,
+    rgba(255, 107, 26, 0.16) 46%,
+    rgba(255, 107, 26, 0.30) 54%,
+    rgba(255, 140, 58, 0.10) 65%,
+    transparent 76%);
+}
+
+/* ── Mobile/tablet toolbar — white glass pill (matches burger) ── */
+@media (max-width: 900px) {
+  .category-toolbar {
+    background: rgba(255, 255, 255, 0.82);
+    border: 1px solid rgba(255, 255, 255, 0.60);
+    box-shadow:
+      inset 0 1.5px 0 rgba(255, 255, 255, 0.95),
+      0 6px 24px rgba(0, 0, 0, 0.10);
+    backdrop-filter: blur(18px) saturate(1.4);
+    -webkit-backdrop-filter: blur(18px) saturate(1.4);
+  }
+}
+
+/* ── Pizza name input — light glass ──────────────────────────── */
+.builder-name-input {
+  background: rgba(255, 255, 255, 0.76);
+  border: 1.5px solid rgba(255, 255, 255, 0.72);
+  color: #1A0A00;
+  backdrop-filter: blur(20px) saturate(1.3);
+  -webkit-backdrop-filter: blur(20px) saturate(1.3);
+  box-shadow:
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.90),
+    0 4px 18px rgba(0, 0, 0, 0.08);
+}
+
+.builder-name-input::placeholder {
+  color: rgba(26, 10, 0, 0.30);
+}
+
+.builder-name-input:focus {
+  background: rgba(255, 255, 255, 0.88);
+  border-color: rgba(200, 0, 30, 0.40);
+  box-shadow:
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.90),
+    0 4px 24px rgba(0, 0, 0, 0.08),
+    0 0 0 3px rgba(200, 0, 30, 0.10);
+}
+
+/* ── Order Now button — warm gold, matches burger builder exactly */
+.pb-order-btn {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.96) 0%,
+    #FFD700 30%,
+    #FFC000 62%,
+    rgba(255, 248, 195, 0.98) 100%
+  );
+  border: 1.5px solid rgba(255, 255, 255, 0.60);
+  color: #1A0A00;
+  box-shadow:
+    0 8px 32px rgba(255, 185, 0, 0.40),
+    0 2px 0   rgba(255, 255, 255, 0.60) inset,
+    0 -1px 0  rgba(180, 110, 0, 0.18) inset;
+}
+
+.pb-order-btn::before {
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.52) 0%,
+    rgba(255, 255, 255, 0.00) 100%
+  );
+}
+
+.pb-order-btn--visible:hover {
+  box-shadow:
+    0 16px 48px rgba(255, 185, 0, 0.58),
+    0 2px 0   rgba(255, 255, 255, 0.75) inset,
+    0 -1px 0  rgba(180, 110, 0, 0.18) inset;
+}
+
+/* ── Edit banner — red accent ─────────────────────────────────── */
+.builder-edit-banner {
+  background: rgba(200, 0, 30, 0.07);
+  border-color: rgba(200, 0, 30, 0.22);
+}
+
+/* ── Saved pizza panel — ambient glass bubble ────────────────── */
+.bpc-panel {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.26);
+  border-radius: 30px;
+  padding: 7px;
+  backdrop-filter: blur(40px) saturate(1.2);
+  -webkit-backdrop-filter: blur(40px) saturate(1.2);
+  box-shadow:
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.45),
+    0 20px 56px rgba(0, 0, 0, 0.07),
+    0 6px 16px rgba(0, 0, 0, 0.04);
+}
+
+/* ── Saved pizza cards — premium liquid glass ────────────────── */
+.bpc-card {
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid rgba(255, 255, 255, 0.88);
+  border-radius: 24px;
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.97),
+    inset 0 -1px 0 rgba(200, 150, 0, 0.05),
+    0 8px 28px rgba(0, 0, 0, 0.09),
+    0 2px 8px rgba(0, 0, 0, 0.06);
 }

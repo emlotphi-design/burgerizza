@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+﻿import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../services/supabase';
 
@@ -137,7 +137,7 @@ export default function AuthCallback() {
       }}>
         <p style={{
           fontFamily: 'Nunito, sans-serif', fontWeight: 700,
-          color: '#C8001E', textAlign: 'center', maxWidth: 360,
+          color: '#FF3B30', textAlign: 'center', maxWidth: 360,
         }}>
           {errorMsg}
         </p>

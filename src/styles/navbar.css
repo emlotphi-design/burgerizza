@@ -14,7 +14,6 @@
   background: none;
   border: none;
   box-shadow: none;
-  /* clicks pass through the transparent gap between elements */
   pointer-events: none;
   animation: fadeIn 0.4s ease both;
 }
@@ -27,18 +26,20 @@
   cursor: pointer;
   user-select: none;
   pointer-events: auto;
-  /* no pill — floats directly on the page */
   background: none;
   border: none;
   border-radius: 0;
-  padding: 4px 2px;
+  padding: 4px 8px 4px 4px;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
   box-shadow: none;
   transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.18s ease;
 }
 
 .brand:hover {
   transform: translateY(-1px);
-  opacity: 0.85;
+  opacity: 0.82;
+  box-shadow: none;
 }
 
 .brand-logo {
@@ -49,12 +50,13 @@
 
 .brand-name {
   font-family: 'Nunito', sans-serif;
-  font-weight: 900;
-  font-size: 19px;
-  letter-spacing: 2.5px;
+  font-weight: 800;
+  font-size: 18px;
+  letter-spacing: 3.2px;
   color: #1A0A00;
   line-height: 1;
-  text-shadow: 0 1px 6px rgba(255, 255, 255, 0.55);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.55);
+  text-rendering: geometricPrecision;
 }
 
 .nav-icons {
@@ -62,25 +64,25 @@
   gap: 1px;
   align-items: center;
   pointer-events: auto;
-  /* premium floating glass */
-  background: rgba(255, 250, 235, 0.62);
-  backdrop-filter: blur(28px) saturate(1.8) brightness(1.06);
-  -webkit-backdrop-filter: blur(28px) saturate(1.8) brightness(1.06);
-  border: 1px solid rgba(255, 255, 255, 0.52);
+  background: rgba(255, 255, 255, 0.68);
+  backdrop-filter: blur(32px) saturate(1.8);
+  -webkit-backdrop-filter: blur(32px) saturate(1.8);
+  border: 1.5px solid rgba(255, 255, 255, 0.90);
   border-radius: 50px;
   padding: 4px;
   box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.90) inset,
-    0 8px 32px rgba(0, 0, 0, 0.10),
-    0 2px 8px rgba(0, 0, 0, 0.06);
+    inset 0 2px 0 rgba(255, 255, 255, 0.95),
+    inset 0 -1px 0 rgba(200, 150, 0, 0.10),
+    0 8px 28px rgba(0, 0, 0, 0.12),
+    0 2px 8px rgba(0, 0, 0, 0.08);
   transition: box-shadow 0.25s ease;
 }
 
 .nav-icons:hover {
   box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.95) inset,
-    0 12px 40px rgba(0, 0, 0, 0.13),
-    0 2px 8px rgba(0, 0, 0, 0.07);
+    inset 0 2px 0 rgba(255, 255, 255, 1.0),
+    0 12px 36px rgba(0, 0, 0, 0.14),
+    0 2px 8px rgba(0, 0, 0, 0.10);
 }
 
 .nav-btn {
@@ -93,13 +95,14 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  color: #1A0A00;
-  transition: background 0.16s ease, transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
+  color: rgba(26, 10, 0, 0.65);
+  transition: background 0.16s ease, transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.16s ease;
   flex-shrink: 0;
 }
 
 .nav-btn:hover {
-  background: rgba(26, 10, 0, 0.06);
+  background: rgba(255, 255, 255, 0.45);
+  color: #1A0A00;
   transform: scale(1.12);
 }
 
@@ -107,22 +110,26 @@
   transform: scale(0.92);
 }
 
-/* Home button — warm accent dot inside the pill */
+/* Home button — red accent */
 .nav-home-btn {
-  background: rgba(245, 197, 24, 0.20);
+  background: rgba(200, 0, 30, 0.10);
+  color: rgba(200, 0, 30, 0.80);
 }
 
 .nav-home-btn:hover {
-  background: rgba(245, 197, 24, 0.38) !important;
+  background: rgba(200, 0, 30, 0.18) !important;
+  color: #C8001E !important;
 }
 
-/* Builder shortcut — subtle warm tint */
+/* Builder shortcut — warm brown tint */
 .nav-builder-btn {
-  background: rgba(245, 197, 24, 0.12);
+  background: rgba(26, 10, 0, 0.07);
+  color: rgba(26, 10, 0, 0.60);
 }
 
 .nav-builder-btn:hover {
-  background: rgba(245, 197, 24, 0.30) !important;
+  background: rgba(26, 10, 0, 0.14) !important;
+  color: #1A0A00 !important;
 }
 
 /* ── Cart icon badge ── */
@@ -137,11 +144,11 @@
   min-width: 18px;
   height: 18px;
   padding: 0 5px;
-  background: linear-gradient(135deg, #C8001E 0%, #ff2040 100%);
+  background: linear-gradient(135deg, #C8001E 0%, #E8002A 100%);
   border-radius: 9px;
   box-shadow:
-    0 0 0 2px rgba(255, 255, 255, 0.85),
-    0 3px 10px rgba(200, 0, 30, 0.48);
+    0 0 0 2px rgba(245, 197, 24, 0.90),
+    0 3px 10px rgba(200, 0, 30, 0.45);
   font-family: 'Nunito', sans-serif;
   font-weight: 900;
   font-size: 10px;
@@ -174,7 +181,6 @@
     height: 44px;
   }
 
-  /* slightly smaller icon artwork on tablets */
   .nav-btn svg {
     width: 20px;
     height: 20px;
@@ -186,7 +192,7 @@
   }
 
   .brand {
-    padding: 8px 4px;
+    padding: 5px 12px 5px 6px;
   }
 
   .brand-logo {
@@ -196,7 +202,7 @@
 
   .brand-name {
     font-size: 15px;
-    letter-spacing: 1.8px;
+    letter-spacing: 2px;
   }
 }
 
@@ -208,8 +214,8 @@
   }
 
   .brand {
-    gap: 5px;
-    padding: 4px 2px;
+    gap: 6px;
+    padding: 5px 12px 5px 6px;
   }
 
   .brand-logo {
@@ -218,11 +224,10 @@
   }
 
   .brand-name {
-    font-size: 12px;
-    letter-spacing: 1px;
+    font-size: 13px;
+    letter-spacing: 1.8px;
   }
 
-  /* 40px keeps the pill compact while meeting minimum touch target */
   .nav-btn {
     width: 40px;
     height: 40px;

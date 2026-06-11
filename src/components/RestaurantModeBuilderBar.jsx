@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useRestaurantMode } from '../store/RestaurantModeContext';
 import { usePizzaStore } from '../store/PizzaContext';
@@ -165,9 +165,9 @@ export default function RestaurantModeBuilderBar() {
 
   /* ── Add-button style varies by state ── */
   const addBg  = flash ? 'linear-gradient(135deg,#22c55e,#16a34a)'
-               : canAdd ? 'linear-gradient(135deg,#FFD54A,#F5C518)'
+               : canAdd ? 'linear-gradient(135deg,#FF8C3A,#FF6B1A)'
                : 'rgba(255,255,255,0.09)';
-  const addClr = flash ? '#fff' : canAdd ? '#1A0A00' : 'rgba(255,255,255,0.28)';
+  const addClr = flash ? '#fff' : canAdd ? '#fff' : 'rgba(255,255,255,0.28)';
   const addShadow = flash
     ? '0 4px 18px rgba(34,197,94,0.40)'
     : canAdd ? '0 4px 16px rgba(255,193,7,0.32)' : 'none';

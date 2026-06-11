@@ -1,24 +1,24 @@
-/* ══════════════════════════════════════════════
-   BURGERIZZA ADMIN — PREMIUM LIGHT + DARK THEME
-   Restaurant management · Real-time · Modern
-══════════════════════════════════════════════ */
+﻿/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+   BURIZZA ADMIN â€” PREMIUM LIGHT + DARK THEME
+   Restaurant management Â· Real-time Â· Modern
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
-/* ══════════════════════════════════════════════
-   BODY — CINEMATIC BACKGROUND SYSTEM
-   ─────────────────────────────────────────────
-   AdminLayout mounts → sets data-context="admin"
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+   BODY â€” CINEMATIC BACKGROUND SYSTEM
+   â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+   AdminLayout mounts â†’ sets data-context="admin"
    and data-admin-theme on <body>.
 
    background-attachment:fixed keeps the gradient
    locked to the viewport (doesn't scroll with
    page content). Cards' backdrop-filter then
-   blurs THIS fixed gradient — true glassmorphism.
-══════════════════════════════════════════════ */
+   blurs THIS fixed gradient â€” true glassmorphism.
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
-/* Dark mode — full Burgerizza cinematic atmosphere */
+/* Dark mode â€” full BURIZZA cinematic atmosphere */
 body[data-context="admin"][data-admin-theme="dark"] {
   /*
-   * Layered system — back to front:
+   * Layered system â€” back to front:
    * 1. Pure near-black warm base
    * 2. Bottom-left: open grill ember (orange-red, heavy)
    * 3. Top-right: pizza oven hood glow (golden, medium)
@@ -44,18 +44,18 @@ body[data-context="admin"][data-admin-theme="dark"] {
   background-attachment: fixed !important;
 }
 
-/* Admin layout is TRANSPARENT in dark mode —
+/* Admin layout is TRANSPARENT in dark mode â€”
    the body gradient shows through glass panels */
 body[data-context="admin"][data-admin-theme="dark"] .adm-layout {
   background: transparent !important;
 }
 
-/* Light mode — keep warm cream from global.css, just override brand yellow */
+/* Light mode â€” keep warm cream from global.css, just override brand yellow */
 body[data-context="admin"][data-admin-theme="light"] {
   background-color: #FFF9EC !important;
 }
 
-/* ── Light mode design tokens ───────────────── */
+/* â”€â”€ Light mode design tokens â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 :root {
   --adm-sidebar-w:   260px;
   --adm-topbar-h:    60px;
@@ -105,7 +105,7 @@ body[data-context="admin"][data-admin-theme="light"] {
   --adm-radius-sm: 12px;
   --adm-radius-xs:  8px;
 
-  /* Shadows — layered warm depth */
+  /* Shadows â€” layered warm depth */
   --adm-shadow:
     inset 0 1px 0 rgba(255,255,255,0.90),
     0 1px 2px rgba(196,154,0,0.06),
@@ -142,42 +142,43 @@ body[data-context="admin"][data-admin-theme="light"] {
   --adm-spark-orders:      #2563eb;
 }
 
-/* ── Dark mode — CSS variable tokens (background handled by body) ─ */
+/* â”€â”€ Dark mode â€” CSS variable tokens (background handled by body) â”€ */
 .adm-layout[data-theme="dark"] {
-  /* background is transparent — set by the body rule above */
+  /* background is transparent â€” set by the body rule above */
   --adm-bg: #030201;
 
-  /* Glass surfaces — semi-transparent so gradient bleeds through */
-  --adm-surface-0:   rgba(16, 10,  4, 0.50);
-  --adm-surface-1:   rgba(12,  8,  3, 0.44);
-  --adm-surface-2:   rgba(22, 14,  6, 0.54);
-  --adm-surface-3:   rgba(28, 18,  8, 0.60);
-  --adm-surface-4:   rgba(34, 22, 10, 0.66);
+  /* Glass surfaces â€” semi-transparent so gradient bleeds through */
+  --adm-surface-0:   rgba(20, 20, 20, 0.45);
+  --adm-surface-1:   rgba(16, 16, 16, 0.40);
+  --adm-surface-2:   rgba(24, 24, 24, 0.55);
+  --adm-surface-3:   rgba(28, 28, 28, 0.60);
+  --adm-surface-4:   rgba(32, 32, 32, 0.65);
 
   /* Legacy aliases */
-  --adm-sidebar-bg:  rgba(3, 2, 1, 0.80);
-  --adm-topbar-bg:   rgba(3, 2, 1, 0.86);
-  --adm-card-bg:     rgba(16, 10,  4, 0.44);
-  --adm-card-border: rgba(255, 195, 100, 0.15);
-  --adm-blur:        blur(28px);
+  /* Surfaces — neutral clean glass */
+  --adm-sidebar-bg:  rgba(12, 12, 12, 0.72);
+  --adm-topbar-bg:   rgba(12, 12, 12, 0.72);
+  --adm-card-bg:     rgba(20, 20, 20, 0.55);
+  --adm-card-border: rgba(255, 255, 255, 0.08);
+  --adm-blur:        blur(18px);
 
-  /* Text — warm cream */
-  --adm-text:    #f8f2e8;
-  --adm-text-2:  #c4a878;
-  --adm-text-3:  #8a6a45;
-  --adm-text-4:  #503c22;
+  /* Text — clean neutral white */
+  --adm-text:    rgba(255, 255, 255, 0.92);
+  --adm-text-2:  rgba(255, 255, 255, 0.50);
+  --adm-text-3:  rgba(255, 255, 255, 0.30);
+  --adm-text-4:  rgba(255, 255, 255, 0.18);
 
-  /* Borders — golden warm */
-  --adm-border:        rgba(255, 195, 100, 0.14);
-  --adm-border-2:      rgba(255, 195, 100, 0.07);
-  --adm-border-focus:  rgba(255, 213, 74, 0.60);
+  /* Borders — subtle neutral */
+  --adm-border:        rgba(255, 255, 255, 0.08);
+  --adm-border-2:      rgba(255, 255, 255, 0.05);
+  --adm-border-focus:  rgba(255, 213, 74, 0.55);
 
   /* Brand */
   --adm-accent:      #FFD54A;
-  --adm-accent-text: #FFD54A;
-  --adm-accent-deep: #FFc107;
+  --adm-accent-text: rgba(255, 213, 74, 0.90);
+  --adm-accent-deep: #FFC107;
 
-  /* Semantic status colors — kept functional */
+  /* Semantic */
   --adm-green:   #4ade80;
   --adm-blue:    #60a5fa;
   --adm-red:     #f87171;
@@ -185,50 +186,47 @@ body[data-context="admin"][data-admin-theme="light"] {
   --adm-purple:  #a78bfa;
   --adm-danger:  #f87171;
 
-  /* Shadows — deep + warm inner glow */
+  /* Shadows — clean depth */
   --adm-shadow:
-    inset 0 1px 0 rgba(255, 210, 120, 0.14),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.28),
-    0 2px  6px rgba(0, 0, 0, 0.60),
-    0 6px 24px rgba(0, 0, 0, 0.48),
-    0 12px 40px rgba(0, 0, 0, 0.32);
+    inset 0 1px 0 rgba(255, 255, 255, 0.07),
+    0 8px 32px rgba(0, 0, 0, 0.35);
   --adm-shadow-lg:
-    inset 0 1px 0 rgba(255, 210, 120, 0.14),
-    0 8px 32px rgba(0, 0, 0, 0.65),
-    0 20px 56px rgba(0, 0, 0, 0.48);
+    inset 0 1px 0 rgba(255, 255, 255, 0.07),
+    0 8px 32px rgba(0, 0, 0, 0.45);
   --adm-shadow-xl:
-    0 24px 64px rgba(0, 0, 0, 0.78),
-    0 6px 20px rgba(0, 0, 0, 0.55);
+    0 20px 56px rgba(0, 0, 0, 0.70),
+    0 6px 16px rgba(0, 0, 0, 0.48);
 
   /* Helpers */
-  --adm-shimmer-start:     rgba(255, 210, 120, 0.04);
-  --adm-shimmer-mid:       rgba(255, 210, 120, 0.10);
-  --adm-table-head-bg:     rgba(255, 200, 100, 0.05);
-  --adm-status-bar-bg:     rgba(255, 200, 100, 0.07);
-  --adm-row-hover:         rgba(255, 200, 100, 0.05);
-  --adm-row-hover-action:  rgba(255, 213, 74, 0.07);
+  --adm-shimmer-start:     rgba(255, 255, 255, 0.02);
+  --adm-shimmer-mid:       rgba(255, 255, 255, 0.05);
+  --adm-table-head-bg:     transparent;
+  --adm-status-bar-bg:     rgba(255, 255, 255, 0.06);
+  --adm-row-hover:         rgba(255, 255, 255, 0.03);
+  --adm-row-hover-action:  rgba(255, 213, 74, 0.06);
   --adm-overlay-bg:        rgba(0, 0, 0, 0.82);
-  --adm-sidebar-shadow:    4px 0 40px rgba(0, 0, 0, 0.70),
-                           inset -1px 0 0 rgba(255, 195, 100, 0.08);
-  --adm-topbar-shadow:     0 2px 20px rgba(0, 0, 0, 0.60);
-  --adm-toggle-bg:         rgba(255, 195, 100, 0.14);
-  --adm-toggle-on-bg:      rgba(74,222,128,0.18);
-  --adm-toggle-on-border:  rgba(74,222,128,0.32);
+  --adm-sidebar-shadow:    4px 0 28px rgba(0, 0, 0, 0.65),
+                           inset -1px 0 0 rgba(255, 255, 255, 0.05);
+  --adm-topbar-shadow:     0 1px 0 rgba(255, 255, 255, 0.06),
+                           0 2px 16px rgba(0, 0, 0, 0.40);
+  --adm-toggle-bg:         rgba(255, 255, 255, 0.10);
+  --adm-toggle-on-bg:      rgba(74,222,128,0.14);
+  --adm-toggle-on-border:  rgba(74,222,128,0.28);
 
   /* Chart */
-  --adm-chart-bar-today:   #FFD54A;
-  --adm-chart-bar-other:   rgba(255, 195, 100, 0.18);
-  --adm-chart-text-today:  #FFD54A;
-  --adm-chart-text-other:  rgba(248, 242, 232, 0.32);
-  --adm-spark-revenue:     #FFD54A;
-  --adm-spark-orders:      #e8a020;
+  --adm-chart-bar-today:   rgba(255, 213, 74, 0.88);
+  --adm-chart-bar-other:   rgba(255, 255, 255, 0.14);
+  --adm-chart-text-today:  rgba(255, 213, 74, 0.90);
+  --adm-chart-text-other:  rgba(255, 255, 255, 0.30);
+  --adm-spark-revenue:     rgba(255, 213, 74, 0.80);
+  --adm-spark-orders:      rgba(96, 165, 250, 0.80);
 }
 
-/* ══════════════════════════════════════════════
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    SMOOTH THEME TRANSITION
    Applied via JS only during explicit toggle
    (prevents FOUC on initial load)
-══════════════════════════════════════════════ */
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 .adm-layout.adm-theme-changing,
 .adm-layout.adm-theme-changing .adm-sidebar,
 .adm-layout.adm-theme-changing .adm-main,
@@ -255,46 +253,40 @@ body[data-context="admin"][data-admin-theme="light"] {
     box-shadow 0.30s ease !important;
 }
 
-/* ══════════════════════════════════════════════
-   DARK MODE — PREMIUM GLASSMORPHISM
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+   DARK MODE â€” PREMIUM GLASSMORPHISM
    True glass: transparent + backdrop-blur so the
    cinematic background gradient shines through.
-══════════════════════════════════════════════ */
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
-/* Sidebar — frosted dark glass panel */
+/* Sidebar â€” frosted dark glass panel */
 .adm-layout[data-theme="dark"] .adm-sidebar {
-  backdrop-filter: blur(32px) saturate(1.6) brightness(0.9);
-  -webkit-backdrop-filter: blur(32px) saturate(1.6) brightness(0.9);
-  border-right: 1px solid rgba(255, 195, 100, 0.10);
-  box-shadow: 4px 0 40px rgba(0,0,0,0.70), inset -1px 0 0 rgba(255,195,100,0.08);
+  backdrop-filter: blur(28px) saturate(1.3) brightness(0.92);
+  -webkit-backdrop-filter: blur(28px) saturate(1.3) brightness(0.92);
+  border-right: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: 4px 0 28px rgba(0,0,0,0.65), inset -1px 0 0 rgba(255,255,255,0.05);
 }
 
-/* Brand name — premium golden glow */
+/* Brand name â€” premium golden glow */
 .adm-layout[data-theme="dark"] .adm-brand-name {
-  text-shadow: 0 0 20px rgba(255, 200, 80, 0.30);
+  text-shadow: none;
 }
 
-/* Cards — true glass panels */
-.adm-layout[data-theme="dark"] .adm-card,
-.adm-layout[data-theme="dark"] .adm-stat-card {
-  backdrop-filter: blur(28px) saturate(1.8) brightness(1.05);
-  -webkit-backdrop-filter: blur(28px) saturate(1.8) brightness(1.05);
-  box-shadow:
-    inset 0  1px 0 rgba(255, 210, 120, 0.18),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.32),
-    0  2px  6px rgba(0, 0, 0, 0.60),
-    0  8px 28px rgba(0, 0, 0, 0.50),
-    0 16px 48px rgba(0, 0, 0, 0.36);
+/* Cards — glass panels, directly visible over cinematic gradient */
+.adm-layout[data-theme=”dark”] .adm-card,
+.adm-layout[data-theme=”dark”] .adm-stat-card {
+  background: rgba(20, 20, 20, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 24px;
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
 }
 
-.adm-layout[data-theme="dark"] .adm-card:hover,
-.adm-layout[data-theme="dark"] .adm-stat-card:hover {
-  box-shadow:
-    inset 0  1px 0 rgba(255, 210, 120, 0.22),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.32),
-    0  4px 12px rgba(0, 0, 0, 0.62),
-    0 12px 36px rgba(0, 0, 0, 0.52),
-    0 20px 56px rgba(0, 0, 0, 0.40);
+.adm-layout[data-theme=”dark”] .adm-card:hover,
+.adm-layout[data-theme=”dark”] .adm-stat-card:hover {
+  background: rgba(28, 28, 28, 0.60);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
 }
 
 /* Warm golden shimmer on card top edge */
@@ -307,64 +299,59 @@ body[data-context="admin"][data-admin-theme="light"] {
   background: linear-gradient(
     90deg,
     transparent 4%,
-    rgba(255, 200, 90, 0.28) 32%,
-    rgba(255, 185, 60, 0.18) 65%,
+    rgba(255, 255, 255, 0.08) 32%,
+    rgba(255, 255, 255, 0.05) 65%,
     transparent 96%
   );
   pointer-events: none;
   z-index: 1;
 }
 
-/* Order cards — glass with warm border */
-.adm-layout[data-theme="dark"] .adm-order-card {
-  backdrop-filter: blur(22px) saturate(1.6);
-  -webkit-backdrop-filter: blur(22px) saturate(1.6);
-  background: rgba(16, 10, 4, 0.42);
-  border: 1px solid rgba(255, 195, 100, 0.12);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 210, 120, 0.12),
-    0 2px 10px rgba(0,0,0,0.55),
-    0 6px 22px rgba(0,0,0,0.40);
+/* Order cards — glass surface */
+.adm-layout[data-theme=”dark”] .adm-order-card {
+  background: rgba(20, 20, 20, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 24px;
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
 }
 
-.adm-layout[data-theme="dark"] .adm-order-card:hover {
-  background: rgba(22, 14, 6, 0.55);
-  border-color: rgba(255, 213, 74, 0.30);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 210, 120, 0.16),
-    0 4px 16px rgba(0,0,0,0.58),
-    0 10px 30px rgba(0,0,0,0.44);
+.adm-layout[data-theme=”dark”] .adm-order-card:hover {
+  background: rgba(28, 28, 28, 0.62);
+  border-color: rgba(255, 213, 74, 0.18);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
 }
 
-/* Nav active link — warm amber glow */
+/* Nav active link â€” warm amber glow */
 .adm-layout[data-theme="dark"] .adm-nav-link--active {
-  background: rgba(255, 195, 60, 0.12) !important;
-  box-shadow: inset 3px 0 0 #FFD54A, inset 0 0 16px rgba(255, 195, 60, 0.08);
+  background: rgba(255, 213, 74, 0.08) !important;
+  box-shadow: inset 3px 0 0 rgba(255, 213, 74, 0.80);
 }
 
-/* Stat card tints — warmer in dark mode */
+/* Stat card tints â€” warmer in dark mode */
 .adm-layout[data-theme="dark"] .adm-stat-card--amber {
-  background: linear-gradient(145deg, rgba(255, 195, 60, 0.12) 0%, rgba(16, 10, 4, 0.44) 60%) !important;
+  background: linear-gradient(145deg, rgba(255, 195, 60, 0.10) 0%, rgba(20, 20, 20, 0.55) 60%) !important;
 }
 .adm-layout[data-theme="dark"] .adm-stat-card--green {
-  background: linear-gradient(145deg, rgba(74, 222, 128, 0.08) 0%, rgba(16, 10, 4, 0.44) 60%) !important;
+  background: linear-gradient(145deg, rgba(74, 222, 128, 0.07) 0%, rgba(20, 20, 20, 0.55) 60%) !important;
 }
 .adm-layout[data-theme="dark"] .adm-stat-card--blue {
-  background: linear-gradient(145deg, rgba(96, 165, 250, 0.08) 0%, rgba(16, 10, 4, 0.44) 60%) !important;
+  background: linear-gradient(145deg, rgba(96, 165, 250, 0.07) 0%, rgba(20, 20, 20, 0.55) 60%) !important;
 }
 .adm-layout[data-theme="dark"] .adm-stat-card--orange {
-  background: linear-gradient(145deg, rgba(251, 146, 60, 0.10) 0%, rgba(16, 10, 4, 0.44) 60%) !important;
+  background: linear-gradient(145deg, rgba(251, 146, 60, 0.09) 0%, rgba(20, 20, 20, 0.55) 60%) !important;
 }
 .adm-layout[data-theme="dark"] .adm-stat-card--purple {
-  background: linear-gradient(145deg, rgba(167, 139, 250, 0.07) 0%, rgba(16, 10, 4, 0.44) 60%) !important;
+  background: linear-gradient(145deg, rgba(167, 139, 250, 0.07) 0%, rgba(20, 20, 20, 0.55) 60%) !important;
 }
 .adm-layout[data-theme="dark"] .adm-stat-card--red {
-  background: linear-gradient(145deg, rgba(248, 113, 113, 0.08) 0%, rgba(16, 10, 4, 0.44) 60%) !important;
+  background: linear-gradient(145deg, rgba(248, 113, 113, 0.08) 0%, rgba(20, 20, 20, 0.55) 60%) !important;
 }
 
-/* ══════════════════════════════════════════════
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    BASE RESET + LAYOUT SHELL
-══════════════════════════════════════════════ */
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 *, *::before, *::after { box-sizing: border-box; }
 
 .adm-layout {
@@ -375,9 +362,9 @@ body[data-context="admin"][data-admin-theme="light"] {
   color: var(--adm-text);
 }
 
-/* ══════════════════════════════════════════════
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    SIDEBAR
-══════════════════════════════════════════════ */
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 .adm-sidebar {
   width: var(--adm-sidebar-w);
   height: 100vh;
@@ -393,7 +380,7 @@ body[data-context="admin"][data-admin-theme="light"] {
   transition: transform 0.30s cubic-bezier(0.22,1,0.36,1);
 }
 
-/* ── Brand ── */
+/* â”€â”€ Brand â”€â”€ */
 .adm-brand {
   padding: 22px 18px 16px;
   border-bottom: 1px solid var(--adm-border);
@@ -439,7 +426,7 @@ body[data-context="admin"][data-admin-theme="light"] {
   padding-left: 44px;
 }
 
-/* ── Live indicator ── */
+/* â”€â”€ Live indicator â”€â”€ */
 .adm-live-indicator {
   display: inline-flex;
   align-items: center;
@@ -466,7 +453,7 @@ body[data-context="admin"][data-admin-theme="light"] {
   50%       { opacity: 0.4; transform: scale(0.8); }
 }
 
-/* ── Nav ── */
+/* â”€â”€ Nav â”€â”€ */
 .adm-nav {
   flex: 1;
   padding: 10px;
@@ -549,7 +536,7 @@ button.adm-nav-link {
 .adm-nav-link:hover .adm-nav-icon { opacity: 0.80; }
 .adm-nav-link--active .adm-nav-icon { opacity: 1; color: var(--adm-accent-text); }
 
-/* ── Nav badge ── */
+/* â”€â”€ Nav badge â”€â”€ */
 .adm-nav-badge {
   margin-left: auto;
   background: var(--adm-accent);
@@ -566,7 +553,7 @@ button.adm-nav-link {
   line-height: 1;
 }
 
-/* ── Sidebar footer ── */
+/* â”€â”€ Sidebar footer â”€â”€ */
 .adm-sidebar-footer {
   padding: 12px 10px;
   border-top: 1px solid var(--adm-border);
@@ -620,7 +607,7 @@ button.adm-nav-link {
   white-space: nowrap;
 }
 
-/* ── Theme toggle row (sidebar) ── */
+/* â”€â”€ Theme toggle row (sidebar) â”€â”€ */
 .adm-theme-row {
   display: flex;
   align-items: center;
@@ -696,12 +683,12 @@ button.adm-nav-link {
 }
 
 .adm-layout[data-theme="dark"] .adm-back-link:hover {
-  background: rgba(255, 195, 100, 0.06);
+  background: rgba(255, 255, 255, 0.05);
 }
 
-/* ══════════════════════════════════════════════
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    MOBILE OVERLAY + TOPBAR
-══════════════════════════════════════════════ */
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 .adm-overlay {
   display: none;
   position: fixed;
@@ -746,10 +733,10 @@ button.adm-nav-link {
   flex-shrink: 0;
 }
 
-.adm-hamburger:hover { background: rgba(255,213,74,0.18); }
+.adm-hamburger:hover { background: rgba(255,255,255,0.08); }
 
 .adm-layout[data-theme="dark"] .adm-hamburger {
-  background: rgba(255, 195, 100, 0.06);
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .adm-topbar-brand {
@@ -789,12 +776,12 @@ button.adm-nav-link {
 }
 
 .adm-layout[data-theme="dark"] .adm-topbar-theme-btn {
-  background: rgba(255, 195, 100, 0.05);
+  background: rgba(255, 255, 255, 0.05);
 }
 
-/* ══════════════════════════════════════════════
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    MAIN CONTENT AREA
-══════════════════════════════════════════════ */
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 .adm-main {
   margin-left: var(--adm-sidebar-w);
   flex: 1;
@@ -811,7 +798,7 @@ button.adm-nav-link {
   width: 100%;
 }
 
-/* ── Page header ── */
+/* â”€â”€ Page header â”€â”€ */
 .adm-page-header {
   margin-bottom: 26px;
   display: flex;
@@ -843,9 +830,9 @@ button.adm-nav-link {
   gap: 8px;
 }
 
-/* ══════════════════════════════════════════════
-   CARD — layered warm depth
-══════════════════════════════════════════════ */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+   CARD â€” layered warm depth
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 .adm-card {
   background: var(--adm-card-bg);
   border: 1px solid var(--adm-card-border);
@@ -856,9 +843,9 @@ button.adm-nav-link {
   overflow: hidden;
 }
 
-/* ══════════════════════════════════════════════
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    STATS GRID
-══════════════════════════════════════════════ */
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 .adm-stats-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -972,9 +959,9 @@ button.adm-nav-link {
 .adm-stat-footer--up   { color: var(--adm-green); }
 .adm-stat-footer--down { color: var(--adm-red); }
 
-/* ══════════════════════════════════════════════
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    ANALYTICS GRID
-══════════════════════════════════════════════ */
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 .adm-grid-2 {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -985,7 +972,7 @@ button.adm-nav-link {
 .adm-grid-2--wide { grid-template-columns: 3fr 2fr; }
 .adm-grid-2--3-2  { grid-template-columns: 3fr 2fr; }
 
-/* ── Bar chart ── */
+/* â”€â”€ Bar chart â”€â”€ */
 .adm-chart-wrap { padding: 20px 22px 16px; }
 
 .adm-chart-title {
@@ -1019,7 +1006,7 @@ button.adm-nav-link {
   flex: 1;
 }
 
-/* ── Status breakdown ── */
+/* â”€â”€ Status breakdown â”€â”€ */
 .adm-status-list { padding: 4px 0; }
 
 .adm-status-row {
@@ -1068,9 +1055,9 @@ button.adm-nav-link {
   transition: width 0.6s ease;
 }
 
-/* ══════════════════════════════════════════════
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    SECTION HEADER INSIDE CARD
-══════════════════════════════════════════════ */
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 .adm-section-head {
   display: flex;
   align-items: center;
@@ -1101,9 +1088,9 @@ button.adm-nav-link {
 
 .adm-section-action:hover { opacity: 0.65; }
 
-/* ══════════════════════════════════════════════
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    TABLE
-══════════════════════════════════════════════ */
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 .adm-table-wrap {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
@@ -1148,9 +1135,9 @@ button.adm-nav-link {
 .adm-table--clickable tbody tr { cursor: pointer; }
 .adm-table--clickable tbody tr:hover { background: var(--adm-row-hover-action); }
 
-/* ══════════════════════════════════════════════
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    MOBILE ORDER CARDS
-══════════════════════════════════════════════ */
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 .adm-order-cards { display: none; }
 
 .adm-order-card {
@@ -1242,9 +1229,9 @@ button.adm-nav-link {
   100% { border-color: rgba(34,197,94,0.40); }
 }
 
-/* ══════════════════════════════════════════════
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    BADGE
-══════════════════════════════════════════════ */
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 .adm-badge {
   display: inline-flex;
   align-items: center;
@@ -1273,19 +1260,29 @@ button.adm-nav-link {
 .adm-layout[data-theme="dark"] .adm-badge--blue   { background: rgba(96,165,250,0.14);  color: #60a5fa; }
 .adm-layout[data-theme="dark"] .adm-badge--red    { background: rgba(248,113,113,0.14); color: #f87171; }
 .adm-layout[data-theme="dark"] .adm-badge--orange { background: rgba(251,146,60,0.14);  color: #fb923c; }
-.adm-layout[data-theme="dark"] .adm-badge--gray   { background: rgba(255, 195, 100, 0.07); color: #b89a70; }
+.adm-layout[data-theme="dark"] .adm-badge--gray   { background: rgba(255, 255, 255, 0.07); color: rgba(255,255,255,0.45); }
 .adm-layout[data-theme="dark"] .adm-badge--indigo  { background: rgba(129,140,248,0.14); color: #818cf8; }
 .adm-layout[data-theme="dark"] .adm-badge--waiting { background: rgba(234,179,8,0.16);   color: #fbbf24; }
 
-/* ══════════════════════════════════════════════
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    TOOLBAR
-══════════════════════════════════════════════ */
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 .adm-toolbar {
   display: flex;
   align-items: center;
   gap: 10px;
   margin-bottom: 18px;
   flex-wrap: wrap;
+}
+
+.adm-layout[data-theme="dark"] .adm-toolbar {
+  background: rgba(20, 20, 20, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+  padding: 10px 14px;
 }
 
 .adm-search {
@@ -1332,14 +1329,14 @@ button.adm-nav-link {
 }
 
 .adm-layout[data-theme="dark"] .adm-select {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23b89a70' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23888888' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
 }
 
 .adm-select option { background: var(--adm-surface-0); color: var(--adm-text); }
 
 .adm-select:focus { border-color: var(--adm-border-focus); }
 
-/* ── Buttons ── */
+/* â”€â”€ Buttons â”€â”€ */
 .adm-btn {
   height: 40px;
   padding: 0 18px;
@@ -1403,9 +1400,9 @@ button.adm-nav-link {
   transform: none !important;
 }
 
-/* ══════════════════════════════════════════════
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    EMPTY STATE
-══════════════════════════════════════════════ */
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 .adm-empty {
   display: flex;
   flex-direction: column;
@@ -1432,9 +1429,9 @@ button.adm-nav-link {
   line-height: 1.5;
 }
 
-/* ══════════════════════════════════════════════
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    MODAL / DRAWER
-══════════════════════════════════════════════ */
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 .adm-modal-overlay {
   position: fixed;
   inset: 0;
@@ -1510,7 +1507,7 @@ button.adm-nav-link {
 
 .adm-modal-close:hover { background: rgba(220,38,38,0.10); color: var(--adm-red); }
 
-.adm-layout[data-theme="dark"] .adm-modal-close { background: rgba(255, 195, 100, 0.06); }
+.adm-layout[data-theme="dark"] .adm-modal-close { background: rgba(255, 255, 255, 0.05); }
 
 .adm-modal-body { padding: 22px; overflow-y: auto; flex: 1; }
 .adm-modal-body--order { padding: 0; }
@@ -1528,9 +1525,9 @@ button.adm-nav-link {
 
 .adm-detail-divider { height: 1px; background: var(--adm-border); margin: 0; }
 
-/* ══════════════════════════════════════════════
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    ORDER DETAIL MODAL
-══════════════════════════════════════════════ */
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 .adm-order-section-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
 
 .adm-order-section { padding: 18px 22px; border-bottom: 1px solid var(--adm-border); }
@@ -1716,14 +1713,14 @@ button.adm-nav-link {
 }
 
 .adm-layout[data-theme="dark"] .adm-status-select {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5' viewBox='0 0 8 5'%3E%3Cpath d='M1 1l3 3 3-3' stroke='%23b89a70' stroke-width='1.2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5' viewBox='0 0 8 5'%3E%3Cpath d='M1 1l3 3 3-3' stroke='%23888888' stroke-width='1.2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
 }
 
 .adm-status-select:focus { border-color: var(--adm-border-focus); }
 
-/* ══════════════════════════════════════════════
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    PRODUCT GRID
-══════════════════════════════════════════════ */
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 .adm-product-grid {
   padding: 16px 18px;
   display: grid;
@@ -1755,9 +1752,9 @@ button.adm-nav-link {
 .adm-product-price { font-size: 15px; font-weight: 900; color: var(--adm-text); letter-spacing: -0.3px; }
 .adm-product-cat { font-size: 10px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: var(--adm-text-3); }
 
-/* ══════════════════════════════════════════════
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    FORM
-══════════════════════════════════════════════ */
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 .adm-form { display: flex; flex-direction: column; gap: 0; }
 
 .adm-form-row { display: flex; flex-direction: column; gap: 5px; margin-bottom: 14px; }
@@ -1792,9 +1789,9 @@ button.adm-nav-link {
 
 textarea.adm-input { height: auto; padding: 10px 14px; resize: vertical; min-height: 72px; }
 
-/* ══════════════════════════════════════════════
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    TOGGLE SWITCH (forms)
-══════════════════════════════════════════════ */
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 .adm-toggle {
   width: 44px;
   height: 24px;
@@ -1829,9 +1826,9 @@ textarea.adm-input { height: auto; padding: 10px 14px; resize: vertical; min-hei
   box-shadow: 0 2px 8px rgba(34,197,94,0.35);
 }
 
-/* ══════════════════════════════════════════════
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    ACTIVITY LIST
-══════════════════════════════════════════════ */
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 .adm-activity-list { padding: 4px 0; }
 
 .adm-activity-row {
@@ -1849,9 +1846,9 @@ textarea.adm-input { height: auto; padding: 10px 14px; resize: vertical; min-hei
 .adm-activity-text { flex: 1; font-size: 13px; font-weight: 700; color: var(--adm-text); }
 .adm-activity-time { font-size: 11px; font-weight: 700; color: var(--adm-text-3); white-space: nowrap; }
 
-/* ══════════════════════════════════════════════
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    TOP ITEMS LIST
-══════════════════════════════════════════════ */
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 .adm-top-item {
   display: flex;
   align-items: center;
@@ -1882,9 +1879,9 @@ textarea.adm-input { height: auto; padding: 10px 14px; resize: vertical; min-hei
 .adm-top-item-name { flex: 1; font-size: 13px; font-weight: 800; color: var(--adm-text); }
 .adm-top-item-count { font-size: 12px; font-weight: 900; color: var(--adm-text-2); }
 
-/* ══════════════════════════════════════════════
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    TOAST NOTIFICATION
-══════════════════════════════════════════════ */
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 .adm-toast-wrap {
   position: fixed;
   top: 20px;
@@ -1927,9 +1924,9 @@ textarea.adm-input { height: auto; padding: 10px 14px; resize: vertical; min-hei
   to   { opacity: 1; transform: translateX(0)    scale(1); }
 }
 
-/* ══════════════════════════════════════════════
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    SKELETON LOADERS
-══════════════════════════════════════════════ */
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 @keyframes adm-shimmer {
   0%   { background-position: -400px 0; }
   100% { background-position: 400px 0; }
@@ -1958,9 +1955,9 @@ textarea.adm-input { height: auto; padding: 10px 14px; resize: vertical; min-hei
 .adm-skeleton-avatar { width: 36px; height: 36px; border-radius: 50%; }
 .adm-skeleton-line   { height: 12px; }
 
-/* ══════════════════════════════════════════════
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    ADMIN ROUTE LOADER
-══════════════════════════════════════════════ */
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 .adm-loader-page {
   display: flex;
   align-items: center;
@@ -1988,9 +1985,9 @@ textarea.adm-input { height: auto; padding: 10px 14px; resize: vertical; min-hei
 
 .adm-loader-text { font-size: 12px; font-weight: 700; color: var(--adm-text-3); letter-spacing: 0.3px; }
 
-/* ══════════════════════════════════════════════
-   RESPONSIVE — TABLET / MOBILE
-══════════════════════════════════════════════ */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+   RESPONSIVE â€” TABLET / MOBILE
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 @media (max-width: 1100px) {
   .adm-stats-grid { grid-template-columns: repeat(2, 1fr); }
   .adm-grid-2--wide { grid-template-columns: 1fr; }
@@ -2060,11 +2057,11 @@ textarea.adm-input { height: auto; padding: 10px 14px; resize: vertical; min-hei
   .adm-product-grid { grid-template-columns: 1fr; }
 }
 
-/* ══════════════════════════════════════════════
-   ORDER INFO PANEL — Kitchen management system
-══════════════════════════════════════════════ */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+   ORDER INFO PANEL â€” Kitchen management system
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
-/* ── Info toggle button ── */
+/* â”€â”€ Info toggle button â”€â”€ */
 .adm-info-btn {
   display: inline-flex;
   align-items: center;
@@ -2109,7 +2106,7 @@ textarea.adm-input { height: auto; padding: 10px 14px; resize: vertical; min-hei
   align-self: center;
 }
 
-/* ── Row states ── */
+/* â”€â”€ Row states â”€â”€ */
 .adm-order-row { cursor: default; }
 .adm-order-row--open { background: rgba(255,213,74,0.04) !important; }
 .adm-order-row--new  { background: rgba(22,163,74,0.06); }
@@ -2122,11 +2119,11 @@ textarea.adm-input { height: auto; padding: 10px 14px; resize: vertical; min-hei
 .adm-order-row--success { animation: adm-success-flash 2.4s ease forwards; }
 .adm-order-card--success { animation: adm-success-flash 2.4s ease forwards; }
 
-/* ── Expanded row container ── */
+/* â”€â”€ Expanded row container â”€â”€ */
 .adm-order-expanded-row { background: var(--adm-surface-1); }
 .adm-order-expanded-row > td { border-top: 2px solid rgba(255,213,74,0.30); }
 
-/* ── Info panel wrapper ── */
+/* â”€â”€ Info panel wrapper â”€â”€ */
 @keyframes adm-panel-enter {
   from { opacity: 0; transform: translateY(-6px); }
   to   { opacity: 1; transform: translateY(0); }
@@ -2136,7 +2133,7 @@ textarea.adm-input { height: auto; padding: 10px 14px; resize: vertical; min-hei
   animation: adm-panel-enter 0.22s ease;
 }
 
-/* ── Pipeline ── */
+/* â”€â”€ Pipeline â”€â”€ */
 .adm-info-panel-pipeline {
   padding: 18px 24px 16px;
   border-bottom: 1px solid var(--adm-border);
@@ -2205,7 +2202,7 @@ textarea.adm-input { height: auto; padding: 10px 14px; resize: vertical; min-hei
 .adm-pipeline-label--active { color: var(--adm-accent-text); font-weight: 900; }
 .adm-pipeline-label--done   { color: var(--adm-green); }
 
-/* ── Info grid (3 cols) ── */
+/* â”€â”€ Info grid (3 cols) â”€â”€ */
 .adm-info-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -2262,7 +2259,7 @@ textarea.adm-input { height: auto; padding: 10px 14px; resize: vertical; min-hei
   color: var(--adm-accent-text);
 }
 
-/* ── Order items section ── */
+/* â”€â”€ Order items section â”€â”€ */
 .adm-info-items-section {
   padding: 16px 22px;
   background: var(--adm-card-bg);
@@ -2353,7 +2350,7 @@ textarea.adm-input { height: auto; padding: 10px 14px; resize: vertical; min-hei
   font-weight: 700;
 }
 
-/* ── Kitchen action buttons ── */
+/* â”€â”€ Kitchen action buttons â”€â”€ */
 .adm-info-actions {
   display: flex;
   align-items: center;
@@ -2456,20 +2453,20 @@ textarea.adm-input { height: auto; padding: 10px 14px; resize: vertical; min-hei
   border: 1px solid rgba(220,38,38,0.20);
 }
 
-/* ── Toast type variants ── */
+/* â”€â”€ Toast type variants â”€â”€ */
 .adm-toast--accept   { border-left-color: #22c55e; }
 .adm-toast--delivery { border-left-color: #f59e0b; }
 .adm-toast--update   { border-left-color: var(--adm-blue); }
 .adm-toast--error    { border-left-color: var(--adm-red); }
 
-/* ══════════════════════════════════════════════
-   DARK MODE — info panel overrides
-══════════════════════════════════════════════ */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+   DARK MODE â€” info panel overrides
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 .adm-layout[data-theme="dark"] .adm-order-expanded-row {
-  background: rgba(255, 195, 100, 0.02);
+  background: rgba(255, 255, 255, 0.02);
 }
 .adm-layout[data-theme="dark"] .adm-order-expanded-row > td {
-  border-top-color: rgba(255,213,74,0.18);
+  border-top-color: rgba(255,255,255,0.07);
 }
 .adm-layout[data-theme="dark"] .adm-info-panel-pipeline {
   background: var(--adm-sidebar-bg);
@@ -2478,21 +2475,21 @@ textarea.adm-input { height: auto; padding: 10px 14px; resize: vertical; min-hei
   background: var(--adm-card-bg);
 }
 .adm-layout[data-theme="dark"] .adm-info-tag {
-  background: rgba(255, 195, 100, 0.06);
-  border-color: rgba(255, 195, 100, 0.10);
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.08);
   color: var(--adm-text-2);
 }
 .adm-layout[data-theme="dark"] .adm-info-item {
-  background: rgba(255, 195, 100, 0.04);
-  border-color: rgba(255, 195, 100, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+  border-color: rgba(255, 255, 255, 0.07);
 }
 .adm-layout[data-theme="dark"] .adm-info-items-section,
 .adm-layout[data-theme="dark"] .adm-info-actions {
   background: var(--adm-surface-0);
 }
 .adm-layout[data-theme="dark"] .adm-info-btn {
-  background: rgba(255, 195, 100, 0.05);
-  border-color: rgba(255, 195, 100, 0.10);
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.09);
   color: var(--adm-text-2);
 }
 .adm-layout[data-theme="dark"] .adm-info-btn:hover {
@@ -2524,9 +2521,9 @@ textarea.adm-input { height: auto; padding: 10px 14px; resize: vertical; min-hei
   border-color: rgba(248,113,113,0.20);
 }
 
-/* ══════════════════════════════════════════════
-   ORDER ROW — 3-column POS layout
-══════════════════════════════════════════════ */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+   ORDER ROW â€” 3-column POS layout
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
 .adm-orders-list { padding: 4px 0; }
 
@@ -2542,7 +2539,7 @@ textarea.adm-input { height: auto; padding: 10px 14px; resize: vertical; min-hei
   0%   { background: rgba(22,163,74,0.14); }
   100% { background: transparent; }
 }
-/* ── New order: pulse glow for 6 s then settle ── */
+/* â”€â”€ New order: pulse glow for 6 s then settle â”€â”€ */
 @keyframes adm-orow-new-glow {
   0%   { box-shadow: inset 3px 0 0 #22c55e, 0 0 0  0   rgba(22,163,74,0);    background: rgba(22,163,74,0.10); }
   25%  { box-shadow: inset 3px 0 0 #22c55e, 0 0 18px 4px rgba(22,163,74,0.14); background: rgba(22,163,74,0.08); }
@@ -2652,7 +2649,7 @@ textarea.adm-input { height: auto; padding: 10px 14px; resize: vertical; min-hei
 }
 .adm-pipe-info-row .adm-spipe { flex: 1; min-width: 0; }
 
-/* Driver badge inside right panel — stays a compact pill */
+/* Driver badge inside right panel â€” stays a compact pill */
 .adm-orow-right .adm-driver-badge {
   align-self: flex-start;
 }
@@ -2731,7 +2728,7 @@ textarea.adm-input { height: auto; padding: 10px 14px; resize: vertical; min-hei
 }
 
 /* CENTER: pipeline */
-/* adm-orow-center is no longer rendered — kept for reference */
+/* adm-orow-center is no longer rendered â€” kept for reference */
 .adm-orow-center {
   display: none;
 }
@@ -2751,7 +2748,7 @@ textarea.adm-input { height: auto; padding: 10px 14px; resize: vertical; min-hei
   animation: adm-panel-enter 0.20s ease;
 }
 
-/* ── Compact pipeline ── */
+/* â”€â”€ Compact pipeline â”€â”€ */
 .adm-cpipe {
   display: flex;
   align-items: center;
@@ -2836,7 +2833,7 @@ textarea.adm-input { height: auto; padding: 10px 14px; resize: vertical; min-hei
   font-weight: 800;
 }
 
-/* ── Row action buttons ── */
+/* â”€â”€ Row action buttons â”€â”€ */
 .adm-row-actions {
   display: flex;
   flex-direction: column;
@@ -2908,7 +2905,7 @@ textarea.adm-input { height: auto; padding: 10px 14px; resize: vertical; min-hei
   border-width: 1.5px;
 }
 
-/* ── Driver selector ── */
+/* â”€â”€ Driver selector â”€â”€ */
 .adm-driver-wrap {
   position: relative;
   width: 100%;
@@ -2974,7 +2971,7 @@ textarea.adm-input { height: auto; padding: 10px 14px; resize: vertical; min-hei
 .adm-driver-option:last-child { border-bottom: none; }
 .adm-driver-option:hover { background: rgba(255,213,74,0.10); color: var(--adm-accent-text); }
 .adm-driver-option--active { color: #16a34a; font-weight: 900; }
-.adm-driver-option--active::before { content: '✓ '; }
+.adm-driver-option--active::before { content: 'âœ“ '; }
 .adm-driver-badge {
   display: inline-flex;
   align-items: center;
@@ -2989,33 +2986,33 @@ textarea.adm-input { height: auto; padding: 10px 14px; resize: vertical; min-hei
   border-radius: 20px;
 }
 
-/* ── Dark mode: orow ── */
-.adm-layout[data-theme="dark"] .adm-orow { border-color: rgba(255, 195, 100, 0.08); }
+/* â”€â”€ Dark mode: orow â”€â”€ */
+.adm-layout[data-theme="dark"] .adm-orow { border-color: rgba(255, 255, 255, 0.06); }
 .adm-layout[data-theme="dark"] .adm-orow-main { background: transparent; }
-.adm-layout[data-theme="dark"] .adm-orow--open { border-left-color: rgba(255,213,74,0.35); }
-.adm-layout[data-theme="dark"] .adm-orow--open .adm-orow-main { background: rgba(255,213,74,0.025); }
-.adm-layout[data-theme="dark"] .adm-orow-left { border-color: rgba(255, 195, 100, 0.08); }
-.adm-layout[data-theme="dark"] .adm-orow-center { border-color: rgba(255, 195, 100, 0.08); }
-.adm-layout[data-theme="dark"] .adm-cpipe-dot { background: var(--adm-card-bg); border-color: rgba(255, 195, 100, 0.16); }
-.adm-layout[data-theme="dark"] .adm-cpipe-line { background: rgba(255, 195, 100, 0.10); }
+.adm-layout[data-theme="dark"] .adm-orow--open { border-left-color: rgba(255,213,74,0.30); }
+.adm-layout[data-theme="dark"] .adm-orow--open .adm-orow-main { background: rgba(255,213,74,0.02); }
+.adm-layout[data-theme="dark"] .adm-orow-left { border-color: rgba(255, 255, 255, 0.06); }
+.adm-layout[data-theme="dark"] .adm-orow-center { border-color: rgba(255, 255, 255, 0.06); }
+.adm-layout[data-theme="dark"] .adm-cpipe-dot { background: var(--adm-card-bg); border-color: rgba(255, 255, 255, 0.12); }
+.adm-layout[data-theme="dark"] .adm-cpipe-line { background: rgba(255, 255, 255, 0.08); }
 .adm-layout[data-theme="dark"] .adm-cpipe-cancelled {
   background: rgba(248,113,113,0.10);
   border-color: rgba(248,113,113,0.20);
   color: #f87171;
 }
 .adm-layout[data-theme="dark"] .adm-row-btn--cancel {
-  border-color: rgba(255, 195, 100, 0.12);
-  color: rgba(246, 240, 230, 0.40);
+  border-color: rgba(255, 255, 255, 0.10);
+  color: rgba(255, 255, 255, 0.35);
 }
 .adm-layout[data-theme="dark"] .adm-row-btn--cancel:hover:not(:disabled) {
   color: #f87171;
   border-color: rgba(248,113,113,0.30);
   background: rgba(248,113,113,0.08);
 }
-.adm-layout[data-theme="dark"] .adm-orow-drawer { border-top-color: rgba(255, 195, 100, 0.07); }
+.adm-layout[data-theme="dark"] .adm-orow-drawer { border-top-color: rgba(255, 255, 255, 0.06); }
 .adm-layout[data-theme="dark"] .adm-driver-btn {
-  background: rgba(255, 195, 100, 0.05);
-  border-color: rgba(255, 195, 100, 0.12);
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.09);
   color: var(--adm-text-2);
 }
 .adm-layout[data-theme="dark"] .adm-driver-btn:hover:not(:disabled) {
@@ -3050,7 +3047,7 @@ textarea.adm-input { height: auto; padding: 10px 14px; resize: vertical; min-hei
   border-color: rgba(74,222,128,0.18);
 }
 
-/* ── Smart Pipeline ── */
+/* â”€â”€ Smart Pipeline â”€â”€ */
 .adm-spipe { width: 100%; }
 
 .adm-spipe-track {
@@ -3218,12 +3215,12 @@ textarea.adm-input { height: auto; padding: 10px 14px; resize: vertical; min-hei
 
 .adm-spipe-driver-opt:disabled { opacity: 0.50; cursor: not-allowed; }
 
-/* ── Dark mode: smart pipeline ── */
+/* â”€â”€ Dark mode: smart pipeline â”€â”€ */
 .adm-layout[data-theme="dark"] .adm-spipe-dot {
   background: var(--adm-card-bg);
-  border-color: rgba(255, 195, 100, 0.16);
+  border-color: rgba(255, 255, 255, 0.14);
 }
-.adm-layout[data-theme="dark"] .adm-spipe-line { background: rgba(255, 195, 100, 0.10); }
+.adm-layout[data-theme="dark"] .adm-spipe-line { background: rgba(255, 255, 255, 0.08); }
 .adm-layout[data-theme="dark"] .adm-spipe-step--next.adm-spipe-step--clickable .adm-spipe-dot {
   border-color: rgba(255,213,74,0.45);
   background: rgba(255,213,74,0.06);
@@ -3244,8 +3241,8 @@ textarea.adm-input { height: auto; padding: 10px 14px; resize: vertical; min-hei
 }
 .adm-layout[data-theme="dark"] .adm-spipe-driver-title { color: #FFD54A; }
 .adm-layout[data-theme="dark"] .adm-spipe-driver-opt {
-  background: rgba(255, 195, 100, 0.04);
-  border-color: rgba(255, 195, 100, 0.10);
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.08);
   color: var(--adm-text-2);
 }
 .adm-layout[data-theme="dark"] .adm-spipe-driver-opt:hover:not(:disabled) {
@@ -3259,7 +3256,7 @@ textarea.adm-input { height: auto; padding: 10px 14px; resize: vertical; min-hei
   color: #4ade80;
 }
 
-/* ── Responsive: orow ── */
+/* â”€â”€ Responsive: orow â”€â”€ */
 @media (max-width: 640px) {
   .adm-orow-main { grid-template-columns: 1fr; }
   .adm-orow-left { border-right: none; border-bottom: 1px solid var(--adm-border-2); padding: 10px 14px; }
@@ -3270,7 +3267,7 @@ textarea.adm-input { height: auto; padding: 10px 14px; resize: vertical; min-hei
   .adm-spipe-driver-grid { grid-template-columns: repeat(4, 1fr); }
 }
 
-/* ── Responsive: info panel ── */
+/* â”€â”€ Responsive: info panel â”€â”€ */
 @media (max-width: 900px) {
   .adm-info-grid { grid-template-columns: 1fr 1fr; }
   .adm-info-section:nth-child(2) { border-right: none; }
@@ -3297,9 +3294,9 @@ textarea.adm-input { height: auto; padding: 10px 14px; resize: vertical; min-hei
   .adm-info-actions { padding: 14px 16px; }
 }
 
-/* ══════════════════════════════════════════════
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    RESTAURANT STATUS CONTROL (Dashboard)
-══════════════════════════════════════════════ */
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 .adm-status-control {
   display: flex;
   align-items: center;
@@ -3412,7 +3409,7 @@ textarea.adm-input { height: auto; padding: 10px 14px; resize: vertical; min-hei
 }
 
 /* ----------------------------------------------
-   ORDERING TOGGLE — Orders page header
+   ORDERING TOGGLE â€” Orders page header
 ---------------------------------------------- */
 .adm-ordering-toggle {
   display: inline-flex;
@@ -3550,7 +3547,7 @@ textarea.adm-input { height: auto; padding: 10px 14px; resize: vertical; min-hei
 }
 
 /* ----------------------------------------------
-   STATUS MINI BADGE — Dashboard header
+   STATUS MINI BADGE â€” Dashboard header
 ---------------------------------------------- */
 .adm-status-mini-badge {
   display: inline-flex;
@@ -3613,7 +3610,7 @@ textarea.adm-input { height: auto; padding: 10px 14px; resize: vertical; min-hei
 }
 
 /* ----------------------------------------------
-   3-STATE STATUS SELECTOR — Dashboard card
+   3-STATE STATUS SELECTOR â€” Dashboard card
 ---------------------------------------------- */
 .adm-status-selector {
   display: flex;
@@ -3750,7 +3747,7 @@ textarea.adm-input { height: auto; padding: 10px 14px; resize: vertical; min-hei
 }
 
 /* ----------------------------------------------
-   3-STATE STATUS SEG — Orders page header
+   3-STATE STATUS SEG â€” Orders page header
    (compact inline version)
 ---------------------------------------------- */
 .adm-orders-status-seg {
@@ -3839,3 +3836,311 @@ textarea.adm-input { height: auto; padding: 10px 14px; resize: vertical; min-hei
 
 .adm-status-mini-badge--online .adm-status-mini-dot { background: #22c55e; animation: adm-dot-pulse-green 2s ease-in-out infinite; }
 .adm-status-mini-badge--busy   .adm-status-mini-dot { background: #f97316; animation: adm-dot-pulse-orange 2s ease-in-out infinite; }
+
+
+/* ══════════════════════════════════════════════════════════════════
+   BURIZZA DASHBOARD — Complete structural redesign
+   Apple / Stripe / Linear aesthetic — guaranteed loading via admin.css
+   All rules scoped under .dash-page
+══════════════════════════════════════════════════════════════════ */
+
+/* ── Entrance animation ─────────────────────────────────────── */
+@keyframes dash-enter {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Hero header ────────────────────────────────────────────── */
+.dash-hero {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 0 28px; margin-bottom: 24px;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+  flex-wrap: wrap; gap: 14px;
+  animation: dash-enter 0.35s cubic-bezier(0.22,1,0.36,1) both;
+}
+.dash-hero-left  { display: flex; align-items: center; gap: 16px; }
+.dash-hero-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+.dash-title-group { display: flex; flex-direction: column; gap: 5px; }
+
+.dash-brand-icon {
+  width: 48px; height: 48px; border-radius: 13px; font-size: 24px;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  background: rgba(255,195,50,0.12); border: 1px solid rgba(255,195,60,0.18);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.28);
+}
+.dash-title {
+  font-size: clamp(22px, 2.6vw, 32px); font-weight: 800;
+  letter-spacing: -0.5px; line-height: 1.05; margin: 0; color: rgba(255,255,255,0.92);
+}
+.dash-subtitle {
+  display: flex; align-items: center; gap: 8px; font-size: 10.5px;
+  font-weight: 600; text-transform: uppercase; letter-spacing: 1.6px;
+  color: rgba(255,255,255,0.32);
+}
+.dash-live-chip {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 2px 8px 2px 6px; border-radius: 100px;
+  background: rgba(52,211,153,0.09); border: 1px solid rgba(52,211,153,0.18);
+  color: rgba(52,211,153,0.82); font-size: 9px; font-weight: 700; letter-spacing: 1.2px;
+}
+.dash-live-dot {
+  width: 6px; height: 6px; border-radius: 50%; background: #34d399; flex-shrink: 0;
+  animation: dash-live-pulse 2.5s ease-in-out infinite;
+}
+@keyframes dash-live-pulse {
+  0%,100% { opacity:1; transform:scale(1); }
+  50%      { opacity:0.38; transform:scale(0.65); }
+}
+
+/* ── Restaurant status bar ──────────────────────────────────── */
+.dash-page .adm-status-selector {
+  display: flex !important; align-items: center !important; justify-content: space-between !important;
+  padding: 15px 20px !important; border-radius: 12px !important; gap: 14px !important;
+  background: rgba(255,255,255,0.04) !important;
+  border: 1px solid rgba(255,255,255,0.08) !important;
+  backdrop-filter: blur(18px) !important;
+  -webkit-backdrop-filter: blur(18px) !important;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.26) !important;
+  margin-bottom: 24px !important;
+  animation: dash-enter 0.35s cubic-bezier(0.22,1,0.36,1) 0.05s both;
+}
+.dash-page .adm-status-selector-info { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0; }
+.dash-page .adm-status-selector-title { font-size: 13px; font-weight: 800; color: rgba(255,255,255,0.80); }
+.dash-page .adm-status-selector-desc  { font-size: 11.5px; font-weight: 600; color: rgba(255,255,255,0.32); margin-top: 1px; }
+.dash-page .adm-status-seg {
+  display: flex !important; gap: 3px !important;
+  background: rgba(0,0,0,0.24) !important;
+  border: 1px solid rgba(255,255,255,0.07) !important;
+  border-radius: 10px !important; padding: 3px !important;
+}
+.dash-page .adm-status-seg-btn {
+  padding: 8px 16px !important; border-radius: 8px !important;
+  font-size: 12.5px !important; font-weight: 700 !important;
+  border: none !important; background: transparent !important;
+  color: rgba(255,255,255,0.42) !important; cursor: pointer !important;
+  transition: all 0.15s ease !important;
+  display: flex !important; align-items: center !important; gap: 6px !important;
+}
+.dash-page .adm-status-seg-btn:not(:disabled):hover { color: rgba(255,255,255,0.68) !important; background: rgba(255,255,255,0.06) !important; }
+.dash-page .adm-status-seg-btn--online.adm-status-seg-btn--active { background: rgba(52,211,153,0.16) !important; color: rgba(52,211,153,0.92) !important; }
+.dash-page .adm-status-seg-btn--busy.adm-status-seg-btn--active   { background: rgba(251,146,60,0.16) !important;  color: rgba(251,146,60,0.92) !important;  }
+.dash-page .adm-status-seg-btn--closed.adm-status-seg-btn--active { background: rgba(248,113,113,0.16) !important; color: rgba(248,113,113,0.92) !important; }
+
+/* ── Stats grid ─────────────────────────────────────────────── */
+.dash-page .adm-stats-grid {
+  display: grid !important; grid-template-columns: repeat(4,1fr) !important;
+  gap: 14px !important; margin-bottom: 14px !important;
+  animation: dash-enter 0.35s cubic-bezier(0.22,1,0.36,1) 0.10s both;
+}
+@media (max-width: 900px) { .dash-page .adm-stats-grid { grid-template-columns: repeat(2,1fr) !important; } }
+@media (max-width: 520px)  { .dash-page .adm-stats-grid { grid-template-columns: 1fr !important; } }
+
+/* ── Stat card structural redesign ─────────────────────────── */
+.dash-page .adm-card.adm-stat-card {
+  padding: 22px 20px 18px !important;
+  border-radius: 14px !important;
+  border: 1px solid rgba(255,255,255,0.08) !important;
+  border-top: 2px solid transparent !important;
+  background: rgba(255,255,255,0.04) !important;
+  backdrop-filter: blur(22px) saturate(1.5) !important;
+  -webkit-backdrop-filter: blur(22px) saturate(1.5) !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.18), 0 6px 22px rgba(0,0,0,0.28) !important;
+  transition: transform 0.18s ease, box-shadow 0.18s ease !important;
+  margin-bottom: 0 !important;
+}
+.dash-page .adm-card.adm-stat-card:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.22), 0 10px 30px rgba(0,0,0,0.34) !important;
+}
+.dash-page .adm-stat-card--amber  { border-top-color: rgba(251,191,36,0.72) !important; }
+.dash-page .adm-stat-card--blue   { border-top-color: rgba(99,179,237,0.65)  !important; }
+.dash-page .adm-stat-card--green  { border-top-color: rgba(52,211,153,0.70)  !important; }
+.dash-page .adm-stat-card--orange { border-top-color: rgba(251,146,60,0.75)  !important; }
+.dash-page .adm-stat-card--purple { border-top-color: rgba(167,139,250,0.68) !important; }
+
+.dash-page .adm-stat-top { margin-bottom: 18px !important; }
+.dash-page .adm-stat-icon {
+  width: 38px !important; height: 38px !important; border-radius: 10px !important;
+  background: rgba(255,255,255,0.06) !important; border: 1px solid rgba(255,255,255,0.08) !important;
+}
+.dash-page .adm-stat-icon svg { width: 17px !important; height: 17px !important; }
+.dash-page .adm-stat-icon--amber  { color: rgba(251,191,36,0.85) !important; background: rgba(251,191,36,0.10) !important; }
+.dash-page .adm-stat-icon--blue   { color: rgba(99,179,237,0.85)  !important; background: rgba(99,179,237,0.10)  !important; }
+.dash-page .adm-stat-icon--green  { color: rgba(52,211,153,0.85)  !important; background: rgba(52,211,153,0.10)  !important; }
+.dash-page .adm-stat-icon--orange { color: rgba(251,146,60,0.85)  !important; background: rgba(251,146,60,0.10)  !important; }
+.dash-page .adm-stat-icon--purple { color: rgba(167,139,250,0.85) !important; background: rgba(167,139,250,0.10) !important; }
+
+.dash-page .adm-stat-value {
+  font-size: clamp(26px, 2.8vw, 36px) !important; font-weight: 800 !important;
+  letter-spacing: -0.8px !important; line-height: 1 !important;
+  color: rgba(255,255,255,0.92) !important; margin-bottom: 5px !important;
+}
+.dash-page .adm-stat-label {
+  font-size: 12px !important; font-weight: 700 !important;
+  color: rgba(255,255,255,0.48) !important; letter-spacing: 0.1px !important;
+}
+.dash-page .adm-stat-footer {
+  font-size: 11px !important; color: rgba(255,255,255,0.30) !important; margin-top: 3px !important;
+}
+
+/* ── Content cards ──────────────────────────────────────────── */
+.dash-page .adm-card:not(.adm-stat-card) {
+  background: rgba(255,255,255,0.04) !important;
+  border: 1px solid rgba(255,255,255,0.08) !important;
+  border-radius: 14px !important;
+  backdrop-filter: blur(20px) saturate(1.4) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(1.4) !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.22), 0 8px 28px rgba(0,0,0,0.26) !important;
+  margin-bottom: 0 !important;
+}
+
+/* ── Grid layout ────────────────────────────────────────────── */
+.dash-page .adm-grid-2 { gap: 14px !important; animation: dash-enter 0.35s cubic-bezier(0.22,1,0.36,1) 0.14s both; }
+.dash-page .adm-grid-2 + .adm-grid-2 { margin-top: 14px !important; animation-delay: 0.19s; }
+
+/* ── Section head inside cards ──────────────────────────────── */
+.dash-page .adm-section-head {
+  padding: 16px 20px 14px !important;
+  border-bottom: 1px solid rgba(255,255,255,0.07) !important;
+}
+.dash-page .adm-section-title {
+  font-size: 14px !important; font-weight: 800 !important;
+  color: rgba(240,236,228,0.88) !important; letter-spacing: -0.1px !important;
+}
+.dash-page .adm-section-action {
+  font-size: 12px !important; font-weight: 600 !important;
+  color: rgba(255,255,255,0.36) !important; letter-spacing: 0 !important;
+  text-decoration: none !important;
+}
+.dash-page .adm-section-action:hover { color: rgba(255,255,255,0.62) !important; }
+
+/* ── Chart card ─────────────────────────────────────────────── */
+.dash-page .adm-chart-wrap { padding: 18px 20px 16px !important; }
+.dash-page .adm-chart-title { font-size: 14px; font-weight: 800; color: rgba(240,236,228,0.88); margin-bottom: 2px; }
+.dash-page .adm-chart-sub   { font-size: 11px; font-weight: 600; color: rgba(255,255,255,0.30); margin-bottom: 14px; }
+
+/* ── Table ──────────────────────────────────────────────────── */
+.dash-page .adm-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.dash-page .adm-table { width: 100% !important; border-collapse: collapse !important; }
+.dash-page .adm-table th {
+  padding: 11px 18px !important; text-align: left !important; font-size: 10px !important;
+  font-weight: 700 !important; letter-spacing: 1.1px !important; text-transform: uppercase !important;
+  color: rgba(255,255,255,0.28) !important; background: transparent !important;
+  border-bottom: 1px solid rgba(255,255,255,0.07) !important; white-space: nowrap !important;
+}
+.dash-page .adm-table td {
+  padding: 14px 18px !important; border-bottom: 1px solid rgba(255,255,255,0.05) !important;
+  font-size: 13px !important; font-weight: 600 !important;
+  color: rgba(240,236,228,0.88) !important; vertical-align: middle !important;
+  white-space: nowrap !important;
+}
+.dash-page .adm-table tr:last-child td { border-bottom: none !important; }
+.dash-page .adm-table tbody tr { transition: background 0.12s ease !important; }
+.dash-page .adm-table tbody tr:hover { background: rgba(255,255,255,0.03) !important; }
+.dash-page .adm-table-muted {
+  font-size: 11.5px !important; font-weight: 600 !important; color: rgba(255,255,255,0.34) !important;
+}
+
+/* ── Status badges ──────────────────────────────────────────── */
+.dash-page .adm-badge {
+  display: inline-flex !important; align-items: center !important;
+  padding: 4px 11px !important; border-radius: 100px !important;
+  font-size: 11.5px !important; font-weight: 700 !important;
+  letter-spacing: 0.1px !important; white-space: nowrap !important;
+  border: 1px solid transparent !important;
+}
+.dash-page .adm-badge--green  { background: rgba(52,211,153,0.12) !important;  color: rgba(52,211,153,0.90) !important;  border-color: rgba(52,211,153,0.18) !important;  }
+.dash-page .adm-badge--amber  { background: rgba(251,191,36,0.11) !important;  color: rgba(251,191,36,0.88) !important;  border-color: rgba(251,191,36,0.18) !important;  }
+.dash-page .adm-badge--orange { background: rgba(251,146,60,0.11) !important;  color: rgba(251,146,60,0.90) !important;  border-color: rgba(251,146,60,0.18) !important;  }
+.dash-page .adm-badge--blue   { background: rgba(99,179,237,0.11) !important;  color: rgba(99,179,237,0.88) !important;  border-color: rgba(99,179,237,0.18) !important;  }
+.dash-page .adm-badge--red    { background: rgba(248,113,113,0.11) !important; color: rgba(248,113,113,0.88) !important; border-color: rgba(248,113,113,0.18) !important; }
+.dash-page .adm-badge--indigo { background: rgba(129,140,248,0.11) !important; color: rgba(129,140,248,0.88) !important; border-color: rgba(129,140,248,0.18) !important; }
+.dash-page .adm-badge--gray   { background: rgba(255,255,255,0.07) !important; color: rgba(255,255,255,0.48) !important; border-color: rgba(255,255,255,0.10) !important; }
+
+/* ── Status breakdown ───────────────────────────────────────── */
+.dash-page .adm-status-list  { padding: 6px 0; }
+.dash-page .adm-status-row   { display: flex; align-items: center; gap: 10px; padding: 9px 20px !important; }
+.dash-page .adm-status-row-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.dash-page .adm-status-row-label { font-size: 12.5px; font-weight: 600; color: rgba(240,236,228,0.78); min-width: 120px; }
+.dash-page .adm-status-row-bar-wrap { flex: 1; height: 4px; background: rgba(255,255,255,0.06); border-radius: 100px; overflow: hidden; }
+.dash-page .adm-status-row-bar { height: 100%; border-radius: 100px; transition: width 0.6s ease; opacity: 0.65; }
+.dash-page .adm-status-row-count { font-size: 12.5px; font-weight: 800; color: rgba(240,236,228,0.65); min-width: 22px; text-align: right; }
+
+/* ── Top items ──────────────────────────────────────────────── */
+.dash-page .adm-top-item {
+  display: flex !important; align-items: center !important; gap: 12px !important;
+  padding: 11px 20px !important; border-bottom: 1px solid rgba(255,255,255,0.05) !important;
+  transition: background 0.12s ease !important;
+}
+.dash-page .adm-top-item:last-child { border-bottom: none !important; }
+.dash-page .adm-top-item:hover { background: rgba(255,255,255,0.028) !important; }
+.dash-page .adm-top-item-rank {
+  width: 26px !important; height: 26px !important; border-radius: 7px !important;
+  display: flex !important; align-items: center !important; justify-content: center !important;
+  font-size: 12px !important; font-weight: 800 !important; flex-shrink: 0 !important;
+  background: rgba(255,255,255,0.06) !important; color: rgba(255,255,255,0.45) !important;
+  border: 1px solid rgba(255,255,255,0.08) !important; box-shadow: none !important;
+}
+.dash-page .adm-top-item:first-child  .adm-top-item-rank { background: rgba(251,191,36,0.14) !important; color: rgba(251,191,36,0.82) !important; border-color: rgba(251,191,36,0.22) !important; }
+.dash-page .adm-top-item:nth-child(2) .adm-top-item-rank { background: rgba(148,163,184,0.10) !important; color: rgba(148,163,184,0.75) !important; border-color: rgba(148,163,184,0.16) !important; }
+.dash-page .adm-top-item:nth-child(3) .adm-top-item-rank { background: rgba(175,115,55,0.12) !important; color: rgba(205,145,80,0.80) !important; border-color: rgba(175,115,55,0.18) !important; }
+.dash-page .adm-top-item-emoji { font-size: 20px !important; flex-shrink: 0 !important; }
+.dash-page .adm-top-item-name  { flex: 1 !important; font-size: 14px !important; font-weight: 700 !important; color: rgba(240,236,228,0.82) !important; }
+.dash-page .adm-top-item-count { font-size: 12.5px !important; font-weight: 800 !important; color: rgba(255,255,255,0.38) !important; flex-shrink: 0 !important; }
+/* ── Mobile responsive dashboard ──────────────────────────────── */
+@media (max-width: 640px) {
+  .dash-page .adm-stat-value  { font-size: clamp(22px, 7vw, 30px) !important; }
+  .dash-page .adm-stat-label  { font-size: 11.5px !important; }
+  .dash-page .adm-status-seg  { flex-wrap: wrap !important; gap: 4px !important; }
+  .dash-page .adm-status-seg-btn { padding: 7px 12px !important; font-size: 11.5px !important; }
+  .dash-page .adm-section-head { padding: 13px 16px 11px !important; }
+  .dash-page .adm-status-row  { padding: 8px 16px !important; }
+  .dash-page .adm-top-item    { padding: 10px 16px !important; }
+}
+
+/* ── Stat card text spacing ────────────────────────────────────── */
+.dash-page .adm-stat-top {
+  display: flex !important;
+  align-items: flex-start !important;
+  justify-content: space-between !important;
+  margin-bottom: 14px !important;
+}
+
+/* ── Chart bar hover state ─────────────────────────────────────── */
+.dash-page .adm-bar-chart-labels {
+  display: flex !important;
+  justify-content: space-between !important;
+  margin-top: 8px !important;
+  padding: 0 2px !important;
+}
+
+.dash-page .adm-bar-chart-label {
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.5px !important;
+  color: rgba(255,255,255,0.30) !important;
+  text-align: center !important;
+  flex: 1 !important;
+}
+
+/* ── Order card polish for mobile ──────────────────────────────── */
+.dash-page .adm-order-card {
+  border-radius: 12px !important;
+  padding: 14px 16px !important;
+}
+
+.dash-page .adm-order-card-id {
+  font-family: 'Courier New', monospace !important;
+  font-size: 10.5px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.8px !important;
+  color: rgba(255,255,255,0.38) !important;
+}
+
+.dash-page .adm-empty-emoji { font-size: 36px !important; }
+.dash-page .adm-empty-title {
+  font-size: 14px !important; font-weight: 800 !important;
+  color: rgba(255,255,255,0.48) !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════ */

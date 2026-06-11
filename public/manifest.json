@@ -1,0 +1,18 @@
+{
+  "name": "BURIZZA",
+  "short_name": "BURIZZA",
+  "description": "Build your perfect pizza or burger — BURIZZA",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#F5C518",
+  "background_color": "#F5C518",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

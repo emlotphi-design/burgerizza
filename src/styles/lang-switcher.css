@@ -1,24 +1,24 @@
-/* ══════════════════════════════════════════════════
+﻿/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    LANGUAGE SWITCHER
    Used in navbar, mobile menu, and admin sidebar.
    Two variants: default (light page) and --dark (admin).
-══════════════════════════════════════════════════ */
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
 .lang-sw {
   position: relative;
   display: inline-flex;
 }
 
-/* ── Trigger button ── */
+/* â”€â”€ Trigger button â”€â”€ */
 .lang-sw-trigger {
   display: flex;
   align-items: center;
   gap: 5px;
   padding: 6px 10px;
   border-radius: 20px;
-  border: 1.5px solid rgba(26, 10, 0, 0.14);
-  background: rgba(26, 10, 0, 0.04);
-  color: #1A0A00;
+  border: 1.5px solid rgba(255, 255, 255, 0.68);
+  background: rgba(255, 255, 255, 0.55);
+  color: rgba(26, 10, 0, 0.80);
   font-family: 'Nunito', sans-serif;
   font-size: 13px;
   font-weight: 800;
@@ -29,8 +29,8 @@
   touch-action: manipulation;
 }
 .lang-sw-trigger:hover {
-  background: rgba(26, 10, 0, 0.08);
-  border-color: rgba(26, 10, 0, 0.24);
+  background: rgba(255, 255, 255, 0.72);
+  border-color: rgba(255, 255, 255, 0.80);
 }
 
 /* Dark variant (admin sidebar) */
@@ -63,19 +63,22 @@
 }
 .lang-sw-chevron--open { transform: rotate(180deg); }
 
-/* ── Dropdown menu ── */
+/* â”€â”€ Dropdown menu â”€â”€ */
 .lang-sw-menu {
   position: absolute;
   top: calc(100% + 6px);
   /* Default: align left edge with trigger */
   left: 0;
   min-width: 180px;
-  background: #FFFDF5;
-  border: 1.5px solid rgba(200, 175, 100, 0.30);
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(18px) saturate(1.4);
+  -webkit-backdrop-filter: blur(18px) saturate(1.4);
+  border: 1.5px solid rgba(255, 255, 255, 0.90);
   border-radius: 14px;
   padding: 5px;
   box-shadow:
-    0 8px 32px rgba(0, 0, 0, 0.12),
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.95),
+    0 8px 32px rgba(0, 0, 0, 0.10),
     0 2px 8px rgba(0, 0, 0, 0.06);
   z-index: 9000;
   animation: lang-sw-appear 0.14s cubic-bezier(0.22, 1, 0.36, 1) both;
@@ -105,7 +108,7 @@
   to   { opacity: 1; transform: translateY(0)    scale(1);    }
 }
 
-/* ── Option buttons ── */
+/* â”€â”€ Option buttons â”€â”€ */
 .lang-sw-option {
   display: flex;
   align-items: center;
@@ -115,7 +118,7 @@
   border: none;
   border-radius: 9px;
   background: transparent;
-  color: #1A0A00;
+  color: rgba(26, 10, 0, 0.80);
   font-family: 'Nunito', sans-serif;
   font-size: 13px;
   font-weight: 700;
@@ -126,11 +129,12 @@
   touch-action: manipulation;
 }
 .lang-sw-option:hover {
-  background: rgba(255, 213, 74, 0.16);
+  background: rgba(200, 0, 30, 0.08);
 }
 .lang-sw-option--active {
-  background: rgba(255, 213, 74, 0.22);
+  background: rgba(200, 0, 30, 0.10);
   font-weight: 900;
+  color: #C8001E;
 }
 
 /* Dark variant options */
@@ -157,12 +161,12 @@
 
 .lang-sw-check {
   flex-shrink: 0;
-  color: #C8A000;
+  color: #C8001E;
   margin-left: auto;
 }
 .lang-sw--dark .lang-sw-check { color: #FFD54A; }
 
-/* ── Mobile: full-width in mobile menu ── */
+/* â”€â”€ Mobile: full-width in mobile menu â”€â”€ */
 .mm-sidebar .lang-sw {
   width: 100%;
 }
@@ -179,3 +183,5 @@
   min-width: unset;
   width: 100%;
 }
+
+

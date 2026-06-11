@@ -4,18 +4,78 @@
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;700;800;900&display=swap');
 
 /* ══════════════════════════════════════════
-   GLOBAL CUSTOM PROPERTIES
+   BURIZZA DESIGN TOKENS
 ══════════════════════════════════════════ */
 :root {
   --nav-h:    72px;
-  --nav-top:  14px;                              /* navbar top: 14px offset */
-  --nav-safe: calc(var(--nav-h) + var(--nav-top)); /* true visual clearance = 86px */
+  --nav-top:  14px;
+  --nav-safe: calc(var(--nav-h) + var(--nav-top));
+
+  /* ── Brand ── */
+  --bz-orange:   #FF6B1A;
+  --bz-amber:    #FFB730;
+  --bz-orange-2: #FF8C3A;
+  --bz-orange-3: #E55A0E;
+
+  /* ── Surfaces ── */
+  --bz-bg:        #080808;
+  --bz-surface:   rgba(20, 20, 20, 0.65);
+  --bz-surface-2: rgba(255, 255, 255, 0.05);
+  --bz-surface-3: rgba(255, 255, 255, 0.03);
+
+  /* ── Text hierarchy ── */
+  --bz-text:   rgba(255, 255, 255, 0.92);
+  --bz-text-2: rgba(255, 255, 255, 0.50);
+  --bz-text-3: rgba(255, 255, 255, 0.28);
+  --bz-text-4: rgba(255, 255, 255, 0.15);
+
+  /* ── Borders ── */
+  --bz-border:   rgba(255, 255, 255, 0.08);
+  --bz-border-2: rgba(255, 255, 255, 0.05);
+
+  /* ── Elevation / Depth ── */
+  --bz-shadow:   0 8px 32px rgba(0, 0, 0, 0.45);
+  --bz-shadow-2: 0 4px 16px rgba(0, 0, 0, 0.30);
+  --bz-shadow-3: 0 20px 60px rgba(0, 0, 0, 0.55);
+  --bz-blur:     blur(18px);
+  --bz-blur-2:   blur(28px);
+  --bz-radius:   24px;
+  --bz-radius-2: 16px;
+  --bz-radius-3: 12px;
+
+  /* ── Spacing scale ── */
+  --sp-1:  4px;
+  --sp-2:  8px;
+  --sp-3:  12px;
+  --sp-4:  16px;
+  --sp-5:  20px;
+  --sp-6:  24px;
+  --sp-8:  32px;
+  --sp-10: 40px;
+  --sp-12: 48px;
+  --sp-16: 64px;
+
+  /* ── Typography scale ── */
+  --text-xs:   10px;
+  --text-sm:   12px;
+  --text-base: 14px;
+  --text-md:   16px;
+  --text-lg:   18px;
+  --text-xl:   22px;
+  --text-2xl:  28px;
+  --text-3xl:  36px;
+  --text-4xl:  48px;
+
+  /* ── Orange accent helpers ── */
+  --bz-orange-bg:     rgba(255, 107, 26, 0.10);
+  --bz-orange-border: rgba(255, 107, 26, 0.22);
+  --bz-orange-glow:   0 8px 28px rgba(255, 107, 26, 0.38);
 }
 
 @media (max-width: 900px) {
   :root {
     --nav-h:    68px;
-    --nav-safe: calc(var(--nav-h) + var(--nav-top)); /* 82px on tablet/mobile */
+    --nav-safe: calc(var(--nav-h) + var(--nav-top));
   }
 }
 
@@ -35,10 +95,7 @@
 ══════════════════════════════════════════ */
 .page {
   min-height: 100vh;
-  background-image: url('/background.png');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
+  background: transparent;
   position: relative;
   display: flex;
   flex-direction: column;
@@ -53,8 +110,8 @@
   height: 100%;
   pointer-events: none;
   z-index: 1;
-  opacity: 0.065;
-  mix-blend-mode: multiply;
+  opacity: 0.035;
+  mix-blend-mode: screen;
 }
 
 /* ══════════════════════════════════════════
@@ -70,7 +127,7 @@
 .sc {
   position: absolute;
   display: block;
-  color: rgba(26, 10, 0, 0.10);
+  color: rgba(255, 107, 26, 0.07);
 }
 
 .sc svg {
@@ -162,50 +219,67 @@
   transform: rotate(-6deg);
 }
 
+/* ══════════════════════════════════════════
+   CUSTOMER-FACING BACKGROUND SYSTEM
+   Original BURIZZA brand palette:
+   warm yellow background.png fully visible,
+   soft edge vignette only for depth.
+   NO dark overlay. Light & warm.
+
+   Layer stack (top → bottom):
+     1  SVG grain    — subtle premium texture
+     2  Soft vignette — gentle edge shadow only
+     3  background.png — warm yellow food icons
+     4  Solid base   — #F5C518 brand yellow
+══════════════════════════════════════════ */
 html {
-  /* Always reserve the scrollbar gutter so its appearance/disappearance
-     never shifts page width during route transitions. */
   overflow-y: scroll;
   scrollbar-gutter: stable;
   overflow-x: hidden;
-  /* Fills iOS overscroll bounce area with brand yellow instead of white */
-  background-color: #F5C518;
-  /* iOS viewport fill — ensures html covers the full screen height */
   height: -webkit-fill-available;
-  /* Prevent iOS font inflation */
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
+
+  background-image:
+    /* 1 — film grain — premium organic texture */
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.68' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23n)' opacity='0.042'/%3E%3C/svg%3E"),
+    /* 2 — soft vignette — gentle depth at edges only */
+    radial-gradient(ellipse 110% 110% at 50% 50%,
+      transparent 48%, rgba(0, 0, 0, 0.28) 100%),
+    /* 3 — illustrated food tile — fully visible warm yellow */
+    url('/background.png');
+  background-color:      #F5C518;
+  background-size:
+    220px 220px,
+    cover,
+    420px auto;
+  background-repeat:
+    repeat,
+    no-repeat,
+    repeat;
+  background-position:
+    center,
+    center,
+    center;
+  background-attachment: fixed;
 }
 
 @media (max-width: 900px) {
   html {
-    /* Mobile has no visible scrollbar — remove the reserved gutter column */
     scrollbar-gutter: auto;
   }
 
-  /* ── iOS Safari mobile fixes ────────────────────────────────────────
-     background-attachment: fixed breaks on iOS — background fails to
-     render or shows white. Switch to scroll on mobile.
-     padding-bottom covers the home-indicator safe area on notched
-     iPhones (active when viewport-fit=cover is set).
-  ──────────────────────────────────────────────────────────────────── */
   body {
-    background-attachment: scroll;
     padding-bottom: env(safe-area-inset-bottom, 0px);
   }
 }
 
 body {
-  background-image: url('../assets/backgrounds/bg.png');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-attachment: fixed;
-  /* Solid fallback shown when image hasn't loaded + fills overscroll area */
-  background-color: #F5C518;
+  /* Transparent so html atmospheric background shows through */
+  background: transparent;
   min-height: 100vh;
-  min-height: -webkit-fill-available; /* older iOS Safari */
-  min-height: 100dvh;                 /* modern mobile-safe unit */
+  min-height: -webkit-fill-available;
+  min-height: 100dvh;
   overflow-x: hidden;
 }
 
@@ -213,6 +287,7 @@ body {
 #root {
   min-height: 100vh;
   min-height: 100dvh;
+  position: relative;
 }
 
 /* ══════════════════════════════════════════
@@ -242,7 +317,7 @@ body {
 ══════════════════════════════════════════ */
 .app-page {
   height: 100vh;
-  height: 100dvh;   /* dvh adjusts for mobile browser chrome */
+  height: 100dvh;
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -250,7 +325,7 @@ body {
 
 .app-content {
   flex: 1;
-  min-height: 0;    /* required for flex children to scroll internally */
+  min-height: 0;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;

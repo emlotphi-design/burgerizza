@@ -42,7 +42,7 @@ export const SITE_URL = (import.meta.env.VITE_SITE_URL ?? window.location.origin
 
 // Redirect URL used for every Supabase auth email (signup, password reset).
 // Must be listed in: Supabase Dashboard → Auth → URL Configuration → Redirect URLs
-// In production this is https://burgerizza-iota.vercel.app/auth/callback
+// In production this is https://burgerizza-iota.vercel.app/auth/callback  (domain kept — Supabase redirect URI)
 // Override via VITE_SITE_URL env var for staging environments.
 export const AUTH_REDIRECT = `${SITE_URL}/auth/callback`;
 

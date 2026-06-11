@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom';
+﻿import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 
 export default function ComingSoon() {
@@ -21,7 +21,7 @@ export default function ComingSoon() {
         <h1 style={{
           fontWeight: 900,
           fontSize: 'clamp(38px, 9vw, 68px)',
-          color: '#1A0A00',
+          color: 'rgba(255,255,255,0.90)',
           letterSpacing: '2px',
           lineHeight: 1.1,
           margin: 0,
@@ -31,7 +31,7 @@ export default function ComingSoon() {
         <p style={{
           fontWeight: 700,
           fontSize: '16px',
-          color: '#1A0A00',
+          color: 'rgba(255,255,255,0.90)',
           opacity: 0.45,
           maxWidth: '260px',
           margin: 0,
@@ -45,8 +45,8 @@ export default function ComingSoon() {
             padding: '13px 30px',
             borderRadius: '50px',
             border: 'none',
-            background: 'linear-gradient(135deg, #F5C518 0%, #FFA722 100%)',
-            color: '#1A0A00',
+            background: 'linear-gradient(135deg, #FF8C3A 0%, #FF6B1A 100%)',
+            color: 'rgba(255,255,255,0.90)',
             fontFamily: "'Nunito', sans-serif",
             fontWeight: 900,
             fontSize: '15px',

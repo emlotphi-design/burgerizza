@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+﻿import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Socials from '../components/Socials';
@@ -33,7 +33,7 @@ function Toast({ toast }) {
         left: '50%',
         transform: 'translateX(-50%)',
         zIndex: 9999,
-        background: toast.type === 'error' ? '#C8001E' : '#3db96e',
+        background: toast.type === 'error' ? '#FF3B30' : '#3db96e',
         color: '#fff',
         fontFamily: 'Nunito, sans-serif',
         fontWeight: 700,
@@ -277,20 +277,20 @@ function ForgotPasswordForm({ onBack, showToast, onPhoneVerified }) {
           {/* Honest message: Supabase returns success even for unregistered emails
               (enumeration protection), so we can't confirm delivery. */}
           <p className="co-form-sub">
-            Falls <strong style={{ color: '#1A0A00' }}>{email}</strong> in unserem System
+            Falls <strong style={{ color: 'rgba(255,255,255,0.90)' }}>{email}</strong> in unserem System
             registriert ist, erhältst du in Kürze einen Reset-Link.
             Der Link ist <strong>60 Minuten</strong> gültig.
           </p>
         </div>
 
         <div style={{
-          background: 'rgba(26,10,0,0.04)',
-          border: '1px solid rgba(26,10,0,0.09)',
+          background: 'rgba(255,255,255,0.05)',
+          border: '1px solid rgba(255,255,255,0.09)',
           borderRadius: 14,
           padding: '14px 18px',
           marginBottom: 20,
         }}>
-          <p className="co-form-sub" style={{ fontWeight: 800, color: '#1A0A00', marginBottom: 6 }}>
+          <p className="co-form-sub" style={{ fontWeight: 800, color: 'rgba(255,255,255,0.85)', marginBottom: 6 }}>
             E-Mail nicht angekommen?
           </p>
           <ul style={{ paddingLeft: 18, margin: 0, display: 'flex', flexDirection: 'column', gap: 4 }}>
@@ -330,7 +330,7 @@ function ForgotPasswordForm({ onBack, showToast, onPhoneVerified }) {
           <h2 className="co-form-title">Code eingeben</h2>
           <p className="co-form-sub">
             Wir haben einen 6-stelligen Code an{' '}
-            <strong style={{ color: '#1A0A00' }}>{phone}</strong> gesendet.
+            <strong style={{ color: 'rgba(255,255,255,0.90)' }}>{phone}</strong> gesendet.
             Dieser Code ist 10 Minuten gültig.
           </p>
         </div>
@@ -367,9 +367,9 @@ function ForgotPasswordForm({ onBack, showToast, onPhoneVerified }) {
   // ── Main form: email or phone input ─────────────────────
   const tabStyle = (active) => ({
     flex: 1, height: 40, borderRadius: 12,
-    border: active ? '2px solid #C8001E' : '1.5px solid rgba(26,10,0,0.15)',
+    border: active ? '2px solid #FF6B1A' : '1.5px solid rgba(255,255,255,0.14)',
     background: active ? 'rgba(200,0,30,0.06)' : 'transparent',
-    color: active ? '#C8001E' : '#8A7A6A',
+    color: active ? '#FF6B1A' : 'rgba(255,255,255,0.45)',
     fontFamily: 'Nunito, sans-serif', fontWeight: 800, fontSize: 13,
     cursor: 'pointer', transition: 'all 0.15s ease',
   });
@@ -737,18 +737,18 @@ function RegisterForm({ onSuccess, showToast }) {
           <h2 className="co-form-title">E-Mail bestätigen</h2>
           <p className="co-form-sub">
             Wir haben einen Bestätigungslink an{' '}
-            <strong style={{ color: '#1A0A00' }}>{fields.email}</strong> gesendet.
+            <strong style={{ color: 'rgba(255,255,255,0.90)' }}>{fields.email}</strong> gesendet.
           </p>
         </div>
 
         <div style={{
-          background: 'rgba(26,10,0,0.04)',
-          border: '1px solid rgba(26,10,0,0.09)',
+          background: 'rgba(255,255,255,0.05)',
+          border: '1px solid rgba(255,255,255,0.09)',
           borderRadius: 14,
           padding: '14px 18px',
           marginBottom: 20,
         }}>
-          <p className="co-form-sub" style={{ marginBottom: 6, fontWeight: 800, color: '#1A0A00' }}>
+          <p className="co-form-sub" style={{ marginBottom: 6, fontWeight: 800, color: 'rgba(255,255,255,0.85)' }}>
             E-Mail nicht angekommen?
           </p>
           <ul style={{ paddingLeft: 18, margin: 0, display: 'flex', flexDirection: 'column', gap: 4 }}>
@@ -771,7 +771,7 @@ function RegisterForm({ onSuccess, showToast }) {
         </button>
 
         {resendStatus === 'error' && (
-          <p style={{ color: '#C8001E', fontSize: 12, fontWeight: 700, textAlign: 'center', marginBottom: 8 }}>
+          <p style={{ color: '#FF3B30', fontSize: 12, fontWeight: 700, textAlign: 'center', marginBottom: 8 }}>
             Supabase erlaubt nur 2 E-Mails/Stunde. Bitte warte kurz.
           </p>
         )}

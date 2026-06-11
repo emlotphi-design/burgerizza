@@ -1,12 +1,12 @@
-/* ═══════════════════════════════════════════════
-   BURGER SIDEBAR — left category rail
-════════════════════════════════════════════════ */
+﻿/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+   BURGER SIDEBAR â€” left category rail
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
 
-/* ── Rail container ─────────────────────────────
-   Fixed, vertically centered, no background —
+/* â”€â”€ Rail container â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+   Fixed, vertically centered, no background â€”
    icons float directly on the page background.
-─────────────────────────────────────────────── */
+â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .bs-rail {
   position: fixed;
   left: 86px;
@@ -24,7 +24,7 @@
 }
 
 
-/* ── Individual category button ─────────────── */
+/* â”€â”€ Individual category button â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .bs-item {
   width: 100%;
   padding: 8px 4px 6px;
@@ -51,7 +51,7 @@
   filter: drop-shadow(0 3px 10px rgba(245, 155, 0, 0.42));
 }
 
-/* ── Locked state (no bun selected yet) ────── */
+/* â”€â”€ Locked state (no bun selected yet) â”€â”€â”€â”€â”€â”€ */
 .bs-item--locked {
   opacity: 0.32;
   cursor: not-allowed;
@@ -75,7 +75,7 @@
 }
 
 
-/* ── Icon ───────────────────────────────────── */
+/* â”€â”€ Icon â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .bs-item__icon {
   display: flex;
   align-items: center;
@@ -98,14 +98,14 @@
 }
 
 
-/* ── Label ──────────────────────────────────── */
+/* â”€â”€ Label â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .bs-item__label {
   font-family: 'Nunito', sans-serif;
   font-weight: 900;
   font-size: 9.5px;
   letter-spacing: 0.8px;
   text-transform: uppercase;
-  color: rgba(26, 10, 0, 0.45);
+  color: rgba(26, 10, 0, 0.42);
   text-align: center;
   line-height: 1;
   transition: color 0.18s ease;
@@ -116,12 +116,12 @@
 }
 
 
-/* ── Responsive ─────────────────────────────── */
+/* â”€â”€ Responsive â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
-/* Tablet / mobile — horizontal pill in flow below canvas, mirrors pizza category-toolbar */
+/* Tablet / mobile â€” horizontal pill in flow below canvas, mirrors pizza category-toolbar */
 @media (max-width: 900px) {
   .bs-rail {
-    /* In-flow (not fixed) — sits naturally below name input, same as pizza toolbar */
+    /* In-flow (not fixed) â€” sits naturally below name input, same as pizza toolbar */
     position: static;
     transform: none;
 
@@ -157,7 +157,7 @@
     height: 42px;
   }
 
-  /* Active glow — matches pizza cat-btn--active */
+  /* Active glow â€” matches pizza cat-btn--active */
   .bs-item--active {
     background: rgba(255, 210, 63, 0.22);
     box-shadow:
@@ -167,7 +167,7 @@
   }
 }
 
-/* Small phone — iPhone SE and similar */
+/* Small phone â€” iPhone SE and similar */
 @media (max-width: 480px) {
   .bs-rail {
     gap: 2px;
@@ -184,3 +184,4 @@
     height: 36px;
   }
 }
+

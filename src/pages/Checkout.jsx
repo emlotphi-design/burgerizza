@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Socials from '../components/Socials';
@@ -285,7 +285,7 @@ function StepAccount({ profile, onSkip, onCreated }) {
             <path d="M5 12h14M12 5l7 7-7 7" />
           </svg>
         </button>
-        <p style={{ fontFamily: 'Nunito, sans-serif', fontSize: 11, fontWeight: 700, color: 'rgba(26,10,0,0.38)', textAlign: 'center', marginTop: 14 }}>
+        <p style={{ fontFamily: 'Nunito, sans-serif', fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.35)', textAlign: 'center', marginTop: 14 }}>
           Deine Bestellung wird sofort platziert. Die Adressspeicherung erfolgt nach der E-Mail-Bestätigung.
         </p>
       </div>
@@ -363,7 +363,7 @@ const PAYMENT_METHODS = [
   {
     id: 'card', label: 'Kreditkarte', sub: 'Visa, Mastercard, Amex',
     icon: (
-      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#1A0A00" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="rgba(26,10,0,0.65)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
         <rect x="2" y="5" width="20" height="14" rx="2" /><line x1="2" y1="10" x2="22" y2="10" /><line x1="6" y1="15" x2="10" y2="15" />
       </svg>
     ),
@@ -371,7 +371,7 @@ const PAYMENT_METHODS = [
   {
     id: 'apple', label: 'Apple Pay', sub: 'Mit Face ID oder Touch ID',
     icon: (
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="#1A0A00">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="rgba(26,10,0,0.70)">
         <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z" />
       </svg>
     ),
@@ -682,7 +682,7 @@ function RestaurantCheckout() {
   /* ── Styles (uses website palette, no admin CSS) ── */
   const brand = { fontFamily: 'Nunito, sans-serif' };
   const accent = '#FFD54A';
-  const dark = '#1A0A00';
+  const dark = 'rgba(255,255,255,0.88)';
 
   if (done) {
     return (
@@ -770,7 +770,7 @@ function RestaurantCheckout() {
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 6 }}>
                 {[{ id: 'walkin', l: 'Walk-in', i: '🚶' }, { id: 'pickup', l: 'Pickup', i: '🏃' }, { id: 'dine_in', l: 'Dine-in', i: '🪑' }].map(t => (
-                  <div key={t.id} style={{ padding: '8px 4px', borderRadius: 10, border: `1.5px solid ${rmConfig.orderType === t.id ? accent : '#E8E0CB'}`, background: rmConfig.orderType === t.id ? `rgba(255,213,74,0.14)` : '#FFFDF5', textAlign: 'center', fontSize: 10, fontWeight: 800, color: rmConfig.orderType === t.id ? '#8B6914' : '#A09070' }}>
+                  <div key={t.id} style={{ padding: '8px 4px', borderRadius: 10, border: `1.5px solid ${rmConfig.orderType === t.id ? accent : 'rgba(255,255,255,0.12)'}`, background: rmConfig.orderType === t.id ? `rgba(255,213,74,0.14)` : '#FFFDF5', textAlign: 'center', fontSize: 10, fontWeight: 800, color: rmConfig.orderType === t.id ? 'rgba(255,107,26,0.88)' : 'rgba(255,255,255,0.45)' }}>
                     <div style={{ fontSize: 16 }}>{t.i}</div>
                     {t.l}
                   </div>

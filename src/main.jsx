@@ -29,19 +29,19 @@ class ErrorBoundary extends Component {
         <div style={{
           display: 'flex', flexDirection: 'column', alignItems: 'center',
           justifyContent: 'center', minHeight: '100vh', padding: 24,
-          fontFamily: 'Nunito, sans-serif', background: '#F5C518',
+          fontFamily: 'Nunito, sans-serif', background: '#080808',
           textAlign: 'center',
         }}>
-          <h2 style={{ color: '#1A0A00', marginBottom: 12, fontSize: 22, fontWeight: 900 }}>
+          <h2 style={{ color: 'rgba(255,255,255,0.90)', marginBottom: 12, fontSize: 22, fontWeight: 900 }}>
             Ups! Etwas ist schiefgelaufen.
           </h2>
-          <p style={{ color: '#1A0A00', marginBottom: 28, maxWidth: 340, fontWeight: 700 }}>
+          <p style={{ color: 'rgba(255,255,255,0.50)', marginBottom: 28, maxWidth: 340, fontWeight: 700 }}>
             Bitte lade die Seite neu. Wenn das Problem weiterhin besteht, leere deinen Browser-Cache.
           </p>
           <button
             onClick={() => window.location.reload()}
             style={{
-              background: '#1A0A00', color: '#F5C518', border: 'none',
+              background: '#FF6B1A', color: '#fff', border: 'none',
               borderRadius: 50, padding: '12px 32px', fontSize: 16,
               fontWeight: 900, cursor: 'pointer', fontFamily: 'Nunito, sans-serif',
             }}

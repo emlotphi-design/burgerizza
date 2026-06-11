@@ -35,7 +35,6 @@ export default function CategoryPage() {
       emoji:       product.emoji,
     });
 
-    // Visual feedback: green "Added" state for 1.5s
     setAddedIds(prev => new Set([...prev, product.id]));
     setTimeout(() => {
       setAddedIds(prev => {
@@ -52,53 +51,59 @@ export default function CategoryPage() {
 
       <main className="cat-page-main">
 
-        {/* Hero header */}
+        {/* ── Page hero ── */}
         <div className="cat-page-hero">
-          <span className="cat-page-emoji" aria-hidden="true">
-            {catData.emoji}
-          </span>
+          <div className="cat-page-emoji-wrap" aria-hidden="true">
+            <span className="cat-page-emoji">{catData.emoji}</span>
+          </div>
           <h1 className="cat-page-title">{catData.title}</h1>
           <p className="cat-page-subtitle">{catData.subtitle}</p>
           <button className="cat-page-back" onClick={() => navigate('/menu')}>
-            ← Back to Menu
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="15 18 9 12 15 6" />
+            </svg>
+            Back to Menu
           </button>
         </div>
 
-        {/* Restaurant mode: prominent builder shortcut for burger/pizza */}
-        {isRestaurantMode && BUILDER_ROUTES[category] && (
-          <div style={{
-            display: 'flex',
-            justifyContent: 'center',
-            padding: '0 0 24px',
-          }}>
+        {/* ── Category switcher tabs ── */}
+        <div className="cat-tabs" role="tablist" aria-label="Menu categories">
+          {CATEGORIES.map(cat => (
             <button
-              onClick={() => navigate(BUILDER_ROUTES[category])}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 10,
-                padding: '14px 28px',
-                borderRadius: 16,
-                border: '2.5px solid #FFD54A',
-                background: '#FFD54A',
-                color: '#1A0A00',
-                fontFamily: 'Nunito, sans-serif',
-                fontWeight: 900,
-                fontSize: 15,
-                cursor: 'pointer',
-                boxShadow: '0 4px 16px rgba(255,193,7,0.30)',
-                transition: 'transform 0.14s ease, box-shadow 0.14s ease',
-              }}
-              onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 22px rgba(255,193,7,0.40)'; }}
-              onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 4px 16px rgba(255,193,7,0.30)'; }}
+              key={cat.id}
+              role="tab"
+              aria-selected={cat.id === category}
+              className={`cat-tab${cat.id === category ? ' cat-tab--active' : ''}`}
+              onClick={() => navigate('/' + cat.id)}
             >
-              {category === 'burger' ? '🍔' : '🍕'}
-              Build a Custom {category === 'burger' ? 'Burger' : 'Pizza'} →
+              <span className="cat-tab-emoji" aria-hidden="true">{cat.emoji}</span>
+              <span className="cat-tab-label">{cat.title}</span>
+            </button>
+          ))}
+        </div>
+
+        {/* ── Restaurant mode: builder shortcut ── */}
+        {isRestaurantMode && BUILDER_ROUTES[category] && (
+          <div className="cat-builder-shortcut">
+            <button
+              className="cat-builder-btn"
+              onClick={() => navigate(BUILDER_ROUTES[category])}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+              </svg>
+              Custom {category === 'burger' ? 'Burger' : 'Pizza'} Builder
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="9 18 15 12 9 6" />
+              </svg>
             </button>
           </div>
         )}
 
-        {/* Product grid */}
+        {/* ── Product grid ── */}
         <div className="menu-products-grid">
           {products.map((product, idx) => {
             const isAdded = addedIds.has(product.id);

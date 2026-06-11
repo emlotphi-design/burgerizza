@@ -1,4 +1,4 @@
-import React, { useEffect, useState, Component } from 'react';
+﻿import React, { useEffect, useState, Component } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
@@ -40,14 +40,14 @@ class ProfileErrorBoundary extends Component {
             margin: '0 auto',
             boxShadow: '0 8px 32px rgba(0,0,0,0.08)',
           }}>
-            <p style={{ fontFamily: 'Nunito,sans-serif', fontWeight: 900, fontSize: 16, color: '#1A0A00', marginBottom: 8 }}>
+            <p style={{ fontFamily: 'Nunito,sans-serif', fontWeight: 900, fontSize: 16, color: 'rgba(255,255,255,0.90)', marginBottom: 8 }}>
               Etwas ist schiefgelaufen.
             </p>
-            <p style={{ fontFamily: 'Nunito,sans-serif', fontSize: 13, color: 'rgba(26,10,0,0.5)', marginBottom: 20 }}>
+            <p style={{ fontFamily: 'Nunito,sans-serif', fontSize: 13, color: 'rgba(255,255,255,0.50)', marginBottom: 20 }}>
               {String(this.state.error?.message ?? '')}
             </p>
             <button
-              style={{ padding: '10px 24px', borderRadius: 50, border: 'none', background: '#FFD23F', fontFamily: 'Nunito,sans-serif', fontWeight: 900, cursor: 'pointer' }}
+              style={{ padding: '10px 24px', borderRadius: 50, border: 'none', background: '#FF6B1A', color: '#fff', fontFamily: 'Nunito,sans-serif', fontWeight: 900, cursor: 'pointer' }}
               onClick={() => this.setState({ crashed: false, error: null })}
             >
               Erneut versuchen
@@ -222,7 +222,7 @@ function ChangePasswordSection() {
       )}
 
       {errors.general && (
-        <div style={{ padding: '8px 14px', background: 'rgba(200,0,30,0.07)', border: '1px solid rgba(200,0,30,0.20)', borderRadius: 10, fontFamily: 'Nunito, sans-serif', fontSize: 12, fontWeight: 700, color: '#C8001E' }}>
+        <div style={{ padding: '8px 14px', background: 'rgba(255,59,48,0.07)', border: '1px solid rgba(255,59,48,0.20)', borderRadius: 10, fontFamily: 'Nunito, sans-serif', fontSize: 12, fontWeight: 700, color: '#FF3B30' }}>
           {errors.general}
         </div>
       )}
@@ -400,7 +400,7 @@ function AddressFormModal({ address, isFirst, onSave, onClose }) {
                   onClick={() => set('is_default', !form.is_default)}
                   style={{
                     width: 38, height: 22, borderRadius: 11, border: 'none', cursor: 'pointer',
-                    background: form.is_default ? '#FFD23F' : 'rgba(26,10,0,0.12)',
+                    background: form.is_default ? 'rgba(255,107,26,0.18)' : 'rgba(255,255,255,0.06)',
                     display: 'flex', alignItems: 'center',
                     padding: '0 3px', transition: 'background 0.18s',
                     flexShrink: 0,
@@ -408,7 +408,7 @@ function AddressFormModal({ address, isFirst, onSave, onClose }) {
                 >
                   <div style={{
                     width: 16, height: 16, borderRadius: '50%',
-                    background: '#1A0A00', opacity: form.is_default ? 1 : 0.4,
+                    background: '#FF6B1A', opacity: form.is_default ? 1 : 0.4,
                     transform: form.is_default ? 'translateX(16px)' : 'translateX(0)',
                     transition: 'transform 0.18s, opacity 0.18s',
                   }} />
@@ -419,7 +419,7 @@ function AddressFormModal({ address, isFirst, onSave, onClose }) {
                 <div style={{
                   padding: '8px 12px', borderRadius: 10,
                   background: 'rgba(200,0,30,0.07)', border: '1px solid rgba(200,0,30,0.22)',
-                  fontFamily: 'Nunito, sans-serif', fontSize: 12, fontWeight: 700, color: '#C8001E',
+                  fontFamily: 'Nunito, sans-serif', fontSize: 12, fontWeight: 700, color: '#FF3B30',
                 }}>
                   {err}
                 </div>
@@ -476,11 +476,11 @@ function MultiAddressSection() {
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '16px 0' }}>
         <div style={{
           width: 16, height: 16, borderRadius: '50%',
-          border: '2.5px solid rgba(26,10,0,0.12)',
-          borderTopColor: '#C8001E',
+          border: '1.5px solid rgba(255,255,255,0.10)',
+          borderTopcolor: '#FF3B30',
           animation: 'co-spin 0.7s linear infinite',
         }} />
-        <span style={{ fontFamily: 'Nunito, sans-serif', fontSize: 13, fontWeight: 700, color: 'rgba(26,10,0,0.40)' }}>
+        <span style={{ fontFamily: 'Nunito, sans-serif', fontSize: 13, fontWeight: 700, color: 'rgba(255,255,255,0.40)' }}>
           Lade Adressen…
         </span>
       </div>
@@ -506,7 +506,7 @@ function MultiAddressSection() {
       )}
 
       <div className="pf-addr-header">
-        <span style={{ fontFamily: 'Nunito, sans-serif', fontSize: 13, fontWeight: 800, color: 'rgba(26,10,0,0.50)' }}>
+        <span style={{ fontFamily: 'Nunito, sans-serif', fontSize: 13, fontWeight: 800, color: 'rgba(255,255,255,0.50)' }}>
           {addresses.length} {addresses.length === 1 ? 'Adresse' : 'Adressen'} gespeichert
         </span>
         <button className="pf-addr-add-btn" onClick={() => setModal('add')}>

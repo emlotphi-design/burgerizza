@@ -1,5 +1,6 @@
-import { useEffect, useRef, useState, useMemo } from 'react';
+﻿import { useEffect, useRef, useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
+import '../styles/dashboard.css';
 import {
   fetchDashboardStats, fetchTodayStats, fetchRevenueByDay,
   fetchStatusBreakdown, fetchTopItems, subscribeToOrders,
@@ -72,6 +73,16 @@ function RevenueChart({ data }) {
         preserveAspectRatio="none"
         style={{ width: '100%', height: 110 }}
       >
+        <defs>
+          <linearGradient id="dash-bar-today" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%"   stopColor="var(--adm-chart-bar-today)" stopOpacity="0.94"/>
+            <stop offset="100%" stopColor="var(--adm-chart-bar-today)" stopOpacity="0.44"/>
+          </linearGradient>
+          <linearGradient id="dash-bar-other" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%"   stopColor="var(--adm-chart-bar-other)" stopOpacity="0.80"/>
+            <stop offset="100%" stopColor="var(--adm-chart-bar-other)" stopOpacity="0.28"/>
+          </linearGradient>
+        </defs>
         {data.map((d, i) => {
           const barH = Math.max((d.revenue / max) * (H - 20), d.orders > 0 ? 4 : 2);
           const x    = i * (barW + gap);
@@ -81,8 +92,8 @@ function RevenueChart({ data }) {
             <g key={d.date}>
               <rect
                 x={x} y={y} width={barW} height={barH}
-                rx={4}
-                fill={isToday ? 'var(--adm-chart-bar-today)' : 'var(--adm-chart-bar-other)'}
+                rx={5}
+                fill={isToday ? 'url(#dash-bar-today)' : 'url(#dash-bar-other)'}
                 style={{ transition: 'fill 0.2s' }}
               />
               {d.revenue > 0 && (
@@ -306,23 +317,28 @@ export default function Dashboard() {
   const recentOrders = allStats?.recentOrders ?? [];
 
   return (
-    <>
-      {/* ── Header ── */}
-      <div className="adm-page-header">
-        <div className="adm-page-header-left">
-          <h1 className="adm-page-title">Dashboard</h1>
-          <p className="adm-page-subtitle">
-            Burgerizza Operations
-            <span className="adm-live-indicator">
-              <span className="adm-live-dot" />
-              LIVE
-            </span>
-          </p>
+    <div className="dash-page">
+      {/* ── Hero header ── */}
+      <div className="dash-hero">
+        <div className="dash-hero-left">
+          <div className="dash-brand-icon">🍔</div>
+          <div className="dash-title-group">
+            <h1 className="dash-title">Dashboard</h1>
+            <div className="dash-subtitle">
+              BURIZZA Operations
+              <span className="dash-live-chip">
+                <span className="dash-live-dot" />
+                LIVE
+              </span>
+            </div>
+          </div>
         </div>
-        <span className={`adm-status-mini-badge adm-status-mini-badge--${restaurantStatus ?? 'online'}`}>
-          <span className="adm-status-mini-dot" />
-          {restaurantStatus === 'busy' ? 'Busy' : restaurantStatus === 'closed' ? 'Closed' : 'Online'}
-        </span>
+        <div className="dash-hero-right">
+          <span className={`adm-status-mini-badge adm-status-mini-badge--${restaurantStatus ?? 'online'}`}>
+            <span className="adm-status-mini-dot" />
+            {restaurantStatus === 'busy' ? 'Busy' : restaurantStatus === 'closed' ? 'Closed' : 'Online'}
+          </span>
+        </div>
       </div>
 
       {/* ── Restaurant Status ── */}
@@ -524,6 +540,6 @@ export default function Dashboard() {
         </div>
 
       </div>
-    </>
+    </div>
   );
 }

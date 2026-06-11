@@ -1,9 +1,9 @@
-/* ═══════════════════════════════════════════════
-   MENU MODAL — fullscreen category picker overlay
-════════════════════════════════════════════════ */
+﻿/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+   MENU MODAL â€” fullscreen category picker overlay
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
 
-/* ── Backdrop ─────────────────────────────────── */
+/* â”€â”€ Backdrop â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .menu-modal-backdrop {
   position: fixed;
   inset: 0;
@@ -24,7 +24,7 @@
 }
 
 
-/* ── Modal card ───────────────────────────────── */
+/* â”€â”€ Modal card â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .menu-modal {
   position: relative;
   width: 100%;
@@ -54,7 +54,7 @@
 }
 
 
-/* ── Close button ─────────────────────────────── */
+/* â”€â”€ Close button â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .menu-modal-close {
   position: absolute;
   top: 20px;
@@ -79,13 +79,13 @@
 }
 
 .menu-modal-close:hover {
-  background: rgba(26, 10, 0, 0.13);
+  background: rgba(26, 10, 0, 0.12);
   color: #1A0A00;
   transform: scale(1.12) rotate(90deg);
 }
 
 
-/* ── Modal header ─────────────────────────────── */
+/* â”€â”€ Modal header â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .menu-modal-header {
   text-align: center;
   margin-bottom: 36px;
@@ -104,13 +104,13 @@
   font-family: 'Nunito', sans-serif;
   font-weight: 700;
   font-size: 14px;
-  color: rgba(26, 10, 0, 0.42);
+  color: rgba(26, 10, 0, 0.45);
   margin: 0;
   letter-spacing: 0.2px;
 }
 
 
-/* ── Category grid 2×2 ───────────────────────── */
+/* â”€â”€ Category grid 2Ã—2 â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .menu-modal-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -118,7 +118,7 @@
 }
 
 
-/* ── Category card ────────────────────────────── */
+/* â”€â”€ Category card â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .menu-cat-card {
   padding: 30px 18px 24px;
   display: flex;
@@ -193,12 +193,12 @@
   font-family: 'Nunito', sans-serif;
   font-weight: 700;
   font-size: 11px;
-  color: rgba(26, 10, 0, 0.40);
+  color: rgba(26, 10, 0, 0.50);
   letter-spacing: 0.2px;
 }
 
 
-/* ── Mobile ≤ 520px — bottom sheet ───────────── */
+/* â”€â”€ Mobile â‰¤ 520px â€” bottom sheet â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 @media (max-width: 520px) {
   .menu-modal-backdrop {
     padding: 0;
@@ -247,7 +247,7 @@
   }
 }
 
-/* ── Tiny phone ≤ 360px ───────────────────────── */
+/* â”€â”€ Tiny phone â‰¤ 360px â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 @media (max-width: 360px) {
   .menu-modal-title {
     font-size: 20px;
@@ -261,3 +261,4 @@
     font-size: 38px;
   }
 }
+

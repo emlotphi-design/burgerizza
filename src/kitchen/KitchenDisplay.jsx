@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+﻿import { useCallback, useEffect, useRef, useState } from 'react';
 import { supabase } from '../services/supabase';
 import { fetchOrders, getYesterdayStart, updateOrderStatus } from '../admin/services/adminService';
 import {
@@ -614,7 +614,7 @@ export default function KitchenDisplay() {
       <header className="kds-header">
         <div className="kds-header-left">
           <span className="kds-logo">🍔</span>
-          <span className="kds-logo-name">Burgerizza</span>
+          <span className="kds-logo-name">BURIZZA</span>
           <span className="kds-logo-tag">Kitchen</span>
           {totalActive > 0 && (
             <span className="kds-live-badge">{totalActive} active</span>

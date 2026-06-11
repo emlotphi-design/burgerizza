@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 
 function EyeOpen() {
   return (
@@ -62,9 +62,9 @@ export default function PasswordInput({ className = '', style, ...props }) {
           flexShrink:       0,
           outline:         'none',
         }}
-        onMouseEnter={e => { e.currentTarget.style.color = '#1A0A00'; }}
+        onMouseEnter={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.90)'; }}
         onMouseLeave={e => { e.currentTarget.style.color = '#8A7A6A'; }}
-        onFocus={e => { e.currentTarget.style.color = '#1A0A00'; }}
+        onFocus={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.90)'; }}
         onBlur={e => { e.currentTarget.style.color = '#8A7A6A'; }}
       >
         {visible ? <EyeClosed /> : <EyeOpen />}

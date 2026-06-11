@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+﻿import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import LanguageSwitcher from './LanguageSwitcher.jsx';
 
@@ -42,14 +42,15 @@ export default function MobileMenu({ onClose }) {
         <div className="mm-header">
           <div className="mm-brand">
             <svg width="32" height="32" viewBox="0 0 46 46" fill="none" aria-hidden="true">
-              <rect width="46" height="46" rx="10" fill="#1A0A00" />
+              <rect width="46" height="46" rx="10" fill="#FF6B1A" fillOpacity="0.15" />
+              <rect width="46" height="46" rx="10" fill="none" stroke="#FF6B1A" strokeWidth="1.5" strokeOpacity="0.30"/>
               <text x="23" y="33" textAnchor="middle"
                 fontFamily="'Nunito', sans-serif" fontWeight="900"
-                fontSize="26" fill="#F5C518" letterSpacing="-1">B</text>
+                fontSize="26" fill="#FF6B1A" letterSpacing="-1">B</text>
               <line x1="12" y1="34" x2="34" y2="12"
-                stroke="#F5C518" strokeWidth="2.5" strokeLinecap="round" />
+                stroke="#FF6B1A" strokeWidth="2.5" strokeLinecap="round" strokeOpacity="0.65"/>
             </svg>
-            <span className="mm-brand-name">BURGERIZZA</span>
+            <span className="mm-brand-name">BURIZZA</span>
           </div>
           <button className="mm-close-btn" onClick={onClose} aria-label="Close menu">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
@@ -75,7 +76,7 @@ export default function MobileMenu({ onClose }) {
         <div className="mm-footer">
           <LanguageSwitcher />
           <button className="mm-cta" onClick={() => handleNav('/coming-soon')}>
-            Burgerizza Plus
+            BURIZZA Plus
           </button>
         </div>
       </aside>

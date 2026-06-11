@@ -1,11 +1,28 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="de" dir="ltr">
 
 <head>
   <meta charset="UTF-8" />
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>BURGERIZZA</title>
+  <title>BURIZZA</title>
+
+  <!-- PWA / mobile home-screen identity -->
+  <link rel="manifest" href="/manifest.json" />
+  <meta name="application-name" content="BURIZZA" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="BURIZZA" />
+  <meta name="mobile-web-app-capable" content="yes" />
+
+  <!-- Social / share preview -->
+  <meta name="description" content="Build your perfect pizza or burger — BURIZZA" />
+  <meta property="og:title" content="BURIZZA" />
+  <meta property="og:site_name" content="BURIZZA" />
+  <meta property="og:description" content="Build your perfect pizza or burger" />
+  <meta property="og:type" content="website" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="BURIZZA" />
 
   <!--
     ANTI-FLASH — STEP 1 of 3
@@ -33,9 +50,14 @@
         var t = localStorage.getItem('adminTheme') || 'dark';
         document.documentElement.style.backgroundColor = t === 'dark' ? '#030201' : '#FFF9EC';
         document.documentElement.style.backgroundImage  = 'none';
+        document.documentElement.style.backgroundAttachment = 'unset';
       } else if (isKitchen) {
         document.documentElement.style.backgroundColor = '#030201';
         document.documentElement.style.backgroundImage  = 'none';
+        document.documentElement.style.backgroundAttachment = 'unset';
+      } else {
+        /* Customer pages — set brand yellow immediately so no white flash */
+        document.documentElement.style.backgroundColor = '#F5C518';
       }
     }());
   </script>
@@ -67,7 +89,7 @@
       min-height: 100dvh !important;
     }
 
-    /* ── Admin dark — full Burgerizza cinematic atmosphere ──────── */
+    /* ── Admin dark — full BURIZZA cinematic atmosphere ──────── */
     body[data-context="admin"][data-admin-theme="dark"] {
       background-color:      #030201 !important;
       background-image:

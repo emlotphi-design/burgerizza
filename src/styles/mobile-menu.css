@@ -7,7 +7,7 @@
 .mm-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(26, 10, 0, 0.52);
+  background: rgba(0, 0, 0, 0.72);
   z-index: 200;
   animation: mmFadeIn 0.25s ease both;
 }
@@ -24,11 +24,14 @@
   right: 0;
   height: 100dvh;
   width: min(300px, 82vw);
-  background: #FFF9EC;
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(28px) saturate(1.5);
+  -webkit-backdrop-filter: blur(28px) saturate(1.5);
+  border-left: 1.5px solid rgba(255, 255, 255, 0.90);
   z-index: 201;
   display: flex;
   flex-direction: column;
-  box-shadow: -6px 0 36px rgba(26, 10, 0, 0.16);
+  box-shadow: -8px 0 40px rgba(0, 0, 0, 0.12);
   border-radius: 20px 0 0 20px;
   overflow: hidden;
   animation: mmSlideIn 0.32s cubic-bezier(0.22, 1, 0.36, 1) both;
@@ -60,7 +63,7 @@
   font-weight: 900;
   font-size: 15px;
   letter-spacing: 2px;
-  color: #1A0A00;
+  color: #C8001E;
 }
 
 .mm-close-btn {
@@ -68,18 +71,19 @@
   height: 44px;
   border-radius: 50%;
   border: none;
-  background: rgba(26, 10, 0, 0.07);
-  color: #1A0A00;
+  background: rgba(26, 10, 0, 0.06);
+  color: rgba(26, 10, 0, 0.55);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  transition: background 0.15s ease, transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition: background 0.15s ease, transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.15s ease;
 }
 
 .mm-close-btn:hover {
-  background: rgba(26, 10, 0, 0.13);
+  background: rgba(26, 10, 0, 0.10);
+  color: #1A0A00;
   transform: scale(1.1);
 }
 
@@ -99,7 +103,7 @@
 
 .mm-nav::-webkit-scrollbar { width: 3px; }
 .mm-nav::-webkit-scrollbar-thumb {
-  background: rgba(26, 10, 0, 0.15);
+  background: rgba(26, 10, 0, 0.14);
   border-radius: 2px;
 }
 
@@ -114,21 +118,22 @@
   font-family: 'Nunito', sans-serif;
   font-weight: 700;
   font-size: 15px;
-  color: #1A0A00;
+  color: rgba(26, 10, 0, 0.72);
   cursor: pointer;
-  transition: background 0.15s ease, transform 0.15s ease;
+  transition: background 0.15s ease, transform 0.15s ease, color 0.15s ease;
   line-height: 1.4;
   display: flex;
   align-items: center;
 }
 
 .mm-item:hover {
-  background: rgba(245, 197, 24, 0.18);
+  background: rgba(200, 0, 30, 0.07);
+  color: #1A0A00;
   transform: translateX(3px);
 }
 
 .mm-item:active {
-  background: rgba(245, 197, 24, 0.30);
+  background: rgba(200, 0, 30, 0.12);
   transform: scale(0.97);
 }
 
@@ -143,22 +148,30 @@
   width: 100%;
   padding: 16px;
   min-height: 54px;
-  border: none;
+  border: 1.5px solid rgba(255, 255, 255, 0.88);
   border-radius: 14px;
-  background: linear-gradient(135deg, #F5C518 0%, #FFA722 100%);
+  background: linear-gradient(160deg, rgba(255,255,255,0.92) 0%, rgba(255,235,100,0.65) 100%);
   font-family: 'Nunito', sans-serif;
   font-weight: 900;
   font-size: 16px;
   color: #1A0A00;
   cursor: pointer;
   letter-spacing: 0.8px;
-  box-shadow: 0 4px 16px rgba(245, 197, 24, 0.38);
-  transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.18s ease;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 1.0),
+    inset 0 -1px 0 rgba(200, 150, 0, 0.12),
+    0 4px 16px rgba(0, 0, 0, 0.10);
+  transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.18s ease, filter 0.18s ease;
 }
 
 .mm-cta:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(245, 197, 24, 0.52);
+  filter: brightness(1.04);
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 1.0),
+    0 8px 24px rgba(0, 0, 0, 0.12);
 }
 
 .mm-cta:active {

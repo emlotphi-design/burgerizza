@@ -1,13 +1,13 @@
-/* ═══════════════════════════════════════════════
-   BURGER BUILDER — feature styles
+﻿/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+   BURGER BUILDER â€” feature styles
    Clean foundation for step-by-step rebuild.
-════════════════════════════════════════════════ */
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
 
-/* ── Stage ──────────────────────────────────────
-   Fixed viewport height — mirrors pizza builder.
+/* â”€â”€ Stage â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+   Fixed viewport height â€” mirrors pizza builder.
    overflow: hidden prevents any page scroll.
-─────────────────────────────────────────────── */
+â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .bb-stage {
   height: 100svh;
   overflow: hidden;
@@ -17,11 +17,11 @@
 }
 
 
-/* ── Workspace (centered content area) ─────────
+/* â”€â”€ Workspace (centered content area) â”€â”€â”€â”€â”€â”€â”€â”€â”€
    Asymmetric padding shifts center up ~90px:
    adding 200px bottom (vs original 60px) moves
    the justify-content:center midpoint upward.
-─────────────────────────────────────────────── */
+â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .bb-workspace {
   flex: 1;
   display: flex;
@@ -38,15 +38,15 @@
   font-size: 13px;
   letter-spacing: 3.5px;
   text-transform: uppercase;
-  color: rgba(26, 10, 0, 0.40);
+  color: rgba(26, 10, 0, 0.42);
   margin: 0;
 }
 
 
-/* ── Builder canvas — square orbital stage ─────
+/* â”€â”€ Builder canvas â€” square orbital stage â”€â”€â”€â”€â”€
    Mirrors PizzaCanvas: square aspect-ratio,
    all children absolutely positioned by %.
-─────────────────────────────────────────────── */
+â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .bb-builder-canvas {
   position: relative;
   width: min(520px, 85vw, calc(100vh - 240px));
@@ -61,7 +61,7 @@
 }
 
 
-/* ── Wrapper paper — centered, slight tilt ─────*/
+/* â”€â”€ Wrapper paper â€” centered, slight tilt â”€â”€â”€â”€â”€*/
 .bb-wrapper-img {
   position: absolute;
   top: 50%;
@@ -74,7 +74,7 @@
 }
 
 
-/* ── Bun base — same anchor, ~34% narrower ─────*/
+/* â”€â”€ Bun base â€” same anchor, ~34% narrower â”€â”€â”€â”€â”€*/
 .bb-bun-img {
   position: absolute;
   top: 50%;
@@ -96,7 +96,7 @@
 }
 
 
-/* ── Orbital preview wrapper ────────────────── */
+/* â”€â”€ Orbital preview wrapper â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .bb-preview-wrap {
   animation: previewItemIn 0.26s cubic-bezier(0.22, 1, 0.36, 1) both;
   will-change: transform, opacity;
@@ -108,7 +108,7 @@
 }
 
 
-/* ── Selection halo — radial ring behind item ── */
+/* â”€â”€ Selection halo â€” radial ring behind item â”€â”€ */
 .bb-preview-wrap::before {
   content: '';
   position: absolute;
@@ -139,7 +139,7 @@
 }
 
 
-/* ── Disabled preview wrap — mirrors pizza .preview-wrapper--disabled */
+/* â”€â”€ Disabled preview wrap â€” mirrors pizza .preview-wrapper--disabled */
 .bb-preview-wrap--disabled {
   opacity: 0.28;
   pointer-events: none;
@@ -159,7 +159,7 @@
 }
 
 
-/* ── Preview button ─────────────────────────── */
+/* â”€â”€ Preview button â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .bb-preview-btn {
   transition: transform 0.2s ease;
   will-change: transform;
@@ -174,14 +174,14 @@
 }
 
 
-/* ── Preview label — tooltip, shown on hover ── */
+/* â”€â”€ Preview label â€” tooltip, shown on hover â”€â”€ */
 .bb-preview-label {
   position: absolute;
   bottom: calc(100% + 7px);
   left: 50%;
   transform: translateX(-50%);
-  background: rgba(26, 10, 0, 0.70);
-  color: #fff;
+  background: rgba(255, 255, 255, 0.90);
+  color: #1A0A00;
   font-family: 'Nunito', sans-serif;
   font-size: clamp(9px, 1.4vw, 11px);
   font-weight: 800;
@@ -191,7 +191,7 @@
   white-space: nowrap;
   pointer-events: none;
   z-index: 20;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.22);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
   opacity: 0;
   transition: opacity 0.22s ease;
 }
@@ -201,7 +201,7 @@
 }
 
 
-/* ── Meat layer — stacks above bun, below sauces */
+/* â”€â”€ Meat layer â€” stacks above bun, below sauces */
 .bb-meat-img {
   position: absolute;
   top: 50%;
@@ -222,11 +222,11 @@
 }
 
 
-/* ── Top bun — drops in above all layers on ORDER ─
+/* â”€â”€ Top bun â€” drops in above all layers on ORDER â”€
    Uses individual translate/scale properties so the
    inline transform: translate(-50%,-50%) rotate(-2deg)
    stays authoritative (same pattern as bunFadeIn).
-─────────────────────────────────────────────────── */
+â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .bb-top-bun-img {
   position: absolute;
   top: 50%;
@@ -245,7 +245,7 @@
 }
 
 
-/* ── Vegetable layer — z-index 13+, above cheese, below top bun ── */
+/* â”€â”€ Vegetable layer â€” z-index 13+, above cheese, below top bun â”€â”€ */
 .bb-vegetable-img {
   position: absolute;
   top: 50%;
@@ -266,7 +266,7 @@
 }
 
 
-/* ── Cheese layer — z-index 12, between meats and top bun ── */
+/* â”€â”€ Cheese layer â€” z-index 12, between meats and top bun â”€â”€ */
 .bb-cheese-img {
   position: absolute;
   top: 50%;
@@ -287,7 +287,7 @@
 }
 
 
-/* ── Sauce layer — stacks above bun, no rotation */
+/* â”€â”€ Sauce layer â€” stacks above bun, no rotation */
 .bb-sauce-img {
   position: absolute;
   top: 50%;
@@ -308,7 +308,7 @@
 }
 
 
-/* ── Meat quantity bar — inside selected preview */
+/* â”€â”€ Meat quantity bar â€” inside selected preview */
 .bb-qty-bar {
   position: absolute;
   bottom: 0;
@@ -317,7 +317,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: rgba(26, 10, 0, 0.72);
+  background: rgba(255, 255, 255, 0.88);
   border-radius: 0 0 10px 10px;
   padding: 3px 5px;
   z-index: 2;
@@ -343,7 +343,8 @@
 }
 
 .bb-qty-btn:hover {
-  background: #F5C518;
+  background: #C8001E;
+  color: #fff;
   transform: scale(1.22);
 }
 
@@ -356,17 +357,17 @@
   font-family: 'Nunito', sans-serif;
   font-weight: 900;
   font-size: 11px;
-  color: #fff;
+  color: #1A0A00;
   min-width: 12px;
   text-align: center;
   line-height: 1;
 }
 
 
-/* ── Ingredient card base ──────────────────────
+/* â”€â”€ Ingredient card base â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
    Retained for selector components and
    BurgerCartCard (used in Cart.jsx).
-─────────────────────────────────────────────── */
+â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .bb-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
@@ -393,25 +394,25 @@
 }
 
 .bb-card:hover {
-  border-color: #F5C518;
+  border-color: #C8001E;
   transform: translateY(-3px) scale(1.03);
-  box-shadow: 0 8px 26px rgba(245, 197, 24, 0.28);
+  box-shadow: 0 8px 26px rgba(200, 0, 30, 0.18);
 }
 
 .bb-card--selected {
-  border-color: #F5C518;
-  background: rgba(245, 197, 24, 0.12);
-  box-shadow: 0 4px 14px rgba(245, 197, 24, 0.22);
+  border-color: #C8001E;
+  background: rgba(200, 0, 30, 0.08);
+  box-shadow: 0 4px 14px rgba(200, 0, 30, 0.14);
 }
 
 .bb-card--selected::after {
-  content: '✓';
+  content: 'âœ”';
   position: absolute;
   top: 5px;
   right: 7px;
   font-size: 11px;
   font-weight: 900;
-  color: #1A0A00;
+  color: #C8001E;
 }
 
 .bb-card--disabled {
@@ -447,10 +448,10 @@
 
 
 
-/* ── Toast — success feedback after adding to cart ──
+/* â”€â”€ Toast â€” success feedback after adding to cart â”€â”€
    Uses CSS `translate` property (not transform) so the
    base transform: translateX(-50%) centering is kept.
-─────────────────────────────────────────────────── */
+â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .bb-toast {
   position: fixed;
   top: calc(var(--nav-h, 72px) + 12px);
@@ -463,8 +464,8 @@
   align-items: center;
   gap: 8px;
 
-  background: rgba(26, 10, 0, 0.88);
-  color: #fff;
+  background: rgba(255, 255, 255, 0.90);
+  color: #1A0A00;
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
   border-radius: 50px;
@@ -486,11 +487,11 @@
 }
 
 
-/* ── ORDER NOW button ───────────────────────────
+/* â”€â”€ ORDER NOW button â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
    Fixed pill, invisible until meat is selected.
    position: fixed keeps it out of flex flow so
    it never shifts the canvas when it appears.
-─────────────────────────────────────────────── */
+â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .bb-order-btn {
   position: fixed;
   bottom: 30px;
@@ -570,9 +571,9 @@
 
 
 
-/* ── Responsive ─────────────────────────────── */
+/* â”€â”€ Responsive â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
-/* Tablet / mobile — sidebar now in-flow below canvas, mirrors pizza layout */
+/* Tablet / mobile â€” sidebar now in-flow below canvas, mirrors pizza layout */
 @media (max-width: 900px) {
   .bb-builder-canvas:hover {
     transform: none;
@@ -614,7 +615,7 @@
     width: min(360px, 84vw, calc(100svh - 270px));
   }
 
-  /* Full-width pill for iPhone — matches pizza builder's calc(76px + env) */
+  /* Full-width pill for iPhone â€” matches pizza builder's calc(76px + env) */
   .bb-order-btn {
     left: 16px;
     right: 16px;
@@ -672,3 +673,4 @@
     gap: 8px;
   }
 }
+

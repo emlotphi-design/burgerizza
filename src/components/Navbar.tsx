@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { usePizzaStore } from '../store/PizzaContext.jsx';
@@ -100,14 +100,15 @@ export default function Navbar() {
       {/* Brand — navigates to home without hard reload */}
       <button className="brand" aria-label={t('nav.home')} onClick={() => navigate('/')}>
         <svg className="brand-logo" width="46" height="46" viewBox="0 0 46 46" fill="none" aria-hidden="true">
-          <rect width="46" height="46" rx="10" fill="#1A0A00" />
+          <rect width="46" height="46" rx="10" fill="#1A0A00" fillOpacity="0.07" />
+          <rect width="46" height="46" rx="10" fill="none" stroke="#1A0A00" strokeWidth="1.5" strokeOpacity="0.18"/>
           <text x="23" y="33" textAnchor="middle"
             fontFamily="'Nunito', sans-serif" fontWeight="900"
-            fontSize="26" fill="#F5C518" letterSpacing="-1">B</text>
+            fontSize="26" fill="#1A0A00" letterSpacing="-1">B</text>
           <line x1="12" y1="34" x2="34" y2="12"
-            stroke="#F5C518" strokeWidth="2.5" strokeLinecap="round" />
+            stroke="#1A0A00" strokeWidth="2.5" strokeLinecap="round" strokeOpacity="0.42"/>
         </svg>
-        <span className="brand-name">BURGERIZZA</span>
+        <span className="brand-name">BURIZZA</span>
       </button>
 
       <div className="nav-icons">

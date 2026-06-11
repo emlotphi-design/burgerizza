@@ -1,4 +1,4 @@
-import { useNavigate, useLocation } from 'react-router-dom';
+﻿import { useNavigate, useLocation } from 'react-router-dom';
 import { usePizzaStore } from '../store/PizzaContext';
 import { useRestaurantMode } from '../store/RestaurantModeContext';
 import { calcPrice } from '../utils/pizzaUtils';
@@ -23,7 +23,7 @@ export default function RestaurantModeCartBar() {
       left:       0,
       right:      0,
       zIndex:     8888,
-      background: 'rgba(26,10,0,0.97)',
+      background: 'rgba(14,14,14,0.97)',
       borderTop:  '2px solid #FFD54A',
       backdropFilter: 'blur(12px)',
       fontFamily: 'Nunito, sans-serif',
