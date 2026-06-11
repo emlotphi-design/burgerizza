@@ -14,22 +14,22 @@ import {
 
 /* ── Status config ─────────────────────────────────────────── */
 const STATUS_FLOW = [
-  { value: 'waiting_confirmation', label: 'Waiting',           color: '#eab308', badge: 'adm-badge--waiting' },
-  { value: 'pending',              label: 'Pending',           color: '#6366f1', badge: 'adm-badge--indigo'  },
-  { value: 'confirmed',            label: 'Confirmed',         color: '#3b82f6', badge: 'adm-badge--blue'    },
-  { value: 'preparing',            label: 'Preparing',         color: '#d97706', badge: 'adm-badge--amber'   },
-  { value: 'ready',                label: 'Out for delivery',  color: '#f97316', badge: 'adm-badge--orange'  },
-  { value: 'delivered',            label: 'Delivered',         color: '#22c55e', badge: 'adm-badge--green'   },
-  { value: 'cancelled',            label: 'Cancelled',         color: '#ef4444', badge: 'adm-badge--red'     },
+  { value: 'waiting_confirmation', label: 'Waiting', color: '#eab308', badge: 'adm-badge--waiting' },
+  { value: 'pending', label: 'Pending', color: '#6366f1', badge: 'adm-badge--indigo' },
+  { value: 'confirmed', label: 'Confirmed', color: '#3b82f6', badge: 'adm-badge--blue' },
+  { value: 'preparing', label: 'Preparing', color: '#d97706', badge: 'adm-badge--amber' },
+  { value: 'ready', label: 'Out for delivery', color: '#f97316', badge: 'adm-badge--orange' },
+  { value: 'delivered', label: 'Delivered', color: '#22c55e', badge: 'adm-badge--green' },
+  { value: 'cancelled', label: 'Cancelled', color: '#ef4444', badge: 'adm-badge--red' },
 ];
 const STATUS_MAP = Object.fromEntries(STATUS_FLOW.map(s => [s.value, s]));
 
 const PIPELINE = [
-  { value: 'pending',   label: 'Pending',    icon: '🕐' },
-  { value: 'confirmed', label: 'Approved',   icon: '✓'  },
-  { value: 'preparing', label: 'Preparing',  icon: '👨‍🍳' },
-  { value: 'ready',     label: 'On the way', icon: '🛵' },
-  { value: 'delivered', label: 'Delivered',  icon: '✅' },
+  { value: 'pending', label: 'Pending', icon: '🕐' },
+  { value: 'confirmed', label: 'Approved', icon: '✓' },
+  { value: 'preparing', label: 'Preparing', icon: '👨‍🍳' },
+  { value: 'ready', label: 'On the way', icon: '🛵' },
+  { value: 'delivered', label: 'Delivered', icon: '✅' },
 ];
 const PIPELINE_VALS = PIPELINE.map(p => p.value);
 
@@ -44,10 +44,10 @@ function fmtDate(iso) {
 function timeAgo(iso) {
   if (!iso) return '';
   const diff = Math.floor((Date.now() - new Date(iso)) / 60000);
-  if (diff < 1)  return 'Just now';
+  if (diff < 1) return 'Just now';
   if (diff < 60) return `${diff}m ago`;
   const h = Math.floor(diff / 60);
-  if (h < 24)   return `${h}h ago`;
+  if (h < 24) return `${h}h ago`;
   return `${Math.floor(h / 24)}d ago`;
 }
 function fmtEstDelivery(iso) {
@@ -59,7 +59,7 @@ function itemsSummary(items) {
   if (!Array.isArray(items) || !items.length) return '—';
   return items.map(i => {
     const label = i.name || i.type || 'Item';
-    const qty   = i.quantity ?? 1;
+    const qty = i.quantity ?? 1;
     return qty > 1 ? `${label} ×${qty}` : label;
   }).slice(0, 3).join(', ') + (items.length > 3 ? ` +${items.length - 3} more` : '');
 }
@@ -97,11 +97,11 @@ function getCustomizations(item) {
     if (Array.isArray(item.vegetables) && item.vegetables.length)
       rows.push({ label: 'Toppings', value: item.vegetables.map(capitalize).join(', ') });
   } else {
-    if (item.dough)  rows.push({ label: 'Dough',   value: capitalize(item.dough) });
-    if (item.sauce)  rows.push({ label: 'Sauce',   value: capitalize(item.sauce) });
-    if (item.cheese) rows.push({ label: 'Cheese',  value: capitalize(item.cheese) });
+    if (item.dough) rows.push({ label: 'Dough', value: capitalize(item.dough) });
+    if (item.sauce) rows.push({ label: 'Sauce', value: capitalize(item.sauce) });
+    if (item.cheese) rows.push({ label: 'Cheese', value: capitalize(item.cheese) });
     if (Array.isArray(item.meats) && item.meats.length)
-      rows.push({ label: 'Meats',   value: item.meats.map(capitalize).join(', ') });
+      rows.push({ label: 'Meats', value: item.meats.map(capitalize).join(', ') });
     if (Array.isArray(item.vegetables) && item.vegetables.length)
       rows.push({ label: 'Toppings', value: item.vegetables.map(capitalize).join(', ') });
   }
@@ -129,9 +129,9 @@ function InlineOrderItems({ items }) {
     <div className="adm-row-items">
       {items.slice(0, 4).map((item, i) => {
         const emoji = item.type === 'burger' ? '🍔' : '🍕';
-        const name  = item.name || capitalize(item.type || 'Item');
-        const qty   = item.quantity ?? 1;
-        const mods  = getKeyMods(item);
+        const name = item.name || capitalize(item.type || 'Item');
+        const qty = item.quantity ?? 1;
+        const mods = getKeyMods(item);
         return (
           <div key={i} className="adm-row-item">
             <div className="adm-row-item-line">
@@ -242,14 +242,14 @@ function SmartPipeline({ order, onStepClick, onDriverAndAdvance, saving, drivers
     return (
       <div className="adm-cpipe-cancelled">
         <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round">
-          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
         </svg>
         Cancelled
       </div>
     );
   }
 
-  const idx          = PIPELINE_VALS.indexOf(status);
+  const idx = PIPELINE_VALS.indexOf(status);
   const effectiveIdx = idx === -1 ? 0 : idx;
 
   function handleStepClick(stepIdx, stepValue) {
@@ -271,9 +271,9 @@ function SmartPipeline({ order, onStepClick, onDriverAndAdvance, saving, drivers
     <div className="adm-spipe" ref={wrapRef}>
       <div className="adm-spipe-track">
         {PIPELINE.map((step, i) => {
-          const done      = i < effectiveIdx;
-          const active    = i === effectiveIdx;
-          const isNext    = i === effectiveIdx + 1;
+          const done = i < effectiveIdx;
+          const active = i === effectiveIdx;
+          const isNext = i === effectiveIdx + 1;
           const clickable = isNext && !saving;
 
           return (
@@ -281,10 +281,10 @@ function SmartPipeline({ order, onStepClick, onDriverAndAdvance, saving, drivers
               <div
                 className={[
                   'adm-spipe-step',
-                  done      ? 'adm-spipe-step--done'        : '',
-                  active    ? 'adm-spipe-step--active'      : '',
-                  isNext    ? 'adm-spipe-step--next'        : '',
-                  clickable ? 'adm-spipe-step--clickable'   : '',
+                  done ? 'adm-spipe-step--done' : '',
+                  active ? 'adm-spipe-step--active' : '',
+                  isNext ? 'adm-spipe-step--next' : '',
+                  clickable ? 'adm-spipe-step--clickable' : '',
                   (step.value === 'ready' && driverOpen) ? 'adm-spipe-step--driver-open' : '',
                 ].filter(Boolean).join(' ')}
                 onClick={() => handleStepClick(i, step.value)}
@@ -294,7 +294,7 @@ function SmartPipeline({ order, onStepClick, onDriverAndAdvance, saving, drivers
                 <div className="adm-spipe-dot">
                   {done ? (
                     <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round">
-                      <polyline points="20 6 9 17 4 12"/>
+                      <polyline points="20 6 9 17 4 12" />
                     </svg>
                   ) : (
                     <span className="adm-spipe-icon">{step.icon}</span>
@@ -353,7 +353,7 @@ function RowActions({ order, onAction, saving }) {
         title="Cancel Order"
       >
         <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
-          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
         </svg>
         Cancel
       </button>
@@ -365,7 +365,7 @@ function RowActions({ order, onAction, saving }) {
    INFO PANEL — customer / delivery / items / payment only
 ═══════════════════════════════════════════════════════════ */
 function OrderInfoPanel({ order }) {
-  const addr  = order.delivery_address || {};
+  const addr = order.delivery_address || {};
   const items = Array.isArray(order.items) ? order.items : [];
 
   return (
@@ -378,8 +378,8 @@ function OrderInfoPanel({ order }) {
         <div className="adm-info-section">
           <div className="adm-info-section-title">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
-              <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
-              <circle cx="12" cy="7" r="4"/>
+              <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
+              <circle cx="12" cy="7" r="4" />
             </svg>
             Customer
           </div>
@@ -401,8 +401,8 @@ function OrderInfoPanel({ order }) {
         <div className="adm-info-section">
           <div className="adm-info-section-title">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
-              <path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z"/>
-              <circle cx="12" cy="10" r="3"/>
+              <path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z" />
+              <circle cx="12" cy="10" r="3" />
             </svg>
             Delivery Address
           </div>
@@ -436,8 +436,8 @@ function OrderInfoPanel({ order }) {
         <div className="adm-info-section">
           <div className="adm-info-section-title">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
-              <rect x="2" y="5" width="20" height="14" rx="2"/>
-              <line x1="2" y1="10" x2="22" y2="10"/>
+              <rect x="2" y="5" width="20" height="14" rx="2" />
+              <line x1="2" y1="10" x2="22" y2="10" />
             </svg>
             Payment & Time
           </div>
@@ -466,9 +466,9 @@ function OrderInfoPanel({ order }) {
       <div className="adm-info-items-section">
         <div className="adm-info-items-title">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
-            <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/>
-            <line x1="3" y1="6" x2="21" y2="6"/>
-            <path d="M16 10a4 4 0 01-8 0"/>
+            <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z" />
+            <line x1="3" y1="6" x2="21" y2="6" />
+            <path d="M16 10a4 4 0 01-8 0" />
           </svg>
           Ordered Items <span className="adm-info-items-count">({items.length})</span>
         </div>
@@ -478,9 +478,9 @@ function OrderInfoPanel({ order }) {
           <div className="adm-info-items-list">
             {items.map((item, i) => {
               const customs = getCustomizations(item);
-              const qty     = item.quantity ?? 1;
-              const price   = item.price != null ? fmtCurrency(item.price * qty) : null;
-              const emoji   = item.type === 'burger' ? '🍔' : '🍕';
+              const qty = item.quantity ?? 1;
+              const price = item.price != null ? fmtCurrency(item.price * qty) : null;
+              const emoji = item.type === 'burger' ? '🍔' : '🍕';
               return (
                 <div key={i} className="adm-info-item">
                   <div className="adm-info-item-head">
@@ -536,10 +536,10 @@ export default function Orders() {
   const navigate = useNavigate();
   const { enterRestaurantMode } = useRestaurantMode();
   const { restaurantStatus, setRestaurantStatus } = useOrdering();
-  const [savingStatus,  setSavingStatus] = useState(false);
-  const [orders,       setOrders]       = useState([]);
-  const [loading,      setLoading]      = useState(true);
-  const [error,        setError]        = useState(null);
+  const [savingStatus, setSavingStatus] = useState(false);
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   async function handleStatusChange(newStatus) {
     if (savingStatus || newStatus === restaurantStatus) return;
@@ -547,19 +547,19 @@ export default function Orders() {
     await setRestaurantStatus(newStatus);
     setSavingStatus(false);
   }
-  const [search,       setSearch]       = useState('');
+  const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
-  const [dateFilter,   setDateFilter]   = useState('all');
-  const [expandedId,   setExpandedId]   = useState(null);
-  const [toasts,       setToasts]       = useState([]);
-  const [newIds,       setNewIds]       = useState(new Set());
-  const [savingIds,    setSavingIds]    = useState(new Set());
-  const [successIds,   setSuccessIds]   = useState(new Set());
-  const [muted,        setMutedState]  = useState(() => getMuted());
+  const [dateFilter, setDateFilter] = useState('all');
+  const [expandedId, setExpandedId] = useState(null);
+  const [toasts, setToasts] = useState([]);
+  const [newIds, setNewIds] = useState(new Set());
+  const [savingIds, setSavingIds] = useState(new Set());
+  const [successIds, setSuccessIds] = useState(new Set());
+  const [muted, setMutedState] = useState(() => getMuted());
   const [activeDrivers, setActiveDrivers] = useState([]);
-  const channelRef  = useRef(null);
+  const channelRef = useRef(null);
   // Always-current orders snapshot for optimistic-UI rollback without stale closures
-  const ordersRef   = useRef([]);
+  const ordersRef = useRef([]);
   useEffect(() => { ordersRef.current = orders; }, [orders]);
 
   // Unlock audio + request browser notification permission on first admin interaction
@@ -598,7 +598,7 @@ export default function Orders() {
 
   useEffect(() => {
     load();
-    fetchActiveDrivers().then(setActiveDrivers).catch(() => {});
+    fetchActiveDrivers().then(setActiveDrivers).catch(() => { });
     channelRef.current = subscribeToOrders(({ eventType, new: row, old }) => {
       if (eventType === 'INSERT') {
         // Only surface orders within today + yesterday.
@@ -703,7 +703,7 @@ export default function Orders() {
     const q = search.toLowerCase();
     const matchSearch = !q ||
       o.id.toLowerCase().includes(q) ||
-      (o.customer_name  || '').toLowerCase().includes(q) ||
+      (o.customer_name || '').toLowerCase().includes(q) ||
       (o.customer_email || '').toLowerCase().includes(q) ||
       (o.customer_phone || '').includes(q);
     const matchStatus = statusFilter === 'all' || o.status === statusFilter;
@@ -766,15 +766,15 @@ export default function Orders() {
           {muted ? (
             /* Bell off */
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M13.73 21a2 2 0 01-3.46 0"/><path d="M18.63 13A17.89 17.89 0 0118 8"/>
-              <path d="M6.26 6.26A5.86 5.86 0 006 8c0 7-3 9-3 9h14"/><path d="M18 8a6 6 0 00-9.33-5"/>
-              <line x1="1" y1="1" x2="23" y2="23"/>
+              <path d="M13.73 21a2 2 0 01-3.46 0" /><path d="M18.63 13A17.89 17.89 0 0118 8" />
+              <path d="M6.26 6.26A5.86 5.86 0 006 8c0 7-3 9-3 9h14" /><path d="M18 8a6 6 0 00-9.33-5" />
+              <line x1="1" y1="1" x2="23" y2="23" />
             </svg>
           ) : (
             /* Bell */
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/>
-              <path d="M13.73 21a2 2 0 01-3.46 0"/>
+              <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9" />
+              <path d="M13.73 21a2 2 0 01-3.46 0" />
             </svg>
           )}
           <span style={{ marginLeft: 5 }}>{muted ? 'Muted' : 'Sound'}</span>
@@ -784,7 +784,7 @@ export default function Orders() {
         <div className="adm-orders-status-seg" role="group" aria-label="Restaurant status">
           {[
             { value: 'online', label: 'Online' },
-            { value: 'busy',   label: 'Busy'   },
+            { value: 'busy', label: 'Busy' },
             { value: 'closed', label: 'Closed' },
           ].map(opt => (
             <button
@@ -802,8 +802,8 @@ export default function Orders() {
 
         <button className="adm-btn adm-btn--ghost" onClick={load} style={{ height: 38, fontSize: 12 }}>
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="23 4 23 10 17 10"/>
-            <path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/>
+            <polyline points="23 4 23 10 17 10" />
+            <path d="M20.49 15a9 9 0 11-2.12-9.36L23 10" />
           </svg>
           Refresh
         </button>
@@ -813,8 +813,8 @@ export default function Orders() {
           style={{ height: 38, fontSize: 12, gap: 7 }}
         >
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
-            <polyline points="9 22 9 12 15 12 15 22"/>
+            <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
+            <polyline points="9 22 9 12 15 12 15 22" />
           </svg>
           Open Restaurant Mode
         </button>
@@ -876,11 +876,21 @@ export default function Orders() {
                 <div
                   className={[
                     'adm-orow',
-                    newIds.has(o.id)     ? 'adm-orow--new'     : '',
+                    newIds.has(o.id) ? 'adm-orow--new' : '',
                     successIds.has(o.id) ? 'adm-orow--success' : '',
-                    expandedId === o.id  ? 'adm-orow--open'    : '',
+                    expandedId === o.id ? 'adm-orow--open' : '',
                   ].filter(Boolean).join(' ')}
+                  style={{
+                    background: '#ffffff',
+                    borderRadius: '24px',
+                    padding: '24px',
+                    marginBottom: '24px',
+                    border: '2px solid #facc15',
+                    boxShadow: '0 10px 30px rgba(0,0,0,0.08)',
+                  }}
                 >
+
+
                   {/* ── Main 3-column row ── */}
                   <div className="adm-orow-main">
 
@@ -899,9 +909,9 @@ export default function Orders() {
                           and falls back to dedicated columns (works after migration 007) */}
                       {((o.source === 'restaurant_mode') || (o.delivery_address?.source === 'restaurant_mode')) && (() => {
                         const addr = o.delivery_address || {};
-                        const orderType   = o.order_type   || addr.order_type   || addr.mode   || '';
-                        const tableNum    = o.table_number  || addr.table_number || addr.tableNumber || '';
-                        const payMethod   = o.payment_method || addr.payment || '';
+                        const orderType = o.order_type || addr.order_type || addr.mode || '';
+                        const tableNum = o.table_number || addr.table_number || addr.tableNumber || '';
+                        const payMethod = o.payment_method || addr.payment || '';
                         return (
                           <div style={{ display: 'flex', alignItems: 'center', gap: 5, flexWrap: 'wrap', margin: '2px 0 3px' }}>
                             <span style={{
@@ -963,7 +973,7 @@ export default function Orders() {
                             width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"
                             style={{ transition: 'transform 0.22s ease', transform: expandedId === o.id ? 'rotate(180deg)' : 'rotate(0deg)' }}
                           >
-                            <polyline points="6 9 12 15 18 9"/>
+                            <polyline points="6 9 12 15 18 9" />
                           </svg>
                         </button>
                       </div>

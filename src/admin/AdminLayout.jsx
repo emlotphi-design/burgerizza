@@ -12,7 +12,7 @@ const NAV = [
     items: [
       {
         to: '/admin/dashboard',
-        label: 'Dashboard',
+        label: 'Analytics',
         locked: true,
         icon: (
           <svg className="adm-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
@@ -107,7 +107,7 @@ const NAV = [
     items: [
       {
         to: '/admin/users',
-        label: 'Users',
+        label: 'Customers',
         locked: true,
         icon: (
           <svg className="adm-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
@@ -150,8 +150,8 @@ function LockedNavLink({ to, end, locked, onAfterClick, icon, label, badge }) {
 
   const inner = (
     <>
-      {icon}
-      <span style={{ flex: 1 }}>{label}</span>
+      <span className="adm-nav-icon-wrap">{icon}</span>
+      <span className="adm-nav-label">{label}</span>
       {badge}
       {locked && !unlocked && <NavLockIcon />}
     </>
@@ -208,7 +208,7 @@ const SunIcon = () => (
 export default function AdminLayout() {
   const [sidebarOpen,  setSidebarOpen]  = useState(false);
   const [pendingCount, setPendingCount] = useState(0);
-  const [theme,        setTheme]        = useState(() => localStorage.getItem('adminTheme') ?? 'dark');
+  const [theme,        setTheme]        = useState(() => localStorage.getItem('adminTheme') ?? 'light');
   const { currentUser } = useAuth();
   const channelRef  = useRef(null);
   const layoutRef   = useRef(null);
@@ -282,11 +282,11 @@ export default function AdminLayout() {
       <aside className={`adm-sidebar${sidebarOpen ? ' adm-sidebar--open' : ''}`}>
 
         <div className="adm-brand">
-          <div className="adm-brand-logo">
-            <div className="adm-brand-icon">🍔</div>
-            <div className="adm-brand-name">Burger<span>izza</span></div>
+          <div className="adm-brand-icon">🍔</div>
+          <div className="adm-brand-text">
+            <div className="adm-brand-name">BURGER<span>IZZA</span></div>
+            <div className="adm-brand-sub">Management Suite</div>
           </div>
-          <div className="adm-brand-badge">Admin Panel</div>
         </div>
 
         <nav className="adm-nav">

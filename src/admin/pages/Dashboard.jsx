@@ -35,12 +35,12 @@ function itemsSummary(items) {
 
 /* ── Status config ─────────────────────────────────────────── */
 const STATUS_CONFIG = {
-  pending:   { label: 'Pending',          color: '#6366f1', badge: 'adm-badge--indigo' },
-  confirmed: { label: 'Confirmed',        color: '#3b82f6', badge: 'adm-badge--blue'   },
-  preparing: { label: 'Preparing',        color: '#d97706', badge: 'adm-badge--amber'  },
-  ready:     { label: 'Out for delivery', color: '#f97316', badge: 'adm-badge--orange' },
-  delivered: { label: 'Delivered',        color: '#22c55e', badge: 'adm-badge--green'  },
-  cancelled: { label: 'Cancelled',        color: '#ef4444', badge: 'adm-badge--red'    },
+  pending:   { label: 'Pending',      color: '#D4A017', badge: 'adm-badge--waiting' },
+  confirmed: { label: 'Confirmed',    color: '#3b82f6', badge: 'adm-badge--blue'    },
+  preparing: { label: 'Preparing',    color: '#f97316', badge: 'adm-badge--orange'  },
+  ready:     { label: 'On the way',   color: '#3b82f6', badge: 'adm-badge--blue'    },
+  delivered: { label: 'Delivered',    color: '#22c55e', badge: 'adm-badge--green'   },
+  cancelled: { label: 'Cancelled',    color: '#ef4444', badge: 'adm-badge--red'     },
 };
 
 function StatusBadge({ status }) {
@@ -255,7 +255,7 @@ export default function Dashboard() {
 
   const topCards = [
     {
-      label:     'Today Revenue',
+      label:     'Revenue Today',
       value:     loading ? '…' : fmtCurrency(todayStats?.todayRevenue ?? 0),
       footer:    'Completed orders',
       cardClass: 'adm-stat-card--amber',
@@ -270,9 +270,9 @@ export default function Dashboard() {
       ),
     },
     {
-      label:     'Today Orders',
-      value:     loading ? '…' : (todayStats?.todayOrders ?? 0),
-      footer:    'Last 24h',
+      label:     'Total Orders',
+      value:     loading ? '…' : (allStats?.totalOrders ?? 0),
+      footer:    'All time',
       cardClass: 'adm-stat-card--blue',
       iconClass: 'adm-stat-icon--blue',
       sparkData: sparkOrders,
@@ -286,23 +286,25 @@ export default function Dashboard() {
       ),
     },
     {
-      label:     'Active Orders',
+      label:     'Active Deliveries',
       value:     loading ? '…' : (todayStats?.activeOrders ?? 0),
-      footer:    'Pending + In progress',
+      footer:    'In progress now',
       cardClass: todayStats?.activeOrders > 0 ? 'adm-stat-card--orange' : 'adm-stat-card--green',
       iconClass: todayStats?.activeOrders > 0 ? 'adm-stat-icon--orange' : 'adm-stat-icon--green',
       sparkData: null,
       icon: (
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-          <circle cx="12" cy="12" r="10"/>
-          <polyline points="12 6 12 12 16 14"/>
+          <circle cx="5.5" cy="17.5" r="2.5"/>
+          <circle cx="17.5" cy="17.5" r="2.5"/>
+          <path d="M8 17.5H15M15 17.5V9l-4-5H5L3 9v8.5"/>
+          <path d="M15 9h4l2 4v4.5h-3"/>
         </svg>
       ),
     },
     {
       label:     'Avg Order Value',
       value:     loading ? '…' : fmtCurrency(todayStats?.avgOrderValue ?? 0),
-      footer:    'All time average',
+      footer:    'Per transaction',
       cardClass: 'adm-stat-card--purple',
       iconClass: 'adm-stat-icon--purple',
       sparkData: null,
