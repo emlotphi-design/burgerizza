@@ -284,8 +284,8 @@ export default function AdminLayout() {
         <div className="adm-brand">
           <div className="adm-brand-icon">🍔</div>
           <div className="adm-brand-text">
-            <div className="adm-brand-name">BURGER<span>IZZA</span></div>
-            <div className="adm-brand-sub">Management Suite</div>
+            <div className="adm-brand-name">Burger<span>izza</span></div>
+            <div className="adm-brand-sub">Admin</div>
           </div>
         </div>
 
@@ -319,30 +319,23 @@ export default function AdminLayout() {
               <div className="adm-user-email">{currentUser?.email ?? ''}</div>
             </div>
           </div>
-          <div style={{ marginBottom: 8 }}>
-            <LanguageSwitcher dark />
-          </div>
-          <div className="adm-theme-row">
-            <span className="adm-theme-label">{theme === 'dark' ? 'Dark mode' : 'Light mode'}</span>
-            <div
-              className={`adm-theme-switch${theme === 'dark' ? ' adm-theme-switch--on' : ''}`}
+          <LanguageSwitcher dark />
+          <div className="adm-sidebar-utils">
+            <button
+              className="adm-util-btn"
               onClick={toggleTheme}
-              role="switch"
-              aria-checked={theme === 'dark'}
-              tabIndex={0}
-              onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && toggleTheme()}
+              title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
             >
-              <div className="adm-theme-switch-knob">
-                {theme === 'dark' ? <SunIcon /> : <MoonIcon />}
-              </div>
-            </div>
+              {theme === 'dark' ? <SunIcon /> : <MoonIcon />}
+              <span>{theme === 'dark' ? 'Light mode' : 'Dark mode'}</span>
+            </button>
+            <Link to="/" className="adm-util-btn" onClick={close}>
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="15 18 9 12 15 6"/>
+              </svg>
+              <span>Back to site</span>
+            </Link>
           </div>
-          <Link to="/" className="adm-back-link" onClick={close}>
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="15 18 9 12 15 6"/>
-            </svg>
-            Back to site
-          </Link>
         </div>
       </aside>
 
@@ -371,15 +364,7 @@ export default function AdminLayout() {
           <div className="adm-topbar-brand">
             Burger<span>izza</span>
             {pendingCount > 0 && (
-              <span style={{
-                display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                marginLeft: 8, minWidth: 20, height: 20, borderRadius: 10,
-                background: '#fbbf24', color: '#1A0A00',
-                fontSize: 10, fontWeight: 900, padding: '0 5px',
-                verticalAlign: 'middle',
-              }}>
-                {pendingCount}
-              </span>
+              <span className="adm-topbar-pending">{pendingCount}</span>
             )}
           </div>
 
@@ -392,20 +377,7 @@ export default function AdminLayout() {
             >
               {theme === 'dark' ? <SunIcon /> : <MoonIcon />}
             </button>
-            <Link
-              to="/"
-              title="Back to site"
-              style={{
-                width: 40, height: 40, display: 'flex', alignItems: 'center',
-                justifyContent: 'center', borderRadius: 8,
-                border: '1px solid var(--adm-border)',
-                color: 'var(--adm-text-3)', textDecoration: 'none',
-                background: 'rgba(0,0,0,0.03)',
-                transition: 'background 0.14s ease, color 0.14s ease',
-              }}
-              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,213,74,0.18)'; e.currentTarget.style.color = 'var(--adm-text)'; }}
-              onMouseLeave={e => { e.currentTarget.style.background = 'rgba(0,0,0,0.03)'; e.currentTarget.style.color = 'var(--adm-text-3)'; }}
-            >
+            <Link to="/" className="adm-topbar-home" title="Back to site">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
                 <polyline points="9 22 9 12 15 12 15 22"/>

@@ -66,9 +66,6 @@ function itemsSummary(items) {
 function capitalize(s) {
   return s ? String(s).charAt(0).toUpperCase() + String(s).slice(1) : '';
 }
-// Returns true when an order's created_at falls within today or yesterday (local time).
-// Called both in the fetch and in the client-side filter so orders automatically
-// disappear when the day rolls over without requiring a manual refresh.
 function isInWindow(iso) {
   if (!iso) return false;
   const windowStart = new Date();
@@ -174,14 +171,10 @@ function SmartPipeline({ order, onStepClick, onDriverAndAdvance, saving, drivers
 
   const { status, driver_name } = order;
 
-  /* Restaurant mode: show "Send to Kitchen" CTA before pipeline starts.
-     Works with status='waiting_confirmation' (after migration 007)
-     AND with status='pending' + delivery_address.source='restaurant_mode' (before migration). */
   const isRmPending =
     status === 'waiting_confirmation' ||
     (status === 'pending' && order.delivery_address?.source === 'restaurant_mode');
 
-  /* Regular web order awaiting admin approval → show Approve / Reject */
   const isWebPending = status === 'pending' && !isRmPending;
 
   if (isWebPending) {
@@ -351,10 +344,18 @@ function RowActions({ order, onAction, saving }) {
         onClick={() => onAction(order.id, 'cancelled')}
         disabled={saving}
         title="Cancel Order"
+        style={{
+          background: 'none',
+          border: 'none',
+          padding: '2px 6px',
+          fontSize: 10,
+          fontWeight: 500,
+          opacity: 0.45,
+          cursor: 'pointer',
+          color: 'inherit',
+          letterSpacing: 0,
+        }}
       >
-        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
-          <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
-        </svg>
         Cancel
       </button>
     </div>
@@ -558,11 +559,9 @@ export default function Orders() {
   const [muted, setMutedState] = useState(() => getMuted());
   const [activeDrivers, setActiveDrivers] = useState([]);
   const channelRef = useRef(null);
-  // Always-current orders snapshot for optimistic-UI rollback without stale closures
   const ordersRef = useRef([]);
   useEffect(() => { ordersRef.current = orders; }, [orders]);
 
-  // Unlock audio + request browser notification permission on first admin interaction
   useEffect(() => {
     const unlock = () => { unlockAudio(); document.removeEventListener('pointerdown', unlock); };
     document.addEventListener('pointerdown', unlock, { passive: true });
@@ -574,7 +573,6 @@ export default function Orders() {
     const nowMuted = toggleMute();
     setMutedState(nowMuted);
     if (!nowMuted) {
-      // Play a preview ding so admin knows sound is on
       playOrderNotification();
     }
   }
@@ -588,8 +586,6 @@ export default function Orders() {
   async function load() {
     setLoading(true); setError(null);
     try {
-      // Fetch only today + yesterday using local restaurant time.
-      // limit:500 covers any realistic 2-day order volume.
       setOrders(await fetchOrders({ since: getYesterdayStart(), limit: 500 }));
     }
     catch (e) { setError(e.message); }
@@ -601,9 +597,6 @@ export default function Orders() {
     fetchActiveDrivers().then(setActiveDrivers).catch(() => { });
     channelRef.current = subscribeToOrders(({ eventType, new: row, old }) => {
       if (eventType === 'INSERT') {
-        // Only surface orders within today + yesterday.
-        // New orders are virtually always "now", but this guards against
-        // clock-skew or backdated POS entries falling outside the window.
         if (!isInWindow(row.created_at)) return;
         setOrders(prev => [row, ...prev]);
         setNewIds(prev => new Set([...prev, row.id]));
@@ -622,9 +615,7 @@ export default function Orders() {
   }, []);
 
   const handleAction = useCallback(async (id, newStatus) => {
-    // Capture snapshot for rollback before any state mutation
     const original = ordersRef.current.find(o => o.id === id) ?? null;
-    // Optimistic: reflect new status immediately
     setOrders(prev => prev.map(o => o.id === id ? { ...o, status: newStatus } : o));
     setSavingIds(prev => new Set([...prev, id]));
     try {
@@ -642,7 +633,6 @@ export default function Orders() {
         hint: err?.hint, details: err?.details,
         id, newStatus,
       });
-      // Rollback optimistic update
       if (original) setOrders(prev => prev.map(o => o.id === id ? original : o));
       addToast('Update failed', err?.message ?? 'Please try again', 'error', '❌');
     } finally {
@@ -655,20 +645,16 @@ export default function Orders() {
       console.warn('[handleDriverAndAdvance] called with empty driverName — aborting');
       return;
     }
-    // Guard: never assign driver to a finished order
     const current = ordersRef.current.find(o => o.id === orderId);
     if (current && ['delivered', 'cancelled'].includes(current.status)) return;
 
-    // Capture snapshot for rollback
     const original = current ?? null;
-    // Optimistic: show driver name + new status immediately
     setOrders(prev => prev.map(o =>
       o.id === orderId ? { ...o, driver_name: driverName.trim(), status } : o
     ));
     setSavingIds(prev => new Set([...prev, orderId]));
     try {
       const updated = await assignDriverAndAdvance(orderId, driverName.trim(), status);
-      // Confirm with server truth
       setOrders(prev => prev.map(o => o.id === orderId ? updated : o));
       setSuccessIds(prev => new Set([...prev, orderId]));
       setTimeout(() => setSuccessIds(prev => { const n = new Set(prev); n.delete(orderId); return n; }), 2400);
@@ -680,7 +666,6 @@ export default function Orders() {
         hint: err?.hint, details: err?.details,
         orderId, driverName, status,
       });
-      // Rollback optimistic update to pre-assignment state
       if (original) setOrders(prev => prev.map(o => o.id === orderId ? original : o));
       addToast(
         'Assignment failed',
@@ -695,9 +680,6 @@ export default function Orders() {
 
   /* Filters */
   const filtered = orders.filter(o => {
-    // Hard window: hide orders that have aged out of today + yesterday.
-    // This runs on every render so the list self-corrects at midnight without
-    // requiring a manual refresh.
     if (!isInWindow(o.created_at)) return false;
 
     const q = search.toLowerCase();
@@ -727,25 +709,25 @@ export default function Orders() {
     (o.status === 'preparing' && o.delivery_address?.source === 'restaurant_mode')
   ).length;
 
+  /* KPI computations */
+  const todayStr = new Date().toDateString();
+  const todayOrders = orders.filter(o => new Date(o.created_at).toDateString() === todayStr);
+  const todayRevenue = todayOrders.reduce((s, o) => s + Number(o.total_price || 0), 0);
+  const activeCount = orders.filter(o => ['confirmed', 'preparing', 'ready'].includes(o.status)).length;
+
   return (
     <>
       <Toast toasts={toasts} />
 
-      {/* Header */}
+      {/* ══════════════════════════════════════
+          PAGE HEADER
+      ══════════════════════════════════════ */}
       <div className="adm-page-header">
         <div className="adm-page-header-left">
           <h1 className="adm-page-title">
             Orders
             {pendingCount > 0 && (
-              <span style={{
-                display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                marginLeft: 10, minWidth: 22, height: 22, borderRadius: 11,
-                background: '#fbbf24', color: '#1A0A00',
-                fontSize: 11, fontWeight: 900, padding: '0 6px',
-                verticalAlign: 'middle',
-              }}>
-                {pendingCount}
-              </span>
+              <span className="ord-pending-badge">{pendingCount}</span>
             )}
           </h1>
           <p className="adm-page-subtitle">
@@ -756,7 +738,7 @@ export default function Orders() {
             </span>
           </p>
         </div>
-        {/* Mute / unmute order sounds */}
+
         <button
           className="adm-btn adm-btn--ghost adm-notif-btn"
           onClick={handleToggleMute}
@@ -764,14 +746,12 @@ export default function Orders() {
           style={{ height: 38, fontSize: 12, minWidth: 38, padding: '0 12px' }}
         >
           {muted ? (
-            /* Bell off */
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M13.73 21a2 2 0 01-3.46 0" /><path d="M18.63 13A17.89 17.89 0 0118 8" />
               <path d="M6.26 6.26A5.86 5.86 0 006 8c0 7-3 9-3 9h14" /><path d="M18 8a6 6 0 00-9.33-5" />
               <line x1="1" y1="1" x2="23" y2="23" />
             </svg>
           ) : (
-            /* Bell */
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9" />
               <path d="M13.73 21a2 2 0 01-3.46 0" />
@@ -780,7 +760,6 @@ export default function Orders() {
           <span style={{ marginLeft: 5 }}>{muted ? 'Muted' : 'Sound'}</span>
         </button>
 
-        {/* 3-state restaurant status */}
         <div className="adm-orders-status-seg" role="group" aria-label="Restaurant status">
           {[
             { value: 'online', label: 'Online' },
@@ -807,6 +786,7 @@ export default function Orders() {
           </svg>
           Refresh
         </button>
+
         <button
           className="adm-btn adm-btn--primary"
           onClick={() => enterRestaurantMode(navigate)}
@@ -816,19 +796,60 @@ export default function Orders() {
             <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
             <polyline points="9 22 9 12 15 12 15 22" />
           </svg>
-          Open Restaurant Mode
+          Restaurant Mode
         </button>
       </div>
 
-      {/* Toolbar */}
-      <div className="adm-toolbar">
-        <input
-          className="adm-search"
-          type="text"
-          placeholder="Search by ID, name, email or phone…"
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-        />
+      {/* ══════════════════════════════════════
+          KPI STAT CARDS
+      ══════════════════════════════════════ */}
+      <div className="ord-kpi-grid">
+        <div className="ord-kpi-card ord-kpi-card--amber">
+          <div className="ord-kpi-top">
+            <span className="ord-kpi-icon">🛒</span>
+            <span className="ord-kpi-label">Orders Today</span>
+          </div>
+          <div className="ord-kpi-value">{todayOrders.length}</div>
+        </div>
+        <div className="ord-kpi-card ord-kpi-card--green">
+          <div className="ord-kpi-top">
+            <span className="ord-kpi-icon">💶</span>
+            <span className="ord-kpi-label">Revenue Today</span>
+          </div>
+          <div className="ord-kpi-value">{fmtCurrency(todayRevenue)}</div>
+        </div>
+        <div className="ord-kpi-card ord-kpi-card--orange">
+          <div className="ord-kpi-top">
+            <span className="ord-kpi-icon">⏳</span>
+            <span className="ord-kpi-label">Awaiting Action</span>
+          </div>
+          <div className="ord-kpi-value">{pendingCount}</div>
+        </div>
+        <div className="ord-kpi-card ord-kpi-card--blue">
+          <div className="ord-kpi-top">
+            <span className="ord-kpi-icon">🛵</span>
+            <span className="ord-kpi-label">Active Orders</span>
+          </div>
+          <div className="ord-kpi-value">{activeCount}</div>
+        </div>
+      </div>
+
+      {/* ══════════════════════════════════════
+          FILTER / SEARCH BAR
+      ══════════════════════════════════════ */}
+      <div className="ord-filter-bar">
+        <div className="ord-search-wrap">
+          <svg className="ord-search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
+            <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
+          </svg>
+          <input
+            className="adm-search ord-search-input"
+            type="text"
+            placeholder="Search by name, ID, email or phone…"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+          />
+        </div>
         <select className="adm-select" value={statusFilter} onChange={e => setStatusFilter(e.target.value)}>
           <option value="all">All statuses</option>
           {STATUS_FLOW.map(s => (
@@ -840,6 +861,11 @@ export default function Orders() {
           <option value="today">Today</option>
           <option value="week">Last 7 days</option>
         </select>
+        {!loading && (
+          <span className="ord-filter-count">
+            {filtered.length} / {orders.length}
+          </span>
+        )}
       </div>
 
       {error && (
@@ -848,159 +874,167 @@ export default function Orders() {
         </div>
       )}
 
-      {/* Order list */}
-      <div className="adm-card">
-        {loading ? (
-          <div>
-            {[1, 2, 3, 4, 5].map(i => (
-              <div key={i} className="adm-skeleton-row">
-                <div className="adm-skeleton" style={{ width: 80, height: 12, borderRadius: 6 }} />
-                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
-                  <div className="adm-skeleton adm-skeleton-line" style={{ width: '45%' }} />
-                  <div className="adm-skeleton adm-skeleton-line" style={{ width: '30%' }} />
-                </div>
-                <div className="adm-skeleton adm-skeleton-line" style={{ width: 70 }} />
+      {/* ══════════════════════════════════════
+          ORDER CARDS GRID
+      ══════════════════════════════════════ */}
+      {loading ? (
+        /* ── Skeleton placeholders ── */
+        <div className="ord-grid">
+          {[1, 2, 3, 4].map(i => (
+            <div key={i} className="ord-card ord-card--loading">
+              {/* cap */}
+              <div className="ord-cap">
+                <div className="adm-skeleton" style={{ width: 90, height: 18, borderRadius: 8 }} />
+                <div className="adm-skeleton" style={{ width: 44, height: 13, borderRadius: 6 }} />
               </div>
-            ))}
-          </div>
-        ) : filtered.length === 0 ? (
+              {/* hero */}
+              <div className="ord-hero">
+                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 7 }}>
+                  <div className="adm-skeleton" style={{ width: '65%', height: 22, borderRadius: 8 }} />
+                  <div className="adm-skeleton" style={{ width: '40%', height: 13, borderRadius: 6 }} />
+                </div>
+                <div className="adm-skeleton" style={{ width: 64, height: 26, borderRadius: 8 }} />
+              </div>
+              <div className="ord-sep" />
+              {/* items */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
+                <div className="adm-skeleton" style={{ width: '75%', height: 13, borderRadius: 6 }} />
+                <div className="adm-skeleton" style={{ width: '55%', height: 13, borderRadius: 6 }} />
+              </div>
+              <div className="ord-sep" />
+              {/* pipeline placeholder */}
+              <div className="adm-skeleton" style={{ width: '100%', height: 52, borderRadius: 14 }} />
+              <div className="ord-sep" />
+              {/* footer */}
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <div className="adm-skeleton" style={{ width: 80, height: 30, borderRadius: 8 }} />
+                <div className="adm-skeleton" style={{ width: 70, height: 30, borderRadius: 8 }} />
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : filtered.length === 0 ? (
+        <div className="adm-card">
           <div className="adm-empty">
             <div className="adm-empty-emoji">📭</div>
             <div className="adm-empty-title">No orders found</div>
-            <div className="adm-empty-sub">Try adjusting search or filters.</div>
+            <div className="adm-empty-sub">Try adjusting your search or filters.</div>
           </div>
-        ) : (
-          <div className="adm-orders-list">
-            {filtered.map(o => (
-              <Fragment key={o.id}>
-                <div
-                  className={[
-                    'adm-orow',
-                    newIds.has(o.id) ? 'adm-orow--new' : '',
-                    successIds.has(o.id) ? 'adm-orow--success' : '',
-                    expandedId === o.id ? 'adm-orow--open' : '',
-                  ].filter(Boolean).join(' ')}
-                  style={{
-                    background: '#ffffff',
-                    borderRadius: '24px',
-                    padding: '24px',
-                    marginBottom: '24px',
-                    border: '2px solid #facc15',
-                    boxShadow: '0 10px 30px rgba(0,0,0,0.08)',
-                  }}
-                >
+        </div>
+      ) : (
+        <div className="ord-grid" style={{ gap: 12 }}>
+          {filtered.map(o => {
+            const statusInfo = STATUS_MAP[o.status];
+            return (
+              <div
+                key={o.id}
+                className={[
+                  'ord-card',
+                  newIds.has(o.id)     ? 'ord-card--new'     : '',
+                  successIds.has(o.id) ? 'ord-card--success'  : '',
+                  expandedId === o.id  ? 'ord-card--expanded' : '',
+                ].filter(Boolean).join(' ')}
+                data-status={o.status}
+              >
 
-
-                  {/* ── Main 3-column row ── */}
-                  <div className="adm-orow-main">
-
-                    {/* LEFT: order meta */}
-                    <div className="adm-orow-left">
-                      <div className="adm-orow-topline">
-                        <div className="adm-orow-id">
-                          #{o.id.slice(0, 8).toUpperCase()}
-                          {newIds.has(o.id) && <span className="adm-orow-new-tag">NEW</span>}
-                        </div>
-                        <span className="adm-orow-time">{timeAgo(o.created_at)}</span>
-                      </div>
-
-                      {/* Restaurant Mode metadata row
-                          Reads from delivery_address JSONB (works before migration 007)
-                          and falls back to dedicated columns (works after migration 007) */}
-                      {((o.source === 'restaurant_mode') || (o.delivery_address?.source === 'restaurant_mode')) && (() => {
-                        const addr = o.delivery_address || {};
-                        const orderType = o.order_type || addr.order_type || addr.mode || '';
-                        const tableNum = o.table_number || addr.table_number || addr.tableNumber || '';
-                        const payMethod = o.payment_method || addr.payment || '';
-                        return (
-                          <div style={{ display: 'flex', alignItems: 'center', gap: 5, flexWrap: 'wrap', margin: '2px 0 3px' }}>
-                            <span style={{
-                              display: 'inline-flex', alignItems: 'center', gap: 3,
-                              padding: '2px 7px', borderRadius: 5,
-                              background: 'rgba(255,213,74,0.16)', border: '1px solid rgba(255,213,74,0.38)',
-                              color: 'var(--adm-accent-text)', fontSize: 9.5, fontWeight: 800,
-                            }}>
-                              🍽️ Restaurant
-                            </span>
-                            {orderType && (
-                              <span style={{ fontSize: 9.5, fontWeight: 700, color: 'var(--adm-text-3)', textTransform: 'capitalize' }}>
-                                {orderType.replace(/_/g, '-')}
-                              </span>
-                            )}
-                            {tableNum && (
-                              <span style={{
-                                padding: '2px 6px', borderRadius: 4,
-                                background: 'var(--adm-surface-4)', border: '1px solid var(--adm-border)',
-                                fontSize: 9.5, fontWeight: 800, color: 'var(--adm-text-2)',
-                              }}>
-                                Table {tableNum}
-                              </span>
-                            )}
-                            {payMethod && (
-                              <span style={{ fontSize: 9.5, fontWeight: 700, color: 'var(--adm-text-3)' }}>
-                                {payMethod === 'card_in_store' ? '💳 Card' : '💵 Cash'}
-                              </span>
-                            )}
-                          </div>
-                        );
-                      })()}
-
-                      <div className="adm-orow-name-row">
-                        <div className="adm-orow-customer">{o.customer_name || '—'}</div>
-                        <div className="adm-orow-total">{fmtCurrency(o.total_price)}</div>
-                      </div>
-                      <InlineOrderItems items={o.items} />
-                    </div>
-
-                    {/* RIGHT: pipeline + info on one row, cancel below */}
-                    <div className="adm-orow-right">
-                      <div className="adm-pipe-info-row">
-                        <SmartPipeline
-                          order={o}
-                          onStepClick={handleAction}
-                          onDriverAndAdvance={handleDriverAndAdvance}
-                          saving={savingIds.has(o.id)}
-                          drivers={activeDrivers}
-                        />
-                        <button
-                          className={`adm-info-btn adm-info-btn--mini${expandedId === o.id ? ' adm-info-btn--open' : ''}`}
-                          onClick={() => setExpandedId(prev => prev === o.id ? null : o.id)}
-                          aria-label="Toggle order details"
-                          aria-expanded={expandedId === o.id}
-                        >
-                          Info
-                          <svg
-                            width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"
-                            style={{ transition: 'transform 0.22s ease', transform: expandedId === o.id ? 'rotate(180deg)' : 'rotate(0deg)' }}
-                          >
-                            <polyline points="6 9 12 15 18 9" />
-                          </svg>
-                        </button>
-                      </div>
-                      <RowActions
-                        order={o}
-                        onAction={handleAction}
-                        saving={savingIds.has(o.id)}
-                      />
-                    </div>
+                {/* ── Cap: status + time ── */}
+                <div className="ord-cap" style={{ paddingTop: 11, paddingBottom: 7 }}>
+                  <div className="ord-cap-left">
+                    <span className="ord-status-dot" style={{ background: statusInfo?.color ?? '#9ca3af' }} />
+                    <span className="ord-status-label">{statusInfo?.label ?? capitalize(o.status)}</span>
+                    {newIds.has(o.id) && <span className="adm-orow-new-tag">NEW</span>}
                   </div>
-
-                  {/* ── Expandable info drawer ── */}
-                  {expandedId === o.id && (
-                    <div className="adm-orow-drawer">
-                      <OrderInfoPanel order={o} />
-                    </div>
-                  )}
+                  <span className="ord-cap-time">{timeAgo(o.created_at)}</span>
                 </div>
-              </Fragment>
-            ))}
-          </div>
-        )}
-      </div>
 
-      {!loading && filtered.length > 0 && (
-        <div style={{ textAlign: 'right', fontSize: 11.5, fontWeight: 700, color: 'var(--adm-text-3)', marginTop: -12 }}>
-          Showing {filtered.length} of {orders.length} orders
+                {/* ── Restaurant mode pills ── */}
+                {((o.source === 'restaurant_mode') || (o.delivery_address?.source === 'restaurant_mode')) && (() => {
+                  const addr = o.delivery_address || {};
+                  const orderType = o.order_type || addr.order_type || addr.mode || '';
+                  const tableNum  = o.table_number || addr.table_number || addr.tableNumber || '';
+                  const payMethod = o.payment_method || addr.payment || '';
+                  return (
+                    <div className="ord-rm-row">
+                      <span className="ord-rm-badge">🍽️ Restaurant</span>
+                      {orderType && <span className="ord-rm-meta">{orderType.replace(/_/g, '-')}</span>}
+                      {tableNum  && <span className="ord-rm-tag">Table {tableNum}</span>}
+                      {payMethod && <span className="ord-rm-meta">{payMethod === 'card_in_store' ? '💳 Card' : '💵 Cash'}</span>}
+                    </div>
+                  );
+                })()}
+
+                {/* ── Hero: customer name + price ── */}
+                <div className="ord-hero" style={{ paddingBottom: 9 }}>
+                  <div className="ord-hero-info">
+                    <div className="ord-customer-name">{o.customer_name || '—'}</div>
+                    <div className="ord-order-id">#{o.id.slice(0, 8).toUpperCase()}</div>
+                  </div>
+                  <div className="ord-price">{fmtCurrency(o.total_price)}</div>
+                </div>
+
+                <div className="ord-sep" />
+
+                {/* ── Items ── */}
+                <div className="ord-items-wrap" style={{ paddingTop: 8, paddingBottom: 8 }}>
+                  <InlineOrderItems items={o.items} />
+                </div>
+
+                <div className="ord-sep" />
+
+                {/* ── Workflow / Pipeline ── */}
+                <div className="ord-workflow" style={{ paddingTop: 8, paddingBottom: 8 }}>
+                  <SmartPipeline
+                    order={o}
+                    onStepClick={handleAction}
+                    onDriverAndAdvance={handleDriverAndAdvance}
+                    saving={savingIds.has(o.id)}
+                    drivers={activeDrivers}
+                  />
+                </div>
+
+                <div className="ord-sep" />
+
+                {/* ── Footer: expand details + cancel ── */}
+                <div className="ord-footer" style={{ paddingTop: 8, paddingBottom: 10 }}>
+                  <button
+                    className={`ord-details-btn${expandedId === o.id ? ' ord-details-btn--open' : ''}`}
+                    onClick={() => setExpandedId(prev => prev === o.id ? null : o.id)}
+                    aria-label="Toggle order details"
+                    aria-expanded={expandedId === o.id}
+                  >
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
+                      <circle cx="12" cy="12" r="10" />
+                      <line x1="12" y1="8" x2="12" y2="12" />
+                      <line x1="12" y1="16" x2="12.01" y2="16" />
+                    </svg>
+                    Details
+                    <svg
+                      className="ord-details-chevron"
+                      width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"
+                      style={{ transform: expandedId === o.id ? 'rotate(180deg)' : 'rotate(0deg)' }}
+                    >
+                      <polyline points="6 9 12 15 18 9" />
+                    </svg>
+                  </button>
+                  <div className="ord-footer-actions">
+                    <RowActions
+                      order={o}
+                      onAction={handleAction}
+                      saving={savingIds.has(o.id)}
+                    />
+                  </div>
+                </div>
+
+                {/* ── Expandable info drawer ── */}
+                {expandedId === o.id && (
+                  <div className="adm-orow-drawer">
+                    <OrderInfoPanel order={o} />
+                  </div>
+                )}
+
+              </div>
+            );
+          })}
         </div>
       )}
     </>

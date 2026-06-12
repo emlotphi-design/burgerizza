@@ -19,18 +19,10 @@ import OrderTracking from './pages/OrderTracking';
 import CategoryPage from './pages/CategoryPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import AuthCallback from './pages/AuthCallback';
-import AdminLayout from './admin/AdminLayout';
+import AdminLayout from './new-admin/AdminLayoutNew';
+import NewAdminRoute from './new-admin/NewAdminRoute';
+import BlankPage from './new-admin/pages/BlankPage';
 import AdminRoute from './admin/AdminRoute';
-import { StaffLockedRoute } from './admin/context/StaffLockContext';
-import AdminDashboard from './admin/pages/Dashboard';
-import AdminOrders from './admin/pages/Orders';
-import AdminProducts from './admin/pages/Products';
-import AdminUsers from './admin/pages/Users';
-import AdminSettings from './admin/pages/Settings';
-import AdminPOS from './admin/pages/POS';
-import AdminDrivers from './admin/pages/Drivers';
-import AdminDriverDetail from './admin/pages/DriverDetail';
-import AdminIngredients from './admin/pages/Ingredients';
 import KitchenDisplay from './kitchen/KitchenDisplay';
 import RestaurantModeBanner from './components/RestaurantModeBanner';
 import RestaurantModeCartBar from './components/RestaurantModeCartBar';
@@ -49,7 +41,7 @@ function AnimatedRoutes() {
     if (location.pathname === displayLocation.pathname) return;
 
     const fromBuilder = BUILDER_ROUTES.has(displayLocation.pathname);
-    const toBuilder   = BUILDER_ROUTES.has(location.pathname);
+    const toBuilder = BUILDER_ROUTES.has(location.pathname);
 
     if (fromBuilder && toBuilder) {
       setExiting(true);
@@ -82,46 +74,44 @@ function AnimatedRoutes() {
             </>
           }
         />
-        <Route path="/build-pizza"  element={<PizzaBuilder />} />
-        <Route path="/menu"         element={<MenuPage />} />
+        <Route path="/build-pizza" element={<PizzaBuilder />} />
+        <Route path="/menu" element={<MenuPage />} />
         <Route path="/build-burger" element={<BurgerPage />} />
-        <Route path="/cart"         element={<CartPage />} />
-        <Route path="/checkout"     element={<CheckoutPage />} />
-        <Route path="/auth"          element={<AuthPage />} />
+        <Route path="/cart" element={<CartPage />} />
+        <Route path="/checkout" element={<CheckoutPage />} />
+        <Route path="/auth" element={<AuthPage />} />
         <Route path="/auth/callback" element={<AuthCallback />} />
-        <Route path="/profile"      element={<ProtectedRoute><ProfileDashboard /></ProtectedRoute>} />
-        <Route path="/my-pizzas"    element={<ProtectedRoute><MyPizzasPage /></ProtectedRoute>} />
-        <Route path="/my-burgers"   element={<ProtectedRoute><MyBurgersPage /></ProtectedRoute>} />
-        <Route path="/coming-soon"      element={<ComingSoon />} />
+        <Route path="/profile" element={<ProtectedRoute><ProfileDashboard /></ProtectedRoute>} />
+        <Route path="/my-pizzas" element={<ProtectedRoute><MyPizzasPage /></ProtectedRoute>} />
+        <Route path="/my-burgers" element={<ProtectedRoute><MyBurgersPage /></ProtectedRoute>} />
+        <Route path="/coming-soon" element={<ComingSoon />} />
         <Route path="/order-tracking/:id" element={<OrderTracking />} />
-        <Route path="/order-tracking"     element={<OrderTracking />} />
+        <Route path="/order-tracking" element={<OrderTracking />} />
 
         {/* Food menu category pages */}
-        <Route path="/burger"  element={<CategoryPage />} />
-        <Route path="/pizza"   element={<CategoryPage />} />
+        <Route path="/burger" element={<CategoryPage />} />
+        <Route path="/pizza" element={<CategoryPage />} />
         <Route path="/dessert" element={<CategoryPage />} />
-        <Route path="/drinks"  element={<CategoryPage />} />
+        <Route path="/drinks" element={<CategoryPage />} />
 
         {/* Kitchen Display System — full-screen, admin-protected, no sidebar */}
         <Route path="/kitchen" element={<AdminRoute><KitchenDisplay /></AdminRoute>} />
 
-        {/* Admin panel — protected, own layout (no AnimatedRoutes animation) */}
+        {/* Admin panel — protected, blank shell (rebuilding UI from scratch) */}
         <Route
           path="/admin"
-          element={<AdminRoute><AdminLayout /></AdminRoute>}
+          element={<NewAdminRoute><AdminLayout /></NewAdminRoute>}
         >
-          {/* /admin → orders: staff land on orders with no password prompt */}
           <Route index element={<Navigate to="/admin/orders" replace />} />
-          <Route path="orders"    element={<AdminOrders />} />
-          {/* Protected routes — redirect to orders + show modal on direct URL entry */}
-          <Route path="dashboard" element={<StaffLockedRoute><AdminDashboard /></StaffLockedRoute>} />
-          <Route path="products"  element={<AdminProducts />} />
-          <Route path="users"     element={<StaffLockedRoute><AdminUsers /></StaffLockedRoute>} />
-          <Route path="settings"  element={<StaffLockedRoute><AdminSettings /></StaffLockedRoute>} />
-          <Route path="pos"       element={<AdminPOS />} />
-          <Route path="drivers"      element={<AdminDrivers />} />
-          <Route path="drivers/:id"  element={<AdminDriverDetail />} />
-          <Route path="ingredients"  element={<AdminIngredients />} />
+          <Route path="orders" element={<BlankPage />} />
+          <Route path="dashboard" element={<BlankPage />} />
+          <Route path="products" element={<BlankPage />} />
+          <Route path="users" element={<BlankPage />} />
+          <Route path="settings" element={<BlankPage />} />
+          <Route path="pos" element={<BlankPage />} />
+          <Route path="drivers" element={<BlankPage />} />
+          <Route path="drivers/:id" element={<BlankPage />} />
+          <Route path="ingredients" element={<BlankPage />} />
         </Route>
       </Routes>
     </div>
