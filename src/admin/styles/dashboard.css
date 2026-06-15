@@ -1,0 +1,540 @@
+/* ── Dashboard page ──────────────────────────────────────────────────── */
+.admin-dash-page {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+/* ── Dashboard header ────────────────────────────────────────────────── */
+.admin-dash-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 18px 24px;
+    border-radius: var(--radius-lg);
+    background: var(--s-glass);
+    border: 1px solid var(--bd1);
+    border-bottom-color: rgba(247,201,72,0.18);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    box-shadow: var(--shadow-sm), inset 0 1px 0 rgba(255,255,255,0.04);
+}
+
+.admin-dash-header-left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.admin-dash-brand-icon {
+    font-size: 1.5rem;
+    line-height: 1;
+}
+
+.admin-dash-title {
+    font-size: 1.5rem;
+    font-weight: 900;
+    letter-spacing: -0.03em;
+    color: var(--t0);
+    margin: 0;
+}
+
+.admin-dash-subtitle {
+    font-size: 0.80rem;
+    color: var(--t2);
+    margin-top: 3px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.admin-dash-live-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 9px;
+    border-radius: 999px;
+    background: var(--c-amber-bg);
+    color: var(--c-amber);
+    border: 1px solid var(--c-amber-bd);
+    font-weight: 800;
+    font-size: 0.66rem;
+    letter-spacing: 0.10em;
+    text-transform: uppercase;
+}
+
+.admin-dash-live-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--gold);
+    box-shadow: 0 0 6px rgba(247,201,72,0.80);
+    animation: dash-blink 2.2s ease infinite;
+}
+
+@keyframes dash-blink {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.28; }
+}
+
+.admin-dash-status-mini {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 8px 14px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid var(--bd1);
+    font-size: 0.80rem;
+    font-weight: 700;
+    color: var(--t2);
+}
+
+.admin-dash-status-mini-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+}
+.admin-dash-status-mini--online .admin-dash-status-mini-dot { background: #34c759; box-shadow: 0 0 6px rgba(52,199,89,0.65); }
+.admin-dash-status-mini--busy   .admin-dash-status-mini-dot { background: var(--gold); box-shadow: 0 0 6px rgba(247,201,72,0.65); }
+.admin-dash-status-mini--closed .admin-dash-status-mini-dot { background: #ef4444; box-shadow: 0 0 6px rgba(239,68,68,0.65); }
+
+/* ── Restaurant status selector ──────────────────────────────────────── */
+.admin-dash-status-selector {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 16px 20px;
+    border-radius: var(--radius-md);
+    background: var(--s2);
+    border: 1px solid var(--bd1);
+    box-shadow: var(--shadow);
+}
+
+.admin-dash-status-info {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.admin-dash-status-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    transition: background 300ms, box-shadow 300ms;
+}
+.admin-dash-status-dot--online { background: #34c759; box-shadow: 0 0 8px rgba(52,199,89,0.55); }
+.admin-dash-status-dot--busy   { background: var(--gold); box-shadow: 0 0 8px rgba(247,201,72,0.55); }
+.admin-dash-status-dot--closed { background: #ef4444; box-shadow: 0 0 8px rgba(239,68,68,0.55); }
+
+.admin-dash-status-label {
+    font-size: 0.86rem;
+    font-weight: 800;
+    color: var(--t0);
+}
+
+.admin-dash-status-desc {
+    font-size: 0.78rem;
+    color: var(--t2);
+    margin-top: 2px;
+}
+
+.admin-dash-seg {
+    display: flex;
+    gap: 4px;
+}
+
+.admin-dash-seg-btn {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 8px 14px;
+    border-radius: 10px;
+    border: 1px solid var(--bd1);
+    background: rgba(255,255,255,0.05);
+    color: var(--t2);
+    font-size: 0.82rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 140ms ease, color 140ms ease, border-color 140ms ease;
+    font-family: inherit;
+}
+.admin-dash-seg-btn:hover:not(:disabled) {
+    background: rgba(255,255,255,0.09);
+    color: var(--t1);
+    border-color: var(--bd2);
+}
+.admin-dash-seg-btn:disabled { opacity: 0.45; cursor: default; }
+
+.admin-dash-seg-btn--online.admin-dash-seg-btn--active {
+    background: var(--c-green-bg);
+    border-color: var(--c-green-bd);
+    color: var(--c-green);
+}
+.admin-dash-seg-btn--busy.admin-dash-seg-btn--active {
+    background: var(--c-amber-bg);
+    border-color: var(--c-amber-bd);
+    color: var(--c-amber);
+}
+.admin-dash-seg-btn--closed.admin-dash-seg-btn--active {
+    background: var(--c-red-bg);
+    border-color: var(--c-red-bd);
+    color: var(--c-red);
+}
+
+.admin-dash-seg-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+    opacity: 0.85;
+}
+
+/* ── Stat cards grid ─────────────────────────────────────────────────── */
+.admin-dash-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+}
+
+.admin-dash-stat {
+    padding: 18px 20px;
+    border-radius: var(--radius-md);
+    background: var(--s2);
+    border: 1px solid var(--bd1);
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    transition: border-color 150ms, background 150ms;
+}
+.admin-dash-stat:hover {
+    border-color: var(--bd2);
+    background: var(--s3);
+}
+
+.admin-dash-stat-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 6px;
+}
+
+.admin-dash-stat-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+}
+.admin-dash-stat-icon svg { width: 16px; height: 16px; }
+
+.admin-dash-stat-icon--amber  { background: var(--c-amber-bg);  color: var(--c-amber);  border: 1px solid var(--c-amber-bd);  }
+.admin-dash-stat-icon--blue   { background: var(--c-blue-bg);   color: var(--c-blue);   border: 1px solid var(--c-blue-bd);   }
+.admin-dash-stat-icon--green  { background: var(--c-green-bg);  color: var(--c-green);  border: 1px solid var(--c-green-bd);  }
+.admin-dash-stat-icon--orange { background: var(--c-orange-bg); color: var(--c-orange); border: 1px solid var(--c-orange-bd); }
+.admin-dash-stat-icon--purple {
+    background: rgba(160,120,255,0.12);
+    color: rgba(196,168,255,0.90);
+    border: 1px solid rgba(160,120,255,0.22);
+}
+
+.admin-dash-stat-value {
+    font-size: 1.80rem;
+    font-weight: 900;
+    letter-spacing: -0.04em;
+    color: var(--t0);
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+}
+
+.admin-dash-stat-label {
+    font-size: 0.80rem;
+    font-weight: 700;
+    color: var(--t2);
+}
+
+.admin-dash-stat-footer {
+    font-size: 0.72rem;
+    color: var(--t3);
+    margin-top: 1px;
+}
+
+/* ── Two-column layout grid ──────────────────────────────────────────── */
+.admin-dash-grid-2 {
+    display: grid;
+    grid-template-columns: 3fr 2fr;
+    gap: 12px;
+}
+
+/* ── Generic card ────────────────────────────────────────────────────── */
+.admin-dash-card {
+    padding: 20px 22px;
+    border-radius: var(--radius-md);
+    background: var(--s2);
+    border: 1px solid var(--bd1);
+    box-shadow: var(--shadow);
+}
+
+.admin-dash-card-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+}
+
+.admin-dash-card-title {
+    font-size: 0.84rem;
+    font-weight: 800;
+    color: var(--t1);
+    letter-spacing: 0.01em;
+}
+
+.admin-dash-card-action {
+    font-size: 0.76rem;
+    font-weight: 700;
+    color: var(--gold-dim);
+    text-decoration: none;
+    transition: color 150ms;
+}
+.admin-dash-card-action:hover { color: var(--gold); }
+
+.admin-dash-card-sub {
+    font-size: 0.74rem;
+    color: var(--t3);
+    margin-bottom: 10px;
+    margin-top: -8px;
+}
+
+/* ── Revenue bar labels ───────────────────────────────────────────────── */
+.admin-dash-bar-labels {
+    display: flex;
+    justify-content: space-between;
+    padding: 0 2px;
+    margin-top: 8px;
+}
+
+.admin-dash-bar-label {
+    font-size: 0.68rem;
+    font-weight: 700;
+    color: var(--t3);
+    flex: 1;
+    text-align: center;
+}
+.admin-dash-bar-label--today { color: var(--c-amber); }
+
+/* ── Status breakdown ────────────────────────────────────────────────── */
+.admin-dash-status-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.admin-dash-status-row {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+}
+
+.admin-dash-status-row-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    opacity: 0.80;
+}
+
+.admin-dash-status-row-label {
+    font-size: 0.80rem;
+    font-weight: 700;
+    color: var(--t2);
+    width: 80px;
+    flex-shrink: 0;
+}
+
+.admin-dash-status-bar-wrap {
+    flex: 1;
+    height: 4px;
+    background: var(--s3);
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.admin-dash-status-bar {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 0.5s ease;
+    opacity: 0.75;
+}
+
+.admin-dash-status-row-count {
+    font-size: 0.78rem;
+    font-weight: 800;
+    color: var(--t2);
+    width: 22px;
+    text-align: right;
+    flex-shrink: 0;
+    font-variant-numeric: tabular-nums;
+}
+
+/* ── Recent orders table ─────────────────────────────────────────────── */
+.admin-dash-table-wrap { overflow-x: auto; }
+
+.admin-dash-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.82rem;
+}
+
+.admin-dash-table thead th {
+    padding: 6px 10px 10px;
+    text-align: left;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--t3);
+    border-bottom: 1px solid var(--bd0);
+    white-space: nowrap;
+}
+
+.admin-dash-table tbody tr {
+    border-bottom: 1px solid var(--bd0);
+    transition: background 130ms;
+}
+.admin-dash-table tbody tr:hover { background: rgba(255,255,255,0.03); }
+.admin-dash-table tbody tr:last-child { border-bottom: none; }
+
+.admin-dash-table td {
+    padding: 10px;
+    color: var(--t1);
+    vertical-align: middle;
+}
+
+.admin-dash-td-id {
+    font-family: 'Courier New', monospace;
+    font-size: 0.70rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    color: var(--t3);
+}
+
+.admin-dash-td-name {
+    font-weight: 700;
+    color: var(--t0);
+}
+
+.admin-dash-td-muted {
+    color: var(--t2);
+    font-size: 0.76rem;
+}
+
+.admin-dash-td-total {
+    font-weight: 900;
+    color: var(--t0);
+    font-variant-numeric: tabular-nums;
+}
+
+/* ── Status badges ───────────────────────────────────────────────────── */
+.admin-dash-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 9px;
+    border-radius: 999px;
+    font-size: 0.68rem;
+    font-weight: 700;
+    border: 1px solid transparent;
+    white-space: nowrap;
+    letter-spacing: 0.04em;
+}
+.admin-dash-badge--pending              { background: var(--c-amber-bg);  color: var(--c-amber);  border-color: var(--c-amber-bd);  }
+.admin-dash-badge--waiting-confirmation { background: var(--c-amber-bg);  color: var(--c-amber);  border-color: var(--c-amber-bd);  }
+.admin-dash-badge--confirmed            { background: var(--c-blue-bg);   color: var(--c-blue);   border-color: var(--c-blue-bd);   }
+.admin-dash-badge--preparing            { background: var(--c-orange-bg); color: var(--c-orange); border-color: var(--c-orange-bd); }
+.admin-dash-badge--ready                { background: var(--c-green-bg);  color: var(--c-green);  border-color: var(--c-green-bd);  }
+.admin-dash-badge--delivered            { background: var(--c-green-bg);  color: var(--c-green);  border-color: var(--c-green-bd);  }
+.admin-dash-badge--completed            { background: rgba(255,255,255,0.06); color: var(--t2); border-color: var(--bd1); }
+.admin-dash-badge--cancelled            { background: var(--c-red-bg);    color: var(--c-red);    border-color: var(--c-red-bd);    }
+.admin-dash-badge--gray                 { background: rgba(255,255,255,0.06); color: var(--t2); }
+
+/* ── Top items list ──────────────────────────────────────────────────── */
+.admin-dash-top-item {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    padding: 9px 0;
+    border-bottom: 1px solid var(--bd0);
+}
+.admin-dash-top-item:last-child { border-bottom: none; }
+
+.admin-dash-top-rank {
+    font-size: 0.68rem;
+    font-weight: 900;
+    color: var(--t3);
+    width: 14px;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.admin-dash-top-emoji { font-size: 1rem; flex-shrink: 0; }
+
+.admin-dash-top-name {
+    flex: 1;
+    font-size: 0.83rem;
+    font-weight: 700;
+    color: var(--t1);
+}
+
+.admin-dash-top-count {
+    font-size: 0.78rem;
+    font-weight: 800;
+    color: var(--gold-dim);
+    font-variant-numeric: tabular-nums;
+}
+
+/* ── Empty / loading ─────────────────────────────────────────────────── */
+.admin-dash-empty {
+    padding: 28px 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    text-align: center;
+}
+.admin-dash-empty-emoji { font-size: 1.6rem; }
+.admin-dash-empty-title { font-size: 0.86rem; font-weight: 700; color: var(--t2); }
+.admin-dash-empty-sub   { font-size: 0.76rem; color: var(--t3); }
+
+/* ── Error banner ────────────────────────────────────────────────────── */
+.admin-dash-error {
+    padding: 12px 18px;
+    border-radius: var(--radius-sm);
+    background: var(--c-red-bg);
+    border: 1px solid var(--c-red-bd);
+    color: var(--c-red);
+    font-size: 0.82rem;
+}
+
+/* ── Responsive ──────────────────────────────────────────────────────── */
+@media (max-width: 1260px) {
+    .admin-dash-stats { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 980px) {
+    .admin-dash-grid-2 { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 640px) {
+    .admin-dash-stats { grid-template-columns: 1fr 1fr; }
+    .admin-dash-status-selector { flex-direction: column; align-items: flex-start; gap: 12px; }
+    .admin-dash-seg { flex-wrap: wrap; }
+    .admin-dash-header { flex-direction: column; align-items: flex-start; gap: 12px; }
+}
+
+@media (max-width: 420px) {
+    .admin-dash-stats { grid-template-columns: 1fr; }
+}

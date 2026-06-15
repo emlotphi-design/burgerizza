@@ -1,0 +1,77 @@
+/* ── Admin shell grid ─────────────────────────────────────────────────── */
+.admin-shell {
+    position: relative;
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    gap: 26px;
+    padding: 28px;
+}
+
+.admin-background-layer {
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(circle at 18% 28%, rgba(247, 201, 72, 0.08), transparent 36%),
+        radial-gradient(circle at 78% 18%, rgba(160, 140, 255, 0.04), transparent 30%),
+        radial-gradient(circle at 55% 78%, rgba(247, 201, 72, 0.05), transparent 32%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+.admin-main {
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+    min-width: 0;
+    z-index: 1;
+}
+
+.admin-content-shell  { padding: 0; }
+
+.admin-content-container {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 0 0 24px;
+}
+
+.admin-content-area {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* ── Mobile sidebar backdrop ──────────────────────────────────────────── */
+.admin-sidebar-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.58);
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
+    z-index: 99;
+    animation: admin-backdrop-in 200ms ease;
+}
+
+@keyframes admin-backdrop-in {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+/* ── Tablet & mobile (<1080px): sidebar becomes overlay, full-width main ─ */
+@media (max-width: 1079px) {
+    .admin-shell {
+        grid-template-columns: 1fr; /* sidebar is fixed overlay, not in grid */
+        padding: 16px 16px 32px;
+        gap: 14px;
+    }
+}
+
+@media (max-width: 680px) {
+    .admin-shell {
+        padding: 12px 12px 28px;
+        gap: 12px;
+    }
+    .admin-content-area {
+        gap: 14px;
+    }
+}

@@ -1,0 +1,122 @@
+/* ── Page header ─────────────────────────────────────────────────────── */
+.admin-page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    padding: 18px 24px;
+    border-radius: var(--radius-lg);
+    background: var(--s-glass);
+    border: 1px solid var(--bd1);
+    border-bottom-color: rgba(247,201,72,0.18);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    box-shadow: var(--shadow-sm), inset 0 1px 0 rgba(255,255,255,0.04);
+    position: sticky;
+    top: 24px;
+    z-index: 2;
+}
+
+.admin-page-header h2 {
+    margin: 0;
+    font-size: clamp(1.1rem, 2vw, 1.7rem);
+    font-weight: 900;
+    letter-spacing: -0.03em;
+    color: var(--t0);
+    line-height: 1.1;
+}
+
+.admin-page-subtitle {
+    margin: 4px 0 0;
+    font-size: 0.82rem;
+    color: var(--t2);
+    line-height: 1.4;
+}
+
+.admin-page-actions {
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+/* ── Primary action button ────────────────────────────────────────────── */
+.admin-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    padding: 9px 16px;
+    min-height: 38px;
+    border-radius: 999px;
+    border: 1px solid var(--bd2);
+    background: rgba(255,255,255,0.08);
+    color: var(--t1);
+    font-size: 0.84rem;
+    font-weight: 700;
+    cursor: pointer;
+    letter-spacing: 0.02em;
+    font-family: inherit;
+    white-space: nowrap;
+    transition: background 150ms ease, border-color 150ms ease, color 150ms ease, transform 150ms ease;
+}
+.admin-btn:hover {
+    background: rgba(255,255,255,0.13);
+    border-color: var(--bd3);
+    color: var(--t0);
+    transform: translateY(-1px);
+}
+.admin-btn:active {
+    transform: translateY(0);
+}
+
+.admin-btn--primary {
+    background: linear-gradient(135deg, rgba(247,201,72,0.95), rgba(232,168,32,0.95));
+    color: #160e00;
+    border-color: rgba(247,201,72,0.40);
+    font-weight: 800;
+    box-shadow: 0 4px 16px rgba(247,201,72,0.25), 0 1px 3px rgba(0,0,0,0.30);
+}
+.admin-btn--primary:hover {
+    background: linear-gradient(135deg, #F7C948, #e8a820);
+    border-color: rgba(247,201,72,0.55);
+    box-shadow: 0 6px 20px rgba(247,201,72,0.35), 0 1px 4px rgba(0,0,0,0.30);
+    color: #110a00;
+}
+
+.admin-btn--tiny {
+    min-width: 34px;
+    padding: 0 10px;
+    height: 34px;
+    min-height: 34px;
+    font-size: 0.82rem;
+    border-radius: 10px;
+    font-weight: 700;
+}
+
+/* ── Mobile: page-header non-sticky ──────────────────────────────────── */
+@media (max-width: 1079px) {
+    .admin-page-header {
+        position: relative;
+        top: auto;
+        padding: 16px 20px;
+        border-radius: 14px;
+    }
+}
+
+@media (max-width: 520px) {
+    .admin-page-header {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 14px 16px;
+        gap: 12px;
+    }
+    .admin-page-actions {
+        width: 100%;
+    }
+    .admin-page-actions .admin-btn {
+        flex: 1;
+    }
+    .admin-btn {
+        min-height: 44px;
+    }
+}

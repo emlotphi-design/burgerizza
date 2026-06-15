@@ -1,0 +1,358 @@
+/* ── Products page ───────────────────────────────────────────────────── */
+.admin-products-page {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+/* ── Toolbar ─────────────────────────────────────────────────────────── */
+.admin-products-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.admin-products-search {
+    flex: 1;
+    min-width: 180px;
+    padding: 9px 14px;
+    border-radius: var(--radius-md);
+    background: var(--s3);
+    border: 1px solid var(--bd2);
+    color: var(--t0);
+    font-size: 0.86rem;
+    font-family: inherit;
+    outline: none;
+    transition: border-color 150ms, background 150ms;
+    min-height: 38px;
+}
+.admin-products-search::placeholder { color: var(--t3); }
+.admin-products-search:focus {
+    border-color: var(--gold-bd);
+    background: var(--s4);
+    outline: none;
+}
+
+.admin-products-select {
+    padding: 9px 12px;
+    border-radius: var(--radius-md);
+    background: var(--s3);
+    border: 1px solid var(--bd2);
+    color: var(--t1);
+    font-size: 0.84rem;
+    font-family: inherit;
+    outline: none;
+    cursor: pointer;
+    transition: border-color 150ms;
+    min-height: 38px;
+}
+.admin-products-select:focus  { border-color: var(--gold-bd); outline: none; }
+.admin-products-select option { background: #1b1e2b; color: var(--t1); }
+
+/* ── Panel card ──────────────────────────────────────────────────────── */
+.admin-products-panel {
+    padding: 20px 22px;
+    border-radius: var(--radius-md);
+    background: var(--s2);
+    border: 1px solid var(--bd1);
+    box-shadow: var(--shadow);
+}
+
+.admin-products-panel-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+}
+
+.admin-products-panel-title {
+    font-size: 0.84rem;
+    font-weight: 800;
+    color: var(--t1);
+    letter-spacing: 0.01em;
+}
+
+.admin-products-count {
+    font-size: 0.74rem;
+    font-weight: 700;
+    color: var(--t3);
+}
+
+/* ── Product grid ────────────────────────────────────────────────────── */
+.admin-products-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 12px;
+}
+
+.admin-product-card {
+    padding: 16px;
+    border-radius: var(--radius-md);
+    background: var(--s3);
+    border: 1px solid var(--bd1);
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    transition: background 140ms, border-color 140ms;
+}
+.admin-product-card:hover {
+    background: var(--s4);
+    border-color: var(--bd2);
+}
+.admin-product-card--inactive { opacity: 0.48; }
+
+.admin-product-emoji { font-size: 1.8rem; line-height: 1; }
+
+.admin-product-name {
+    font-size: 0.90rem;
+    font-weight: 800;
+    color: var(--t0);
+    line-height: 1.2;
+}
+
+.admin-product-desc {
+    font-size: 0.76rem;
+    color: var(--t2);
+    line-height: 1.45;
+}
+
+.admin-product-meta-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-top: 2px;
+}
+
+.admin-product-price {
+    font-size: 0.94rem;
+    font-weight: 900;
+    color: var(--c-amber);
+    font-variant-numeric: tabular-nums;
+}
+
+.admin-product-cat {
+    font-size: 0.68rem;
+    font-weight: 700;
+    color: var(--t3);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.admin-product-badge-active {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 0.68rem;
+    font-weight: 700;
+    background: var(--c-green-bg);
+    color: var(--c-green);
+    border: 1px solid var(--c-green-bd);
+}
+
+.admin-product-badge-hidden {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 0.68rem;
+    font-weight: 700;
+    background: rgba(255,255,255,0.06);
+    color: var(--t2);
+    border: 1px solid var(--bd1);
+}
+
+.admin-product-actions {
+    display: flex;
+    gap: 5px;
+    margin-top: 4px;
+}
+
+.admin-product-btn {
+    flex: 1;
+    height: 34px;
+    padding: 0 10px;
+    border-radius: 9px;
+    border: 1px solid var(--bd2);
+    background: rgba(255,255,255,0.06);
+    color: var(--t1);
+    font-size: 0.78rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 130ms, border-color 130ms, color 130ms;
+    font-family: inherit;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+}
+.admin-product-btn:hover {
+    background: rgba(255,255,255,0.11);
+    border-color: var(--bd3);
+    color: var(--t0);
+}
+
+.admin-product-btn--icon {
+    flex: 0 0 34px;
+    width: 34px;
+    padding: 0;
+}
+
+.admin-product-btn--danger {
+    background: var(--c-red-bg);
+    border-color: var(--c-red-bd);
+    color: var(--c-red);
+}
+.admin-product-btn--danger:hover {
+    background: rgba(239,68,68,0.20);
+    color: rgba(252,165,165,1);
+}
+
+/* ── Empty state ─────────────────────────────────────────────────────── */
+.admin-products-empty {
+    padding: 36px 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 7px;
+    text-align: center;
+}
+.admin-products-empty-emoji { font-size: 2rem; }
+.admin-products-empty-title { font-size: 0.88rem; font-weight: 700; color: var(--t2); }
+.admin-products-empty-sub   { font-size: 0.78rem; color: var(--t3); }
+
+.admin-products-error {
+    padding: 12px 18px;
+    border-radius: var(--radius-sm);
+    background: var(--c-red-bg);
+    border: 1px solid var(--c-red-bd);
+    color: var(--c-red);
+    font-size: 0.82rem;
+}
+
+/* ── Driver list ─────────────────────────────────────────────────────── */
+.admin-driver-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.admin-driver-row {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    gap: 16px;
+    align-items: center;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--bd0);
+    transition: opacity 150ms;
+}
+.admin-driver-row:last-child { border-bottom: none; }
+.admin-driver-row--inactive  { opacity: 0.45; }
+
+.admin-driver-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+}
+
+.admin-driver-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: var(--s3);
+    border: 1px solid var(--bd1);
+    display: grid;
+    place-items: center;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+}
+
+.admin-driver-details { min-width: 0; }
+
+.admin-driver-name {
+    font-weight: 800;
+    font-size: 0.88rem;
+    color: var(--t0);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.admin-driver-meta {
+    font-size: 0.74rem;
+    color: var(--t2);
+    margin-top: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.admin-driver-last { margin-left: 10px; }
+
+.admin-driver-stats-cell {
+    text-align: right;
+    flex-shrink: 0;
+}
+
+.admin-driver-count {
+    font-size: 1.1rem;
+    font-weight: 900;
+    color: var(--t0);
+    font-variant-numeric: tabular-nums;
+}
+
+.admin-driver-count-label {
+    font-size: 0.70rem;
+    color: var(--t3);
+    font-weight: 700;
+}
+
+/* ── Period tabs ─────────────────────────────────────────────────────── */
+.admin-period-tabs {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+}
+
+.admin-period-btn {
+    padding: 7px 12px;
+    border-radius: 9px;
+    border: 1px solid var(--bd1);
+    background: rgba(255,255,255,0.04);
+    color: var(--t2);
+    font-size: 0.80rem;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 140ms, color 140ms, border-color 140ms;
+}
+.admin-period-btn:hover {
+    background: rgba(255,255,255,0.08);
+    color: var(--t1);
+    border-color: var(--bd2);
+}
+.admin-period-btn--active {
+    border-color: var(--gold-bd);
+    background: var(--gold-weak);
+    color: var(--c-amber);
+    font-weight: 800;
+}
+
+/* ── Responsive ──────────────────────────────────────────────────────── */
+@media (max-width: 680px) {
+    .admin-products-grid   { grid-template-columns: 1fr 1fr; }
+    .admin-products-toolbar { flex-direction: column; align-items: stretch; gap: 8px; }
+}
+
+@media (max-width: 420px) {
+    .admin-products-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 520px) {
+    .admin-driver-row          { grid-template-columns: 1fr auto; gap: 10px; }
+    .admin-driver-stats-cell   { display: none; }
+    .admin-period-tabs         { width: 100%; }
+    .admin-period-btn          { flex: 1; text-align: center; min-height: 44px; padding: 10px 12px; }
+}

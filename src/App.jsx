@@ -19,10 +19,14 @@ import OrderTracking from './pages/OrderTracking';
 import CategoryPage from './pages/CategoryPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import AuthCallback from './pages/AuthCallback';
-import AdminLayout from './new-admin/AdminLayoutNew';
-import NewAdminRoute from './new-admin/NewAdminRoute';
-import BlankPage from './new-admin/pages/BlankPage';
-import AdminRoute from './admin/AdminRoute';
+import AdminLayout from './admin/components/layout/AdminLayout';
+import AdminGuard from './admin/routes/AdminGuard';
+import OrdersPage from './admin/pages/Orders';
+import DashboardPage from './admin/pages/Dashboard';
+import ProductsPage from './admin/pages/Products';
+import DriversPage from './admin/pages/Drivers';
+import SettingsPage from './admin/pages/Settings';
+import KitchenRoute from './admin/routes/KitchenRoute';
 import KitchenDisplay from './kitchen/KitchenDisplay';
 import RestaurantModeBanner from './components/RestaurantModeBanner';
 import RestaurantModeCartBar from './components/RestaurantModeCartBar';
@@ -95,23 +99,19 @@ function AnimatedRoutes() {
         <Route path="/drinks" element={<CategoryPage />} />
 
         {/* Kitchen Display System — full-screen, admin-protected, no sidebar */}
-        <Route path="/kitchen" element={<AdminRoute><KitchenDisplay /></AdminRoute>} />
+        <Route path="/kitchen" element={<KitchenRoute><KitchenDisplay /></KitchenRoute>} />
 
-        {/* Admin panel — protected, blank shell (rebuilding UI from scratch) */}
+        {/* Admin panel */}
         <Route
           path="/admin"
-          element={<NewAdminRoute><AdminLayout /></NewAdminRoute>}
+          element={<AdminGuard><AdminLayout /></AdminGuard>}
         >
           <Route index element={<Navigate to="/admin/orders" replace />} />
-          <Route path="orders" element={<BlankPage />} />
-          <Route path="dashboard" element={<BlankPage />} />
-          <Route path="products" element={<BlankPage />} />
-          <Route path="users" element={<BlankPage />} />
-          <Route path="settings" element={<BlankPage />} />
-          <Route path="pos" element={<BlankPage />} />
-          <Route path="drivers" element={<BlankPage />} />
-          <Route path="drivers/:id" element={<BlankPage />} />
-          <Route path="ingredients" element={<BlankPage />} />
+          <Route path="orders"    element={<OrdersPage />} />
+          <Route path="dashboard" element={<DashboardPage />} />
+          <Route path="products"  element={<ProductsPage />} />
+          <Route path="drivers"   element={<DriversPage />} />
+          <Route path="settings"  element={<SettingsPage />} />
         </Route>
       </Routes>
     </div>
