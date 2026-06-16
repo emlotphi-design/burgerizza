@@ -73,13 +73,9 @@ export function usePizzaBuilder() {
     }
   }, [config]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Lock page scroll while builder is mounted
   useEffect(() => {
-    const prev = document.documentElement.style.overflowY;
-    document.documentElement.style.overflowY = 'hidden';
     document.body.classList.add('is-builder');
     return () => {
-      document.documentElement.style.overflowY = prev;
       document.body.classList.remove('is-builder');
     };
   }, []);

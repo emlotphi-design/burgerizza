@@ -270,18 +270,18 @@ const EMPTY_ADDR_FORM = {
 
 function AddressFormModal({ address, isFirst, onSave, onClose }) {
   const [form, setForm] = useState(address ? {
-    label:        address.label        || 'Zuhause',
-    street:       address.street       || '',
+    label: address.label || 'Zuhause',
+    street: address.street || '',
     house_number: address.house_number || '',
-    postal_code:  address.postal_code  || '',
-    city:         address.city         || '',
-    floor:        address.floor        || '',
-    bell_name:    address.bell_name    || '',
-    phone:        address.phone        || '',
-    is_default:   address.is_default   ?? false,
+    postal_code: address.postal_code || '',
+    city: address.city || '',
+    floor: address.floor || '',
+    bell_name: address.bell_name || '',
+    phone: address.phone || '',
+    is_default: address.is_default ?? false,
   } : { ...EMPTY_ADDR_FORM, is_default: isFirst });
   const [saving, setSaving] = useState(false);
-  const [err,    setErr]    = useState('');
+  const [err, setErr] = useState('');
 
   function set(k, v) { setForm(p => ({ ...p, [k]: v })); }
 
@@ -294,21 +294,21 @@ function AddressFormModal({ address, isFirst, onSave, onClose }) {
 
   async function handleSubmit(e) {
     e.preventDefault();
-    if (!form.street.trim())  { setErr('Straße ist erforderlich.'); return; }
-    if (!form.city.trim())    { setErr('Stadt ist erforderlich.');  return; }
-    if (!form.label.trim())   { setErr('Bezeichnung ist erforderlich.'); return; }
+    if (!form.street.trim()) { setErr('Straße ist erforderlich.'); return; }
+    if (!form.city.trim()) { setErr('Stadt ist erforderlich.'); return; }
+    if (!form.label.trim()) { setErr('Bezeichnung ist erforderlich.'); return; }
     setSaving(true); setErr('');
     try {
       await onSave(address?.id ?? null, {
-        label:        form.label.trim(),
-        street:       form.street.trim(),
+        label: form.label.trim(),
+        street: form.street.trim(),
         house_number: form.house_number.trim(),
-        postal_code:  form.postal_code.trim(),
-        city:         form.city.trim(),
-        floor:        form.floor.trim(),
-        bell_name:    form.bell_name.trim(),
-        phone:        form.phone.trim(),
-        is_default:   form.is_default,
+        postal_code: form.postal_code.trim(),
+        city: form.city.trim(),
+        floor: form.floor.trim(),
+        bell_name: form.bell_name.trim(),
+        phone: form.phone.trim(),
+        is_default: form.is_default,
       });
       onClose();
     } catch (e) {
@@ -446,7 +446,7 @@ function AddressFormModal({ address, isFirst, onSave, onClose }) {
 // ─── Multi-address management section ────────────────────────
 function MultiAddressSection() {
   const { addresses, isLoading, addAddress, updateAddress, deleteAddress, setDefault } = useUserAddresses();
-  const [modal,    setModal]    = useState(null); // null | 'add' | { address }
+  const [modal, setModal] = useState(null); // null | 'add' | { address }
   const [deleting, setDeleting] = useState(null);
 
   async function handleSave(id, payload) {
@@ -511,7 +511,7 @@ function MultiAddressSection() {
         </span>
         <button className="pf-addr-add-btn" onClick={() => setModal('add')}>
           <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round">
-            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+            <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
           </svg>
           Neue Adresse
         </button>

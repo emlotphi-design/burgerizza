@@ -4,92 +4,102 @@
    ═══════════════════════════════════════════════════════════════════════ */
 
 :root {
-    /* ── Surface scale (elevation ladder) ────────────────────────────────
+   /* ── Surface scale (elevation ladder) ────────────────────────────────
        Each step is deliberately lighter so hierarchy is perceptible        */
-    --bg:       #09090f;    /* deepest page canvas                          */
-    --s1:       #0d0f17;    /* section wrappers, panel containers           */
-    --s2:       #141720;    /* cards, panels  ← main content surface        */
-    --s3:       #1b1e2b;    /* inputs, toolbar cells, table header          */
-    --s4:       #22263a;    /* hover / active state over s3                 */
-    --s-glass:  rgba(10,11,18,0.96); /* sticky glass (topbar, sidebar, page-header) */
+   --bg: #09090f;
+   /* deepest page canvas                          */
+   --s1: #0d0f17;
+   /* section wrappers, panel containers           */
+   --s2: #141720;
+   /* cards, panels  ← main content surface        */
+   --s3: #1b1e2b;
+   /* inputs, toolbar cells, table header          */
+   --s4: #22263a;
+   /* hover / active state over s3                 */
+   --s-glass: rgba(10, 11, 18, 0.96);
+   /* sticky glass (topbar, sidebar, page-header) */
 
-    /* ── Borders ─────────────────────────────────────────────────────────
+   /* ── Borders ─────────────────────────────────────────────────────────
        Use progressively more visible values for interactive depth          */
-    --bd0:      rgba(255,255,255,0.05);  /* hairline — card on panel        */
-    --bd1:      rgba(255,255,255,0.09);  /* default card edge               */
-    --bd2:      rgba(255,255,255,0.14);  /* interactive / input             */
-    --bd3:      rgba(255,255,255,0.22);  /* focused, strong separator       */
-    --bd-gold:  rgba(247,201,72,0.26);   /* accent / active row             */
+   --bd0: rgba(255, 255, 255, 0.05);
+   /* hairline — card on panel        */
+   --bd1: rgba(255, 255, 255, 0.09);
+   /* default card edge               */
+   --bd2: rgba(255, 255, 255, 0.14);
+   /* interactive / input             */
+   --bd3: rgba(255, 255, 255, 0.22);
+   /* focused, strong separator       */
+   --bd-gold: rgba(247, 201, 72, 0.26);
+   /* accent / active row             */
 
-    /* ── Text hierarchy ──────────────────────────────────────────────────
+   /* ── Text hierarchy ──────────────────────────────────────────────────
        4-level system: heading → body → secondary → muted                  */
-    --t0:       rgba(255,255,255,0.94);  /* headings, prices, key values    */
-    --t1:       rgba(255,255,255,0.80);  /* body text                       */
-    --t2:       rgba(255,255,255,0.52);  /* secondary labels, meta          */
-    --t3:       rgba(255,255,255,0.30);  /* timestamps, IDs, decorative     */
+   --t0: rgba(255, 255, 255, 0.94);
+   /* headings, prices, key values    */
+   --t1: rgba(255, 255, 255, 0.80);
+   /* body text                       */
+   --t2: rgba(255, 255, 255, 0.52);
+   /* secondary labels, meta          */
+   --t3: rgba(255, 255, 255, 0.30);
+   /* timestamps, IDs, decorative     */
 
-    /* backward-compat aliases */
-    --text:     var(--t0);
-    --muted:    var(--t2);
+   /* backward-compat aliases */
+   --text: var(--t0);
+   --muted: var(--t2);
 
-    /* ── Brand ───────────────────────────────────────────────────────────*/
-    --gold:         #F7C948;
-    --gold-dim:     rgba(247,201,72,0.86);
-    --gold-weak:    rgba(247,201,72,0.13);
-    --gold-bg:      rgba(247,201,72,0.14);
-    --gold-bg2:     rgba(247,201,72,0.08);
-    --gold-bd:      rgba(247,201,72,0.28);
+   /* ── Brand ───────────────────────────────────────────────────────────*/
+   --gold: #F7C948;
+   --gold-dim: rgba(247, 201, 72, 0.86);
+   --gold-weak: rgba(247, 201, 72, 0.13);
+   --gold-bg: rgba(247, 201, 72, 0.14);
+   --gold-bg2: rgba(247, 201, 72, 0.08);
+   --gold-bd: rgba(247, 201, 72, 0.28);
 
-    /* ── Status palette ──────────────────────────────────────────────────
+   /* ── Status palette ──────────────────────────────────────────────────
        Each status: fg color · background fill · border                    */
-    --c-amber:      rgba(247,201,72,0.95);
-    --c-amber-bg:   rgba(247,201,72,0.14);
-    --c-amber-bd:   rgba(247,201,72,0.28);
+   --c-amber: rgba(247, 201, 72, 0.95);
+   --c-amber-bg: rgba(247, 201, 72, 0.14);
+   --c-amber-bd: rgba(247, 201, 72, 0.28);
 
-    --c-green:      rgba(74,222,128,0.92);
-    --c-green-bg:   rgba(74,222,128,0.12);
-    --c-green-bd:   rgba(74,222,128,0.24);
+   --c-green: rgba(74, 222, 128, 0.92);
+   --c-green-bg: rgba(74, 222, 128, 0.12);
+   --c-green-bd: rgba(74, 222, 128, 0.24);
 
-    --c-blue:       rgba(96,165,250,0.92);
-    --c-blue-bg:    rgba(96,165,250,0.11);
-    --c-blue-bd:    rgba(96,165,250,0.22);
+   --c-blue: rgba(96, 165, 250, 0.92);
+   --c-blue-bg: rgba(96, 165, 250, 0.11);
+   --c-blue-bd: rgba(96, 165, 250, 0.22);
 
-    --c-orange:     rgba(251,146,60,0.92);
-    --c-orange-bg:  rgba(251,146,60,0.12);
-    --c-orange-bd:  rgba(251,146,60,0.24);
+   --c-orange: rgba(251, 146, 60, 0.92);
+   --c-orange-bg: rgba(251, 146, 60, 0.12);
+   --c-orange-bd: rgba(251, 146, 60, 0.24);
 
-    --c-red:        rgba(252,165,165,0.90);
-    --c-red-bg:     rgba(239,68,68,0.12);
-    --c-red-bd:     rgba(239,68,68,0.24);
+   --c-red: rgba(252, 165, 165, 0.90);
+   --c-red-bg: rgba(239, 68, 68, 0.12);
+   --c-red-bd: rgba(239, 68, 68, 0.24);
 
-    /* ── Shadows (crisp — no bloom) ──────────────────────────────────────
+   /* ── Shadows (crisp — no bloom) ──────────────────────────────────────
        Small blur radii, higher opacity = sharp & legible                  */
-    --shadow:       0 1px 3px rgba(0,0,0,0.55);
-    --shadow-sm:    0 2px 8px rgba(0,0,0,0.55),  0 1px 2px rgba(0,0,0,0.40);
-    --shadow-md:    0 4px 16px rgba(0,0,0,0.55), 0 1px 4px rgba(0,0,0,0.40);
-    --shadow-lg:    0 8px 28px rgba(0,0,0,0.60), 0 2px 8px rgba(0,0,0,0.40);
+   --shadow: 0 1px 3px rgba(0, 0, 0, 0.55);
+   --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.55), 0 1px 2px rgba(0, 0, 0, 0.40);
+   --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.55), 0 1px 4px rgba(0, 0, 0, 0.40);
+   --shadow-lg: 0 8px 28px rgba(0, 0, 0, 0.60), 0 2px 8px rgba(0, 0, 0, 0.40);
 
-    /* ── Radius ───────────────────────────────────────────────────────── */
-    --radius-xl:    22px;
-    --radius-lg:    16px;
-    --radius-md:    12px;
-    --radius-sm:    8px;
+   /* ── Radius ───────────────────────────────────────────────────────── */
+   --radius-xl: 22px;
+   --radius-lg: 16px;
+   --radius-md: 12px;
+   --radius-sm: 8px;
 
-    font-family: Inter, system-ui, -apple-system, 'Segoe UI', sans-serif;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
+   font-family: Inter, system-ui, -apple-system, 'Segoe UI', sans-serif;
+   -webkit-font-smoothing: antialiased;
+   -moz-osx-font-smoothing: grayscale;
 }
 
 /* ── Page background ────────────────────────────────────────────────────
    Deep charcoal with barely-perceptible amber warmth (brand anchor)      */
 body {
-    margin: 0;
-    min-height: 100vh;
-    background-color: var(--bg);
-    background-image:
-        radial-gradient(ellipse 900px 700px at 0% 0%,   rgba(247,201,72,0.030), transparent 55%),
-        radial-gradient(ellipse 700px 600px at 100% 0%, rgba(80,60,200,0.025),  transparent 55%),
-        radial-gradient(ellipse 600px 500px at 50% 100%, rgba(247,201,72,0.018), transparent 55%);
-    background-attachment: fixed;
-    color: var(--t1);
+   background: transparent !important;
+   margin: 0;
+   min-height: 100vh;
+   color: var(--t1);
 }

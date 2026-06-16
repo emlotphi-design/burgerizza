@@ -13,21 +13,8 @@
   position: relative;
 }
 
-/* Ambient orb — bottom-left warm anchor */
 .cat-page::before {
-  content: '';
-  position: fixed;
-  bottom: -8%;
-  left: -6%;
-  width: clamp(300px, 50vw, 700px);
-  height: clamp(200px, 38vw, 520px);
-  border-radius: 50%;
-  pointer-events: none;
-  z-index: 0;
-  background: radial-gradient(ellipse at center,
-    rgba(200, 0, 30, 0.10) 0%,
-    rgba(200, 0, 30, 0.04) 48%,
-    transparent 70%);
+  content: none;
 }
 
 .cat-page-main {

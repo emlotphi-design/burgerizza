@@ -240,27 +240,10 @@ html {
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
 
-  background-image:
-    /* 1 — film grain — premium organic texture */
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.68' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23n)' opacity='0.042'/%3E%3C/svg%3E"),
-    /* 2 — soft vignette — gentle depth at edges only */
-    radial-gradient(ellipse 110% 110% at 50% 50%,
-      transparent 48%, rgba(0, 0, 0, 0.28) 100%),
-    /* 3 — illustrated food tile — fully visible warm yellow */
-    url('/background.png');
-  background-color:      #F5C518;
-  background-size:
-    220px 220px,
-    cover,
-    420px auto;
-  background-repeat:
-    repeat,
-    no-repeat,
-    repeat;
-  background-position:
-    center,
-    center,
-    center;
+  background-image: url('../assets/backgrounds/bg.png');
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
   background-attachment: fixed;
 }
 
@@ -274,9 +257,8 @@ html {
   }
 }
 
-body {
-  /* Transparent so html atmospheric background shows through */
-  background: transparent;
+html body {
+  background: transparent !important;
   min-height: 100vh;
   min-height: -webkit-fill-available;
   min-height: 100dvh;

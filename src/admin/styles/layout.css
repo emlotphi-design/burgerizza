@@ -6,17 +6,11 @@
     grid-template-columns: 260px 1fr;
     gap: 26px;
     padding: 28px;
-    /* Opaque dark canvas — blocks global.css html/#F5C518 from bleeding through */
-    background-color: var(--bg, #09090f);
 }
 
 .admin-background-layer {
     position: absolute;
     inset: 0;
-    background:
-        radial-gradient(circle at 18% 28%, rgba(247, 201, 72, 0.08), transparent 36%),
-        radial-gradient(circle at 78% 18%, rgba(160, 140, 255, 0.04), transparent 30%),
-        radial-gradient(circle at 55% 78%, rgba(247, 201, 72, 0.05), transparent 32%);
     pointer-events: none;
     z-index: 0;
 }

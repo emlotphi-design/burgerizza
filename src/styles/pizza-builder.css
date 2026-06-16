@@ -808,21 +808,7 @@
 }
 
 .pb-main::before {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -52%);
-  width: clamp(320px, 58vw, 720px);
-  height: clamp(320px, 58vw, 720px);
-  border-radius: 50%;
-  pointer-events: none;
-  z-index: 0;
-  background: radial-gradient(ellipse at center,
-    rgba(255, 107, 26, 0.10) 0%,
-    rgba(255, 140, 58, 0.06) 38%,
-    rgba(185, 52,   4, 0.04) 58%,
-    transparent 72%);
+  content: none;
 }
 
 /* Ensure stage content sits above the glow */
@@ -838,16 +824,7 @@
 }
 
 .builder-center::before {
-  content: '';
-  position: absolute;
-  inset: -18% -22%;
-  border-radius: 50%;
-  pointer-events: none;
-  z-index: -1;
-  background: radial-gradient(ellipse at 50% 48%,
-    rgba(255, 107, 26, 0.13) 0%,
-    rgba(215, 112,  10, 0.07) 42%,
-    transparent 68%);
+  content: none;
 }
 
 /* Minimal depth — faint warm shadow only, no black bloom on yellow bg */
