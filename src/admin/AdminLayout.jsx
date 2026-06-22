@@ -5,6 +5,8 @@ import { subscribeToOrders, fetchOrders } from './services/adminService';
 import { StaffLockProvider, useStaffLock } from './context/StaffLockContext';
 import LanguageSwitcher from '../components/LanguageSwitcher.jsx';
 import './styles/admin.css';
+import dbgLight from '../assets/backgrounds/dbg.png';
+import dbgDark  from '../assets/backgrounds/dbgn.png';
 
 const NAV = [
   {
@@ -212,6 +214,7 @@ export default function AdminLayout() {
   const { currentUser } = useAuth();
   const channelRef  = useRef(null);
   const layoutRef   = useRef(null);
+  const mainRef     = useRef(null);
 
   function toggleTheme() {
     layoutRef.current?.classList.add('adm-theme-changing');
@@ -245,10 +248,25 @@ export default function AdminLayout() {
     };
   }, []);
 
-  /* Keep body data-admin-theme in sync — drives background-attachment:fixed gradient */
+  /* Keep body data-admin-theme in sync */
   useEffect(() => {
     document.body.dataset.adminTheme = theme;
     return () => { delete document.body.dataset.adminTheme; };
+  }, [theme]);
+
+  /* Global background — applies to every admin page via .adm-main */
+  useEffect(() => {
+    const el = mainRef.current;
+    if (!el) return;
+    const isLight = theme === 'light';
+    const img     = isLight ? dbgLight : dbgDark;
+    const overlay = isLight ? 'rgba(255,255,255,0.30)' : 'rgba(0,0,0,0.65)';
+    el.style.setProperty(
+      'background',
+      `linear-gradient(${overlay}, ${overlay}) center/cover fixed no-repeat, url(${img}) center/cover fixed no-repeat`,
+      'important'
+    );
+    return () => el.style.removeProperty('background');
   }, [theme]);
 
   useEffect(() => {
@@ -353,7 +371,7 @@ export default function AdminLayout() {
       />
 
       {/* ── Main ── */}
-      <div className="adm-main">
+      <div className="adm-main" ref={mainRef}>
 
         <header className="adm-topbar">
           <button

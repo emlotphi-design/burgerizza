@@ -179,6 +179,33 @@ body[data-context="admin"] .adm-layout[data-theme="dark"] .dash-page {
 .dash-page .adm-status-seg-btn--busy.adm-status-seg-btn--active    { background: rgba(234,88,12,0.12) !important; color: #c2410c !important; }
 .dash-page .adm-status-seg-btn--closed.adm-status-seg-btn--active  { background: rgba(220,38,38,0.11) !important; color: #991b1b !important; }
 
+/* ─── Glass section panels (light mode) ─── */
+.dash-page .adm-stats-grid,
+.dash-page .adm-grid-2 {
+  background: linear-gradient(
+    135deg,
+    rgba(255,248,235,0.85),
+    rgba(255,243,210,0.75)
+  );
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1px solid rgba(255,255,255,0.65);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.80),
+    0 12px 40px rgba(212,163,60,0.08);
+  border-radius: 24px;
+  padding: 14px;
+  margin-bottom: 20px;
+  transition: all 0.25s ease;
+}
+
+.dash-page .adm-stats-grid:hover,
+.dash-page .adm-grid-2:hover {
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.90),
+    0 18px 50px rgba(212,163,60,0.13);
+}
+
 /* ─── Stat cards ─── */
 .dash-page .adm-stats-grid { animation: dash-enter 0.4s cubic-bezier(0.22,1,0.36,1) 0.10s both; }
 
@@ -214,7 +241,7 @@ body[data-context="admin"] .adm-layout[data-theme="dark"] .dash-page {
   display: flex !important;
   align-items: flex-start !important;
   justify-content: space-between !important;
-  margin-bottom: 16px !important;
+  margin-bottom: 10px !important;
 }
 .dash-page .adm-stat-value  { color: var(--adm-text) !important; }
 .dash-page .adm-stat-label  { color: var(--adm-text-3) !important; }
@@ -273,13 +300,13 @@ body[data-context="admin"] .adm-layout[data-theme="dark"] .dash-page {
 /* ─── Table ─── */
 .dash-page .adm-table { width: 100% !important; border-collapse: collapse !important; }
 .dash-page .adm-table th {
-  padding: 11px 20px !important; font-size: 10px !important; font-weight: 800 !important;
+  padding: 7px 20px !important; font-size: 10px !important; font-weight: 800 !important;
   letter-spacing: 1.2px !important; text-transform: uppercase !important;
   color: var(--adm-text-3) !important; background: var(--adm-surface-3) !important;
   border-bottom: 1px solid var(--adm-border) !important;
 }
 .dash-page .adm-table td {
-  padding: 13px 20px !important; font-size: 13px !important; font-weight: 600 !important;
+  padding: 8px 20px !important; font-size: 13px !important; font-weight: 600 !important;
   color: var(--adm-text) !important;
   border-bottom: 1px solid var(--adm-border-2) !important;
 }
@@ -338,7 +365,7 @@ body[data-context="admin"] .adm-layout[data-theme="dark"] .dash-page {
 /* ─── Mobile order cards ─── */
 .dash-page .adm-order-card {
   border-radius: 14px !important;
-  padding: 18px 20px !important;
+  padding: 12px 16px !important;
   border-left-width: 4px !important;
   border-left-style: solid !important;
 }
@@ -364,17 +391,18 @@ body[data-context="admin"] .adm-layout[data-theme="dark"] .dash-page {
   .dash-title { font-size: 24px; }
   .dash-page .adm-status-seg { flex-wrap: wrap; }
   .dash-page .adm-status-seg-btn { padding: 7px 12px !important; font-size: 11.5px !important; }
-  .dash-page .adm-stat-value { font-size: 26px !important; }
+  .dash-page .adm-stat-value { font-size: 32px !important; }
   .dash-page .adm-section-head { padding: 13px 16px 11px !important; }
+  .dash-page .adm-order-cards { gap: 7px !important; padding: 8px 12px 10px !important; }
 }
 
 /* ─── Stacked floating order row cards (light mode) ─── */
 body[data-context="admin"][data-admin-theme="light"] .dash-page .adm-table-wrap {
-  padding: 6px 8px 10px !important;
+  padding: 4px 8px 6px !important;
 }
 body[data-context="admin"][data-admin-theme="light"] .dash-page .adm-table {
   border-collapse: separate !important;
-  border-spacing: 0 5px !important;
+  border-spacing: 0 3px !important;
 }
 body[data-context="admin"][data-admin-theme="light"] .dash-page .adm-table tbody td {
   background: #FFFDF7 !important;
@@ -415,7 +443,7 @@ body[data-context="admin"][data-admin-theme="light"] .dash-page .adm-order-card 
   border-left: 3px solid rgba(245,197,24,0.65) !important;
   border-radius: 12px !important;
   box-shadow: 0 2px 8px rgba(0,0,0,0.07), 0 6px 20px rgba(0,0,0,0.05) !important;
-  margin-bottom: 10px !important;
+  margin-bottom: 7px !important;
 }
 body[data-context="admin"][data-admin-theme="light"] .dash-page .adm-order-card:hover {
   background: #FFF8E1 !important;
@@ -433,6 +461,24 @@ body[data-context="admin"][data-admin-theme="light"] .dash-page .adm-order-card:
   color: rgba(52,211,153,0.85) !important;
 }
 .adm-layout[data-theme="dark"] .dash-live-dot { background: #34d399 !important; }
+
+/* Dark glass section panels */
+.adm-layout[data-theme="dark"] .dash-page .adm-stats-grid,
+.adm-layout[data-theme="dark"] .dash-page .adm-grid-2 {
+  background:
+    linear-gradient(135deg, rgba(255,190,0,0.06), rgba(255,190,0,0.02)),
+    rgba(18,18,18,0.72);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1px solid rgba(255,200,0,0.12);
+  box-shadow: 0 15px 45px rgba(0,0,0,0.45);
+  border-radius: 24px;
+}
+
+.adm-layout[data-theme="dark"] .dash-page .adm-stats-grid:hover,
+.adm-layout[data-theme="dark"] .dash-page .adm-grid-2:hover {
+  box-shadow: 0 20px 60px rgba(0,0,0,0.55);
+}
 
 /* Dark status mini badges */
 .adm-layout[data-theme="dark"] .dash-page .adm-status-mini-badge--online  { background: rgba(52,211,153,0.09);  border-color: rgba(52,211,153,0.18);  color: rgba(52,211,153,0.85);  }

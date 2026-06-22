@@ -243,6 +243,7 @@ export default function Dashboard() {
     return () => { channelRef.current?.unsubscribe(); };
   }, []);
 
+
   /* Sparkline data from chart (revenue per day) */
   const sparkRevenue = chartData.map(d => d.revenue);
   const sparkOrders  = chartData.map(d => d.orders);

@@ -54,6 +54,7 @@ function StaffLockModal({ intendedPath, onSuccess, onCancel }) {
   const [error, setError]   = useState(false);
   const [shake, setShake]   = useState(false);
   const navigate             = useNavigate();
+  const isDark               = localStorage.getItem('adminTheme') === 'dark';
 
   const trySubmit = useCallback((currentPin) => {
     if (currentPin === STAFF_ADMIN_PASSWORD) {
@@ -128,12 +129,18 @@ function StaffLockModal({ intendedPath, onSuccess, onCancel }) {
         }}
       >
         <div style={{
-          background: 'linear-gradient(160deg, #FFFFF8 0%, #FFFCE8 100%)',
+          background: isDark
+            ? 'rgba(18,18,18,0.88)'
+            : 'linear-gradient(160deg, #FFFFF8 0%, #FFFCE8 100%)',
+          backdropFilter: isDark ? 'blur(24px) saturate(1.4)' : undefined,
+          WebkitBackdropFilter: isDark ? 'blur(24px) saturate(1.4)' : undefined,
           borderRadius: 26,
           padding: '32px 26px 24px',
           width: '100%', maxWidth: 320,
-          boxShadow: '0 28px 72px rgba(0,0,0,0.36), 0 4px 16px rgba(0,0,0,0.10)',
-          border: '1.5px solid rgba(255,213,74,0.50)',
+          boxShadow: isDark
+            ? '0 28px 72px rgba(0,0,0,0.72), 0 4px 16px rgba(0,0,0,0.40), inset 0 1px 0 rgba(255,255,255,0.06)'
+            : '0 28px 72px rgba(0,0,0,0.36), 0 4px 16px rgba(0,0,0,0.10)',
+          border: isDark ? '1.5px solid rgba(250,204,21,0.22)' : '1.5px solid rgba(255,213,74,0.50)',
           pointerEvents: 'auto',
           animation: shake
             ? 'sfShake 0.42s ease'
@@ -151,10 +158,10 @@ function StaffLockModal({ intendedPath, onSuccess, onCancel }) {
             }}>
               <LockSvg />
             </div>
-            <div style={{ fontFamily: 'Nunito, sans-serif', fontWeight: 900, fontSize: 18, color: '#1A0A00', lineHeight: 1.2 }}>
+            <div style={{ fontFamily: 'Nunito, sans-serif', fontWeight: 900, fontSize: 18, color: isDark ? 'rgba(240,236,228,0.95)' : '#1A0A00', lineHeight: 1.2 }}>
               Admin-Zugang
             </div>
-            <div style={{ fontFamily: 'Nunito, sans-serif', fontWeight: 700, fontSize: 12, color: 'rgba(26,10,0,0.45)', marginTop: 4 }}>
+            <div style={{ fontFamily: 'Nunito, sans-serif', fontWeight: 700, fontSize: 12, color: isDark ? 'rgba(255,255,255,0.38)' : 'rgba(26,10,0,0.45)', marginTop: 4 }}>
               Bitte Passwort eingeben
             </div>
           </div>
@@ -169,7 +176,7 @@ function StaffLockModal({ intendedPath, onSuccess, onCancel }) {
                   background: filled
                     ? (error ? '#C8001E' : '#FFD23F')
                     : 'transparent',
-                  border: `2.5px solid ${filled ? (error ? '#C8001E' : '#C09500') : 'rgba(26,10,0,0.20)'}`,
+                  border: `2.5px solid ${filled ? (error ? '#C8001E' : '#C09500') : isDark ? 'rgba(255,255,255,0.22)' : 'rgba(26,10,0,0.20)'}`,
                   transition: 'background 0.1s ease, border-color 0.1s ease',
                   boxShadow: filled && !error ? '0 0 0 3px rgba(255,213,74,0.25)' : 'none',
                 }} />
@@ -204,11 +211,11 @@ function StaffLockModal({ intendedPath, onSuccess, onCancel }) {
                     borderRadius: 14,
                     border: isConfirm
                       ? '2px solid rgba(255,210,63,0.70)'
-                      : '1.5px solid rgba(26,10,0,0.10)',
+                      : isDark ? '1.5px solid rgba(255,255,255,0.10)' : '1.5px solid rgba(26,10,0,0.10)',
                     background: isConfirm
                       ? 'linear-gradient(135deg, #FFE970, #FFD23F)'
-                      : 'rgba(255,255,255,0.68)',
-                    color: isBack ? '#B00018' : '#1A0A00',
+                      : isDark ? 'rgba(255,255,255,0.07)' : 'rgba(255,255,255,0.68)',
+                    color: isBack ? (isDark ? '#f87171' : '#B00018') : isDark ? 'rgba(240,236,228,0.90)' : '#1A0A00',
                     fontFamily: 'Nunito, sans-serif',
                     fontWeight: isConfirm ? 900 : 700,
                     fontSize: isBack ? 15 : isConfirm ? 15 : 22,
@@ -238,12 +245,12 @@ function StaffLockModal({ intendedPath, onSuccess, onCancel }) {
               marginTop: 16, width: '100%', padding: '9px',
               border: 'none', background: 'transparent',
               fontFamily: 'Nunito, sans-serif', fontWeight: 800,
-              fontSize: 12, color: 'rgba(26,10,0,0.35)',
+              fontSize: 12, color: isDark ? 'rgba(255,255,255,0.28)' : 'rgba(26,10,0,0.35)',
               cursor: 'pointer', letterSpacing: '0.2px',
               transition: 'color 0.14s ease',
             }}
-            onMouseEnter={e => { e.currentTarget.style.color = 'rgba(26,10,0,0.55)'; }}
-            onMouseLeave={e => { e.currentTarget.style.color = 'rgba(26,10,0,0.35)'; }}
+            onMouseEnter={e => { e.currentTarget.style.color = isDark ? 'rgba(255,255,255,0.55)' : 'rgba(26,10,0,0.55)'; }}
+            onMouseLeave={e => { e.currentTarget.style.color = isDark ? 'rgba(255,255,255,0.28)' : 'rgba(26,10,0,0.35)'; }}
           >
             Abbrechen
           </button>

@@ -205,20 +205,32 @@ function StatsBar({ builder, list }) {
   return (
     <div className="ing-statsbar">
       <div className="ing-stat">
-        <span className="ing-stat-value">{total}</span>
-        <span className="ing-stat-label">Total</span>
+        <div className="ing-stat-icon-wrap">📦</div>
+        <div className="ing-stat-body">
+          <span className="ing-stat-value">{total}</span>
+          <span className="ing-stat-label">Total</span>
+        </div>
       </div>
       <div className="ing-stat">
-        <span className="ing-stat-value ing-stat-value--on">{enabled}</span>
-        <span className="ing-stat-label">Available</span>
+        <div className="ing-stat-icon-wrap ing-stat-icon-wrap--on">✅</div>
+        <div className="ing-stat-body">
+          <span className="ing-stat-value ing-stat-value--on">{enabled}</span>
+          <span className="ing-stat-label">Available</span>
+        </div>
       </div>
       <div className="ing-stat ing-stat--warn">
-        <span className="ing-stat-value ing-stat-value--off">{disabled}</span>
-        <span className="ing-stat-label">Disabled</span>
+        <div className="ing-stat-icon-wrap ing-stat-icon-wrap--off">⛔</div>
+        <div className="ing-stat-body">
+          <span className="ing-stat-value ing-stat-value--off">{disabled}</span>
+          <span className="ing-stat-label">Disabled</span>
+        </div>
       </div>
       <div className="ing-stat">
-        <span className="ing-stat-value ing-stat-value--vis">{visual}</span>
-        <span className="ing-stat-label">Visual Assets</span>
+        <div className="ing-stat-icon-wrap ing-stat-icon-wrap--vis">🎨</div>
+        <div className="ing-stat-body">
+          <span className="ing-stat-value ing-stat-value--vis">{visual}</span>
+          <span className="ing-stat-label">Visual Assets</span>
+        </div>
       </div>
     </div>
   );

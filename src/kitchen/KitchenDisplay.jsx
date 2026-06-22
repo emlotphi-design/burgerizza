@@ -1,5 +1,7 @@
 ﻿import { useCallback, useEffect, useRef, useState } from 'react';
 import { supabase } from '../services/supabase';
+import dbgLight from '../assets/backgrounds/dbg.png';
+import dbgDark  from '../assets/backgrounds/dbgn.png';
 import { fetchOrders, getYesterdayStart, updateOrderStatus } from '../admin/services/adminService';
 import {
   getMuted,
@@ -428,8 +430,8 @@ function OrderCard({ order, onAdvance, onCancel, flash, expandedId, setExpandedI
                     </div>
                     <div className="kds-exp-item-body">
                       <div className="kds-exp-image">
-                        {isPizza  && <PizzaComposite  item={item} size={160} />}
-                        {isBurger && <BurgerComposite item={item} size={160} />}
+                        {isPizza  && <PizzaComposite  item={item} size={190} />}
+                        {isBurger && <BurgerComposite item={item} size={190} />}
                       </div>
                       <div className="kds-exp-detail">
                         <IngredientChips item={item} />
@@ -495,7 +497,7 @@ export default function KitchenDisplay() {
   const [showDone,   setShowDone]   = useState(false);
   const [expandedId, setExpandedId] = useState(null);
   const [theme,    setTheme]    = useState(() => localStorage.getItem('kds-theme') || 'dark');
-  const channelRef = useRef(null);
+  const channelRef  = useRef(null);
 
   /* Load today + yesterday orders */
   useEffect(() => {
@@ -548,6 +550,45 @@ export default function KitchenDisplay() {
       document.documentElement.style.backgroundImage  = '';
     };
   }, []);
+
+  /* DEBUG: Background via inline style — same reasoning as Dashboard.
+     kitchen.css sets body[data-context="kitchen"] with !important gradient.
+     element.style.setProperty(..., 'important') is above that entire layer. */
+  useEffect(() => {
+    // eslint-disable-next-line no-console
+    console.log('[KdsBG] light =', dbgLight, '| dark =', dbgDark);
+
+    return () => {
+      ['background-image', 'background-size', 'background-position',
+       'background-repeat', 'background-attachment', 'background-color']
+        .forEach(p => document.body.style.removeProperty(p));
+      document.querySelector('.kds-root')?.style.removeProperty('background');
+    };
+  }, []);
+
+  useEffect(() => {
+    const img = theme === 'dark' ? dbgDark : dbgLight;
+    // eslint-disable-next-line no-console
+    console.log('[KdsBG] apply →', theme, img);
+
+    document.body.style.setProperty('background-image',      `url('${img}')`, 'important');
+    document.body.style.setProperty('background-size',       'cover',         'important');
+    document.body.style.setProperty('background-position',   'center',        'important');
+    document.body.style.setProperty('background-repeat',     'no-repeat',     'important');
+    document.body.style.setProperty('background-attachment', 'fixed',         'important');
+    document.body.style.setProperty('background-color',      theme === 'dark' ? '#000' : '#fff', 'important');
+
+    // Light mode: kitchen.css gives .kds-root[data-theme="light"] its own solid
+    // background — punch through it so the body image shows through.
+    const root = document.querySelector('.kds-root');
+    if (root) {
+      if (theme === 'light') {
+        root.style.setProperty('background', 'transparent', 'important');
+      } else {
+        root.style.removeProperty('background');
+      }
+    }
+  }, [theme]);
 
   /* 30-second tick — refreshes urgency colours */
   useEffect(() => {

@@ -339,25 +339,120 @@ function SmartPipeline({ order, onStepClick, onDriverAndAdvance, saving, drivers
 }
 
 /* ═══════════════════════════════════════════════════════════
-   ROW ACTIONS — cancel only; pipeline handles forward moves
+   CANCEL CONFIRM MODAL
+   Deliberate-intent gate — prevents accidental cancellations.
 ═══════════════════════════════════════════════════════════ */
-function RowActions({ order, onAction, saving }) {
-  const canCancel = !['delivered', 'cancelled'].includes(order.status);
-  if (!canCancel) return null;
+function CancelConfirmModal({ order, onConfirm, onDismiss }) {
+  useEffect(() => {
+    function onKey(e) { if (e.key === 'Escape') onDismiss(); }
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
-    <div className="adm-row-actions">
-      <button
-        className="adm-row-btn adm-row-btn--cancel"
-        onClick={() => onAction(order.id, 'cancelled')}
-        disabled={saving}
-        title="Cancel Order"
-      >
-        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
-          <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
-        </svg>
-        Cancel
-      </button>
-    </div>
+    <>
+      {/* Backdrop */}
+      <div
+        onClick={onDismiss}
+        style={{
+          position: 'fixed', inset: 0, zIndex: 9000,
+          background: 'rgba(10,5,0,0.46)',
+          backdropFilter: 'blur(3px)',
+          WebkitBackdropFilter: 'blur(3px)',
+        }}
+      />
+      {/* Dialog */}
+      <div style={{
+        position: 'fixed', inset: 0, zIndex: 9001,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        padding: 20, pointerEvents: 'none',
+      }}>
+        <div
+          onClick={e => e.stopPropagation()}
+          style={{
+            pointerEvents: 'auto',
+            background: 'var(--adm-card-bg)',
+            border: '1.5px solid var(--adm-border)',
+            borderRadius: 20,
+            padding: '26px 26px 22px',
+            width: '100%', maxWidth: 340,
+            boxShadow:
+              '0 4px 16px rgba(0,0,0,0.14), 0 16px 48px rgba(0,0,0,0.20), 0 40px 80px rgba(0,0,0,0.14)',
+          }}
+        >
+          {/* Icon */}
+          <div style={{
+            width: 46, height: 46, borderRadius: 13,
+            background: 'rgba(239,68,68,0.10)',
+            border: '1.5px solid rgba(239,68,68,0.24)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            marginBottom: 16,
+          }}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2.2" strokeLinecap="round">
+              <circle cx="12" cy="12" r="10" />
+              <line x1="15" y1="9" x2="9" y2="15" />
+              <line x1="9" y1="9" x2="15" y2="15" />
+            </svg>
+          </div>
+          {/* Heading */}
+          <div style={{
+            fontFamily: 'Nunito, sans-serif', fontWeight: 900,
+            fontSize: 15.5, color: 'var(--adm-text)', marginBottom: 7, lineHeight: 1.2,
+          }}>
+            Cancel this order?
+          </div>
+          {/* Body */}
+          <div style={{
+            fontFamily: 'Nunito, sans-serif', fontSize: 12.5, fontWeight: 600,
+            color: 'var(--adm-text-2)', lineHeight: 1.60, marginBottom: 22,
+          }}>
+            Order{' '}
+            <span style={{ fontWeight: 800, color: 'var(--adm-text)' }}>
+              #{order.id.slice(0, 8).toUpperCase()}
+            </span>
+            {order.customer_name && (
+              <> from{' '}
+                <span style={{ fontWeight: 800, color: 'var(--adm-text)' }}>
+                  {order.customer_name}
+                </span>
+              </>
+            )}
+            {' '}will be permanently cancelled. This cannot be undone.
+          </div>
+          {/* Buttons — Keep is primary, Cancel Order is destructive secondary */}
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button
+              type="button"
+              onClick={onDismiss}
+              autoFocus
+              style={{
+                flex: 1, padding: '10px 14px', borderRadius: 11,
+                border: '1.5px solid var(--adm-border)',
+                background: 'var(--adm-surface-3)',
+                fontFamily: 'Nunito, sans-serif', fontWeight: 800, fontSize: 13,
+                color: 'var(--adm-text)', cursor: 'pointer', lineHeight: 1,
+              }}
+            >
+              Keep Order
+            </button>
+            <button
+              type="button"
+              onClick={onConfirm}
+              style={{
+                flex: 1, padding: '10px 14px', borderRadius: 11,
+                border: '1.5px solid rgba(239,68,68,0.38)',
+                background: 'rgba(239,68,68,0.08)',
+                fontFamily: 'Nunito, sans-serif', fontWeight: 800, fontSize: 13,
+                color: '#dc2626', cursor: 'pointer', lineHeight: 1,
+              }}
+            >
+              Cancel Order
+            </button>
+          </div>
+        </div>
+      </div>
+    </>
   );
 }
 
@@ -557,10 +652,27 @@ export default function Orders() {
   const [successIds, setSuccessIds] = useState(new Set());
   const [muted, setMutedState] = useState(() => getMuted());
   const [activeDrivers, setActiveDrivers] = useState([]);
+  const [confirmCancel, setConfirmCancel] = useState(null);
   const channelRef = useRef(null);
+  const listRef    = useRef(null);
   // Always-current orders snapshot for optimistic-UI rollback without stale closures
   const ordersRef = useRef([]);
   useEffect(() => { ordersRef.current = orders; }, [orders]);
+
+  // Cursor-following glass reflection — sets --card-x / --card-y on each hovered row
+  useEffect(() => {
+    const list = listRef.current;
+    if (!list) return;
+    const onMove = (e) => {
+      const row = e.target.closest('.adm-orow');
+      if (!row) return;
+      const r = row.getBoundingClientRect();
+      row.style.setProperty('--card-x', `${((e.clientX - r.left) / r.width  * 100).toFixed(1)}%`);
+      row.style.setProperty('--card-y', `${((e.clientY - r.top)  / r.height * 100).toFixed(1)}%`);
+    };
+    list.addEventListener('mousemove', onMove, { passive: true });
+    return () => list.removeEventListener('mousemove', onMove);
+  }, []);
 
   // Unlock audio + request browser notification permission on first admin interaction
   useEffect(() => {
@@ -730,6 +842,13 @@ export default function Orders() {
   return (
     <>
       <Toast toasts={toasts} />
+      {confirmCancel && (
+        <CancelConfirmModal
+          order={confirmCancel}
+          onConfirm={() => { handleAction(confirmCancel.id, 'cancelled'); setConfirmCancel(null); }}
+          onDismiss={() => setConfirmCancel(null)}
+        />
+      )}
 
       {/* Header */}
       <div className="adm-page-header">
@@ -870,24 +989,17 @@ export default function Orders() {
             <div className="adm-empty-sub">Try adjusting search or filters.</div>
           </div>
         ) : (
-          <div className="adm-orders-list">
+          <div className="adm-orders-list" ref={listRef}>
             {filtered.map(o => (
               <Fragment key={o.id}>
                 <div
                   className={[
                     'adm-orow',
+                    'adm-orow--order-page',
                     newIds.has(o.id) ? 'adm-orow--new' : '',
                     successIds.has(o.id) ? 'adm-orow--success' : '',
                     expandedId === o.id ? 'adm-orow--open' : '',
                   ].filter(Boolean).join(' ')}
-                  style={{
-                    background: '#ffffff',
-                    borderRadius: '24px',
-                    padding: '24px',
-                    marginBottom: '24px',
-                    border: '2px solid #facc15',
-                    boxShadow: '0 10px 30px rgba(0,0,0,0.08)',
-                  }}
                 >
 
 
@@ -952,7 +1064,7 @@ export default function Orders() {
                       <InlineOrderItems items={o.items} />
                     </div>
 
-                    {/* RIGHT: pipeline + info on one row, cancel below */}
+                    {/* RIGHT: pipeline + info + cancel on one row */}
                     <div className="adm-orow-right">
                       <div className="adm-pipe-info-row">
                         <SmartPipeline
@@ -962,26 +1074,55 @@ export default function Orders() {
                           saving={savingIds.has(o.id)}
                           drivers={activeDrivers}
                         />
-                        <button
-                          className={`adm-info-btn adm-info-btn--mini${expandedId === o.id ? ' adm-info-btn--open' : ''}`}
-                          onClick={() => setExpandedId(prev => prev === o.id ? null : o.id)}
-                          aria-label="Toggle order details"
-                          aria-expanded={expandedId === o.id}
-                        >
-                          Info
-                          <svg
-                            width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"
-                            style={{ transition: 'transform 0.22s ease', transform: expandedId === o.id ? 'rotate(180deg)' : 'rotate(0deg)' }}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
+                          <button
+                            className={`adm-info-btn adm-info-btn--mini${expandedId === o.id ? ' adm-info-btn--open' : ''}`}
+                            onClick={() => setExpandedId(prev => prev === o.id ? null : o.id)}
+                            aria-label="Toggle order details"
+                            aria-expanded={expandedId === o.id}
                           >
-                            <polyline points="6 9 12 15 18 9" />
-                          </svg>
-                        </button>
+                            Info
+                            <svg
+                              width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"
+                              style={{ transition: 'transform 0.22s ease', transform: expandedId === o.id ? 'rotate(180deg)' : 'rotate(0deg)' }}
+                            >
+                              <polyline points="6 9 12 15 18 9" />
+                            </svg>
+                          </button>
+                          {!['delivered', 'cancelled'].includes(o.status) && (
+                            <button
+                              type="button"
+                              onClick={() => setConfirmCancel(o)}
+                              disabled={savingIds.has(o.id)}
+                              title="Cancel order"
+                              style={{
+                                display: 'inline-flex', alignItems: 'center', gap: 4,
+                                padding: '5px 9px', borderRadius: 7,
+                                border: '1.5px solid rgba(239,68,68,0.28)',
+                                background: 'transparent',
+                                color: '#dc2626', fontSize: 10.5, fontWeight: 800,
+                                cursor: 'pointer', whiteSpace: 'nowrap',
+                                fontFamily: 'inherit',
+                                opacity: savingIds.has(o.id) ? 0.45 : 1,
+                                transition: 'background 0.14s ease, border-color 0.14s ease',
+                              }}
+                              onMouseEnter={e => {
+                                e.currentTarget.style.background = 'rgba(239,68,68,0.07)';
+                                e.currentTarget.style.borderColor = 'rgba(239,68,68,0.44)';
+                              }}
+                              onMouseLeave={e => {
+                                e.currentTarget.style.background = 'transparent';
+                                e.currentTarget.style.borderColor = 'rgba(239,68,68,0.28)';
+                              }}
+                            >
+                              <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
+                                <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+                              </svg>
+                              Cancel
+                            </button>
+                          )}
+                        </div>
                       </div>
-                      <RowActions
-                        order={o}
-                        onAction={handleAction}
-                        saving={savingIds.has(o.id)}
-                      />
                     </div>
                   </div>
 
