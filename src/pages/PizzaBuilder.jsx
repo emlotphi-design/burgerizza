@@ -1,13 +1,14 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import Navbar from '../components/Navbar';
 import Socials from '../components/Socials';
-import PizzaCanvas from '../components/PizzaCanvas';
+import PizzaCanvas, { PIZZA_ASSET_URLS } from '../components/PizzaCanvas';
 import CategoryToolbar from '../components/CategoryToolbar';
 import { usePizzaBuilder } from '../features/pizza-builder/hooks/usePizzaBuilder';
 import { LABEL, calcPrice } from '../utils/pizzaUtils';
 import { calculatePizzaCalories } from '../utils/pizzaNutritionUtils';
 import { PIZZA_SIZES } from '../utils/pizzaSizes';
 import NutritionBadge from '../components/NutritionBadge';
+import { preloadImages } from '../utils/imagePreloadCache';
 
 // ── Saved-pizza card (presentational, no logic) ───────────────────────────────
 
@@ -71,6 +72,7 @@ function SavedPizzaCard({ pizza, onEdit, onDelete, onRename, exiting }) {
           selectedMeats={meats}
           selectedVegetables={vegetables}
           size="88px"
+          protectImages
         />
       </div>
       <p className="bpc-summary">
@@ -116,6 +118,14 @@ export default function PizzaBuilder() {
     setDraftName, renamePizza,
   } = usePizzaBuilder();
 
+  // Preload + cache every ingredient image as soon as the builder opens,
+  // instead of each one loading lazily the first time its category is
+  // selected. preloadImages() is idempotent, so this is safe to call again
+  // on every mount without re-fetching anything already cached.
+  useEffect(() => {
+    preloadImages(PIZZA_ASSET_URLS);
+  }, []);
+
   const liveCalories = calculatePizzaCalories({
     dough: selectedDough,
     size: selectedSize,
@@ -136,7 +146,7 @@ export default function PizzaBuilder() {
             </div>
           )}
           {selectedDough && (
-            <div className="nutrition-live-float">
+            <div className="nutrition-live-float nutrition-live-float--pizza">
               <NutritionBadge calories={liveCalories} size="md" />
             </div>
           )}
@@ -161,6 +171,7 @@ export default function PizzaBuilder() {
               onMeatToggle={handleMeatToggle}
               onVegetableToggle={handleVegetableToggle}
               size="min(540px, 88vw, calc(100vh - 232px))"
+              protectImages
             />
             <div className="builder-name-wrap">
               <input

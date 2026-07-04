@@ -716,6 +716,16 @@
   white-space: pre-line;
 }
 
+.co-btn-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 900;
+  font-size: 15px;
+}
+
 /* ══════════════════════════════════════════
    CHECKOUT — ADDRESS SELECTION
 ══════════════════════════════════════════ */

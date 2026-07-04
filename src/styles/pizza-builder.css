@@ -262,6 +262,27 @@
   transform: scale(1.015);
 }
 
+/* Pizza Builder only: block iOS long-press Save/Copy/Share, the desktop
+   right-click image menu, drag, and text/image selection on every
+   ingredient image and pizza preview layer. Applied via an explicit opt-in
+   prop (PizzaCanvas's `protectImages`), so pages that reuse PizzaCanvas
+   without that prop (e.g. Cart) are completely unaffected. Tapping is
+   untouched -- only user-select/touch-callout/drag are disabled, never
+   pointer-events, so buttons and ingredient selection keep working exactly
+   as before. touch-action is left at its default, so scrolling/pinch-zoom
+   gestures are unaffected too. JS also calls preventDefault() on
+   contextmenu/dragstart in PizzaCanvas.jsx for browsers where CSS alone
+   isn't enough (e.g. Android Chrome's long-press context menu). */
+.pizza-canvas-wrap--protected,
+.pizza-canvas-wrap--protected img,
+.pizza-canvas-wrap--protected .dough-label {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
 /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    CATEGORY TOOLBAR â€” floating icon rail
 â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */

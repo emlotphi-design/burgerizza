@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useIngredientConfig } from '../context/IngredientConfigContext';
 
 import trayImg       from '../assets/pizzas/base/full/tray-full.png';
@@ -250,6 +250,20 @@ const VEGETABLES = [
   { id: 'pestocheese',  label: 'Pesto Cheese',  preview: pestocheesePrev,  layer: pestocheeseLayer,  pos: { top: '16.7%', left: '34.0%', transform: 'translate(-50%, -50%)' } },
 ];
 
+/**
+ * Every image PizzaCanvas can ever render, flattened into one array —
+ * used to preload/cache them all up front instead of fetching each one
+ * lazily the first time its category becomes active.
+ */
+export const PIZZA_ASSET_URLS = [
+  trayImg,
+  ...DOUGHS.flatMap(d => [d.preview, d.full]),
+  ...SAUCES.flatMap(s => [s.preview, s.layer]),
+  ...CHEESES.flatMap(c => [c.preview, c.layer]),
+  ...MEATS.flatMap(m => [m.preview, m.layer]),
+  ...VEGETABLES.flatMap(v => [v.preview, v.layer]),
+];
+
 const centeredLayer = (size, zIndex) => ({
   position: 'absolute',
   top: '50%',
@@ -272,7 +286,7 @@ const previewBtn = {
   overflow: 'visible',
 };
 
-export default function PizzaCanvas({
+function PizzaCanvas({
   activeCategory     = 'dough',
   selectedDough      = null,
   selectedSauce      = null,
@@ -285,20 +299,41 @@ export default function PizzaCanvas({
   onMeatToggle       = () => {},
   onVegetableToggle  = () => {},
   size               = 'min(540px, 88vw, calc(100vh - 180px))',
+  /* Pizza Builder only (see pizza-builder.css .pizza-canvas-wrap--protected):
+     blocks iOS long-press Save/Copy/Share, the desktop right-click image
+     menu, and native drag on every image/layer rendered here. Off by
+     default so other pages reusing this component (e.g. Cart) are
+     unaffected. */
+  protectImages      = false,
 }) {
   const { isEnabled } = useIngredientConfig();
+
+  const handleContextMenu = protectImages ? (e) => e.preventDefault() : undefined;
+  const handleDragStart   = protectImages ? (e) => e.preventDefault() : undefined;
 
   const activeDough   = selectedDough  ? DOUGHS.find(d => d.id === selectedDough)   : null;
   const activeSauce   = selectedSauce  ? SAUCES.find(s => s.id === selectedSauce)   : null;
   const activeCheese  = selectedCheese ? CHEESES.find(c => c.id === selectedCheese) : null;
-  const activeMeats   = selectedMeats.map(id => MEATS.find(m => m.id === id)).filter(Boolean);
-  const activeVeggies = selectedVegetables.map(id => VEGETABLES.find(v => v.id === id)).filter(Boolean);
+
+  const activeMeats = useMemo(
+    () => selectedMeats.map(id => MEATS.find(m => m.id === id)).filter(Boolean),
+    [selectedMeats],
+  );
+  const activeVeggies = useMemo(
+    () => selectedVegetables.map(id => VEGETABLES.find(v => v.id === id)).filter(Boolean),
+    [selectedVegetables],
+  );
 
   const atMeatLimit    = selectedMeats.length      >= 4;
   const atVeggieLimit  = selectedVegetables.length >= 6;
 
   return (
-    <div className="pizza-canvas-wrap" style={{ position: 'relative', width: size, aspectRatio: '1' }}>
+    <div
+      className={`pizza-canvas-wrap${protectImages ? ' pizza-canvas-wrap--protected' : ''}`}
+      style={{ position: 'relative', width: size, aspectRatio: '1' }}
+      onContextMenu={handleContextMenu}
+      onDragStart={handleDragStart}
+    >
 
       {/* ── Layer 1: tray ── */}
       <img src={trayImg} alt="tray" style={centeredLayer('54%', 1)} />
@@ -516,3 +551,8 @@ export default function PizzaCanvas({
     </div>
   );
 }
+
+/* Prevents re-rendering when parent state unrelated to the canvas changes
+   (e.g. typing the pizza name, toast visibility, lock messages) — none of
+   that is a prop PizzaCanvas receives. */
+export default React.memo(PizzaCanvas);

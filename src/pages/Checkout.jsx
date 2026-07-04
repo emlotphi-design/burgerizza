@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Socials from '../components/Socials';
@@ -418,8 +418,24 @@ function StepPayment({ grandTotal, grandCalories, paymentStep, onBack, onConfirm
   const { isOrderingEnabled, isBusy, statusLoaded, setRestaurantStatus } = useOrdering();
   const { t } = useTranslation();
 
+  /* Synchronous lock — closes the double-click race that setConfirming(true)
+     alone can't close, since React state updates aren't applied immediately. */
+  const submitLockRef = useRef(false);
+
+  /* Re-enable the button only when the order attempt actually failed.
+     There is no reset on success — the component unmounts as the parent
+     transitions to the success screen instead. */
+  useEffect(() => {
+    if (submitError) {
+      submitLockRef.current = false;
+      setConfirming(false);
+    }
+  }, [submitError]);
+
   async function handleConfirm() {
+    if (submitLockRef.current) return;
     if (!selected || !isOrderingEnabled) return;
+    submitLockRef.current = true;
     setConfirming(true);
 
     /*
@@ -436,6 +452,7 @@ function StepPayment({ grandTotal, grandCalories, paymentStep, onBack, onConfirm
     if (liveStatus && liveStatus !== 'online') {
       /* Sync the context so the button immediately shows the correct blocked state */
       await setRestaurantStatus(liveStatus);
+      submitLockRef.current = false;
       setConfirming(false);
       return;
     }
@@ -515,7 +532,10 @@ function StepPayment({ grandTotal, grandCalories, paymentStep, onBack, onConfirm
         onClick={handleConfirm}
         disabled={!selected || confirming || !isOrderingEnabled || !statusLoaded}>
         {confirming ? (
-          <span className="co-spinner" />
+          <span className="co-btn-loading">
+            <span className="co-spinner" />
+            Placing your order...
+          </span>
         ) : !isOrderingEnabled ? (
           <span className="co-btn-blocked-text" style={{ whiteSpace: 'pre-line' }}>
             {isBusy ? t('restaurant.busyBtn') : t('restaurant.closedBtn')}
@@ -922,6 +942,12 @@ function CheckoutNormal() {
   const [finalTotal, setFinalTotal] = useState(0);
   const [finalCalories, setFinalCalories] = useState(0);
   const [savedOrderId, setSavedOrderId] = useState(null);
+  /* One key per checkout attempt, stable across retries within this mount —
+     that's what makes it an idempotency key rather than just a random id.
+     A duplicate insert with the same key is rejected by the DB (see
+     handleConfirmed's orderError.code === '23505' handling below), so a
+     retried request can never create a second order. */
+  const [idempotencyKey] = useState(() => crypto.randomUUID());
   /* Explicit flag: set when user confirms the saved address card. Prevents any
      re-render (auth refresh, Supabase fetch, context update) from flipping the
      view back to the address form once the user has chosen to proceed. */
@@ -980,6 +1006,7 @@ function CheckoutNormal() {
     let savedOid = null;
     try {
       const { data: savedOrder, error: orderError } = await supabase.from('orders').insert({
+        idempotency_key: idempotencyKey,
         user_id: currentUser?.id ?? null,
         customer_name: profile.fullName || '',
         customer_email: profile.email || '',
@@ -1019,7 +1046,23 @@ function CheckoutNormal() {
         payment_method: paymentMethod,
       }).select('id').single();
 
-      if (orderError) {
+      if (orderError && orderError.code === '23505') {
+        /*
+         * Unique violation on idempotency_key — this exact order was already
+         * inserted by an earlier attempt (e.g. a retry after the first
+         * request's response never reached the client). The DB has already
+         * done its job preventing a duplicate; recover the original order's
+         * id and proceed to the success screen exactly as if this insert
+         * had returned it directly. Never treat this as a failure.
+         */
+        console.warn('[checkout] duplicate order attempt caught by idempotency key — recovering original order');
+        const { data: existing } = await supabase
+          .from('orders')
+          .select('id')
+          .eq('idempotency_key', idempotencyKey)
+          .maybeSingle();
+        savedOid = existing?.id ?? null;
+      } else if (orderError) {
         /*
          * Insert was rejected. Two causes:
          *   a) RLS policy (restaurant closed/busy) — orderError.code '42501'
@@ -1037,9 +1080,9 @@ function CheckoutNormal() {
           setSubmitError('error');
         }
         return; /* ← critical: stop here, never call setDone(true) */
+      } else {
+        savedOid = savedOrder?.id ?? null;
       }
-
-      savedOid = savedOrder?.id ?? null;
       if (savedOid) {
         setSavedOrderId(savedOid);
         localStorage.setItem('bz_last_order_id', savedOid);
