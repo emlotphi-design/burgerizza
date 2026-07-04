@@ -1,0 +1,1224 @@
+/* ═══════════════════════════════════════════════════════════════
+   BURGERIZZA — INGREDIENT MANAGEMENT  /admin/ingredients
+
+   4-Layer Depth System:
+   L1  Page background       (admin body — handled by admin.css)
+   L2  Section glass panels  (category containers — float above L1)
+   L3  Ingredient cards      (solid surfaces — float above L2)
+   L4  Interactive controls  (pressed-in wells — sit below L3 surface)
+
+   Dark: charcoal navy · gold accent · glowing values
+   Light: warm cream glass · frosted panels · warm amber shadows
+═══════════════════════════════════════════════════════════════ */
+
+@keyframes ing-shimmer {
+  0%, 100% { opacity: 0.30; }
+  50%       { opacity: 0.68; }
+}
+
+@keyframes ing-card-in {
+  from { opacity: 0; transform: translateY(10px) scale(0.980); }
+  to   { opacity: 1; transform: none; }
+}
+
+@keyframes ing-section-in {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* ── Page container (L1) ────────────────────────────────────────── */
+.ing-page {
+  padding: 32px 32px 80px;
+  max-width: 1440px;
+  animation: adm-fade-in 0.36s cubic-bezier(0.22,1,0.36,1) both;
+}
+
+/* ── Page header ────────────────────────────────────────────────── */
+.ing-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 28px;
+  margin-bottom: 32px;
+  flex-wrap: wrap;
+}
+
+.ing-title {
+  font-size: 1.80rem;
+  font-weight: 900;
+  color: rgba(255,255,255,0.95);
+  letter-spacing: -0.03em;
+  margin: 0 0 7px;
+  line-height: 1.1;
+}
+
+.ing-desc {
+  font-size: 0.84rem;
+  color: rgba(255,255,255,0.36);
+  margin: 0;
+  max-width: 500px;
+  line-height: 1.65;
+  font-weight: 500;
+}
+
+/* ── Tab group ──────────────────────────────────────────────────── */
+.ing-tab-group {
+  display: flex;
+  gap: 5px;
+  background: rgba(10,12,16,0.90);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-top-color: rgba(255,255,255,0.10);
+  border-radius: 16px;
+  padding: 5px;
+  backdrop-filter: blur(32px) saturate(1.8);
+  -webkit-backdrop-filter: blur(32px) saturate(1.8);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.06),
+    inset 0 -1px 0 rgba(0,0,0,0.22),
+    0 4px 16px rgba(0,0,0,0.38),
+    0 14px 36px rgba(0,0,0,0.26);
+  flex-shrink: 0;
+}
+
+.ing-tab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border-radius: 12px;
+  border: none;
+  background: transparent;
+  color: rgba(255,255,255,0.34);
+  font-size: 0.875rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.22s cubic-bezier(0.22,1,0.36,1);
+  font-family: inherit;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+}
+
+.ing-tab:hover {
+  color: rgba(255,255,255,0.76);
+  background: rgba(250,204,21,0.08);
+}
+
+.ing-tab--active {
+  background: linear-gradient(140deg, rgba(250,204,21,0.22) 0%, rgba(250,204,21,0.12) 100%);
+  color: rgba(255,255,255,0.92);
+  box-shadow:
+    inset 0 1px 0 rgba(250,204,21,0.20),
+    0 0 0 1px rgba(250,204,21,0.22),
+    0 2px 10px rgba(0,0,0,0.28),
+    0 0 22px rgba(250,204,21,0.06);
+}
+
+.ing-tab-icon { font-size: 1.15rem; line-height: 1; }
+
+.ing-tab-badge {
+  background: rgba(255,255,255,0.07);
+  color: rgba(255,255,255,0.34);
+  border-radius: 7px;
+  padding: 2px 8px;
+  font-size: 0.70rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  border: 1px solid rgba(255,255,255,0.07);
+}
+
+.ing-tab--active .ing-tab-badge {
+  background: rgba(250,204,21,0.16);
+  color: #FACC15;
+  border-color: rgba(250,204,21,0.26);
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   STATS BAR — L2 surface widgets
+══════════════════════════════════════════════════════════════════ */
+.ing-statsbar {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-bottom: 36px;
+}
+
+.ing-stat {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 17px;
+  padding: 20px 22px;
+  position: relative;
+  overflow: hidden;
+  /* L2: above page bg */
+  background: rgba(20,24,32,0.92);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-top-color: rgba(255,255,255,0.11);
+  border-radius: 18px;
+  backdrop-filter: blur(32px) saturate(1.9);
+  -webkit-backdrop-filter: blur(32px) saturate(1.9);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.09),     /* glass top edge */
+    inset 0 -1px 0 rgba(0,0,0,0.15),           /* underside shadow */
+    0 2px 4px  rgba(0,0,0,0.38),               /* tight contact */
+    0 8px 24px rgba(0,0,0,0.30),               /* near elevation */
+    0 24px 56px rgba(0,0,0,0.22),              /* mid ambient */
+    0 56px 96px rgba(0,0,0,0.14);              /* far ambient */
+  transition:
+    transform    0.28s cubic-bezier(0.22,1,0.36,1),
+    box-shadow   0.28s ease,
+    border-color 0.28s ease;
+}
+
+/* Gold shimmer accent on top edge */
+.ing-stat::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 14%; right: 14%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(250,204,21,0.20) 50%, transparent);
+  pointer-events: none;
+}
+
+/* Interior diagonal highlight — simulates curved glass */
+.ing-stat::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(148deg,
+    rgba(255,255,255,0.030) 0%,
+    rgba(255,255,255,0.010) 30%,
+    transparent 55%
+  );
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.ing-stat:hover {
+  transform: translateY(-5px);
+  border-color: rgba(250,204,21,0.18);
+  border-top-color: rgba(250,204,21,0.26);
+  box-shadow:
+    inset 0 1px 0 rgba(250,204,21,0.14),
+    inset 0 -1px 0 rgba(0,0,0,0.12),
+    0 4px 10px  rgba(0,0,0,0.46),
+    0 16px 40px rgba(0,0,0,0.36),
+    0 40px 80px rgba(0,0,0,0.26),
+    0 80px 140px rgba(0,0,0,0.16);
+}
+
+/* ── Stat icon container ── */
+.ing-stat-icon-wrap {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.40rem;
+  flex-shrink: 0;
+  background: linear-gradient(145deg, rgba(250,204,21,0.22) 0%, rgba(250,204,21,0.09) 100%);
+  border: 1px solid rgba(250,204,21,0.26);
+  box-shadow:
+    inset 0 1px 0 rgba(250,204,21,0.16),
+    0 0 0 3px rgba(250,204,21,0.07),     /* soft outer glow ring */
+    0 0 24px rgba(250,204,21,0.09);      /* ambient glow */
+}
+
+.ing-stat-icon-wrap--on {
+  background: linear-gradient(145deg, rgba(94,196,104,0.24) 0%, rgba(94,196,104,0.10) 100%);
+  border-color: rgba(94,196,104,0.30);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.10),
+    0 0 0 3px rgba(94,196,104,0.07),
+    0 0 24px rgba(94,196,104,0.12);
+}
+.ing-stat-icon-wrap--off {
+  background: linear-gradient(145deg, rgba(224,90,90,0.24) 0%, rgba(224,90,90,0.10) 100%);
+  border-color: rgba(224,90,90,0.30);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.08),
+    0 0 0 3px rgba(224,90,90,0.07),
+    0 0 24px rgba(224,90,90,0.11);
+}
+.ing-stat-icon-wrap--vis {
+  background: linear-gradient(145deg, rgba(147,114,255,0.24) 0%, rgba(147,114,255,0.10) 100%);
+  border-color: rgba(147,114,255,0.30);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.08),
+    0 0 0 3px rgba(147,114,255,0.07),
+    0 0 24px rgba(147,114,255,0.11);
+}
+
+/* ── Stat text ── */
+.ing-stat-body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.ing-stat-value {
+  font-size: 1.90rem;
+  font-weight: 900;
+  color: rgba(255,255,255,0.92);
+  line-height: 1;
+  letter-spacing: -0.032em;
+  text-shadow: 0 0 30px rgba(255,255,255,0.09);
+}
+.ing-stat-value--on  { color: #5ec468; text-shadow: 0 0 26px rgba(94,196,104,0.26); }
+.ing-stat-value--off { color: #e05a5a; text-shadow: 0 0 26px rgba(224,90,90,0.24); }
+.ing-stat-value--vis { color: #a78bfa; text-shadow: 0 0 26px rgba(167,139,250,0.24); }
+
+.ing-stat-label {
+  font-size: 0.67rem;
+  color: rgba(255,255,255,0.30);
+  text-transform: uppercase;
+  letter-spacing: 0.10em;
+  font-weight: 800;
+}
+
+/* ── Loading skeletons ──────────────────────────────────────────── */
+.ing-loading {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(164px, 1fr));
+  gap: 14px;
+  padding: 8px 0;
+}
+
+.ing-skeleton {
+  height: 248px;
+  border-radius: 18px;
+  background: rgba(250,204,21,0.04);
+  border: 1px solid rgba(250,204,21,0.05);
+  animation: ing-shimmer 1.8s ease-in-out infinite both;
+}
+
+/* ── Content wrapper ────────────────────────────────────────────── */
+.ing-content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   SECTION PANELS — L2 glass containers
+   Float above page background. Cards (L3) float above these.
+══════════════════════════════════════════════════════════════════ */
+/* ══ CRYSTAL LIQUID GLASS — dark / default ══════════════════════
+   Physics model:
+   • Base fill ≈ 0 — glass colour comes from reflections + refraction
+   • Asymmetric borders = physical glass edge catching light
+   • backdrop-filter blur+saturate = background bleeds through glass
+   • Inset shadows = volumetric glass thickness
+   • ::before = upper-face specular + radial caustic hotspot
+   • ::after  = angled refraction streak + Fresnel bottom edge
+══════════════════════════════════════════════════════════════════ */
+.ing-section {
+  position: relative;
+  background: rgba(255,255,255,0.03);
+  border-top:    1.5px solid rgba(255,255,255,0.16);
+  border-left:   1px   solid rgba(255,255,255,0.09);
+  border-right:  1px   solid rgba(255,255,255,0.05);
+  border-bottom: 1px   solid rgba(255,255,255,0.04);
+  border-radius: 28px;
+  padding: 24px 24px 28px;
+  backdrop-filter: blur(40px) saturate(1.8);
+  -webkit-backdrop-filter: blur(40px) saturate(1.8);
+  box-shadow:
+    inset 0 1px 0     rgba(255,255,255,0.10),   /* subtle top rim          */
+    inset 0 3px  32px rgba(255,255,255,0.02),   /* faint interior volume   */
+    inset 3px 0  20px rgba(255,255,255,0.01),   /* left-face catchlight    */
+    inset 0 -1px 0    rgba(255,255,255,0.05),   /* bottom Fresnel reflect  */
+    0 2px  8px   rgba(0,0,0,0.28),               /* contact shadow          */
+    0 12px 36px  rgba(0,0,0,0.22),               /* near float              */
+    0 32px 72px  rgba(0,0,0,0.16),               /* mid ambient             */
+    0 64px 128px rgba(0,0,0,0.10);               /* far ambient             */
+  animation: ing-section-in 0.42s cubic-bezier(0.22,1,0.36,1) both;
+  transition: box-shadow 0.35s ease, border-color 0.35s ease;
+}
+
+.ing-section:nth-child(1) { animation-delay: 0ms; }
+.ing-section:nth-child(2) { animation-delay: 55ms; }
+.ing-section:nth-child(3) { animation-delay: 110ms; }
+.ing-section:nth-child(4) { animation-delay: 165ms; }
+.ing-section:nth-child(5) { animation-delay: 220ms; }
+
+/* Upper-face specular + radial caustic hotspot */
+.ing-section::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 28px;
+  background:
+    linear-gradient(
+      172deg,
+      rgba(255,255,255,0.07) 0%,
+      rgba(255,255,255,0.03) 26%,
+      transparent 52%
+    ),
+    radial-gradient(
+      ellipse 78% 52% at 38% -8%,
+      rgba(255,255,255,0.05) 0%,
+      transparent 68%
+    );
+  pointer-events: none;
+}
+
+/* Angled refraction streak + Fresnel bottom-edge glow */
+.ing-section::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 28px;
+  background:
+    linear-gradient(
+      109deg,
+      rgba(255,255,255,0.04) 0%,
+      rgba(255,255,255,0.01) 28%,
+      transparent 50%
+    ),
+    linear-gradient(
+      0deg,
+      rgba(255,255,255,0.03) 0%,
+      transparent 20%
+    );
+  pointer-events: none;
+}
+
+.ing-section:hover {
+  border-top-color:  rgba(255,255,255,0.20);
+  border-left-color: rgba(255,255,255,0.10);
+  box-shadow:
+    inset 0 1px 0     rgba(255,255,255,0.12),
+    inset 0 3px  32px rgba(255,255,255,0.02),
+    inset 3px 0  20px rgba(255,255,255,0.01),
+    inset 0 -1px 0    rgba(255,255,255,0.06),
+    0 4px  14px  rgba(0,0,0,0.34),
+    0 18px 48px  rgba(0,0,0,0.28),
+    0 44px 88px  rgba(0,0,0,0.20),
+    0 80px 150px rgba(0,0,0,0.13);
+}
+
+.ing-section-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  padding-left: 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  border-left: 3px solid #FACC15;
+}
+
+.ing-section-emoji {
+  font-size: 1.60rem;
+  line-height: 1;
+  filter: drop-shadow(0 0 14px rgba(250,204,21,0.28));
+  flex-shrink: 0;
+}
+
+.ing-section-title {
+  font-size: 0.78rem;
+  font-weight: 900;
+  color: rgba(255,255,255,0.86);
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  margin: 0;
+  flex: 1;
+}
+
+.ing-section-stats {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.ing-section-count {
+  font-size: 0.70rem;
+  color: rgba(255,255,255,0.26);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.ing-section-enabled {
+  font-size: 0.67rem;
+  background: rgba(94,196,104,0.12);
+  color: #5ec468;
+  border-radius: 7px;
+  padding: 3px 10px;
+  font-weight: 800;
+  border: 1px solid rgba(94,196,104,0.22);
+  letter-spacing: 0.02em;
+  box-shadow: 0 0 12px rgba(94,196,104,0.07);
+}
+
+/* ── Ingredient grid ────────────────────────────────────────────── */
+.ing-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(164px, 1fr));
+  gap: 14px;
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   INGREDIENT CARDS — L3 floating surfaces
+   Noticeably lighter/higher than section panels.
+   Multiple shadow layers create physical elevation illusion.
+══════════════════════════════════════════════════════════════════ */
+.ing-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  border-radius: 18px;
+  overflow: hidden;
+  /* L3: lighter than sections = appears to float above them */
+  background: rgba(30,35,48,0.97);
+  border: 1px solid rgba(255,255,255,0.14);
+  border-top-color: rgba(255,255,255,0.22);
+  backdrop-filter: blur(40px) saturate(2.2) brightness(1.07);
+  -webkit-backdrop-filter: blur(40px) saturate(2.2) brightness(1.07);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.14),     /* glossy top lip */
+    inset 0 -1px 0 rgba(0,0,0,0.24),           /* bottom underside */
+    0 2px 5px  rgba(0,0,0,0.54),               /* tight contact shadow */
+    0 6px 20px rgba(0,0,0,0.44),               /* near elevation */
+    0 18px 44px rgba(0,0,0,0.30),              /* mid elevation */
+    0 40px 80px rgba(0,0,0,0.20),              /* far ambient */
+    0 80px 130px rgba(0,0,0,0.13);             /* scatter ambient */
+  transition:
+    transform    0.32s cubic-bezier(0.22,1,0.36,1),
+    border-color 0.26s ease,
+    box-shadow   0.32s ease;
+  cursor: default;
+  animation: ing-card-in 0.38s cubic-bezier(0.22,1,0.36,1) both;
+}
+
+.ing-card:hover {
+  transform: translateY(-8px) scale(1.024);
+  border-color: rgba(250,204,21,0.42);
+  border-top-color: rgba(250,204,21,0.54);
+  box-shadow:
+    inset 0 1px 0 rgba(250,204,21,0.18),
+    inset 0 -1px 0 rgba(0,0,0,0.22),
+    0 4px 12px  rgba(0,0,0,0.62),
+    0 14px 36px rgba(0,0,0,0.50),
+    0 32px 72px rgba(0,0,0,0.36),
+    0 68px 120px rgba(0,0,0,0.24),
+    0 0 0 1px rgba(250,204,21,0.26),           /* gold ring */
+    0 0 44px rgba(250,204,21,0.10);             /* ambient glow */
+}
+
+.ing-card--off {
+  opacity: 0.58;
+  filter: saturate(0.38) brightness(0.90);
+}
+
+.ing-card--off:hover {
+  opacity: 0.74;
+  filter: saturate(0.52) brightness(0.95);
+  transform: translateY(-3px) scale(1.010);
+}
+
+/* ── Card image section ─────────────────────────────────────────── */
+.ing-card-img-wrap {
+  position: relative;
+  height: 116px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* Product photography spotlight: dark bg + warm glow under image */
+  background:
+    radial-gradient(ellipse 62% 52% at 50% 82%, rgba(250,204,21,0.11) 0%, transparent 62%),
+    linear-gradient(180deg, rgba(255,255,255,0.025) 0%, transparent 44%),
+    rgba(11,13,19,0.92);
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  overflow: hidden;
+}
+
+/* Subtle horizontal highlight at top of image area */
+.ing-card-img-wrap::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 6%; right: 6%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.11) 50%, transparent);
+  pointer-events: none;
+}
+
+/* Corner glass highlight (top-left) */
+.ing-card-img-wrap::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 58% 44% at 12% 14%, rgba(255,255,255,0.045) 0%, transparent 55%);
+  pointer-events: none;
+}
+
+.ing-card-img {
+  width: 84px;
+  height: 84px;
+  object-fit: contain;
+  filter:
+    drop-shadow(0 4px 12px rgba(0,0,0,0.60))
+    drop-shadow(0 0 22px rgba(250,204,21,0.07));
+  transition:
+    transform 0.32s cubic-bezier(0.22,1,0.36,1),
+    filter    0.32s ease;
+  z-index: 1;
+  position: relative;
+}
+
+.ing-card:hover .ing-card-img {
+  transform: scale(1.13) translateY(-5px);
+  filter:
+    drop-shadow(0 8px 22px rgba(0,0,0,0.70))
+    drop-shadow(0 0 30px rgba(250,204,21,0.16));
+}
+
+.ing-card-placeholder {
+  width: 68px;
+  height: 68px;
+  border-radius: 50%;
+  background: rgba(250,204,21,0.06);
+  border: 1px dashed rgba(250,204,21,0.18);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  transition: transform 0.32s cubic-bezier(0.22,1,0.36,1);
+  z-index: 1;
+  position: relative;
+}
+
+.ing-card:hover .ing-card-placeholder {
+  transform: scale(1.11) translateY(-4px);
+}
+
+/* ── Asset indicator dot ────────────────────────────────────────── */
+.ing-asset-dot {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  font-size: 0.57rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  padding: 3px 7px;
+  border-radius: 6px;
+  background: rgba(0,0,0,0.66);
+  color: rgba(255,255,255,0.24);
+  border: 1px solid rgba(255,255,255,0.07);
+  z-index: 3;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.ing-asset-dot--yes {
+  color: rgba(250,204,21,0.92);
+  background: rgba(250,204,21,0.13);
+  border-color: rgba(250,204,21,0.26);
+}
+
+/* ── Card body ──────────────────────────────────────────────────── */
+.ing-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px 14px 16px;
+  flex: 1;
+}
+
+.ing-card-name {
+  font-size: 0.83rem;
+  font-weight: 800;
+  color: rgba(255,255,255,0.90);
+  line-height: 1.28;
+  min-height: 2.1em;
+  letter-spacing: -0.01em;
+}
+
+.ing-card-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+}
+
+/* ── Category pills ─────────────────────────────────────────────── */
+.ing-cat-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.61rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  padding: 3px 8px;
+  border-radius: 7px;
+  text-transform: uppercase;
+}
+
+.ing-cat-pill--dough     { background: rgba(250,200,80,0.16);  color: #f4c842; border: 1px solid rgba(250,200,80,0.26); }
+.ing-cat-pill--sauce     { background: rgba(240,80,60,0.14);   color: #f87171; border: 1px solid rgba(240,80,60,0.24); }
+.ing-cat-pill--cheese    { background: rgba(250,204,21,0.14);  color: #FACC15; border: 1px solid rgba(250,204,21,0.24); }
+.ing-cat-pill--meat      { background: rgba(240,110,50,0.14);  color: #fb923c; border: 1px solid rgba(240,110,50,0.24); }
+.ing-cat-pill--vegetable { background: rgba(80,200,100,0.14);  color: #4ade80; border: 1px solid rgba(80,200,100,0.22); }
+.ing-cat-pill--bun       { background: rgba(200,140,60,0.14);  color: #d4a04a; border: 1px solid rgba(200,140,60,0.22); }
+
+/* ── Dietary tags ───────────────────────────────────────────────── */
+.ing-tag-row { display: flex; gap: 3px; }
+
+.ing-tag {
+  font-size: 0.75rem;
+  border-radius: 5px;
+  padding: 1px 4px;
+  line-height: 1;
+}
+
+.ing-tag--spicy { background: rgba(220,70,30,0.16); }
+.ing-tag--vegan { background: rgba(80,180,90,0.14); }
+
+/* ── Price row (L4 — pressed-in control well) ───────────────────── */
+.ing-price-row {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  /* L4: darker inset surface — visually below the card surface */
+  background: rgba(8,10,14,0.74);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow:
+    inset 0 2px 4px rgba(0,0,0,0.36),         /* pressed-in shadow */
+    inset 0 1px 2px rgba(0,0,0,0.22);          /* depth reinforcement */
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.ing-price-row:focus-within {
+  border-color: rgba(250,204,21,0.34);
+  box-shadow:
+    inset 0 2px 4px rgba(0,0,0,0.30),
+    0 0 0 3px rgba(250,204,21,0.09);
+}
+
+.ing-price-sym {
+  padding: 0 9px 0 11px;
+  font-size: 0.84rem;
+  font-weight: 800;
+  color: rgba(250,204,21,0.82);
+  background: rgba(250,204,21,0.07);
+  border-right: 1px solid rgba(255,255,255,0.05);
+  height: 100%;
+  display: flex;
+  align-items: center;
+  align-self: stretch;
+  line-height: 1;
+  padding-block: 9px;
+  letter-spacing: -0.01em;
+}
+
+.ing-price-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  padding: 9px 10px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: rgba(255,255,255,0.88);
+  font-family: inherit;
+  width: 0;
+  -moz-appearance: textfield;
+  letter-spacing: -0.01em;
+}
+
+.ing-price-input::-webkit-inner-spin-button,
+.ing-price-input::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* ── Availability row ───────────────────────────────────────────── */
+.ing-avail-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 1px;
+}
+
+.ing-avail-label {
+  font-size: 0.67rem;
+  font-weight: 800;
+  color: rgba(94,196,104,0.85);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.ing-avail-label--off {
+  color: rgba(224,90,90,0.72);
+}
+
+/* ── Toggle switch ──────────────────────────────────────────────── */
+.ing-toggle {
+  position: relative;
+  width: 36px;
+  height: 20px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  flex-shrink: 0;
+  background: rgba(255,255,255,0.09);
+  transition: background 0.22s ease, box-shadow 0.22s ease;
+  outline: none;
+  /* Pressed-in feel — same L4 language as price row */
+  box-shadow:
+    inset 0 2px 5px rgba(0,0,0,0.40),
+    inset 0 1px 2px rgba(0,0,0,0.22);
+}
+
+.ing-toggle:focus-visible {
+  box-shadow:
+    0 0 0 2px rgba(250,204,21,0.44),
+    inset 0 2px 5px rgba(0,0,0,0.36);
+}
+
+.ing-toggle--on {
+  background: rgba(94,196,104,0.70);
+  box-shadow:
+    0 0 16px rgba(94,196,104,0.30),
+    inset 0 1px 0 rgba(255,255,255,0.14),
+    inset 0 -1px 0 rgba(0,0,0,0.14);
+}
+
+.ing-toggle-thumb {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.50);
+  transition: transform 0.22s cubic-bezier(0.22,1,0.36,1), background 0.22s ease;
+  pointer-events: none;
+  box-shadow:
+    0 1px 4px rgba(0,0,0,0.40),
+    0 0 0 1px rgba(0,0,0,0.10);
+}
+
+.ing-toggle--on .ing-toggle-thumb {
+  transform: translateX(16px);
+  background: #ffffff;
+  box-shadow:
+    0 1px 4px rgba(0,0,0,0.30),
+    0 2px 10px rgba(94,196,104,0.28);
+}
+
+/* ── Responsive ─────────────────────────────────────────────────── */
+@media (max-width: 1100px) {
+  .ing-statsbar { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 900px) {
+  .ing-page      { padding: 18px 16px 56px; }
+  .ing-header    { flex-direction: column; gap: 18px; }
+  .ing-tab-group { align-self: stretch; }
+  .ing-tab       { flex: 1; justify-content: center; }
+  .ing-statsbar  { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .ing-grid      { grid-template-columns: repeat(auto-fill, minmax(148px, 1fr)); gap: 10px; }
+  .ing-section   { padding: 18px 16px 22px; border-radius: 20px; }
+}
+
+@media (max-width: 480px) {
+  .ing-grid           { grid-template-columns: repeat(2, 1fr); }
+  .ing-statsbar       { grid-template-columns: 1fr 1fr; }
+  .ing-stat           { padding: 14px 16px; gap: 13px; }
+  .ing-stat-icon-wrap { width: 40px; height: 40px; font-size: 1.22rem; border-radius: 12px; }
+  .ing-stat-value     { font-size: 1.60rem; }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   LIGHT MODE OVERRIDES
+   Applied when .adm-layout[data-theme="light"]
+
+   PAGE BACKGROUND: #f4f6fb (cool blue-grey — set in admin.css .adm-main)
+
+   4-Layer contrast system:
+   L1  #f4f6fb cool blue-grey page bg     — neutral, professional
+   L2  #FFFEF7→#FFFAE0 warm yellow-white sections — clearly warmer
+   L3  #FFFFFF pure white cards            — cleanest, highest surface
+   L4  #F5F0E3 warm cream controls         — pressed-in below card
+
+   The contrast between cool L1 and warm L2 IS the primary
+   depth signal. Yellow (#FACC15) as the accent color bridges them.
+═══════════════════════════════════════════════════════════════ */
+
+/* ── Page — subtle gold toplight on cool bg ── */
+.adm-layout[data-theme="light"] .ing-page {
+  /* Very faint warm bloom at top — Burgerizza brand seeping through */
+  background: linear-gradient(180deg,
+    rgba(250,204,21,0.05) 0%,
+    rgba(250,204,21,0.015) 200px,
+    transparent 380px
+  );
+}
+
+/* ── Title & Description ── */
+.adm-layout[data-theme="light"] .ing-title { color: #0D1117; }
+.adm-layout[data-theme="light"] .ing-desc  { color: #6B7280; }
+
+/* ── Tab group ── */
+.adm-layout[data-theme="light"] .ing-tab-group {
+  background: linear-gradient(160deg, #FFFFFF 0%, #FFFEF5 100%);
+  border-color: rgba(250,204,21,0.28);
+  border-top-color: rgba(255,255,255,0.98);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.99),
+    inset 0 -1px 0 rgba(180,130,0,0.05),
+    0 2px 8px rgba(180,130,0,0.09),
+    0 8px 24px rgba(0,0,0,0.08),
+    0 20px 44px rgba(0,0,0,0.05);
+}
+.adm-layout[data-theme="light"] .ing-tab { color: #6B7280; }
+.adm-layout[data-theme="light"] .ing-tab:hover {
+  color: #1F2937;
+  background: rgba(250,204,21,0.09);
+}
+.adm-layout[data-theme="light"] .ing-tab--active {
+  background: linear-gradient(155deg, #FFFFFF 0%, #FFFEF0 100%);
+  color: #111827;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,1),
+    0 0 0 1px rgba(250,204,21,0.32),
+    0 2px 8px rgba(180,130,0,0.10),
+    0 6px 20px rgba(0,0,0,0.07);
+}
+.adm-layout[data-theme="light"] .ing-tab-badge {
+  background: rgba(0,0,0,0.05);
+  color: #6B7280;
+  border-color: rgba(0,0,0,0.07);
+}
+.adm-layout[data-theme="light"] .ing-tab--active .ing-tab-badge {
+  background: rgba(250,204,21,0.14);
+  color: #7A5200;
+  border-color: rgba(250,204,21,0.28);
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   LIGHT STATS — Premium floating widgets
+   White-to-warm gradient, gold border, warm amber shadows.
+   The shimmer line and interior gradient ARE visible in light mode.
+══════════════════════════════════════════════════════════════════ */
+.adm-layout[data-theme="light"] .ing-stat {
+  background: linear-gradient(150deg, #FFFFFF 0%, #FFFEF8 100%);
+  border-color: rgba(250,204,21,0.24);
+  border-top-color: rgba(255,255,255,0.98);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.99),
+    inset 0 -1px 0 rgba(180,130,0,0.05),
+    /* warm amber ambient — not cold grey */
+    0 1px 2px rgba(180,130,0,0.09),
+    0 4px 14px rgba(0,0,0,0.09),
+    0 16px 40px rgba(0,0,0,0.08),
+    0 40px 72px rgba(0,0,0,0.04);
+}
+/* Gold shimmer line visible in light mode too */
+.adm-layout[data-theme="light"] .ing-stat::before {
+  display: block;
+  background: linear-gradient(90deg, transparent, rgba(250,204,21,0.30) 50%, transparent);
+}
+/* Subtle warm interior tint */
+.adm-layout[data-theme="light"] .ing-stat::after {
+  display: block;
+  background: linear-gradient(148deg,
+    rgba(255,248,190,0.18) 0%,
+    rgba(255,253,220,0.09) 30%,
+    transparent 55%
+  );
+}
+.adm-layout[data-theme="light"] .ing-stat:hover {
+  border-color: rgba(250,204,21,0.38);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.99),
+    inset 0 -1px 0 rgba(180,130,0,0.05),
+    0 2px 6px rgba(180,130,0,0.11),
+    0 8px 26px rgba(0,0,0,0.11),
+    0 26px 60px rgba(0,0,0,0.09),
+    0 56px 100px rgba(0,0,0,0.05),
+    0 0 0 1px rgba(250,204,21,0.18);
+}
+/* Icon containers — gradient + outer glow ring */
+.adm-layout[data-theme="light"] .ing-stat-icon-wrap {
+  background: linear-gradient(145deg, rgba(250,204,21,0.18) 0%, rgba(250,204,21,0.08) 100%);
+  border-color: rgba(250,204,21,0.34);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.90),
+    0 0 0 3px rgba(250,204,21,0.08);
+}
+.adm-layout[data-theme="light"] .ing-stat-icon-wrap--on {
+  background: linear-gradient(145deg, rgba(22,163,74,0.15) 0%, rgba(22,163,74,0.06) 100%);
+  border-color: rgba(22,163,74,0.30);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.90), 0 0 0 3px rgba(22,163,74,0.07);
+}
+.adm-layout[data-theme="light"] .ing-stat-icon-wrap--off {
+  background: linear-gradient(145deg, rgba(220,38,38,0.14) 0%, rgba(220,38,38,0.06) 100%);
+  border-color: rgba(220,38,38,0.30);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.90), 0 0 0 3px rgba(220,38,38,0.07);
+}
+.adm-layout[data-theme="light"] .ing-stat-icon-wrap--vis {
+  background: linear-gradient(145deg, rgba(124,58,237,0.14) 0%, rgba(124,58,237,0.06) 100%);
+  border-color: rgba(124,58,237,0.30);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.90), 0 0 0 3px rgba(124,58,237,0.07);
+}
+.adm-layout[data-theme="light"] .ing-stat-value      { color: #0D1117; text-shadow: none; }
+.adm-layout[data-theme="light"] .ing-stat-value--on  { color: #16a34a; text-shadow: none; }
+.adm-layout[data-theme="light"] .ing-stat-value--off { color: #dc2626; text-shadow: none; }
+.adm-layout[data-theme="light"] .ing-stat-value--vis { color: #7c3aed; text-shadow: none; }
+.adm-layout[data-theme="light"] .ing-stat-label      { color: #9CA3AF; }
+
+/* ── Loading skeletons ── */
+.adm-layout[data-theme="light"] .ing-skeleton {
+  background: rgba(250,204,21,0.05);
+  border-color: rgba(250,204,21,0.10);
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   LIGHT SECTION PANELS — L2 warm cream
+
+   Two-axis contrast against #f4f6fb:
+   1. BRIGHTNESS: cream is 8-10% darker than ice-blue page bg
+   2. TEMPERATURE: cream is warm (amber), page is cool (blue)
+
+   These two axes together make sections instantly recognisable
+   as a distinct layer even from a distance.
+
+   Inset top shadow creates a "recessed tray" — cards sit inside it.
+══════════════════════════════════════════════════════════════════ */
+/* ══ CRYSTAL LIQUID GLASS — light mode ═════════════════════════
+   Light glass is fundamentally different from dark glass:
+   • Much higher base opacity (~6%) — glass tints white in daylight
+   • Borders blow out to near-white — edge specular is maximal
+   • ::before radial caustic is very bright (0.72 peak)
+   • Outer shadows are subtle — light glass floats softly
+   • Warm cream bias in caustic = premium/expensive glass feel
+══════════════════════════════════════════════════════════════════ */
+.adm-layout[data-theme="light"] .ing-section {
+  background: rgba(255,255,255,0.06);
+  backdrop-filter: blur(40px) saturate(1.6);
+  -webkit-backdrop-filter: blur(40px) saturate(1.6);
+  border-top:    1.5px solid rgba(255,255,255,0.60);
+  border-left:   1px   solid rgba(255,255,255,0.32);
+  border-right:  1px   solid rgba(255,255,255,0.14);
+  border-bottom: 1px   solid rgba(255,255,255,0.10);
+  box-shadow:
+    inset 0 1px 0     rgba(255,255,255,0.42),
+    inset 0 3px  32px rgba(255,255,255,0.04),
+    inset 3px 0  20px rgba(255,255,255,0.02),
+    inset 0 -1px 0    rgba(255,255,255,0.16),
+    0 2px  8px   rgba(0,0,0,0.08),
+    0 10px 32px  rgba(0,0,0,0.08),
+    0 28px 60px  rgba(0,0,0,0.06),
+    0 56px 100px rgba(0,0,0,0.04);
+}
+
+/* Upper-face specular + warm cream radial caustic */
+.adm-layout[data-theme="light"] .ing-section::before {
+  background:
+    linear-gradient(
+      172deg,
+      rgba(255,255,255,0.18) 0%,
+      rgba(255,255,255,0.06) 26%,
+      transparent 52%
+    ),
+    radial-gradient(
+      ellipse 82% 55% at 36% -10%,
+      rgba(255,248,220,0.14) 0%,
+      transparent 70%
+    );
+}
+
+/* Angled refraction streak + warm Fresnel bottom */
+.adm-layout[data-theme="light"] .ing-section::after {
+  background:
+    linear-gradient(
+      109deg,
+      rgba(255,255,255,0.10) 0%,
+      rgba(255,255,255,0.03) 28%,
+      transparent 50%
+    ),
+    linear-gradient(
+      0deg,
+      rgba(255,250,235,0.08) 0%,
+      transparent 28%
+    );
+}
+
+.adm-layout[data-theme="light"] .ing-section:hover {
+  border-top-color:  rgba(255,255,255,0.72);
+  border-left-color: rgba(255,255,255,0.40);
+  box-shadow:
+    inset 0 1px 0     rgba(255,255,255,0.52),
+    inset 0 3px  32px rgba(255,255,255,0.05),
+    inset 3px 0  20px rgba(255,255,255,0.02),
+    inset 0 -1px 0    rgba(255,255,255,0.20),
+    0 4px  14px  rgba(0,0,0,0.10),
+    0 16px 44px  rgba(0,0,0,0.09),
+    0 36px 72px  rgba(0,0,0,0.07),
+    0 70px 120px rgba(0,0,0,0.05);
+}
+/* Section header divider styled for cream background */
+.adm-layout[data-theme="light"] .ing-section-header {
+  border-bottom-color: rgba(160,120,40,0.18);
+  border-left-color: #FACC15;
+}
+.adm-layout[data-theme="light"] .ing-section-emoji   { filter: none; }
+/* Dark text on cream — deep warm brown, not cold grey */
+.adm-layout[data-theme="light"] .ing-section-title   { color: #1C1000; }
+.adm-layout[data-theme="light"] .ing-section-count   { color: #7A6A50; }
+.adm-layout[data-theme="light"] .ing-section-enabled {
+  background: rgba(22,163,74,0.10);
+  color: #166534;
+  border-color: rgba(22,163,74,0.26);
+  box-shadow: none;
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   LIGHT INGREDIENT CARDS — L3 pure white product cards
+   #FFFFFF solid white sits clearly above warm #FFFEF7 sections.
+   Gold border + warm amber shadows = Burgerizza product card feel.
+══════════════════════════════════════════════════════════════════ */
+.adm-layout[data-theme="light"] .ing-card {
+  background: #FFFFFF;
+  border-color: rgba(160,120,0,0.28);
+  border-top-color: rgba(255,255,255,1);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,1),
+    inset 0 -1px 0 rgba(0,0,0,0.05),
+    /* warm amber tight shadow — product photography feel */
+    0 1px 3px rgba(180,130,0,0.14),
+    0 4px 14px rgba(0,0,0,0.13),
+    0 16px 40px rgba(0,0,0,0.10),
+    0 36px 72px rgba(0,0,0,0.07);
+}
+.adm-layout[data-theme="light"] .ing-card:hover {
+  border-color: rgba(160,120,0,0.52);
+  border-top-color: rgba(255,255,255,1);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,1),
+    inset 0 -1px 0 rgba(0,0,0,0.05),
+    0 2px 8px rgba(180,130,0,0.16),
+    0 8px 28px rgba(0,0,0,0.15),
+    0 24px 60px rgba(0,0,0,0.12),
+    0 52px 100px rgba(0,0,0,0.08),
+    /* Burgerizza gold ring + ambient glow */
+    0 0 0 1.5px rgba(250,204,21,0.44),
+    0 0 44px rgba(250,204,21,0.12);
+}
+
+/* ── Card image area ── */
+.adm-layout[data-theme="light"] .ing-card-img-wrap {
+  /* Pure white card image area — clearly lighter than cream section bg */
+  background:
+    radial-gradient(ellipse 62% 52% at 50% 85%, rgba(234,179,8,0.11) 0%, transparent 60%),
+    linear-gradient(180deg, rgba(255,255,255,0.70) 0%, transparent 50%),
+    linear-gradient(180deg, #FFFFFF 0%, #FBF8F0 100%);
+  border-bottom-color: rgba(200,160,50,0.12);
+}
+.adm-layout[data-theme="light"] .ing-card-img-wrap::before { display: none; }
+.adm-layout[data-theme="light"] .ing-card-img-wrap::after {
+  background: radial-gradient(ellipse 58% 46% at 12% 14%, rgba(255,255,255,0.65) 0%, transparent 55%);
+}
+.adm-layout[data-theme="light"] .ing-card-img {
+  filter: drop-shadow(0 3px 8px rgba(0,0,0,0.12)) drop-shadow(0 0 1px rgba(0,0,0,0.04));
+}
+.adm-layout[data-theme="light"] .ing-card:hover .ing-card-img {
+  filter: drop-shadow(0 6px 18px rgba(0,0,0,0.16)) drop-shadow(0 0 2px rgba(0,0,0,0.06));
+}
+.adm-layout[data-theme="light"] .ing-card-placeholder {
+  background: rgba(250,204,21,0.09);
+  border-color: rgba(250,204,21,0.26);
+}
+
+/* ── Asset dot ── */
+.adm-layout[data-theme="light"] .ing-asset-dot {
+  background: rgba(0,0,0,0.05);
+  color: #9CA3AF;
+  border-color: rgba(0,0,0,0.07);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+.adm-layout[data-theme="light"] .ing-asset-dot--yes {
+  color: #7A5200;
+  background: rgba(250,204,21,0.12);
+  border-color: rgba(250,204,21,0.30);
+}
+
+/* ── Card name ── */
+.adm-layout[data-theme="light"] .ing-card-name { color: #111827; }
+
+/* ── Category pills ── */
+.adm-layout[data-theme="light"] .ing-cat-pill--dough     { color: #92620A; background: rgba(220,160,50,0.12); border-color: rgba(220,160,50,0.26); }
+.adm-layout[data-theme="light"] .ing-cat-pill--sauce     { color: #B91C1C; background: rgba(200,60,40,0.09);  border-color: rgba(200,60,40,0.22); }
+.adm-layout[data-theme="light"] .ing-cat-pill--cheese    { color: #7A5200; background: rgba(250,204,21,0.12); border-color: rgba(250,204,21,0.28); }
+.adm-layout[data-theme="light"] .ing-cat-pill--meat      { color: #9A3412; background: rgba(200,90,30,0.10);  border-color: rgba(200,90,30,0.24); }
+.adm-layout[data-theme="light"] .ing-cat-pill--vegetable { color: #15803d; background: rgba(80,170,90,0.10);  border-color: rgba(80,170,90,0.22); }
+.adm-layout[data-theme="light"] .ing-cat-pill--bun       { color: #78350F; background: rgba(175,110,45,0.10); border-color: rgba(175,110,45,0.24); }
+
+/* ── Price row (L4 — warm cream pressed-in well) ── */
+.adm-layout[data-theme="light"] .ing-price-row {
+  /* Warm cream — noticeably warmer/darker than white card */
+  background: #F5F0E3;
+  border-color: rgba(250,204,21,0.22);
+  box-shadow:
+    inset 0 2px 5px rgba(0,0,0,0.07),
+    inset 0 1px 2px rgba(0,0,0,0.05);
+}
+.adm-layout[data-theme="light"] .ing-price-row:focus-within {
+  border-color: rgba(250,204,21,0.62);
+  box-shadow:
+    inset 0 2px 5px rgba(0,0,0,0.06),
+    0 0 0 3px rgba(250,204,21,0.15);
+}
+.adm-layout[data-theme="light"] .ing-price-sym {
+  color: #7A5200;
+  background: rgba(250,204,21,0.12);
+  border-right-color: rgba(250,204,21,0.20);
+}
+.adm-layout[data-theme="light"] .ing-price-input { color: #111827; }
+
+/* ── Availability labels ── */
+.adm-layout[data-theme="light"] .ing-avail-label      { color: #16a34a; }
+.adm-layout[data-theme="light"] .ing-avail-label--off  { color: #dc2626; }
+
+/* ── Toggle switch ── */
+.adm-layout[data-theme="light"] .ing-toggle {
+  background: rgba(0,0,0,0.15);
+  box-shadow:
+    inset 0 2px 5px rgba(0,0,0,0.16),
+    inset 0 1px 2px rgba(0,0,0,0.09);
+}
+.adm-layout[data-theme="light"] .ing-toggle:focus-visible {
+  box-shadow:
+    0 0 0 2px rgba(250,204,21,0.48),
+    inset 0 2px 5px rgba(0,0,0,0.13);
+}
+.adm-layout[data-theme="light"] .ing-toggle--on {
+  background: rgba(22,163,74,0.86);
+  box-shadow:
+    0 0 16px rgba(22,163,74,0.26),
+    inset 0 1px 0 rgba(255,255,255,0.16),
+    inset 0 -1px 0 rgba(0,0,0,0.10);
+}
+.adm-layout[data-theme="light"] .ing-toggle-thumb {
+  background: #FFFFFF;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.18), 0 0 0 1px rgba(0,0,0,0.06);
+}
+.adm-layout[data-theme="light"] .ing-toggle--on .ing-toggle-thumb {
+  background: #FFFFFF;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.14), 0 2px 10px rgba(22,163,74,0.24);
+}

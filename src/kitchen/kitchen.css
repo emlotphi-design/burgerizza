@@ -1,942 +1,1872 @@
-/* ══════════════════════════════════════════════════════════════════
-   BURGERIZZA — Kitchen Display System
-   4-column kanban: New · Preparing · Ready · Done
-   Dark-first, touch-optimized, realtime restaurant operations
-══════════════════════════════════════════════════════════════════ */
+﻿/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+   BURGERIZZA — Kitchen Display System (KDS)
+   Brand-aligned: warm, food-focused, cinematic dark mode
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
-*, *::before, *::after { box-sizing: border-box; }
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+   BODY â€” CINEMATIC KITCHEN ATMOSPHERE
+   â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+   KitchenDisplay mounts â†’ sets data-context="kitchen"
+   on <body>. kds-root becomes transparent so this
+   fixed background shines through the glass cards.
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
 body[data-context="kitchen"] {
-  background: transparent !important;
+  /*
+   * Kitchen at night â€” heavy grill ember bottom-left,
+   * stainless hood reflected golden top-right,
+   * radiant oven heat from centre-right,
+   * dark vignette frames the work surface,
+   * film grain adds physicality.
+   */
+  background-color: #030201 !important;
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.055'/%3E%3C/svg%3E"),
+    radial-gradient(ellipse 108% 108% at 50% 50%, transparent 32%, rgba(0, 0, 0, 0.78) 100%),
+    radial-gradient(ellipse 150% 95% at -6% 115%, rgba(190, 55, 4, 0.48) 0%, transparent 46%),
+    radial-gradient(ellipse 110% 82% at 112% -4%, rgba(218, 118, 10, 0.38) 0%, transparent 44%),
+    radial-gradient(ellipse 85% 68% at 72% 62%, rgba(135, 38, 2, 0.30) 0%, transparent 52%),
+    radial-gradient(ellipse 58% 45% at 18% 8%, rgba(205, 88, 8, 0.22) 0%, transparent 46%) !important;
+  background-size:
+    200px 200px,
+    cover, cover, cover, cover, cover !important;
+  background-repeat:
+    repeat,
+    no-repeat, no-repeat, no-repeat, no-repeat, no-repeat !important;
+  background-attachment: fixed !important;
 }
 
-/* ── Root tokens ──────────────────────────────────────────────── */
+/* â”€â”€ Root + design tokens â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .kds-root {
-  /* Column accent colors */
-  --kds-new:       rgba(247, 201, 72, 0.94);
-  --kds-new-bg:    rgba(247, 201, 72, 0.10);
-  --kds-new-bd:    rgba(247, 201, 72, 0.24);
-  --kds-new-solid: #c8960a;
+  /* Glass surfaces â€” semi-transparent so the gradient bleeds through */
+  --kds-bg: #030201;
+  --kds-surf: rgba(16, 10, 4, 0.46);
+  --kds-surf2: rgba(22, 14, 6, 0.52);
+  --kds-surf3: rgba(28, 18, 8, 0.58);
 
-  --kds-prep:      rgba(251, 146, 60, 0.92);
-  --kds-prep-bg:   rgba(251, 146, 60, 0.10);
-  --kds-prep-bd:   rgba(251, 146, 60, 0.24);
-  --kds-prep-solid: #c4600a;
+  /* Borders â€” warm golden tint */
+  --kds-border: rgba(255, 195, 100, 0.12);
+  --kds-border-acc: rgba(255, 195, 100, 0.20);
 
-  --kds-ready:     rgba(96, 165, 250, 0.92);
-  --kds-ready-bg:  rgba(96, 165, 250, 0.10);
-  --kds-ready-bd:  rgba(96, 165, 250, 0.24);
-  --kds-ready-solid: #1a6db5;
+  /* Text â€” warm cream */
+  --kds-text: #f8f2e8;
+  --kds-text2: #c4a878;
+  --kds-muted: #7a5c3c;
 
-  --kds-done:      rgba(74, 222, 128, 0.80);
-  --kds-done-bg:   rgba(74, 222, 128, 0.08);
-  --kds-done-bd:   rgba(74, 222, 128, 0.18);
+  /* Brand */
+  --kds-brand: #f0aa28;
+  --kds-header-bg: rgba(3, 2, 1, 0.88);
+
+  /* Status */
+  --kds-c-done: #4db880;
+  --kds-c-cancel: #d44444;
 
   /* Urgency */
-  --kds-fresh:     rgba(74, 222, 128, 0.90);
-  --kds-fresh-bg:  rgba(74, 222, 128, 0.12);
-  --kds-warn:      rgba(251, 191, 36, 0.94);
-  --kds-warn-bg:   rgba(251, 191, 36, 0.12);
-  --kds-late:      rgba(248, 113, 113, 0.94);
-  --kds-late-bg:   rgba(248, 113, 113, 0.12);
+  --kds-fresh-b: #4db880;
+  --kds-warm-b: #e07828;
+  --kds-urgent-b: #d44444;
 
-  /* Surfaces */
-  --kds-bg:        #050304;
-  --kds-s1:        rgba(15, 11, 7, 0.90);   /* card */
-  --kds-s2:        rgba(23, 17, 10, 0.85);  /* item */
-  --kds-s3:        rgba(32, 24, 14, 0.80);  /* hover */
-  --kds-col-bg:    rgba(0, 0, 0, 0.20);
-  --kds-head-bg:   rgba(6, 4, 2, 0.90);
+  /* Geometry */
+  --kds-hdr: 72px;
+  --kds-radius: 20px;
+  --kds-font: 'Nunito', system-ui, -apple-system, sans-serif;
 
-  /* Borders */
-  --kds-bd:        rgba(255, 255, 255, 0.07);
-  --kds-bd2:       rgba(255, 255, 255, 0.12);
-  --kds-bd-warm:   rgba(255, 195, 100, 0.10);
-
-  /* Text */
-  --kds-t0:        rgba(255, 255, 255, 0.96);
-  --kds-t1:        rgba(255, 255, 255, 0.80);
-  --kds-t2:        rgba(255, 255, 255, 0.50);
-  --kds-t3:        rgba(255, 255, 255, 0.28);
-
-  /* Cancel */
-  --kds-cancel:    rgba(248, 113, 113, 0.90);
-  --kds-cancel-bg: rgba(239, 68, 68, 0.12);
-  --kds-cancel-bd: rgba(239, 68, 68, 0.24);
-
-  --kds-brand:     #F7C948;
-  --kds-hdr:       62px;
-  --kds-radius:    18px;
-  --kds-font:      'Inter', 'Nunito', system-ui, -apple-system, sans-serif;
-
-  font-family:    var(--kds-font);
-  color:          var(--kds-t0);
-  height:         100dvh;
-  height:         100vh;
-  display:        flex;
+  font-family: var(--kds-font);
+  color: var(--kds-text);
+  height: 100dvh;
+  display: flex;
   flex-direction: column;
-  overflow:       hidden;
-  background:     transparent;
-  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+  transition: color 0.25s ease;
+
+  /* Transparent â€” body[data-context="kitchen"] provides the real background */
+  background: transparent;
 }
 
-/* Fallback bg when body context not set */
+/* Fallback: when NOT tagged (direct load without body context),
+   show the self-contained cinematic gradient */
 body:not([data-context="kitchen"]) .kds-root {
   background:
-    radial-gradient(ellipse 160% 100% at -8% 110%, rgba(200, 58, 6, 0.50) 0%, transparent 46%),
-    radial-gradient(ellipse 110% 80% at 108% -6%, rgba(220, 118, 12, 0.36) 0%, transparent 44%),
-    radial-gradient(ellipse 80% 64% at 68% 64%,   rgba(140, 40, 4, 0.26) 0%, transparent 52%),
+    radial-gradient(ellipse 150% 95% at -6% 115%, rgba(190, 55, 4, 0.48) 0%, transparent 46%),
+    radial-gradient(ellipse 110% 82% at 112% -4%, rgba(218, 118, 10, 0.38) 0%, transparent 44%),
+    radial-gradient(ellipse 85% 68% at 72% 62%, rgba(135, 38, 2, 0.30) 0%, transparent 52%),
+    radial-gradient(ellipse 58% 45% at 18% 8%, rgba(205, 88, 8, 0.22) 0%, transparent 46%),
     var(--kds-bg);
 }
 
-/* ── Loading ──────────────────────────────────────────────────── */
-.kds-loading {
-  justify-content: center;
-  align-items:     center;
-  gap: 20px;
-}
-.kds-loading-icon {
-  font-size: 60px;
-  animation: kds-bounce 1.2s ease-in-out infinite;
-}
-.kds-loading-text {
-  font-size:   18px;
-  font-weight: 600;
-  color:       var(--kds-t2);
+/* â”€â”€ Light theme (warm cream) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+.kds-root[data-theme="light"] {
+  --kds-bg: #f4ece0;
+  --kds-surf: #ffffff;
+  --kds-surf2: #F8F9FA;
+  --kds-surf3: #F3F4F6;
+  --kds-border: rgba(0, 0, 0, 0.134);
+  --kds-border-acc: rgba(0, 0, 0, 0.12);
+  --kds-text: #1c1408;
+  --kds-text2: #5a4028;
+  --kds-muted: #8a6a48;
+  --kds-brand: #b07018;
+  --kds-header-bg: #FFFFFF;
+
+  --kds-fresh-b: #167840;
+  --kds-warm-b: #c05010;
+  --kds-urgent-b: #b81c1c;
+
+  background:
+    radial-gradient(ellipse 80% 60% at 12% 85%, rgba(200, 110, 20, 0.09) 0%, transparent 60%),
+    radial-gradient(ellipse 65% 45% at 88% 15%, rgba(220, 150, 35, 0.08) 0%, transparent 55%),
+    var(--kds-bg);
 }
 
-/* ── Header ───────────────────────────────────────────────────── */
+/* Light overrides */
+.kds-root[data-theme="light"] .kds-card {
+  background: #FFFFFF;
+}
+
+.kds-root[data-theme="light"] .kds-section-scroll {
+  background: transparent;
+  scrollbar-color: rgba(0, 0, 0, 0.14) transparent;
+}
+
+.kds-root[data-theme="light"] .kds-chip {
+  background: rgba(120, 60, 0, 0.06);
+  border-color: rgba(120, 60, 0, 0.09);
+}
+
+.kds-root[data-theme="light"] .kds-chip-label {
+  color: #4a3020;
+}
+
+.kds-root[data-theme="light"] .kds-item-tile {
+  background: rgba(0, 0, 0, 0.03);
+  border-color: rgba(0, 0, 0, 0.06);
+}
+
+.kds-root[data-theme="light"] .kds-card-age.kds-u-fresh {
+  background: rgba(22, 120, 64, 0.12);
+}
+
+.kds-root[data-theme="light"] .kds-card-age.kds-u-warm {
+  background: rgba(192, 80, 16, 0.12);
+}
+
+.kds-root[data-theme="light"] .kds-card-age.kds-u-urgent {
+  background: rgba(184, 28, 28, 0.12);
+}
+
+.kds-root[data-theme="light"] .kds-btn--start {
+  box-shadow: 0 2px 12px rgba(210, 110, 20, 0.30);
+}
+
+.kds-root[data-theme="light"] .kds-btn--ready {
+  box-shadow: 0 2px 12px rgba(180, 60, 20, 0.28);
+}
+
+.kds-root[data-theme="light"] .kds-exp-card {
+  background: #FFFFFF;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border: 1px solid rgba(0, 0, 0, 0.10);
+  border-left: 4px solid rgba(180, 120, 30, 0.40);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.95),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.04),
+    0 4px 18px rgba(0, 0, 0, 0.10),
+    0 24px 60px rgba(0, 0, 0, 0.12);
+}
+
+/* Light mode — popup text contrast */
+.kds-root[data-theme="light"] .kds-exp-card .kds-card-name,
+.kds-root[data-theme="light"] .kds-exp-card .kds-exp-item-name {
+  color: #1F2937;
+}
+.kds-root[data-theme="light"] .kds-exp-card .kds-card-id {
+  color: #374151 !important;
+}
+.kds-root[data-theme="light"] .kds-exp-card .kds-card-type {
+  color: #374151;
+  background: rgba(0, 0, 0, 0.05) !important;
+  border-color: rgba(0, 0, 0, 0.08) !important;
+}
+.kds-root[data-theme="light"] .kds-exp-card .kds-item-note {
+  color: #374151;
+}
+.kds-root[data-theme="light"] .kds-exp-card .kds-order-notes {
+  color: #374151;
+}
+.kds-root[data-theme="light"] .kds-exp-card .kds-item-qty {
+  color: #374151 !important;
+  background: rgba(0, 0, 0, 0.06) !important;
+  border-color: rgba(0, 0, 0, 0.10) !important;
+}
+.kds-root[data-theme="light"] .kds-exp-card .kds-chip {
+  background: rgba(0, 0, 0, 0.05) !important;
+  border-color: rgba(0, 0, 0, 0.08) !important;
+}
+.kds-root[data-theme="light"] .kds-exp-card .kds-chip-label {
+  color: #4B5563 !important;
+}
+
+/* Light mode — structural containers */
+.kds-root[data-theme=”light”] .kds-header {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
+}
+
+/* Board — breathing room so column boxes float on the gray page */
+.kds-root[data-theme=”light”] .kds-board {
+  gap: 10px;
+  padding: 10px;
+}
+
+/* Column container — no background fill, shows page background image through */
+.kds-root[data-theme=”light”] .kds-section {
+  border-radius: 14px;
+  border-right: none;
+  overflow: hidden;
+  box-shadow:
+    0 2px 6px rgba(0, 0, 0, 0.06),
+    0 8px 24px rgba(0, 0, 0, 0.07),
+    0 20px 48px rgba(0, 0, 0, 0.05);
+}
+
+/* Column header — sits inside the white column box */
+.kds-root[data-theme=”light”] .kds-section-head {
+  background: #FFFFFF;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border-bottom: 2px solid color-mix(in srgb, var(--sc, #b07018) 30%, transparent);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.06);
+}
+
+.kds-root[data-theme=”light”] .kds-section-label {
+  text-shadow: none;
+}
+
+/* â”€â”€ Loading â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+.kds-loading {
+  justify-content: center;
+  align-items: center;
+  gap: 18px;
+}
+
+.kds-loading-icon {
+  font-size: 64px;
+  animation: kds-bounce 1.2s ease-in-out infinite;
+}
+
+.kds-loading-text {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--kds-muted);
+}
+
+/* â”€â”€ Header â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .kds-header {
-  height:          var(--kds-hdr);
-  flex-shrink:     0;
-  display:         flex;
-  align-items:     center;
+  height: var(--kds-hdr);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
   justify-content: space-between;
-  padding:         0 20px;
-  background:      var(--kds-head-bg);
-  backdrop-filter: blur(20px) saturate(1.4);
-  -webkit-backdrop-filter: blur(20px) saturate(1.4);
-  border-bottom:   1px solid rgba(247, 201, 72, 0.18);
-  box-shadow:      0 1px 0 rgba(247, 201, 72, 0.06), 0 4px 24px rgba(0, 0, 0, 0.50);
-  gap: 12px;
+  padding: 0 22px;
+  background: var(--kds-header-bg);
+  backdrop-filter: blur(18px) saturate(1.3) brightness(0.95);
+  -webkit-backdrop-filter: blur(18px) saturate(1.3) brightness(0.95);
+  border-bottom: 1px solid rgba(255, 213, 74, 0.22);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+  gap: 14px;
   z-index: 10;
 }
 
 .kds-header-left {
-  display:     flex;
+  display: flex;
   align-items: center;
-  gap: 10px;
-  min-width:   0;
+  gap: 12px;
 }
 
-.kds-logo { font-size: 28px; line-height: 1; flex-shrink: 0; }
+.kds-logo {
+  font-size: 32px;
+  line-height: 1;
+}
 
+/* Brand name â€” golden gradient + glow, luxury food feel */
 .kds-logo-name {
-  font-size:   22px;
+  font-size: 26px;
   font-weight: 900;
-  letter-spacing: -0.5px;
-  background:  linear-gradient(135deg, #ffd54a 0%, #f0a820 55%, #c86010 100%);
+  letter-spacing: -0.3px;
+  background: linear-gradient(135deg, #ffd54a 0%, #f0a820 52%, #c86010 100%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
   color: var(--kds-brand);
-  flex-shrink: 0;
+  filter: drop-shadow(0 0 12px rgba(255, 185, 40, 0.40));
 }
 
 .kds-logo-tag {
-  font-size:   10px;
+  font-size: 10px;
   font-weight: 800;
-  color:       var(--kds-brand);
+  color: var(--kds-brand);
   text-transform: uppercase;
-  letter-spacing: 1.6px;
-  padding:     3px 8px;
-  background:  rgba(247, 201, 72, 0.09);
-  border:      1px solid rgba(247, 201, 72, 0.20);
+  letter-spacing: 1.8px;
+  padding: 3px 9px;
+  background: rgba(255, 180, 60, 0.10);
+  border: 1px solid rgba(255, 180, 60, 0.22);
   border-radius: 5px;
-  flex-shrink: 0;
+  text-shadow: 0 0 8px rgba(255, 185, 40, 0.30);
 }
 
 .kds-live-badge {
-  font-size:   13px;
+  font-size: 14px;
   font-weight: 800;
-  color:       var(--kds-fresh);
-  background:  var(--kds-fresh-bg);
-  border:      1px solid rgba(74, 222, 128, 0.22);
-  padding:     4px 10px;
-  border-radius: 7px;
-  flex-shrink: 0;
+  color: var(--kds-c-done);
+  background: rgba(77, 184, 128, 0.14);
+  border: 1px solid rgba(77, 184, 128, 0.26);
+  padding: 5px 12px;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(77, 184, 128, 0.18);
 }
 
 .kds-header-right {
-  display:     flex;
+  display: flex;
   align-items: center;
   gap: 8px;
-  flex-shrink: 0;
 }
 
 .kds-clock {
-  font-size:   24px;
+  font-size: 26px;
   font-weight: 800;
-  color:       var(--kds-brand);
+  color: var(--kds-brand);
   font-variant-numeric: tabular-nums;
-  margin-right: 4px;
-  letter-spacing: 0.5px;
+  margin-right: 8px;
+  letter-spacing: 0.4px;
 }
 
 .kds-ctrl {
-  display:    flex;
+  display: flex;
   align-items: center;
   justify-content: center;
-  width:       44px;
-  height:      44px;
+  width: 44px;
+  height: 44px;
   border-radius: 10px;
-  background:  rgba(247, 201, 72, 0.05);
-  border:      1px solid rgba(247, 201, 72, 0.10);
-  color:       var(--kds-t2);
-  font-size:   18px;
-  cursor:      pointer;
+  background: rgba(255, 180, 60, 0.05);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 180, 60, 0.10);
+  color: var(--kds-text2);
+  font-size: 20px;
+  cursor: pointer;
   text-decoration: none;
-  transition:  background 140ms, color 140ms, border-color 140ms, transform 100ms;
+  transition: background 0.15s, color 0.15s, border-color 0.15s, transform 0.1s;
   flex-shrink: 0;
-  font-family: inherit;
-}
-.kds-ctrl:hover {
-  background:   rgba(247, 201, 72, 0.11);
-  color:        var(--kds-t0);
-  border-color: rgba(247, 201, 72, 0.22);
-  transform:    translateY(-1px);
-}
-.kds-ctrl--muted {
-  color:        var(--kds-cancel);
-  border-color: rgba(239, 68, 68, 0.22);
 }
 
-/* ── Board: 4-column kanban ───────────────────────────────────── */
+.kds-ctrl:hover {
+  background: rgba(255, 180, 60, 0.12);
+  color: var(--kds-text);
+  border-color: rgba(255, 180, 60, 0.22);
+  transform: translateY(-1px);
+}
+
+.kds-ctrl--muted {
+  color: var(--kds-c-cancel);
+  border-color: rgba(212, 68, 68, 0.28);
+}
+
+/* â”€â”€ Board â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .kds-board {
-  flex:     1;
-  display:  grid;
-  grid-template-columns: repeat(4, 1fr);
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   overflow: hidden;
   min-height: 0;
-  gap: 0;
 }
 
-/* ── Queue column ─────────────────────────────────────────────── */
-.kds-col {
-  display:        flex;
+/* â”€â”€ Section column â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+.kds-section {
+  display: flex;
   flex-direction: column;
-  border-right:   1px solid var(--kds-bd);
-  overflow:       hidden;
-  min-height:     0;
-}
-.kds-col:last-child { border-right: none; }
-
-/* Column head */
-.kds-col-head {
-  flex-shrink:  0;
-  display:      flex;
-  align-items:  center;
-  justify-content: space-between;
-  gap: 10px;
-  padding:      14px 16px 12px;
-  background:   rgba(10, 7, 4, 0.72);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border-bottom: 2px solid var(--kds-col-accent, var(--kds-bd2));
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+  min-height: 0;
 }
 
-.kds-col-icon {
-  font-size:   20px;
-  line-height: 1;
+.kds-section:last-child {
+  border-right: none;
+}
+
+.kds-section-head {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 22px 14px;
+  background: rgba(20, 20, 20, 0.55);
+  backdrop-filter: blur(18px) saturate(1.3);
+  -webkit-backdrop-filter: blur(18px) saturate(1.3);
+  border-bottom: 2px solid color-mix(in srgb, var(--sc, #f0aa28) 55%, transparent);
+  box-shadow:
+    inset 0 -1px 0 rgba(255, 185, 60, 0.08),
+    0 4px 16px rgba(0, 0, 0, 0.30);
+}
+
+@supports not (background: color-mix(in srgb, red 10%, blue)) {
+  .kds-section-head {
+    border-bottom-color: rgba(230, 150, 40, 0.40);
+  }
+}
+
+.kds-section-emoji {
+  font-size: 28px;
   flex-shrink: 0;
 }
 
-.kds-col-label {
-  font-size:   15px;
+.kds-section-label {
+  font-size: 24px;
   font-weight: 900;
-  color:       var(--kds-col-accent, var(--kds-t1));
-  letter-spacing: 0.6px;
+  color: var(--sc, var(--kds-brand));
+  letter-spacing: 1.8px;
   text-transform: uppercase;
   flex: 1;
+  text-shadow: 0 0 20px rgba(255, 185, 40, 0.32);
 }
 
-.kds-col-count {
-  font-size:   13px;
-  font-weight: 800;
-  color:       var(--kds-col-accent, var(--kds-t2));
-  background:  rgba(255, 255, 255, 0.06);
-  border:      1px solid rgba(255, 255, 255, 0.09);
-  padding:     2px 9px;
-  border-radius: 7px;
-  min-width:   28px;
-  text-align:  center;
-  flex-shrink: 0;
+.kds-section-count {
+  font-size: 20px;
+  font-weight: 900;
+  color: var(--sc, var(--kds-brand));
+  min-width: 40px;
+  height: 38px;
+  border-radius: 9px;
+  background: color-mix(in srgb, var(--sc, var(--kds-brand)) 18%, transparent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 10px;
 }
 
-/* Per-column accent overrides */
-.kds-col--new    { --kds-col-accent: var(--kds-new); }
-.kds-col--prep   { --kds-col-accent: var(--kds-prep); }
-.kds-col--ready  { --kds-col-accent: var(--kds-ready); }
-.kds-col--done   { --kds-col-accent: var(--kds-t3); }
+@supports not (background: color-mix(in srgb, red 18%, blue)) {
+  .kds-section-count {
+    background: rgba(230, 160, 40, 0.18);
+  }
+}
 
-.kds-col--new   .kds-col-count { background: var(--kds-new-bg);   border-color: var(--kds-new-bd); }
-.kds-col--prep  .kds-col-count { background: var(--kds-prep-bg);  border-color: var(--kds-prep-bd); }
-.kds-col--ready .kds-col-count { background: var(--kds-ready-bg); border-color: var(--kds-ready-bd); }
-
-/* Column scroll area */
-.kds-col-scroll {
-  flex:       1;
+.kds-section-scroll {
+  flex: 1;
   overflow-y: auto;
-  overflow-x: hidden;
-  padding:    12px 10px;
-  display:    flex;
-  flex-direction: column;
-  gap: 10px;
-  min-height: 0;
-  background: var(--kds-col-bg);
-  scrollbar-width: thin;
-  scrollbar-color: rgba(247, 201, 72, 0.08) transparent;
-}
-.kds-col-scroll::-webkit-scrollbar       { width: 4px; }
-.kds-col-scroll::-webkit-scrollbar-track { background: transparent; }
-.kds-col-scroll::-webkit-scrollbar-thumb { background: rgba(247, 201, 72, 0.10); border-radius: 2px; }
-
-/* ── Empty column state ───────────────────────────────────────── */
-.kds-empty {
-  display:      flex;
-  flex-direction: column;
-  align-items:  center;
-  gap: 8px;
-  padding:      52px 20px;
-  color:        var(--kds-t3);
-  text-align:   center;
-}
-.kds-empty-icon { font-size: 28px; opacity: 0.40; }
-.kds-empty-text { font-size: 14px; font-weight: 600; }
-
-/* ── Kitchen card ─────────────────────────────────────────────── */
-.kds-card {
-  position:       relative;
-  background:     var(--kds-s1);
-  border-radius:  var(--kds-radius);
-  border:         1px solid var(--kds-bd);
-  border-left:    4px solid rgba(255, 195, 100, 0.18);
-  overflow:       hidden;
-  display:        flex;
-  flex-direction: column;
-  flex-shrink:    0;
-  transition:     transform 160ms ease, box-shadow 160ms ease, border-left-color 300ms ease;
-  box-shadow:
-    0 2px 8px rgba(0, 0, 0, 0.60),
-    0 6px 22px rgba(0, 0, 0, 0.48);
-}
-.kds-card:hover {
-  transform:  translateY(-2px);
-  box-shadow:
-    0 4px 14px rgba(0, 0, 0, 0.65),
-    0 10px 32px rgba(0, 0, 0, 0.52);
-}
-
-/* Urgency left-border colors */
-.kds-card.kds-u-fresh  { border-left-color: var(--kds-fresh); }
-.kds-card.kds-u-warn   { border-left-color: var(--kds-warn); }
-.kds-card.kds-u-late   {
-  border-left-color: var(--kds-late);
-  animation: kds-urgent-pulse 2.6s ease-in-out infinite;
-}
-
-/* Done cards */
-.kds-card--done {
-  opacity: 0.42;
-  filter:  saturate(0.12);
-}
-
-/* Flash animation for new orders */
-.kds-card--flash { animation: kds-flash-in 0.44s cubic-bezier(0.22, 1, 0.36, 1); }
-
-/* ── Card header ──────────────────────────────────────────────── */
-.kds-card-head {
-  display:     flex;
-  align-items: center;
-  justify-content: space-between;
-  padding:     11px 14px 9px;
-  border-bottom: 1px solid var(--kds-bd);
-  background:  rgba(255, 255, 255, 0.02);
-  gap: 8px;
-}
-
-.kds-card-meta {
-  display:     flex;
-  align-items: center;
-  gap: 7px;
-  min-width:   0;
-  flex:        1;
-}
-
-.kds-card-id {
-  font-size:   11px;
-  font-weight: 700;
-  color:       var(--kds-t3);
-  font-variant-numeric: tabular-nums;
-  letter-spacing: 0.4px;
-  flex-shrink: 0;
-}
-
-.kds-type-badge {
-  font-size:   11px;
-  font-weight: 600;
-  color:       var(--kds-t2);
-  background:  rgba(255, 255, 255, 0.05);
-  border:      1px solid var(--kds-bd);
-  padding:     2px 7px;
-  border-radius: 5px;
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-
-/* ── Timer badge ──────────────────────────────────────────────── */
-.kds-timer {
-  font-size:   13px;
-  font-weight: 800;
-  padding:     3px 9px;
-  border-radius: 7px;
-  flex-shrink: 0;
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
-  letter-spacing: 0.2px;
-}
-.kds-timer--fresh {
-  color:       var(--kds-fresh);
-  background:  var(--kds-fresh-bg);
-}
-.kds-timer--warn {
-  color:       var(--kds-warn);
-  background:  var(--kds-warn-bg);
-  animation:   kds-timer-blink 2s ease-in-out infinite;
-}
-.kds-timer--late {
-  color:       var(--kds-late);
-  background:  var(--kds-late-bg);
-  animation:   kds-timer-blink 1.4s ease-in-out infinite;
-}
-.kds-timer--none { display: none; }
-
-/* ── Customer name ────────────────────────────────────────────── */
-.kds-card-customer {
-  padding:     8px 14px 6px;
-  font-size:   18px;
-  font-weight: 800;
-  color:       var(--kds-t0);
-  white-space: nowrap;
-  overflow:    hidden;
-  text-overflow: ellipsis;
-  letter-spacing: -0.2px;
-}
-
-/* ── Card body ────────────────────────────────────────────────── */
-.kds-card-body {
-  padding:     6px 10px 8px;
-  display:     flex;
-  flex-direction: column;
-  gap: 7px;
-  overflow-y:  auto;
-  max-height:  320px;
-  min-height:  0;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(247, 201, 72, 0.08) transparent;
-}
-.kds-card-body::-webkit-scrollbar       { width: 3px; }
-.kds-card-body::-webkit-scrollbar-track { background: transparent; }
-.kds-card-body::-webkit-scrollbar-thumb { background: rgba(247, 201, 72, 0.12); border-radius: 2px; }
-
-/* ── Item row ─────────────────────────────────────────────────── */
-.kds-item {
-  background:   var(--kds-s2);
-  border:       1px solid var(--kds-bd);
-  border-radius: 11px;
-  padding:      9px 11px;
-  transition:   background 130ms;
-}
-.kds-item:hover { background: var(--kds-s3); }
-
-.kds-item-head {
-  display:  flex;
-  gap: 10px;
-  align-items: flex-start;
-}
-
-.kds-item-image {
-  flex-shrink: 0;
-  display:     flex;
-  align-items: center;
-  justify-content: center;
-  filter: drop-shadow(0 2px 8px rgba(190, 90, 14, 0.20));
-}
-
-.kds-item-fallback-emoji {
-  font-size:   40px;
-  line-height: 1;
-  width:       56px;
-  height:      56px;
-  display:     flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.kds-item-info {
-  flex:      1;
-  min-width: 0;
-  display:   flex;
-  flex-direction: column;
-  gap: 5px;
-}
-
-.kds-item-title {
-  display:     flex;
-  align-items: center;
-  gap: 6px;
-  flex-wrap:   wrap;
-}
-
-.kds-item-emoji { font-size: 14px; flex-shrink: 0; }
-
-.kds-item-name {
-  font-size:   15px;
-  font-weight: 800;
-  color:       var(--kds-t0);
-  flex:        1;
-  min-width:   0;
-  line-height: 1.2;
-}
-
-.kds-item-qty {
-  font-size:   12px;
-  font-weight: 800;
-  color:       var(--kds-brand);
-  background:  rgba(247, 201, 72, 0.10);
-  border:      1px solid rgba(247, 201, 72, 0.18);
-  border-radius: 5px;
-  padding:     1px 6px;
-  flex-shrink: 0;
-  font-variant-numeric: tabular-nums;
-}
-
-.kds-item-note {
-  font-size:   12px;
-  font-weight: 600;
-  color:       var(--kds-brand);
-  background:  rgba(247, 201, 72, 0.07);
-  border:      1px solid rgba(247, 201, 72, 0.14);
-  padding:     4px 9px;
-  border-radius: 6px;
-  line-height: 1.4;
-}
-
-.kds-no-items {
-  font-size:  13px;
-  color:      var(--kds-t3);
-  font-style: italic;
-  padding:    4px 2px;
-}
-
-/* ── Ingredient chips ─────────────────────────────────────────── */
-.kds-chips {
-  display:   flex;
-  flex-wrap: wrap;
-  gap: 3px;
-  max-height: 56px;
-  overflow:  hidden;
-}
-
-.kds-chip {
-  display:     flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 3px;
-  background:  rgba(255, 255, 255, 0.05);
-  border:      1px solid rgba(255, 255, 255, 0.07);
-  border-radius: 100px;
-  padding:     2px 7px 2px 3px;
-  flex-shrink: 0;
-}
-.kds-chip-img   { width: 15px; height: 15px; object-fit: contain; border-radius: 50%; flex-shrink: 0; }
-.kds-chip-label { font-size: 10px; font-weight: 600; color: var(--kds-t2); white-space: nowrap; }
-
-/* ── Order notes ──────────────────────────────────────────────── */
-.kds-order-notes {
-  display:     flex;
-  align-items: flex-start;
-  gap: 6px;
-  padding:     6px 10px;
-  background:  rgba(247, 201, 72, 0.06);
-  border:      1px solid rgba(247, 201, 72, 0.12);
-  border-radius: 8px;
-  font-size:   12px;
-  font-weight: 600;
-  color:       var(--kds-brand);
-  line-height: 1.45;
-  margin-top:  2px;
-}
-
-/* Composites */
-.kds-composite         { position: relative; flex-shrink: 0; overflow: hidden; }
-.kds-composite--pizza  { border-radius: 50%; }
-.kds-composite--burger { border-radius: 10px; background: rgba(36, 24, 10, 0.55); }
-
-/* ── Action bar ───────────────────────────────────────────────── */
-.kds-action-bar {
-  display:     flex;
-  align-items: center;
-  gap: 7px;
-  padding:     9px 12px 12px;
-  border-top:  1px solid var(--kds-bd);
-  background:  rgba(0, 0, 0, 0.18);
-  flex-shrink: 0;
-}
-
-/* ── Buttons ──────────────────────────────────────────────────── */
-.kds-btn {
-  border:      none;
-  border-radius: 10px;
-  font-family: var(--kds-font);
-  font-size:   14px;
-  font-weight: 800;
-  cursor:      pointer;
-  padding:     0 16px;
-  height:      48px;
-  min-height:  48px;
-  display:     flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  white-space: nowrap;
-  flex-shrink: 0;
-  letter-spacing: 0.2px;
-  transition:  opacity 120ms, transform 100ms, box-shadow 140ms;
-}
-.kds-btn:hover:not(:disabled) { opacity: 0.88; transform: translateY(-1px); }
-.kds-btn:active:not(:disabled) { transform: scale(0.97); opacity: 0.72; }
-.kds-btn:disabled { opacity: 0.28; cursor: not-allowed; }
-
-/* Advance button — takes remaining width */
-.kds-btn--advance {
-  flex:     1;
-  height:   52px;
-  min-height: 52px;
-  font-size:  15px;
-  color:    #fff;
-}
-
-/* Start cooking — amber/ember */
-.kds-btn--start {
-  background: linear-gradient(135deg, rgba(220, 112, 24, 0.94), rgba(190, 82, 10, 0.94));
-  border:     1px solid rgba(255, 180, 80, 0.26);
-  box-shadow: 0 2px 12px rgba(200, 96, 16, 0.38), inset 0 1px 0 rgba(255, 210, 120, 0.18);
-}
-.kds-btn--start:hover:not(:disabled) {
-  box-shadow: 0 4px 20px rgba(200, 96, 16, 0.54), inset 0 1px 0 rgba(255, 210, 120, 0.24);
-}
-
-/* Mark ready — blue */
-.kds-btn--ready {
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.90), rgba(37, 99, 235, 0.90));
-  border:     1px solid rgba(96, 165, 250, 0.28);
-  box-shadow: 0 2px 12px rgba(37, 99, 235, 0.38), inset 0 1px 0 rgba(147, 197, 253, 0.18);
-}
-.kds-btn--ready:hover:not(:disabled) {
-  box-shadow: 0 4px 20px rgba(37, 99, 235, 0.52), inset 0 1px 0 rgba(147, 197, 253, 0.24);
-}
-
-/* Complete — green */
-.kds-btn--complete {
-  background: linear-gradient(135deg, rgba(34, 197, 94, 0.88), rgba(22, 163, 74, 0.88));
-  border:     1px solid rgba(74, 222, 128, 0.26);
-  box-shadow: 0 2px 12px rgba(22, 163, 74, 0.36), inset 0 1px 0 rgba(134, 239, 172, 0.16);
-}
-.kds-btn--complete:hover:not(:disabled) {
-  box-shadow: 0 4px 20px rgba(22, 163, 74, 0.50), inset 0 1px 0 rgba(134, 239, 172, 0.22);
-}
-
-/* Cancel (X) button */
-.kds-btn--cancel {
-  width:      48px;
-  height:     48px;
-  min-height: 48px;
-  padding:    0;
-  background: rgba(255, 255, 255, 0.05);
-  color:      var(--kds-t3);
-  border:     1px solid var(--kds-bd);
-  font-size:  15px;
-}
-.kds-btn--cancel:hover:not(:disabled) {
-  background:   var(--kds-cancel-bg);
-  color:        var(--kds-cancel);
-  border-color: var(--kds-cancel-bd);
-  opacity:      1;
-  transform:    none;
-}
-
-/* Cancel confirm */
-.kds-btn--cancel-confirm {
-  flex:        1;
-  background:  var(--kds-cancel-bg);
-  color:       var(--kds-cancel);
-  border:      1px solid var(--kds-cancel-bd);
-}
-.kds-btn--cancel-confirm:hover:not(:disabled) {
-  background: rgba(239, 68, 68, 0.20);
-  opacity:    1;
-  transform:  none;
-}
-
-/* Keep button */
-.kds-btn--keep {
-  flex:        1;
-  background:  rgba(255, 255, 255, 0.05);
-  color:       var(--kds-t2);
-  border:      1px solid var(--kds-bd);
-}
-.kds-btn--keep:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.09);
-  color:      var(--kds-t0);
-  opacity:    1;
-  transform:  none;
-}
-
-/* Close expanded */
-.kds-btn--close-exp {
-  padding:    0 18px;
-  background: rgba(255, 255, 255, 0.06);
-  color:      var(--kds-t2);
-  border:     1px solid var(--kds-bd);
-}
-.kds-btn--close-exp:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.10);
-  color:      var(--kds-t0);
-  opacity:    1;
-}
-
-/* ── Done badge ───────────────────────────────────────────────── */
-.kds-done-badge {
-  display:     inline-flex;
-  align-items: center;
-  gap: 5px;
-  font-size:   12px;
-  font-weight: 800;
-  padding:     5px 12px;
-  border-radius: 100px;
-}
-.kds-done-badge--complete {
-  color:       var(--kds-done);
-  background:  var(--kds-done-bg);
-  border:      1px solid var(--kds-done-bd);
-}
-.kds-done-badge--cancel {
-  color:       var(--kds-cancel);
-  background:  var(--kds-cancel-bg);
-  border:      1px solid var(--kds-cancel-bd);
-}
-
-/* ── Expanded overlay ─────────────────────────────────────────── */
-.kds-overlay {
-  position:        fixed;
-  inset:           0;
-  background:      rgba(0, 0, 0, 0.75);
-  backdrop-filter: blur(12px) saturate(0.60);
-  -webkit-backdrop-filter: blur(12px) saturate(0.60);
-  z-index:         1000;
-  display:         flex;
-  align-items:     center;
-  justify-content: center;
-  padding:         20px;
-  animation:       kds-overlay-in 0.18s ease;
-}
-
-.kds-exp-card {
-  position:    relative;
-  background:  rgba(14, 10, 6, 0.94);
-  backdrop-filter: blur(28px);
-  -webkit-backdrop-filter: blur(28px);
-  border-radius: 20px;
-  border:      1px solid var(--kds-bd2);
-  border-left: 4px solid rgba(255, 195, 100, 0.18);
-  width:       100%;
-  max-width:   580px;
-  max-height:  90dvh;
-  max-height:  90vh;
-  display:     flex;
-  flex-direction: column;
-  overflow:    hidden;
-  animation:   kds-card-expand 0.28s cubic-bezier(0.34, 1.4, 0.64, 1);
-  box-shadow:
-    0 32px 72px rgba(0, 0, 0, 0.68),
-    0 8px 28px rgba(0, 0, 0, 0.44),
-    inset 0 1px 0 rgba(255, 200, 90, 0.10);
-}
-.kds-exp-card.kds-u-fresh { border-left-color: var(--kds-fresh); }
-.kds-exp-card.kds-u-warn  { border-left-color: var(--kds-warn); }
-.kds-exp-card.kds-u-late  { border-left-color: var(--kds-late); }
-
-.kds-exp-head {
-  display:     flex;
-  align-items: center;
-  gap: 10px;
-  padding:     14px 18px;
-  border-bottom: 1px solid var(--kds-bd);
-  background:  rgba(0, 0, 0, 0.20);
-  flex-shrink: 0;
-}
-.kds-exp-head-left  { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
-.kds-exp-head-meta  { display: flex; align-items: center; gap: 7px; }
-.kds-exp-head-name  { font-size: 20px; font-weight: 900; color: var(--kds-t0); }
-.kds-exp-close {
-  width:       34px;
-  height:      34px;
-  border-radius: 8px;
-  background:  rgba(255, 255, 255, 0.05);
-  border:      1px solid var(--kds-bd);
-  color:       var(--kds-t2);
-  font-size:   14px;
-  display:     flex;
-  align-items: center;
-  justify-content: center;
-  cursor:      pointer;
-  flex-shrink: 0;
-  transition:  background 130ms, color 130ms, border-color 130ms;
-  font-family: inherit;
-  font-weight: 700;
-}
-.kds-exp-close:hover {
-  background:   var(--kds-cancel-bg);
-  color:        var(--kds-cancel);
-  border-color: var(--kds-cancel-bd);
-}
-
-.kds-exp-body {
-  flex:       1;
-  overflow-y: auto;
-  min-height: 0;
-  padding:    14px 18px;
-  display:    flex;
+  padding: 14px;
+  display: flex;
   flex-direction: column;
   gap: 12px;
   scrollbar-width: thin;
-  scrollbar-color: rgba(247, 201, 72, 0.08) transparent;
+  scrollbar-color: rgba(255, 180, 60, 0.10) transparent;
+  min-height: 0;
+  background: rgba(0, 0, 0, 0.18);
 }
 
-.kds-exp-item {
-  background:  var(--kds-s2);
-  border:      1px solid var(--kds-bd);
-  border-radius: 12px;
-  padding:     14px;
-  display:     flex;
+.kds-empty {
+  color: var(--kds-muted);
+  text-align: center;
+  padding: 56px 20px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+/* â”€â”€ Order card â€” premium glass surface (matches admin dashboard) â”€â”€â”€â”€ */
+.kds-card {
+  position: relative;
+  background: rgba(20, 18, 14, 0.58);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border-radius: var(--kds-radius);
+  border: 1px solid rgba(255, 195, 100, 0.10);
+  border-left: 4px solid rgba(255, 195, 100, 0.20);
+  overflow: hidden;
+  transition: border-left-color 0.35s, background 0.2s, box-shadow 0.2s, transform 0.2s;
+  display: flex;
   flex-direction: column;
-  gap: 10px;
-}
-.kds-exp-item-head {
-  display:     flex;
-  align-items: center;
-  gap: 8px;
-  font-size:   17px;
-  font-weight: 800;
-  color:       var(--kds-t0);
-}
-.kds-exp-item-body {
-  display:  flex;
-  gap: 16px;
-  align-items: flex-start;
-}
-.kds-exp-image {
   flex-shrink: 0;
-  display:     flex;
+  cursor: default;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 210, 120, 0.10),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.24),
+    0 1px 4px rgba(0, 0, 0, 0.36),
+    0 4px 16px rgba(0, 0, 0, 0.30),
+    0 12px 36px rgba(0, 0, 0, 0.24),
+    0 28px 64px rgba(0, 0, 0, 0.16),
+    0 56px 96px rgba(0, 0, 0, 0.10);
+}
+
+/* Warm golden shimmer â€” light catching top edge of glass */
+.kds-root[data-theme="light"] .kds-card {
+  background: #ffffff;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border: 1px solid rgba(0, 0, 0, .06);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, .08);
+
+}
+
+.kds-card:hover {
+  transform: translateY(-3px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 210, 120, 0.14),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.28),
+    0 2px 8px rgba(0, 0, 0, 0.42),
+    0 8px 24px rgba(0, 0, 0, 0.35),
+    0 18px 48px rgba(0, 0, 0, 0.28),
+    0 40px 80px rgba(0, 0, 0, 0.20),
+    0 72px 120px rgba(0, 0, 0, 0.12);
+}
+
+/* â”€â”€ Card body â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+.kds-card-body {
+  overflow-y: auto;
+  max-height: 290px;
+  min-height: 0;
+  padding: 6px 8px 5px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 180, 60, 0.10) transparent;
+}
+
+.kds-card-body::-webkit-scrollbar {
+  width: 4px;
+}
+
+.kds-card-body::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.kds-card-body::-webkit-scrollbar-thumb {
+  background: rgba(255, 180, 60, 0.14);
+  border-radius: 2px;
+}
+
+/* â”€â”€ Item grid â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+.kds-items-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px;
+}
+
+.kds-item-tile {
+  background: rgba(255, 180, 60, 0.04);
+  border-radius: 10px;
+  border: 1px solid rgba(255, 180, 60, 0.07);
+  padding: 7px;
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+  align-items: flex-start;
+  transition: background 0.15s;
+}
+
+.kds-item-tile:hover {
+  background: rgba(255, 180, 60, 0.07);
+}
+
+/* Food images â€” warm glow to make them pop */
+.kds-tile-image {
+  flex-shrink: 0;
+  display: flex;
   align-items: center;
   justify-content: center;
-  filter: drop-shadow(0 4px 16px rgba(190, 90, 14, 0.26));
+  filter: drop-shadow(0 2px 8px rgba(200, 100, 20, 0.22));
 }
-.kds-exp-detail { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
-.kds-exp-item .kds-chips     { max-height: none; overflow: visible; gap: 4px; }
-.kds-exp-item .kds-chip      { padding: 3px 9px 3px 4px; }
-.kds-exp-item .kds-chip-img  { width: 20px; height: 20px; }
-.kds-exp-item .kds-chip-label { font-size: 11px; }
 
-.kds-exp-actions {
-  display:     flex;
+.kds-tile-content {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.kds-tile-title {
+  display: flex;
   align-items: center;
-  gap: 8px;
-  padding:     12px 18px 14px;
-  border-top:  1px solid var(--kds-bd);
-  background:  rgba(0, 0, 0, 0.20);
-  flex-shrink: 0;
+  gap: 5px;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--kds-text);
 }
 
-/* ── Keyframes ────────────────────────────────────────────────── */
-@keyframes kds-bounce {
-  0%, 100% { transform: translateY(0); }
-  50%       { transform: translateY(-10px); }
+.kds-tile-emoji {
+  flex-shrink: 0;
+  font-size: 12px;
+}
+
+.kds-tile-title strong {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.kds-item-tile .kds-chips {
+  max-height: 64px;
+  overflow: hidden;
+}
+
+.kds-item-tile .kds-chip {
+  min-width: 34px;
+  max-width: 44px;
+  padding: 2px 3px;
+  background: rgba(255, 180, 60, 0.06);
+  border-color: rgba(255, 180, 60, 0.09);
+}
+
+.kds-item-tile .kds-chip-img {
+  width: 20px;
+  height: 20px;
+}
+
+.kds-item-tile .kds-chip-label {
+  font-size: 7px;
+}
+
+/* â”€â”€ Urgency â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+.kds-card.kds-u-fresh {
+  border-left-color: var(--kds-fresh-b);
+}
+
+.kds-card.kds-u-warm {
+  border-left-color: var(--kds-warm-b);
+}
+
+.kds-card.kds-u-urgent {
+  border-left-color: var(--kds-urgent-b);
+  animation: kds-urgent-glow 2.8s ease-in-out infinite;
+}
+
+.kds-card--done {
+  opacity: 0.40;
+  filter: saturate(0.10);
 }
 
 @keyframes kds-flash-in {
-  0%   { opacity: 0; transform: translateY(-8px) scale(0.97); }
-  100% { opacity: 1; transform: none; }
+  0% {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.96);
+  }
+
+  100% {
+    opacity: 1;
+    transform: none;
+  }
 }
 
+.kds-card--flash {
+  animation: kds-flash-in 0.44s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* â”€â”€ Card header â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+.kds-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px 7px;
+  border-bottom: 1px solid rgba(255, 180, 60, 0.07);
+  background: rgba(255, 180, 60, 0.02);
+  gap: 8px;
+}
+
+.kds-card-head-left {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  min-width: 0;
+  flex: 1;
+}
+
+.kds-card-head-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.kds-card-id {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--kds-brand);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.5px;
+  flex-shrink: 0;
+  opacity: 0.80;
+}
+
+.kds-card-name {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--kds-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+.kds-card-age {
+  font-size: 13px;
+  font-weight: 800;
+  padding: 4px 9px;
+  border-radius: 7px;
+  white-space: nowrap;
+}
+
+.kds-card-age.kds-u-fresh {
+  color: var(--kds-fresh-b);
+  background: rgba(77, 184, 128, 0.13);
+}
+
+.kds-card-age.kds-u-warm {
+  color: var(--kds-warm-b);
+  background: rgba(224, 120, 40, 0.13);
+}
+
+.kds-card-age.kds-u-urgent {
+  color: var(--kds-urgent-b);
+  background: rgba(212, 68, 68, 0.14);
+  animation: kds-blink 1.8s ease-in-out infinite;
+}
+
+.kds-card-type {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--kds-muted);
+  background: rgba(255, 180, 60, 0.06);
+  border: 1px solid rgba(255, 180, 60, 0.09);
+  padding: 3px 8px;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+
+.kds-no-items {
+  color: var(--kds-muted);
+  font-size: 13px;
+  font-style: italic;
+  padding: 4px 2px;
+}
+
+/* Composites */
+.kds-composite {
+  position: relative;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.kds-composite--pizza {
+  border-radius: 50%;
+  background: none;
+}
+
+.kds-composite--burger {
+  border-radius: 10px;
+  background: rgba(40, 28, 14, 0.55);
+}
+
+/* â”€â”€ Ingredient chips â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+.kds-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  align-items: flex-start;
+  align-content: flex-start;
+  overflow: hidden;
+  max-height: 88px;
+}
+
+.kds-chip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  background: rgba(255, 180, 60, 0.08);
+  border: 1px solid rgba(255, 180, 60, 0.10);
+  border-radius: 6px;
+  padding: 3px 4px;
+  min-width: 40px;
+  max-width: 50px;
+  flex-shrink: 0;
+}
+
+.kds-chip-img {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+  border-radius: 3px;
+}
+
+.kds-chip-label {
+  font-size: 8px;
+  font-weight: 600;
+  color: var(--kds-text2);
+  text-align: center;
+  line-height: 1.2;
+  word-break: break-word;
+}
+
+.kds-item-note {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--kds-brand);
+  background: rgba(232, 160, 32, 0.08);
+  border: 1px solid rgba(232, 160, 32, 0.18);
+  padding: 4px 10px;
+  border-radius: 6px;
+}
+
+/* â”€â”€ Order notes â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+.kds-order-notes {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin: 0 6px 5px;
+  padding: 5px 10px;
+  background: rgba(232, 160, 32, 0.07);
+  border: 1px solid rgba(232, 160, 32, 0.14);
+  border-radius: 7px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--kds-brand);
+  line-height: 1.4;
+}
+
+.kds-order-notes-icon {
+  flex-shrink: 0;
+}
+
+/* â”€â”€ Card action footer â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+.kds-card-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  padding: 6px 10px 8px;
+  background: rgba(0, 0, 0, 0.16);
+  border-top: 1px solid rgba(255, 180, 60, 0.07);
+}
+
+/* â”€â”€ Buttons â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+.kds-btn {
+  border: none;
+  border-radius: 10px;
+  font-family: var(--kds-font);
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  padding: 0 18px;
+  height: 44px;
+  min-height: 44px;
+  transition: opacity 0.12s, transform 0.10s, box-shadow 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  letter-spacing: 0.2px;
+}
+
+.kds-btn:hover {
+  opacity: 0.86;
+  transform: translateY(-1px);
+}
+
+.kds-btn:active {
+  transform: scale(0.97) translateY(0);
+  opacity: 0.72;
+}
+
+.kds-btn:disabled {
+  opacity: 0.30;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Start Preparing â€” grilled amber */
+.kds-btn--advance {
+  width: 174px;
+  color: #fff;
+}
+
+.kds-btn--start {
+  background: linear-gradient(135deg, rgba(225, 125, 30, 0.90), rgba(200, 90, 15, 0.90));
+  border: 1px solid rgba(255, 185, 80, 0.30);
+  box-shadow: 0 2px 14px rgba(210, 105, 20, 0.35), inset 0 1px 0 rgba(255, 210, 120, 0.22);
+}
+
+.kds-btn--start:hover {
+  box-shadow: 0 4px 20px rgba(210, 105, 20, 0.50), inset 0 1px 0 rgba(255, 210, 120, 0.28);
+}
+
+/* Mark Ready â€” deep ember */
+.kds-btn--ready {
+  background: linear-gradient(135deg, rgba(195, 68, 28, 0.90), rgba(165, 48, 14, 0.90));
+  border: 1px solid rgba(255, 140, 80, 0.28);
+  box-shadow: 0 2px 14px rgba(185, 58, 20, 0.32), inset 0 1px 0 rgba(255, 180, 120, 0.20);
+}
+
+.kds-btn--ready:hover {
+  box-shadow: 0 4px 20px rgba(185, 58, 20, 0.48), inset 0 1px 0 rgba(255, 180, 120, 0.28);
+}
+
+/* Cancel */
+.kds-btn--cancel {
+  width: 44px;
+  background: rgba(212, 68, 68, 0.12);
+  color: var(--kds-c-cancel);
+  font-size: 15px;
+  border: 1px solid rgba(212, 68, 68, 0.22);
+}
+
+.kds-btn--cancel:hover {
+  opacity: 1;
+  background: rgba(212, 68, 68, 0.20);
+}
+
+.kds-btn--cancel-confirm {
+  width: 158px;
+  background: rgba(212, 68, 68, 0.14);
+  color: #f87171;
+  border: 1px solid rgba(212, 68, 68, 0.28);
+}
+
+.kds-btn--cancel-confirm:hover {
+  opacity: 1;
+  background: rgba(212, 68, 68, 0.22);
+}
+
+.kds-btn--keep {
+  width: 84px;
+  background: rgba(255, 180, 60, 0.07);
+  color: var(--kds-text2);
+  border: 1px solid rgba(255, 180, 60, 0.12);
+}
+
+.kds-btn--keep:hover {
+  opacity: 1;
+  background: rgba(255, 180, 60, 0.13);
+  color: var(--kds-text);
+}
+
+/* â”€â”€ Status badges â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+.kds-badge-delivered,
+.kds-badge-cancelled {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 5px 14px;
+  border-radius: 7px;
+}
+
+.kds-badge-delivered {
+  color: var(--kds-c-done);
+  background: rgba(77, 184, 128, 0.12);
+  border: 1px solid rgba(77, 184, 128, 0.22);
+}
+
+.kds-badge-cancelled {
+  color: var(--kds-c-cancel);
+  background: rgba(212, 68, 68, 0.12);
+  border: 1px solid rgba(212, 68, 68, 0.22);
+}
+
+/* â”€â”€ Expand hint â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+.kds-expand-hint {
+  font-size: 12px;
+  opacity: 0.20;
+  flex-shrink: 0;
+  line-height: 1;
+  pointer-events: none;
+  transition: opacity 0.2s;
+}
+
+.kds-card:hover .kds-expand-hint {
+  opacity: 0.50;
+}
+
+/* â”€â”€ Overlay â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 @keyframes kds-overlay-in {
-  from { opacity: 0; }
-  to   { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes kds-card-expand {
-  from { opacity: 0; transform: scale(0.88) translateY(20px); }
-  to   { opacity: 1; transform: scale(1) translateY(0); }
+  from {
+    opacity: 0;
+    transform: scale(0.87) translateY(24px);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
 }
 
-@keyframes kds-urgent-pulse {
-  0%, 100% {
-    box-shadow: 0 2px 8px rgba(0,0,0,0.60), 0 6px 22px rgba(0,0,0,0.48), -3px 0 14px rgba(248,113,113,0.14);
+.kds-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.72);
+  backdrop-filter: blur(12px) saturate(0.65);
+  -webkit-backdrop-filter: blur(12px) saturate(0.65);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  animation: kds-overlay-in 0.20s ease;
+}
+
+/* â”€â”€ Expanded glass card â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+.kds-exp-card {
+  position: relative;
+  background: rgba(18, 13, 8, 0.86);
+  backdrop-filter: blur(28px) saturate(1.7);
+  -webkit-backdrop-filter: blur(28px) saturate(1.7);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 195, 100, 0.13);
+  border-left: 4px solid rgba(255, 195, 100, 0.13);
+  width: 100%;
+  max-width: 600px;
+  max-height: 88vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: kds-card-expand 0.30s cubic-bezier(0.34, 1.4, 0.64, 1);
+  box-shadow:
+    0 36px 80px rgba(0, 0, 0, 0.65),
+    0 8px 28px rgba(0, 0, 0, 0.40),
+    inset 0 1px 0 rgba(255, 200, 90, 0.12);
+}
+
+.kds-exp-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 4px;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 5%, rgba(255, 200, 90, 0.18) 40%, rgba(255, 190, 70, 0.09) 75%, transparent 100%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.kds-exp-card.kds-u-fresh {
+  border-left-color: var(--kds-fresh-b);
+}
+
+.kds-exp-card.kds-u-warm {
+  border-left-color: var(--kds-warm-b);
+}
+
+.kds-exp-card.kds-u-urgent {
+  border-left-color: var(--kds-urgent-b);
+}
+
+.kds-exp-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(255, 180, 60, 0.08);
+  background: rgba(0, 0, 0, 0.15);
+  flex-shrink: 0;
+}
+
+.kds-exp-head .kds-card-head-left {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.kds-exp-head .kds-card-head-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.kds-exp-close {
+  background: rgba(255, 180, 60, 0.06);
+  border: 1px solid rgba(255, 180, 60, 0.10);
+  color: var(--kds-text2);
+  border-radius: 7px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 700;
+  flex-shrink: 0;
+  transition: background 0.12s, color 0.12s, border-color 0.12s;
+}
+
+.kds-exp-close:hover {
+  background: rgba(212, 68, 68, 0.14);
+  color: var(--kds-c-cancel);
+  border-color: rgba(212, 68, 68, 0.28);
+}
+
+.kds-exp-body {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 180, 60, 0.10) transparent;
+}
+
+.kds-exp-item {
+  background: rgba(255, 180, 60, 0.04);
+  border: 1px solid rgba(255, 180, 60, 0.09);
+  border-radius: 10px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.kds-exp-item-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--kds-text);
+}
+
+.kds-exp-item-emoji {
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.kds-exp-item-name {
+  flex: 1;
+  min-width: 0;
+}
+
+.kds-exp-item-body {
+  display: flex;
+  flex-direction: row;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.kds-exp-image {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  filter: drop-shadow(0 4px 16px rgba(200, 100, 20, 0.28));
+}
+
+.kds-exp-detail {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+/* Chips in expanded â€” larger */
+.kds-exp-item .kds-chips {
+  max-height: none;
+  overflow: visible;
+  gap: 4px;
+}
+
+.kds-exp-item .kds-chip {
+  min-width: 46px;
+  max-width: 60px;
+  padding: 4px 5px;
+}
+
+.kds-exp-item .kds-chip-img {
+  width: 30px;
+  height: 30px;
+}
+
+.kds-exp-item .kds-chip-label {
+  font-size: 9px;
+  font-weight: 600;
+}
+
+.kds-exp-note {
+  font-size: 12px;
+  color: var(--kds-text2);
+  margin: 0;
+  padding: 5px 10px;
+  background: rgba(255, 180, 60, 0.05);
+  border: 1px solid rgba(255, 180, 60, 0.08);
+  border-radius: 6px;
+}
+
+.kds-exp-order-notes {
+  font-size: 14px;
+  padding: 10px 12px;
+}
+
+.kds-exp-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px 12px;
+  border-top: 1px solid rgba(255, 180, 60, 0.08);
+  background: rgba(0, 0, 0, 0.18);
+  flex-shrink: 0;
+}
+
+.kds-btn--close-exp {
+  width: 84px;
+  background: rgba(255, 180, 60, 0.07);
+  color: var(--kds-text2);
+  border: 1px solid rgba(255, 180, 60, 0.12);
+  font-weight: 700;
+}
+
+.kds-btn--close-exp:hover {
+  opacity: 1;
+  background: rgba(255, 180, 60, 0.13);
+  color: var(--kds-text);
+}
+
+/* â”€â”€ Completed today â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+.kds-done-strip {
+  flex-shrink: 0;
+  max-height: 36vh;
+  border-top: 1px solid rgba(255, 180, 60, 0.08);
+  background: rgba(0, 0, 0, 0.28);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.kds-done-toggle {
+  flex-shrink: 0;
+  padding: 12px 22px;
+  background: none;
+  border: none;
+  color: var(--kds-muted);
+  font-family: var(--kds-font);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  text-align: left;
+  transition: color 0.15s;
+}
+
+.kds-done-toggle:hover {
+  color: var(--kds-text);
+}
+
+.kds-done-cards {
+  overflow-y: auto;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 6px 16px 16px;
+  flex: 1;
+  min-height: 0;
+}
+
+.kds-done-cards .kds-card {
+  width: 280px;
+  flex-shrink: 0;
+}
+
+/* â”€â”€ Keyframes â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+@keyframes kds-bounce {
+
+  0%,
+  100% {
+    transform: translateY(0);
   }
+
   50% {
-    box-shadow: 0 2px 8px rgba(0,0,0,0.60), 0 6px 22px rgba(0,0,0,0.48), -3px 0 28px rgba(248,113,113,0.42), 0 0 14px rgba(248,113,113,0.10);
+    transform: translateY(-12px);
   }
 }
 
-@keyframes kds-timer-blink {
-  0%, 100% { opacity: 1; }
-  50%       { opacity: 0.46; }
+@keyframes kds-urgent-glow {
+
+  0%,
+  100% {
+    box-shadow:
+      0 4px 18px rgba(0, 0, 0, 0.52),
+      0 1px 4px rgba(0, 0, 0, 0.32),
+      inset 0 1px 0 rgba(255, 200, 100, 0.09),
+      -4px 0 16px rgba(212, 68, 68, 0.18);
+  }
+
+  50% {
+    box-shadow:
+      0 4px 18px rgba(0, 0, 0, 0.52),
+      0 1px 4px rgba(0, 0, 0, 0.32),
+      inset 0 1px 0 rgba(255, 200, 100, 0.09),
+      -4px 0 32px rgba(212, 68, 68, 0.48),
+      0 0 18px rgba(212, 68, 68, 0.14);
+  }
 }
 
-/* ── Tablet landscape (≤1280px): 4 narrower cols ─────────────── */
-@media (max-width: 1280px) {
-  .kds-card-customer { font-size: 16px; }
-  .kds-btn--advance  { height: 48px; min-height: 48px; font-size: 14px; }
+@keyframes kds-blink {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.44;
+  }
 }
 
-/* ── Tablet portrait (≤900px): 2×2 grid, board scrolls ──────── */
-@media (max-width: 900px) {
+/* â”€â”€ Tablet (â‰¤1100px) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+@media (max-width: 1100px) {
   .kds-board {
-    grid-template-columns: repeat(2, 1fr);
-    grid-template-rows:    repeat(2, auto);
     overflow-y: auto;
-    height:     auto;
+    height: auto;
   }
-  .kds-root { height: auto; min-height: 100dvh; min-height: 100vh; overflow-y: auto; overflow-x: hidden; }
-  .kds-col  { min-height: 0; }
-  .kds-col-scroll { max-height: 60vw; }
-  .kds-logo-tag   { display: none; }
+
+  .kds-section--new,
+  .kds-section--preparing {
+    max-height: none;
+    overflow: visible;
+  }
+
+  .kds-section--new .kds-section-scroll,
+  .kds-section--preparing .kds-section-scroll {
+    overflow: visible;
+    max-height: none;
+  }
+
+  .kds-root {
+    height: auto;
+    min-height: 100dvh;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
 }
 
-/* ── Mobile (≤600px): single column ──────────────────────────── */
-@media (max-width: 600px) {
+/* â”€â”€ Mobile (â‰¤720px) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+@media (max-width: 720px) {
+  .kds-root {
+    height: auto;
+    min-height: 100dvh;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
   .kds-board {
     grid-template-columns: 1fr;
-    grid-template-rows:    auto;
+    grid-template-rows: auto;
+    overflow: visible;
+    height: auto;
   }
-  .kds-col { border-right: none; border-bottom: 1px solid var(--kds-bd); }
-  .kds-col-scroll { max-height: none; }
-  .kds-clock       { font-size: 18px; }
-  .kds-ctrl        { width: 40px; height: 40px; font-size: 17px; }
-  .kds-btn         { height: 52px; min-height: 52px; font-size: 15px; }
-  .kds-btn--advance { height: 56px; min-height: 56px; }
-  .kds-btn--cancel { width: 52px; height: 52px; min-height: 52px; }
-  .kds-exp-card    { max-width: 100%; border-radius: 20px 20px 0 0; align-self: flex-end; max-height: 92dvh; max-height: 92vh; }
-  .kds-overlay     { align-items: flex-end; padding: 0; }
+
+  .kds-section {
+    border-right: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    max-height: none;
+    overflow: visible;
+  }
+
+  .kds-section-scroll {
+    overflow: visible;
+    max-height: none;
+  }
+
+  .kds-logo-tag {
+    display: none;
+  }
+
+  .kds-clock {
+    font-size: 18px;
+  }
+
+  .kds-ctrl {
+    width: 42px;
+    height: 42px;
+    font-size: 18px;
+  }
+
+  .kds-card-name {
+    font-size: 15px;
+  }
+
+  .kds-done-cards .kds-card {
+    width: 100%;
+  }
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   BURGERIZZA KITCHEN — Complete structural redesign
+   Clean, operational, modern restaurant system
+═══════════════════════════════════════════════════════════════ */
+
+/* ── Header ──────────────────────────────────────────────────── */
+.kds-header {
+  background: rgba(20, 20, 20, 0.55) !important;
+  backdrop-filter: blur(18px) !important;
+  -webkit-backdrop-filter: blur(18px) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35) !important;
+}
+
+.kds-logo-name {
+  filter: none !important;
+  text-shadow: none !important;
+}
+
+.kds-logo-tag {
+  text-shadow: none !important;
+}
+
+.kds-live-badge {
+  box-shadow: none !important;
+}
+
+/* ── Section head ────────────────────────────────────────────── */
+.kds-section-head {
+  padding: 12px 18px !important;
+  gap: 10px !important;
+  background: rgba(20, 20, 20, 0.55) !important;
+  backdrop-filter: blur(18px) !important;
+  -webkit-backdrop-filter: blur(18px) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35) !important;
+}
+
+.kds-section-emoji {
+  font-size: 22px !important;
+}
+
+.kds-section-label {
+  font-size: 16px !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.6px !important;
+  text-shadow: none !important;
+}
+
+.kds-section--new .kds-section-label {
+  color: rgba(255, 205, 70, 0.88) !important;
+  text-shadow: none !important;
+}
+
+.kds-section--preparing .kds-section-label {
+  color: rgba(251, 146, 60, 0.88) !important;
+  text-shadow: none !important;
+}
+
+.kds-section-count {
+  font-size: 14px !important;
+  font-weight: 800 !important;
+  height: 28px !important;
+  min-width: 28px !important;
+  padding: 0 8px !important;
+  border-radius: 8px !important;
+  box-shadow: none !important;
+}
+
+.kds-section--new .kds-section-count {
+  background: rgba(255, 200, 60, 0.12) !important;
+  border: 1px solid rgba(255, 200, 60, 0.20) !important;
+  color: rgba(255, 210, 80, 0.82) !important;
+  box-shadow: none !important;
+}
+
+.kds-section--preparing .kds-section-count {
+  background: rgba(251, 146, 60, 0.12) !important;
+  border: 1px solid rgba(251, 146, 60, 0.20) !important;
+  color: rgba(251, 146, 60, 0.82) !important;
+  box-shadow: none !important;
+}
+
+/* ── Section scroll ──────────────────────────────────────────── */
+.kds-section-scroll {
+  padding: 12px !important;
+  gap: 10px !important;
+}
+
+/* ── Order card ──────────────────────────────────────────────── */
+.kds-card {
+  border-radius: 24px !important;
+  background: rgba(20, 20, 20, 0.55) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  backdrop-filter: blur(18px) !important;
+  -webkit-backdrop-filter: blur(18px) !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35) !important;
+  transition: transform 0.15s ease, box-shadow 0.15s ease !important;
+}
+
+.kds-card:hover {
+  transform: translateY(-2px) !important;
+  background: rgba(28, 28, 28, 0.62) !important;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45) !important;
+}
+
+.kds-card::before {
+  display: none !important;
+}
+
+.kds-card.kds-u-fresh {
+  border-left: 3px solid rgba(52, 211, 153, 0.55) !important;
+}
+
+.kds-card.kds-u-warm {
+  border-left: 3px solid rgba(251, 146, 60, 0.60) !important;
+}
+
+.kds-card.kds-u-urgent {
+  border-left: 3px solid rgba(248, 113, 113, 0.70) !important;
+}
+
+/* ── Card header ─────────────────────────────────────────────── */
+.kds-card-head {
+  padding: 12px 14px 10px !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07) !important;
+  background: rgba(255, 255, 255, 0.025) !important;
+}
+
+.kds-card-id {
+  font-size: 10.5px !important;
+  opacity: 1 !important;
+  color: rgba(255, 255, 255, 0.36) !important;
+}
+
+.kds-card-name {
+  font-size: 15px !important;
+  font-weight: 800 !important;
+}
+
+.kds-card-age {
+  font-size: 12px !important;
+  font-weight: 700 !important;
+}
+
+.kds-card-type {
+  font-size: 11.5px !important;
+  font-weight: 600 !important;
+  background: rgba(255, 255, 255, 0.05) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+/* ── Card body ───────────────────────────────────────────────── */
+.kds-card-body {
+  padding: 12px 14px !important;
+  max-height: 340px !important;
+}
+
+/* Items: single column for readability */
+.kds-items-grid {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 8px !important;
+}
+
+/* Item tile — larger padding */
+.kds-item-tile {
+  padding: 10px 11px !important;
+  border-radius: 10px !important;
+  gap: 10px !important;
+  background: rgba(255, 255, 255, 0.03) !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+}
+
+.kds-item-tile:hover {
+  background: rgba(255, 255, 255, 0.05) !important;
+}
+
+.kds-tile-title {
+  font-size: 13px !important;
+  font-weight: 800 !important;
+  margin-bottom: 6px !important;
+  gap: 6px !important;
+}
+
+.kds-tile-emoji {
+  font-size: 15px !important;
+}
+
+.kds-tile-title strong {
+  font-size: 13px !important;
+}
+
+/* Ingredient chips — horizontal pill layout */
+.kds-chip {
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 4px !important;
+  min-width: unset !important;
+  max-width: unset !important;
+  padding: 3px 8px 3px 4px !important;
+  border-radius: 100px !important;
+  background: rgba(255, 255, 255, 0.06) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+.kds-chip-img {
+  width: 16px !important;
+  height: 16px !important;
+  border-radius: 50% !important;
+}
+
+.kds-chip-label {
+  font-size: 10px !important;
+  color: rgba(255, 255, 255, 0.55) !important;
+  word-break: unset !important;
+  text-align: left !important;
+}
+
+.kds-item-tile .kds-chip {
+  flex-direction: row !important;
+  min-width: unset !important;
+  max-width: unset !important;
+  padding: 3px 7px 3px 4px !important;
+}
+
+.kds-item-tile .kds-chip-img {
+  width: 15px !important;
+  height: 15px !important;
+}
+
+.kds-item-tile .kds-chip-label {
+  font-size: 10px !important;
+}
+
+/* Item note */
+.kds-item-note {
+  font-size: 11.5px !important;
+  padding: 4px 10px !important;
+}
+
+/* Qty badge */
+.kds-item-qty {
+  font-size: 11px !important;
+  font-weight: 800 !important;
+  background: rgba(255, 255, 255, 0.09) !important;
+  border: 1px solid rgba(255, 255, 255, 0.10) !important;
+  border-radius: 6px !important;
+  padding: 1px 7px !important;
+  color: rgba(255, 255, 255, 0.60) !important;
+}
+
+/* Order notes */
+.kds-order-notes {
+  padding: 8px 12px !important;
+  margin: 8px 0 0 !important;
+  font-size: 12px !important;
+}
+
+/* ── Card actions ────────────────────────────────────────────── */
+.kds-card-actions {
+  padding: 10px 14px 13px !important;
+  gap: 8px !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.07) !important;
+}
+
+/* Buttons — large, clearly tappable */
+.kds-btn {
+  height: 44px !important;
+  min-height: 44px !important;
+  border-radius: 10px !important;
+  font-size: 13.5px !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.2px !important;
+}
+
+.kds-btn--advance {
+  flex: 1 !important;
+  height: 48px !important;
+  min-height: 48px !important;
+  font-size: 14px !important;
+}
+
+.kds-btn--start {
+  background: rgba(195, 100, 20, 0.88) !important;
+  color: #fff !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.12) !important;
+}
+
+.kds-btn--start:hover:not(:disabled) {
+  background: rgba(218, 118, 28, 0.94) !important;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.30), inset 0 1px 0 rgba(255, 255, 255, 0.14) !important;
+  transform: translateY(-1px) !important;
+}
+
+.kds-btn--ready {
+  background: rgba(165, 44, 14, 0.88) !important;
+  color: #fff !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.10) !important;
+}
+
+.kds-btn--ready:hover:not(:disabled) {
+  background: rgba(190, 56, 18, 0.94) !important;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.30), inset 0 1px 0 rgba(255, 255, 255, 0.12) !important;
+  transform: translateY(-1px) !important;
+}
+
+.kds-btn--cancel {
+  width: 44px !important;
+  height: 44px !important;
+  flex-shrink: 0 !important;
+  background: rgba(255, 255, 255, 0.06) !important;
+  color: rgba(255, 255, 255, 0.38) !important;
+  border: 1px solid rgba(255, 255, 255, 0.09) !important;
+  box-shadow: none !important;
+}
+
+.kds-btn--cancel:hover {
+  background: rgba(248, 113, 113, 0.12) !important;
+  color: rgba(248, 113, 113, 0.78) !important;
+  border-color: rgba(248, 113, 113, 0.20) !important;
+}
+
+.kds-btn--cancel-confirm {
+  background: rgba(220, 38, 38, 0.16) !important;
+  color: rgba(248, 113, 113, 0.88) !important;
+  border: 1px solid rgba(220, 38, 38, 0.28) !important;
+  flex: 1 !important;
+}
+
+.kds-btn--keep {
+  background: rgba(255, 255, 255, 0.06) !important;
+  color: rgba(255, 255, 255, 0.52) !important;
+  border: 1px solid rgba(255, 255, 255, 0.09) !important;
+  flex: 1 !important;
+}
+
+.kds-btn--close-exp {
+  padding: 0 16px !important;
+  width: auto !important;
+  flex-shrink: 0 !important;
+}
+
+/* ── Done badges ─────────────────────────────────────────────── */
+.kds-badge-delivered {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 14px;
+  border-radius: 100px;
+  background: rgba(52, 211, 153, 0.11);
+  border: 1px solid rgba(52, 211, 153, 0.18);
+  color: rgba(52, 211, 153, 0.85);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.kds-badge-cancelled {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 14px;
+  border-radius: 100px;
+  background: rgba(248, 113, 113, 0.11);
+  border: 1px solid rgba(248, 113, 113, 0.18);
+  color: rgba(248, 113, 113, 0.85);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+/* ── Done strip ──────────────────────────────────────────────── */
+.kds-done-strip {
+  border-top: 1px solid rgba(255, 255, 255, 0.07) !important;
+  background: rgba(0, 0, 0, 0.20) !important;
+}
+
+.kds-done-toggle {
+  padding: 12px 18px !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  color: rgba(255, 255, 255, 0.40) !important;
+}
+
+.kds-done-cards {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 10px !important;
+  padding: 12px !important;
+}
+
+.kds-done-cards .kds-card {
+  width: 280px !important;
+  opacity: 0.50 !important;
+}
+
+/* ── Mobile ──────────────────────────────────────────────────── */
+@media (max-width: 720px) {
+  .kds-section-label {
+    font-size: 15px !important;
+  }
+
+  .kds-section-emoji {
+    font-size: 20px !important;
+  }
+
+  .kds-section-count {
+    font-size: 13px !important;
+  }
+
+  .kds-btn {
+    height: 46px !important;
+    min-height: 46px !important;
+    font-size: 13px !important;
+  }
+
+  .kds-btn--advance {
+    height: 50px !important;
+    min-height: 50px !important;
+  }
+}
+
+/* ── Expanded popup — size scale-up (~18%) ──────────────────────────────── */
+/* Header text */
+.kds-exp-card .kds-card-id   { font-size: 12.5px !important; }
+.kds-exp-card .kds-card-name { font-size: 20px   !important; font-weight: 900 !important; }
+.kds-exp-card .kds-card-age  { font-size: 14px   !important; }
+.kds-exp-card .kds-card-type { font-size: 13.5px !important; }
+
+/* Close button icon */
+.kds-exp-close { font-size: 16px; width: 36px; height: 36px; }
+
+/* Item header row (pizza/burger name + emoji) */
+.kds-exp-item-head  { font-size: 19px; }
+.kds-exp-item-emoji { font-size: 20px; }
+
+/* Qty badge */
+.kds-exp-card .kds-item-qty { font-size: 13px !important; }
+
+/* Ingredient chips in expanded popup */
+.kds-exp-item .kds-chip-img   { width: 34px !important; height: 34px !important; }
+.kds-exp-item .kds-chip-label { font-size: 11.5px !important; }
+
+/* Notes */
+.kds-exp-card .kds-item-note   { font-size: 13.5px !important; }
+.kds-exp-card .kds-order-notes { font-size: 14px   !important; }

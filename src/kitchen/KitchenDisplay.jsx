@@ -1,5 +1,7 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+﻿import { useCallback, useEffect, useRef, useState } from 'react';
 import { supabase } from '../services/supabase';
+import dbgLight from '../assets/backgrounds/dbg.png';
+import dbgDark  from '../assets/backgrounds/dbgn.png';
 import { fetchOrders, getYesterdayStart, updateOrderStatus } from '../admin/services/adminService';
 import {
   getMuted,
@@ -25,93 +27,76 @@ import {
 } from './kdsImages';
 import './kitchen.css';
 
-/* ── Column configuration ────────────────────────────────────── */
-const COLUMNS = [
+/* ── Status constants ──────────────────────────────────────────── */
+
+/*
+ * Kitchen only receives orders AFTER admin approval:
+ * pending → (admin approves) → confirmed  ← kitchen NEW
+ *                            → preparing  ← kitchen PREPARING
+ *
+ * "Mark Ready" moves an order to `ready` status → it leaves the kitchen
+ * entirely and appears in the driver panel. Kitchen is done at that point.
+ */
+const ACTIVE_STATUSES = ['confirmed', 'preparing'];
+const DONE_STATUSES   = ['delivered', 'cancelled'];
+
+const SECTIONS = [
   {
     key:      'new',
-    label:    'New',
-    icon:     '🔥',
+    label:    'NEW',
+    emoji:    '🔥',
+    color:    '#f0a020',
     statuses: ['confirmed'],
     sort:     'desc',
   },
   {
-    key:      'prep',
-    label:    'Preparing',
-    icon:     '🍳',
+    key:      'preparing',
+    label:    'PREPARING',
+    emoji:    '🍳',
+    color:    '#e06828',
     statuses: ['preparing'],
     sort:     'asc',
   },
-  {
-    key:      'ready',
-    label:    'Ready',
-    icon:     '✓',
-    statuses: ['ready'],
-    sort:     'asc',
-  },
-  {
-    key:      'done',
-    label:    'Done',
-    icon:     '✔',
-    statuses: ['completed', 'delivered', 'cancelled'],
-    sort:     'desc',
-    limit:    20,
-  },
 ];
-
-const KITCHEN_STATUSES = ['confirmed', 'preparing', 'ready'];
-const DONE_STATUSES    = ['completed', 'delivered', 'cancelled'];
-const ALL_SHOWN        = [...KITCHEN_STATUSES, ...DONE_STATUSES];
 
 const NEXT_STATUS = {
   confirmed: 'preparing',
-  preparing: 'ready',
-  ready:     'completed',
+  preparing: 'ready',   // moves order out of kitchen → into driver panel
 };
 
-/* ── Pure helpers ────────────────────────────────────────────── */
+
+/* ── Pure helpers ───────────────────────────────────────────────── */
+
 function getMinutes(iso) {
   return Math.floor((Date.now() - new Date(iso)) / 60000);
 }
-
-function urgencyKey(iso, status) {
-  if (!KITCHEN_STATUSES.includes(status)) return 'none';
-  const m = getMinutes(iso);
-  if (m < 5)  return 'fresh';
-  if (m < 12) return 'warn';
-  return 'late';
-}
-
 function formatAge(iso) {
   const m = getMinutes(iso);
   if (m < 1)  return 'Just now';
   if (m < 60) return `${m}m`;
-  return `${Math.floor(m / 60)}h ${m % 60}m`;
+  const h = Math.floor(m / 60);
+  return `${h}h ${m % 60}m`;
 }
-
+function urgencyClass(iso) {
+  const m = getMinutes(iso);
+  if (m < 5)  return 'kds-u-fresh';
+  if (m < 10) return 'kds-u-warm';
+  return 'kds-u-urgent';
+}
 function orderTypeInfo(order) {
-  if (order.table_number) return { icon: '🍽️', label: `Table ${order.table_number}` };
+  if (order.table_number) return { icon: '🍽️', text: `Table ${order.table_number}`, isDelivery: false };
   const src = order.source ?? order.delivery_address?.source ?? '';
-  if (src === 'pos' || src === 'restaurant_mode') return { icon: '🏪', label: 'In-store' };
-  if (order.order_type === 'pickup')   return { icon: '🏃', label: 'Pickup' };
-  if (order.order_type === 'delivery' || order.delivery_address?.street)
-    return { icon: '🛵', label: 'Delivery' };
-  return { icon: '📦', label: 'Order' };
+  if (src === 'pos' || src === 'restaurant_mode') return { icon: '🏪', text: 'In-store', isDelivery: false };
+  if (order.order_type === 'pickup')   return { icon: '🏃', text: 'Pickup', isDelivery: false };
+  if (order.order_type === 'delivery') return { icon: '🛵', text: 'Delivery', isDelivery: true };
+  if (order.delivery_address?.street)  return { icon: '🛵', text: 'Delivery', isDelivery: true };
+  return { icon: '📦', text: 'Order', isDelivery: false };
 }
-
-function getDisplayId(id) {
-  if (!id) return '#000';
-  if (typeof id === 'number') return `#${String(id).slice(-3).padStart(3, '0')}`;
-  const n = String(id);
-  let h = 0;
-  for (let i = 0; i < n.length; i++) h = (h * 31 + n.charCodeAt(i)) & 0xffffffff;
-  return `#${String(Math.abs(h % 900) + 100).padStart(3, '0')}`;
-}
-
 function cap(s) {
   return s ? String(s).charAt(0).toUpperCase() + String(s).slice(1) : '';
 }
 
-/* ── Pizza composite ─────────────────────────────────────────── */
+/* ── Pizza composite ────────────────────────────────────────────── */
 function PizzaComposite({ item, size }) {
   const s     = size;
   const dough = PIZZA_DOUGHS[item.dough];
@@ -119,83 +104,159 @@ function PizzaComposite({ item, size }) {
   const chz   = PIZZA_CHEESES[item.cheese];
   const meats = (item.meats ?? []).map(id => ({ id, ...PIZZA_MEATS[id] })).filter(m => m.layer);
   const vegs  = (item.vegetables ?? []).map(id => ({ id, ...PIZZA_VEGETABLES[id] })).filter(v => v.layer);
-  if (!dough && !sauce && !chz && !meats.length && !vegs.length) return null;
+
+  const hasLayers = dough || sauce || chz || meats.length || vegs.length;
+  if (!hasLayers) return null;
+
   function px(pct) { return Math.round(s * pct / 100); }
   function centered(sizePct, zIndex, offsetPct = 0) {
     const dim = px(sizePct);
     return {
-      position: 'absolute', top: '50%', left: '50%',
+      position: 'absolute',
+      top: '50%',
+      left: '50%',
       transform: offsetPct
         ? `translate(-50%, calc(-50% + ${px(offsetPct)}px))`
         : 'translate(-50%, -50%)',
-      width: dim, height: dim, objectFit: 'contain', zIndex, pointerEvents: 'none',
+      width: dim,
+      height: dim,
+      objectFit: 'contain',
+      zIndex,
+      pointerEvents: 'none',
     };
   }
+
   return (
     <div className="kds-composite kds-composite--pizza" style={{ width: s, height: s }}>
-      <img src={trayImg} alt="" style={centered(54, 1)} />
-      {dough && <img src={dough.full}  alt="" style={centered(49, 2)} />}
+      <img src={trayImg}    alt="" style={centered(54, 1)} />
+      {dough && <img src={dough.full} alt="" style={centered(49, 2)} />}
       {sauce && <img src={sauce.layer} alt="" style={centered(sauce.layerPct ?? 42, 3)} />}
       {chz   && <img src={chz.layer}   alt="" style={centered(40, 4, chz.offsetPct ?? 0)} />}
-      {meats.map((m, i) => <img key={m.id} src={m.layer} alt="" style={centered(m.layerPct ?? 42, 5 + i)} />)}
-      {vegs.map((v, i)  => <img key={v.id} src={v.layer} alt="" style={centered(v.layerPct ?? 42, 5 + meats.length + i, v.offsetPct ?? 0)} />)}
+      {meats.map((m, i) => (
+        <img key={m.id} src={m.layer} alt="" style={centered(m.layerPct ?? 42, 5 + i)} />
+      ))}
+      {vegs.map((v, i) => (
+        <img key={v.id} src={v.layer} alt=""
+          style={centered(v.layerPct ?? 42, 5 + meats.length + i, v.offsetPct ?? 0)} />
+      ))}
     </div>
   );
 }
 
-/* ── Burger composite ────────────────────────────────────────── */
+/* ── Burger composite ────────────────────────────────────────────── */
 function BurgerComposite({ item, size }) {
   const s       = size;
   const bunId   = item.bun;
   const bunBase = BUN_BASES[bunId];
   const bunTop  = BUN_TOPS[bunId];
+
   if (!bunBase) return null;
+
   const bunPct = BUN_BASE_WIDTH[bunId] ?? 36;
+
   function centered(widthPct, zIndex) {
     const dim = Math.round(s * widthPct / 100);
     return {
-      position: 'absolute', top: '50%', left: '50%',
+      position: 'absolute',
+      top: '50%',
+      left: '50%',
       transform: 'translate(-50%, -50%)',
-      width: dim, height: dim, objectFit: 'contain', zIndex, pointerEvents: 'none',
+      width: dim,
+      height: dim,
+      objectFit: 'contain',
+      zIndex,
+      pointerEvents: 'none',
     };
   }
+
+  // Build ingredient layers in order: meats → cheeses → sauces → vegetables
   const layers = [];
   let z = 2;
-  if (item.burger_meats && typeof item.burger_meats === 'object')
-    Object.entries(item.burger_meats).filter(([, q]) => q > 0).forEach(([id]) => { const src = MEAT_BASES[id]; if (src) layers.push({ id, src, z: z++, pct: bunPct }); });
-  if (item.cheeses && typeof item.cheeses === 'object')
-    Object.entries(item.cheeses).filter(([, q]) => q > 0).forEach(([id]) => { const src = CHEESE_BASES[id]; if (src) layers.push({ id, src, z: z++, pct: bunPct }); });
-  (item.sauces ?? []).forEach(id => { const src = SAUCE_BASES[id]; if (src) layers.push({ id, src, z: z++, pct: bunPct }); });
-  (item.vegetables ?? []).forEach(id => { const src = VEGETABLE_BASES[id]; if (src) layers.push({ id, src, z: z++, pct: bunPct }); });
+
+  if (item.burger_meats && typeof item.burger_meats === 'object') {
+    Object.entries(item.burger_meats).filter(([, q]) => q > 0).forEach(([id]) => {
+      const src = MEAT_BASES[id];
+      if (src) layers.push({ id, src, z: z++, pct: bunPct });
+    });
+  }
+  if (item.cheeses && typeof item.cheeses === 'object') {
+    Object.entries(item.cheeses).filter(([, q]) => q > 0).forEach(([id]) => {
+      const src = CHEESE_BASES[id];
+      if (src) layers.push({ id, src, z: z++, pct: bunPct });
+    });
+  }
+  (item.sauces ?? []).forEach(id => {
+    const src = SAUCE_BASES[id];
+    if (src) layers.push({ id, src, z: z++, pct: bunPct });
+  });
+  (item.vegetables ?? []).forEach(id => {
+    const src = VEGETABLE_BASES[id];
+    if (src) layers.push({ id, src, z: z++, pct: bunPct });
+  });
+
   return (
     <div className="kds-composite kds-composite--burger" style={{ width: s, height: s }}>
-      <img src={DEFAULT_WRAPPER} alt="" style={{ ...centered(100, 0), objectFit: 'cover', opacity: 0.22 }} />
+      <img src={DEFAULT_WRAPPER} alt="" style={{ ...centered(100, 0), objectFit: 'cover', opacity: 0.25 }} />
       <img src={bunBase} alt="" style={centered(bunPct, 1)} />
-      {layers.map(l => <img key={l.id} src={l.src} alt="" style={centered(l.pct, l.z)} />)}
+      {layers.map(l => (
+        <img key={l.id} src={l.src} alt="" style={centered(l.pct, l.z)} />
+      ))}
       {bunTop && <img src={bunTop} alt="" style={centered(bunPct, 100)} />}
     </div>
   );
 }
 
-/* ── Ingredient chips ────────────────────────────────────────── */
+/* ── Ingredient chips ────────────────────────────────────────────── */
 function IngredientChips({ item }) {
   const chips = [];
+
   if (item.type === 'pizza' || item.dough) {
-    const d = PIZZA_DOUGHS[item.dough];    if (d) chips.push({ img: d.preview,   label: d.label });
-    const s = PIZZA_SAUCES[item.sauce];   if (s) chips.push({ img: s.preview,   label: s.label });
-    const c = PIZZA_CHEESES[item.cheese]; if (c) chips.push({ img: c.preview,   label: c.label });
-    (item.meats      ?? []).forEach(id => { const m = PIZZA_MEATS[id];      if (m) chips.push({ img: m.preview, label: m.label }); });
-    (item.vegetables ?? []).forEach(id => { const v = PIZZA_VEGETABLES[id]; if (v) chips.push({ img: v.preview, label: v.label }); });
+    const d = PIZZA_DOUGHS[item.dough];
+    if (d) chips.push({ img: d.preview, label: d.label });
+
+    const s = PIZZA_SAUCES[item.sauce];
+    if (s) chips.push({ img: s.preview, label: s.label });
+
+    const c = PIZZA_CHEESES[item.cheese];
+    if (c) chips.push({ img: c.preview, label: c.label });
+
+    (item.meats ?? []).forEach(id => {
+      const m = PIZZA_MEATS[id];
+      if (m) chips.push({ img: m.preview, label: m.label });
+    });
+    (item.vegetables ?? []).forEach(id => {
+      const v = PIZZA_VEGETABLES[id];
+      if (v) chips.push({ img: v.preview, label: v.label });
+    });
+
   } else if (item.type === 'burger' || item.bun) {
-    const bp = BUN_PREVIEWS[item.bun]; if (bp) chips.push({ img: bp, label: cap(item.bun?.replace(/bun\d?$/, '') || item.bun) });
-    if (item.burger_meats && typeof item.burger_meats === 'object')
-      Object.entries(item.burger_meats).filter(([, q]) => q > 0).forEach(([id, qty]) => { const p = MEAT_PREVIEWS[id]; if (p) chips.push({ img: p, label: `${cap(id)}${qty > 1 ? ` ×${qty}` : ''}` }); });
-    if (item.cheeses && typeof item.cheeses === 'object')
-      Object.entries(item.cheeses).filter(([, q]) => q > 0).forEach(([id, qty]) => { const p = CHEESE_PREVIEWS[id]; if (p) chips.push({ img: p, label: `${cap(id)}${qty > 1 ? ` ×${qty}` : ''}` }); });
-    (item.sauces     ?? []).forEach(id => { const p = SAUCE_PREVIEWS[id];     if (p) chips.push({ img: p, label: cap(id) }); });
-    (item.vegetables ?? []).forEach(id => { const p = VEGETABLE_PREVIEWS[id]; if (p) chips.push({ img: p, label: cap(id) }); });
+    const bp = BUN_PREVIEWS[item.bun];
+    if (bp) chips.push({ img: bp, label: cap(item.bun?.replace(/bun\d?$/, '') || item.bun) });
+
+    if (item.burger_meats && typeof item.burger_meats === 'object') {
+      Object.entries(item.burger_meats).filter(([, q]) => q > 0).forEach(([id, qty]) => {
+        const p = MEAT_PREVIEWS[id];
+        if (p) chips.push({ img: p, label: `${cap(id)}${qty > 1 ? ` ×${qty}` : ''}` });
+      });
+    }
+    if (item.cheeses && typeof item.cheeses === 'object') {
+      Object.entries(item.cheeses).filter(([, q]) => q > 0).forEach(([id, qty]) => {
+        const p = CHEESE_PREVIEWS[id];
+        if (p) chips.push({ img: p, label: `${cap(id)}${qty > 1 ? ` ×${qty}` : ''}` });
+      });
+    }
+    (item.sauces ?? []).forEach(id => {
+      const p = SAUCE_PREVIEWS[id];
+      if (p) chips.push({ img: p, label: cap(id) });
+    });
+    (item.vegetables ?? []).forEach(id => {
+      const p = VEGETABLE_PREVIEWS[id];
+      if (p) chips.push({ img: p, label: cap(id) });
+    });
   }
+
   if (!chips.length) return null;
+
   return (
     <div className="kds-chips">
       {chips.map((chip, i) => (
@@ -208,28 +269,28 @@ function IngredientChips({ item }) {
   );
 }
 
-/* ── Timer ───────────────────────────────────────────────────── */
-function Timer({ iso, urgency }) {
-  if (urgency === 'none') return null;
-  return (
-    <span className={`kds-timer kds-timer--${urgency}`}>
-      {formatAge(iso)}
-    </span>
-  );
-}
-
-/* ── StatusBadge ─────────────────────────────────────────────── */
-function StatusBadge({ order }) {
-  const { icon, label } = orderTypeInfo(order);
-  return <span className="kds-type-badge">{icon} {label}</span>;
-}
-
-/* ── ActionBar ───────────────────────────────────────────────── */
-function ActionBar({ order, onAdvance, onCancel, busy }) {
+/* ── OrderCard ─────────────────────────────────────────────────── */
+function OrderCard({ order, onAdvance, onCancel, flash, expandedId, setExpandedId }) {
   const [confirmCancel, setConfirmCancel] = useState(false);
+  const [busy, setBusy]                   = useState(false);
   const timerRef = useRef(null);
 
-  function handleCancelClick() {
+  const isDone    = DONE_STATUSES.includes(order.status);
+  const uClass    = isDone ? '' : urgencyClass(order.created_at);
+  const typeInfo  = orderTypeInfo(order);
+  const items     = Array.isArray(order.items) ? order.items : [];
+  const shortId   = '#' + order.id.slice(0, 8).toUpperCase();
+  const custNotes = (order.delivery_address || {}).notes || null;
+  const isExpanded = expandedId === order.id;
+
+  async function doAdvance() {
+    if (busy) return;
+    setBusy(true);
+    try { await onAdvance(order.id, NEXT_STATUS[order.status]); }
+    finally { setBusy(false); }
+  }
+
+  function initCancel() {
     if (confirmCancel) {
       clearTimeout(timerRef.current);
       onCancel(order.id);
@@ -240,252 +301,205 @@ function ActionBar({ order, onAdvance, onCancel, busy }) {
     }
   }
 
-  const isDone = DONE_STATUSES.includes(order.status);
-
-  if (isDone) {
-    const isCancel = order.status === 'cancelled';
-    return (
-      <div className="kds-action-bar">
-        <span className={`kds-done-badge kds-done-badge--${isCancel ? 'cancel' : 'complete'}`}>
-          {isCancel ? '✕ Cancelled' : '✓ Done'}
-        </span>
-      </div>
-    );
-  }
-
-  const btnClass  = order.status === 'confirmed' ? 'start' : order.status === 'preparing' ? 'ready' : 'complete';
-  const btnLabel  = order.status === 'confirmed' ? '▶ Start Preparing'
-    : order.status === 'preparing'               ? '✓ Mark Ready'
-    :                                              '✔ Complete';
-
-  if (confirmCancel) {
-    return (
-      <div className="kds-action-bar" onClick={e => e.stopPropagation()}>
-        <button className="kds-btn kds-btn--cancel-confirm" onClick={handleCancelClick}>Cancel order?</button>
-        <button className="kds-btn kds-btn--keep" onClick={() => { clearTimeout(timerRef.current); setConfirmCancel(false); }}>Keep</button>
-      </div>
-    );
+  function stopAndExpand(e) {
+    e.stopPropagation();
+    setExpandedId(order.id);
   }
 
   return (
-    <div className="kds-action-bar" onClick={e => e.stopPropagation()}>
-      <button
-        className={`kds-btn kds-btn--advance kds-btn--${btnClass}`}
-        onClick={() => !busy && onAdvance(order.id, NEXT_STATUS[order.status])}
-        disabled={busy}
+    <>
+      {/* ── Compact card ── */}
+      <div
+        className={`kds-card ${uClass}${flash ? ' kds-card--flash' : ''}${isDone ? ' kds-card--done' : ''}`}
+        onClick={setExpandedId ? stopAndExpand : undefined}
+        style={setExpandedId ? { cursor: 'pointer' } : undefined}
       >
-        {busy ? '…' : btnLabel}
-      </button>
-      <button className="kds-btn kds-btn--cancel" onClick={handleCancelClick} title="Cancel order">✕</button>
-    </div>
-  );
-}
-
-/* ── KitchenCard ─────────────────────────────────────────────── */
-function KitchenCard({ order, onAdvance, onCancel, flash, onExpand }) {
-  const [busy, setBusy] = useState(false);
-
-  const uKey   = urgencyKey(order.created_at, order.status);
-  const uClass = uKey !== 'none' ? ` kds-u-${uKey}` : '';
-  const isDone = DONE_STATUSES.includes(order.status);
-  const items  = Array.isArray(order.items) ? order.items : [];
-  const notes  = order.notes || order.customer_notes || order.delivery_address?.notes || '';
-
-  async function handleAdvance(id, next) {
-    setBusy(true);
-    try { await onAdvance(id, next); }
-    finally { setBusy(false); }
-  }
-
-  return (
-    <div
-      className={`kds-card${uClass}${flash ? ' kds-card--flash' : ''}${isDone ? ' kds-card--done' : ''}`}
-      onClick={onExpand ? () => onExpand(order.id) : undefined}
-      style={onExpand ? { cursor: 'pointer' } : undefined}
-    >
-      {/* Header: order id + type + timer */}
-      <div className="kds-card-head">
-        <div className="kds-card-meta">
-          <span className="kds-card-id">{getDisplayId(order.id)}</span>
-          <StatusBadge order={order} />
-        </div>
-        <Timer iso={order.created_at} urgency={uKey} />
-      </div>
-
-      {/* Customer name */}
-      <div className="kds-card-customer">
-        {order.customer_name || order.customer_email || 'Guest'}
-      </div>
-
-      {/* Items */}
-      <div className="kds-card-body" onClick={e => e.stopPropagation()}>
-        {items.length === 0 && <div className="kds-no-items">No items</div>}
-        {items.map((item, idx) => {
-          const isPizza  = item.type === 'pizza' || !!item.dough;
-          const isBurger = item.type === 'burger' || !!item.bun;
-          const emoji    = isPizza ? '🍕' : isBurger ? '🍔' : '📦';
-          const name     = item.name || cap(item.type) || 'Item';
-          const qty      = item.quantity ?? 1;
-          const note     = item.notes || item.special_instructions || '';
-          return (
-            <div key={idx} className="kds-item">
-              <div className="kds-item-head">
-                <div className="kds-item-image">
-                  {isPizza  && <PizzaComposite  item={item} size={64} />}
-                  {isBurger && <BurgerComposite item={item} size={64} />}
-                  {!isPizza && !isBurger && (
-                    <span className="kds-item-fallback-emoji">{emoji}</span>
-                  )}
-                </div>
-                <div className="kds-item-info">
-                  <div className="kds-item-title">
-                    <span className="kds-item-emoji">{emoji}</span>
-                    <span className="kds-item-name">{name}</span>
-                    {qty > 1 && <span className="kds-item-qty">×{qty}</span>}
-                  </div>
-                  <IngredientChips item={item} />
-                  {note && <div className="kds-item-note">📝 {note}</div>}
-                </div>
-              </div>
-            </div>
-          );
-        })}
-        {notes && (
-          <div className="kds-order-notes">
-            <span>📝</span>
-            <span>{notes}</span>
+        {/* Single-row header */}
+        <div className="kds-card-head">
+          <div className="kds-card-head-left">
+            <span className="kds-card-id">{shortId}</span>
+            <span className="kds-card-name">{order.customer_name || 'Guest'}</span>
           </div>
-        )}
-      </div>
-
-      {/* Action bar */}
-      <ActionBar order={order} onAdvance={handleAdvance} onCancel={onCancel} busy={busy} />
-    </div>
-  );
-}
-
-/* ── QueueColumn ─────────────────────────────────────────────── */
-function QueueColumn({ col, orders, onAdvance, onCancel, flashIds, onExpand }) {
-  return (
-    <section className={`kds-col kds-col--${col.key}`}>
-      <div className="kds-col-head">
-        <span className="kds-col-icon">{col.icon}</span>
-        <span className="kds-col-label">{col.label}</span>
-        <span className="kds-col-count">{orders.length}</span>
-      </div>
-      <div className="kds-col-scroll">
-        {orders.length === 0 ? (
-          <div className="kds-empty">
-            <span className="kds-empty-icon">○</span>
-            <span className="kds-empty-text">All clear</span>
+          <div className="kds-card-head-right">
+            <span className={`kds-card-age ${uClass}`}>{formatAge(order.created_at)}</span>
+            <span className="kds-card-type">{typeInfo.icon} {typeInfo.text}</span>
+            {setExpandedId && <span className="kds-expand-hint">⤢</span>}
           </div>
-        ) : (
-          orders.map(order => (
-            <KitchenCard
-              key={order.id}
-              order={order}
-              onAdvance={onAdvance}
-              onCancel={onCancel}
-              flash={flashIds.has(order.id)}
-              onExpand={onExpand}
-            />
-          ))
-        )}
-      </div>
-    </section>
-  );
-}
-
-/* ── Expanded overlay ────────────────────────────────────────── */
-function ExpandedCard({ order, onAdvance, onCancel, onClose }) {
-  const [busy, setBusy] = useState(false);
-
-  const uKey   = urgencyKey(order.created_at, order.status);
-  const uClass = uKey !== 'none' ? ` kds-u-${uKey}` : '';
-  const items  = Array.isArray(order.items) ? order.items : [];
-  const notes  = order.notes || order.customer_notes || order.delivery_address?.notes || '';
-
-  async function handleAdvance(id, next) {
-    setBusy(true);
-    try { await onAdvance(id, next); onClose(); }
-    finally { setBusy(false); }
-  }
-
-  return (
-    <div className="kds-overlay" onClick={onClose}>
-      <div className={`kds-exp-card${uClass}`} onClick={e => e.stopPropagation()}>
-        {/* Header */}
-        <div className="kds-exp-head">
-          <div className="kds-exp-head-left">
-            <div className="kds-exp-head-meta">
-              <span className="kds-card-id">{getDisplayId(order.id)}</span>
-              <StatusBadge order={order} />
-              <Timer iso={order.created_at} urgency={uKey} />
-            </div>
-            <div className="kds-exp-head-name">{order.customer_name || order.customer_email || 'Guest'}</div>
-          </div>
-          <button className="kds-exp-close" onClick={onClose}>✕</button>
         </div>
 
-        {/* Body */}
-        <div className="kds-exp-body">
-          {items.length === 0 && <div className="kds-no-items">No items</div>}
-          {items.map((item, idx) => {
-            const isPizza  = item.type === 'pizza' || !!item.dough;
-            const isBurger = item.type === 'burger' || !!item.bun;
-            const emoji    = isPizza ? '🍕' : isBurger ? '🍔' : '📦';
-            const name     = item.name || cap(item.type) || 'Item';
-            const qty      = item.quantity ?? 1;
-            const note     = item.notes || item.special_instructions || '';
-            return (
-              <div key={idx} className="kds-exp-item">
-                <div className="kds-exp-item-head">
-                  <span>{emoji}</span>
-                  <strong>{name}</strong>
-                  {qty > 1 && <span className="kds-item-qty">×{qty}</span>}
-                </div>
-                <div className="kds-exp-item-body">
-                  <div className="kds-exp-image">
-                    {isPizza  && <PizzaComposite  item={item} size={148} />}
-                    {isBurger && <BurgerComposite item={item} size={148} />}
+        {/* Scrollable items grid */}
+        <div className="kds-card-body">
+          {items.length === 0 && <p className="kds-no-items">No items</p>}
+          <div className="kds-items-grid">
+            {items.map((item, idx) => {
+              const isPizza  = item.type === 'pizza' || !!item.dough;
+              const isBurger = item.type === 'burger' || !!item.bun;
+              const emoji    = isPizza ? '🍕' : isBurger ? '🍔' : '📦';
+              const name     = item.name || cap(item.type) || 'Item';
+              const qty      = item.quantity ?? 1;
+              const note     = item.notes || item.special_instructions || '';
+              return (
+                <div key={idx} className="kds-item-tile">
+                  <div className="kds-tile-image">
+                    {isPizza  && <PizzaComposite  item={item} size={96} />}
+                    {isBurger && <BurgerComposite item={item} size={96} />}
                   </div>
-                  <div className="kds-exp-detail">
+                  <div className="kds-tile-content">
+                    <div className="kds-tile-title">
+                      <span className="kds-tile-emoji">{emoji}</span>
+                      <strong>{name}</strong>
+                      {qty > 1 && <span className="kds-item-qty">×{qty}</span>}
+                    </div>
                     <IngredientChips item={item} />
-                    {note && <div className="kds-item-note">📝 {note}</div>}
+                    {note && <p className="kds-item-note">📝 {note}</p>}
                   </div>
                 </div>
-              </div>
-            );
-          })}
-          {notes && (
+              );
+            })}
+          </div>
+          {custNotes && (
             <div className="kds-order-notes">
-              <span>📝</span>
-              <span>{notes}</span>
+              <span className="kds-order-notes-icon">📝</span>
+              <span>{custNotes}</span>
             </div>
           )}
         </div>
 
-        {/* Footer */}
-        <div className="kds-exp-actions">
-          <ActionBar order={order} onAdvance={handleAdvance} onCancel={(id) => { onCancel(id); onClose(); }} busy={busy} />
-          <button className="kds-btn kds-btn--close-exp" onClick={onClose}>Close</button>
-        </div>
+        {/* Fixed footer — workflow controls */}
+        {confirmCancel ? (
+          <div className="kds-card-actions" onClick={e => e.stopPropagation()}>
+            <button className="kds-btn kds-btn--cancel-confirm" onClick={initCancel}>🔴 Cancel?</button>
+            <button className="kds-btn kds-btn--keep" onClick={() => { clearTimeout(timerRef.current); setConfirmCancel(false); }}>Keep</button>
+          </div>
+        ) : order.status === 'confirmed' ? (
+          <div className="kds-card-actions" onClick={e => e.stopPropagation()}>
+            <button className="kds-btn kds-btn--advance kds-btn--start" onClick={doAdvance} disabled={busy}>
+              {busy ? '…' : '▶ Start Preparing'}
+            </button>
+            <button className="kds-btn kds-btn--cancel" onClick={initCancel} title="Cancel">✕</button>
+          </div>
+        ) : order.status === 'preparing' ? (
+          <div className="kds-card-actions" onClick={e => e.stopPropagation()}>
+            <button className="kds-btn kds-btn--advance kds-btn--ready" onClick={doAdvance} disabled={busy}>
+              {busy ? '…' : '✓ Mark Ready'}
+            </button>
+            <button className="kds-btn kds-btn--cancel" onClick={initCancel} title="Cancel">✕</button>
+          </div>
+        ) : isDone ? (
+          <div className="kds-card-actions">
+            {order.status === 'delivered' && <span className="kds-badge-delivered">✓ Delivered</span>}
+            {order.status === 'cancelled'  && <span className="kds-badge-cancelled">✕ Cancelled</span>}
+          </div>
+        ) : null}
       </div>
-    </div>
+
+      {/* ── Expanded overlay ── */}
+      {isExpanded && (
+        <div className="kds-overlay" onClick={() => setExpandedId(null)}>
+          <div className={`kds-exp-card ${uClass}`} onClick={e => e.stopPropagation()}>
+
+            {/* Expanded header */}
+            <div className="kds-exp-head">
+              <div className="kds-card-head-left">
+                <span className="kds-card-id">{shortId}</span>
+                <span className="kds-card-name">{order.customer_name || 'Guest'}</span>
+              </div>
+              <div className="kds-card-head-right">
+                <span className={`kds-card-age ${uClass}`}>{formatAge(order.created_at)}</span>
+                <span className="kds-card-type">{typeInfo.icon} {typeInfo.text}</span>
+              </div>
+              <button className="kds-exp-close" onClick={() => setExpandedId(null)} title="Close">✕</button>
+            </div>
+
+            {/* Expanded scrollable body */}
+            <div className="kds-exp-body">
+              {items.length === 0 && <p className="kds-no-items">No items</p>}
+              {items.map((item, idx) => {
+                const isPizza  = item.type === 'pizza' || !!item.dough;
+                const isBurger = item.type === 'burger' || !!item.bun;
+                const emoji    = isPizza ? '🍕' : isBurger ? '🍔' : '📦';
+                const name     = item.name || cap(item.type) || 'Item';
+                const qty      = item.quantity ?? 1;
+                const note     = item.notes || item.special_instructions || '';
+                return (
+                  <div key={idx} className="kds-exp-item">
+                    <div className="kds-exp-item-head">
+                      <span className="kds-exp-item-emoji">{emoji}</span>
+                      <strong className="kds-exp-item-name">{name}</strong>
+                      {qty > 1 && <span className="kds-item-qty">×{qty}</span>}
+                    </div>
+                    <div className="kds-exp-item-body">
+                      <div className="kds-exp-image">
+                        {isPizza  && <PizzaComposite  item={item} size={190} />}
+                        {isBurger && <BurgerComposite item={item} size={190} />}
+                      </div>
+                      <div className="kds-exp-detail">
+                        <IngredientChips item={item} />
+                        {note && <p className="kds-item-note kds-exp-note">📝 {note}</p>}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+              {custNotes && (
+                <div className="kds-order-notes kds-exp-order-notes">
+                  <span className="kds-order-notes-icon">📝</span>
+                  <span>{custNotes}</span>
+                </div>
+              )}
+            </div>
+
+            {/* Expanded footer — workflow controls */}
+            {confirmCancel ? (
+              <div className="kds-exp-actions">
+                <button className="kds-btn kds-btn--cancel-confirm" onClick={initCancel}>🔴 Cancel?</button>
+                <button className="kds-btn kds-btn--keep" onClick={() => { clearTimeout(timerRef.current); setConfirmCancel(false); }}>Keep</button>
+                <button className="kds-btn kds-btn--close-exp" onClick={() => setExpandedId(null)}>Close</button>
+              </div>
+            ) : order.status === 'confirmed' ? (
+              <div className="kds-exp-actions">
+                <button className="kds-btn kds-btn--advance kds-btn--start" onClick={doAdvance} disabled={busy}>
+                  {busy ? '…' : '▶ Start Preparing'}
+                </button>
+                <button className="kds-btn kds-btn--cancel" onClick={initCancel} title="Cancel order">✕</button>
+                <button className="kds-btn kds-btn--close-exp" onClick={() => setExpandedId(null)}>Close</button>
+              </div>
+            ) : order.status === 'preparing' ? (
+              <div className="kds-exp-actions">
+                <button className="kds-btn kds-btn--advance kds-btn--ready" onClick={doAdvance} disabled={busy}>
+                  {busy ? '…' : '✓ Mark Ready'}
+                </button>
+                <button className="kds-btn kds-btn--cancel" onClick={initCancel} title="Cancel order">✕</button>
+                <button className="kds-btn kds-btn--close-exp" onClick={() => setExpandedId(null)}>Close</button>
+              </div>
+            ) : (
+              <div className="kds-exp-actions">
+                {order.status === 'delivered' && <span className="kds-badge-delivered">✓ Delivered</span>}
+                {order.status === 'cancelled'  && <span className="kds-badge-cancelled">✕ Cancelled</span>}
+                <button className="kds-btn kds-btn--close-exp" onClick={() => setExpandedId(null)}>Close</button>
+              </div>
+            )}
+
+          </div>
+        </div>
+      )}
+    </>
   );
 }
 
-/* ── KitchenDisplay (page) ───────────────────────────────────── */
+/* ── KitchenDisplay (page) ──────────────────────────────────────── */
 export default function KitchenDisplay() {
   const [orders,     setOrders]     = useState([]);
   const [loading,    setLoading]    = useState(true);
   const [muted,      setMuted]      = useState(getMuted);
-  const [,           setTick]       = useState(0);
+  const [, setTick]                 = useState(0);
   const [flashIds,   setFlashIds]   = useState(new Set());
+  const [showDone,   setShowDone]   = useState(false);
   const [expandedId, setExpandedId] = useState(null);
-  const channelRef = useRef(null);
+  const [theme,    setTheme]    = useState(() => localStorage.getItem('kds-theme') || 'dark');
+  const channelRef  = useRef(null);
 
-  /* Initial load */
+  /* Load today + yesterday orders */
   useEffect(() => {
     fetchOrders({ since: getYesterdayStart(), limit: 300 })
       .then(setOrders)
@@ -493,22 +507,24 @@ export default function KitchenDisplay() {
       .finally(() => setLoading(false));
   }, []);
 
-  /* Realtime */
+  /* Realtime — approved orders appear instantly */
   useEffect(() => {
     const ch = supabase
-      .channel('kds-live-v3')
+      .channel('kds-live-v2')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, (payload) => {
         const { eventType, new: nr, old: or } = payload;
+
         if (eventType === 'INSERT') {
           setOrders(prev => [nr, ...prev]);
-          if (KITCHEN_STATUSES.includes(nr.status)) {
+          if (ACTIVE_STATUSES.includes(nr.status)) {
             setFlashIds(prev => new Set([...prev, nr.id]));
             playOrderNotification();
             setTimeout(() => setFlashIds(prev => { const s = new Set(prev); s.delete(nr.id); return s; }), 8000);
           }
         } else if (eventType === 'UPDATE') {
           setOrders(prev => prev.map(o => (o.id === nr.id ? nr : o)));
-          if (KITCHEN_STATUSES.includes(nr.status) && !KITCHEN_STATUSES.includes(or?.status)) {
+          // Flash + sound when an order transitions INTO kitchen (pending → confirmed)
+          if (ACTIVE_STATUSES.includes(nr.status) && !ACTIVE_STATUSES.includes(or?.status)) {
             setFlashIds(prev => new Set([...prev, nr.id]));
             playOrderNotification();
             setTimeout(() => setFlashIds(prev => { const s = new Set(prev); s.delete(nr.id); return s; }), 8000);
@@ -518,11 +534,14 @@ export default function KitchenDisplay() {
         }
       })
       .subscribe();
+
     channelRef.current = ch;
     return () => supabase.removeChannel(ch);
   }, []);
 
-  /* Kitchen body context for cinematic bg */
+  /* Tag <body> so kitchen.css can drive the real cinematic background.
+     On unmount, clear the html inline style set by the index.html
+     anti-flash script so the main site background is not blocked. */
   useEffect(() => {
     document.body.dataset.context = 'kitchen';
     return () => {
@@ -531,6 +550,45 @@ export default function KitchenDisplay() {
       document.documentElement.style.backgroundImage  = '';
     };
   }, []);
+
+  /* DEBUG: Background via inline style — same reasoning as Dashboard.
+     kitchen.css sets body[data-context="kitchen"] with !important gradient.
+     element.style.setProperty(..., 'important') is above that entire layer. */
+  useEffect(() => {
+    // eslint-disable-next-line no-console
+    console.log('[KdsBG] light =', dbgLight, '| dark =', dbgDark);
+
+    return () => {
+      ['background-image', 'background-size', 'background-position',
+       'background-repeat', 'background-attachment', 'background-color']
+        .forEach(p => document.body.style.removeProperty(p));
+      document.querySelector('.kds-root')?.style.removeProperty('background');
+    };
+  }, []);
+
+  useEffect(() => {
+    const img = theme === 'dark' ? dbgDark : dbgLight;
+    // eslint-disable-next-line no-console
+    console.log('[KdsBG] apply →', theme, img);
+
+    document.body.style.setProperty('background-image',      `url('${img}')`, 'important');
+    document.body.style.setProperty('background-size',       'cover',         'important');
+    document.body.style.setProperty('background-position',   'center',        'important');
+    document.body.style.setProperty('background-repeat',     'no-repeat',     'important');
+    document.body.style.setProperty('background-attachment', 'fixed',         'important');
+    document.body.style.setProperty('background-color',      theme === 'dark' ? '#000' : '#fff', 'important');
+
+    // Light mode: kitchen.css gives .kds-root[data-theme="light"] its own solid
+    // background — punch through it so the body image shows through.
+    const root = document.querySelector('.kds-root');
+    if (root) {
+      if (theme === 'light') {
+        root.style.setProperty('background', 'transparent', 'important');
+      } else {
+        root.style.removeProperty('background');
+      }
+    }
+  }, [theme]);
 
   /* 30-second tick — refreshes urgency colours */
   useEffect(() => {
@@ -556,33 +614,35 @@ export default function KitchenDisplay() {
     }
   }, []);
 
-  const handleMuteToggle = useCallback(() => setMuted(toggleMute()), []);
-  const handleFullscreen = useCallback(() => {
+  /* Persist theme */
+  useEffect(() => { localStorage.setItem('kds-theme', theme); }, [theme]);
+
+  const handleMuteToggle  = useCallback(() => setMuted(toggleMute()), []);
+  const handleThemeToggle = useCallback(() => setTheme(t => t === 'dark' ? 'light' : 'dark'), []);
+  const handleFullscreen  = useCallback(() => {
     if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(() => {});
     else document.exitFullscreen().catch(() => {});
   }, []);
 
-  /* Build column data */
-  const shownOrders = orders.filter(o => ALL_SHOWN.includes(o.status));
-  const activeCount = shownOrders.filter(o => KITCHEN_STATUSES.includes(o.status)).length;
+  const activeOrders = orders.filter(o => ACTIVE_STATUSES.includes(o.status));
+  const doneOrders   = orders.filter(o => DONE_STATUSES.includes(o.status));
+  const totalActive  = activeOrders.length;
 
-  const columnData = COLUMNS.map(col => {
-    let list = shownOrders
-      .filter(o => col.statuses.includes(o.status))
+  const sectionData = SECTIONS.map(sec => ({
+    ...sec,
+    orders: activeOrders
+      .filter(o => sec.statuses.includes(o.status))
       .sort((a, b) => {
         const d = new Date(a.created_at) - new Date(b.created_at);
-        return col.sort === 'asc' ? d : -d;
-      });
-    if (col.limit) list = list.slice(0, col.limit);
-    return { ...col, orders: list };
-  });
+        return sec.sort === 'asc' ? d : -d;
+      }),
+  }));
 
   const clockTime = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
-  const expandedOrder = expandedId ? orders.find(o => o.id === expandedId) : null;
 
   if (loading) {
     return (
-      <div className="kds-root kds-loading">
+      <div className="kds-root kds-loading" data-theme={theme}>
         <div className="kds-loading-icon">🍔</div>
         <div className="kds-loading-text">Loading Kitchen Display…</div>
       </div>
@@ -590,56 +650,77 @@ export default function KitchenDisplay() {
   }
 
   return (
-    <div className="kds-root" onClick={unlockAudio}>
+    <div className="kds-root" data-theme={theme} onClick={unlockAudio}>
 
-      {/* Header */}
       <header className="kds-header">
         <div className="kds-header-left">
           <span className="kds-logo">🍔</span>
           <span className="kds-logo-name">BURGERIZZA</span>
           <span className="kds-logo-tag">Kitchen</span>
-          {activeCount > 0 && (
-            <span className="kds-live-badge">{activeCount} active</span>
+          {totalActive > 0 && (
+            <span className="kds-live-badge">{totalActive} active</span>
           )}
         </div>
         <div className="kds-header-right">
           <span className="kds-clock">{clockTime}</span>
-          <button
-            className={`kds-ctrl${muted ? ' kds-ctrl--muted' : ''}`}
-            onClick={handleMuteToggle}
-            title={muted ? 'Unmute' : 'Mute'}
-            type="button"
-          >
+          <button className={`kds-ctrl${muted ? ' kds-ctrl--muted' : ''}`}
+            onClick={handleMuteToggle} title={muted ? 'Unmute' : 'Mute'}>
             {muted ? '🔇' : '🔊'}
           </button>
-          <button className="kds-ctrl" onClick={handleFullscreen} title="Fullscreen" type="button">⛶</button>
+          <button className="kds-ctrl" onClick={handleThemeToggle}
+            title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}>
+            {theme === 'dark' ? '☀️' : '🌙'}
+          </button>
+          <button className="kds-ctrl" onClick={handleFullscreen} title="Fullscreen">⛶</button>
           <a href="/admin/orders" className="kds-ctrl" title="Admin panel" onClick={e => e.stopPropagation()}>⚙</a>
         </div>
       </header>
 
-      {/* 4-column kanban board */}
       <main className="kds-board">
-        {columnData.map(col => (
-          <QueueColumn
-            key={col.key}
-            col={col}
-            orders={col.orders}
-            onAdvance={handleAdvance}
-            onCancel={handleCancel}
-            flashIds={flashIds}
-            onExpand={setExpandedId}
-          />
+        {sectionData.map(sec => (
+          <section key={sec.key} className={`kds-section kds-section--${sec.key}`}>
+            <div className="kds-section-head" style={{ '--sc': sec.color }}>
+              <span className="kds-section-emoji">{sec.emoji}</span>
+              <span className="kds-section-label">{sec.label}</span>
+              <span className="kds-section-count">{sec.orders.length}</span>
+            </div>
+            <div className="kds-section-scroll">
+              {sec.orders.length === 0
+                ? <div className="kds-empty">No orders</div>
+                : sec.orders.map(order => (
+                    <OrderCard
+                      key={order.id}
+                      order={order}
+                      onAdvance={handleAdvance}
+                      onCancel={handleCancel}
+                      flash={flashIds.has(order.id)}
+                      expandedId={expandedId}
+                      setExpandedId={setExpandedId}
+                    />
+                  ))
+              }
+            </div>
+          </section>
         ))}
       </main>
 
-      {/* Expanded overlay */}
-      {expandedOrder && (
-        <ExpandedCard
-          order={expandedOrder}
-          onAdvance={handleAdvance}
-          onCancel={handleCancel}
-          onClose={() => setExpandedId(null)}
-        />
+      {doneOrders.length > 0 && (
+        <div className="kds-done-strip">
+          <button className="kds-done-toggle" onClick={() => setShowDone(v => !v)}>
+            {showDone ? '▲' : '▼'}&nbsp; Completed Today · {doneOrders.length}
+          </button>
+          {showDone && (
+            <div className="kds-done-cards">
+              {doneOrders
+                .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+                .slice(0, 30)
+                .map(o => (
+                  <OrderCard key={o.id} order={o} onAdvance={handleAdvance} onCancel={handleCancel} flash={false}
+                    expandedId={expandedId} setExpandedId={setExpandedId} />
+                ))}
+            </div>
+          )}
+        </div>
       )}
     </div>
   );

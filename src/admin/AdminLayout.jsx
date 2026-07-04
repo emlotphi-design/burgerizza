@@ -1,0 +1,443 @@
+import { useEffect, useRef, useState } from 'react';
+import { NavLink, Outlet, Link } from 'react-router-dom';
+import { useAuth } from '../store/AuthContext';
+import { subscribeToOrders, fetchOrders } from './services/adminService';
+import { StaffLockProvider, useStaffLock } from './context/StaffLockContext';
+import LanguageSwitcher from '../components/LanguageSwitcher.jsx';
+import './styles/admin.css';
+import dbgLight from '../assets/backgrounds/dbg.png';
+import dbgDark  from '../assets/backgrounds/dbgn.png';
+
+const NAV = [
+  {
+    section: 'Overview',
+    items: [
+      {
+        to: '/admin/dashboard',
+        label: 'Analytics',
+        locked: true,
+        icon: (
+          <svg className="adm-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="3" y="3" width="7" height="7" rx="1.5"/>
+            <rect x="14" y="3" width="7" height="7" rx="1.5"/>
+            <rect x="14" y="14" width="7" height="7" rx="1.5"/>
+            <rect x="3" y="14" width="7" height="7" rx="1.5"/>
+          </svg>
+        ),
+      },
+    ],
+  },
+  {
+    section: 'Operations',
+    items: [
+      {
+        to: '/admin/orders',
+        label: 'Orders',
+        badgeKey: 'pending',
+        icon: (
+          <svg className="adm-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/>
+            <line x1="3" y1="6" x2="21" y2="6"/>
+            <path d="M16 10a4 4 0 01-8 0"/>
+          </svg>
+        ),
+      },
+      {
+        to: '/admin/pos',
+        label: 'POS',
+        icon: (
+          <svg className="adm-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="2" y="3" width="20" height="14" rx="2"/>
+            <path d="M8 21h8M12 17v4"/>
+            <line x1="6" y1="8" x2="6" y2="8.01"/>
+            <line x1="10" y1="8" x2="18" y2="8"/>
+            <line x1="6" y1="12" x2="6" y2="12.01"/>
+            <line x1="10" y1="12" x2="18" y2="12"/>
+          </svg>
+        ),
+      },
+      {
+        to: '/kitchen',
+        label: 'Kitchen',
+        icon: (
+          <svg className="adm-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M6 2v6a6 6 0 0012 0V2"/>
+            <line x1="12" y1="14" x2="12" y2="22"/>
+            <line x1="8" y1="22" x2="16" y2="22"/>
+            <line x1="6" y1="2" x2="6" y2="6"/>
+            <line x1="18" y1="2" x2="18" y2="6"/>
+          </svg>
+        ),
+      },
+      {
+        to: '/admin/products',
+        label: 'Products',
+        icon: (
+          <svg className="adm-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/>
+            <line x1="7" y1="7" x2="7.01" y2="7"/>
+          </svg>
+        ),
+      },
+      {
+        to: '/admin/drivers',
+        label: 'Drivers',
+        icon: (
+          <svg className="adm-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="5.5" cy="17.5" r="2.5"/>
+            <circle cx="17.5" cy="17.5" r="2.5"/>
+            <path d="M8 17.5H15M15 17.5V9l-4-5H5L3 9v8.5"/>
+            <path d="M15 9h4l2 4v4.5h-3"/>
+          </svg>
+        ),
+      },
+      {
+        to: '/admin/ingredients',
+        label: 'Ingredients',
+        icon: (
+          <svg className="adm-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+            <polygon points="12 2 2 7 12 12 22 7 12 2"/>
+            <polyline points="2 17 12 22 22 17"/>
+            <polyline points="2 12 12 17 22 12"/>
+          </svg>
+        ),
+      },
+    ],
+  },
+  {
+    section: 'Management',
+    items: [
+      {
+        to: '/admin/users',
+        label: 'Customers',
+        locked: true,
+        icon: (
+          <svg className="adm-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
+            <circle cx="9" cy="7" r="4"/>
+            <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/>
+          </svg>
+        ),
+      },
+      {
+        to: '/admin/settings',
+        label: 'Settings',
+        locked: true,
+        icon: (
+          <svg className="adm-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/>
+          </svg>
+        ),
+      },
+    ],
+  },
+];
+
+/* ── Small lock icon for protected nav items ── */
+const NavLockIcon = () => (
+  <svg
+    width="11" height="11" viewBox="0 0 24 24" fill="none"
+    stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round"
+    style={{ marginLeft: 'auto', opacity: 0.32, flexShrink: 0 }}
+  >
+    <rect x="3" y="11" width="18" height="11" rx="2"/>
+    <path d="M7 11V7a5 5 0 0110 0v4"/>
+  </svg>
+);
+
+/* ── Nav link that intercepts clicks on locked items ── */
+function LockedNavLink({ to, end, locked, onAfterClick, icon, label, badge }) {
+  const { unlocked, requestUnlock } = useStaffLock();
+
+  const inner = (
+    <>
+      <span className="adm-nav-icon-wrap">{icon}</span>
+      <span className="adm-nav-label">{label}</span>
+      {badge}
+      {locked && !unlocked && <NavLockIcon />}
+    </>
+  );
+
+  if (!locked || unlocked) {
+    return (
+      <NavLink
+        to={to}
+        end={end}
+        className={({ isActive }) => `adm-nav-link${isActive ? ' adm-nav-link--active' : ''}`}
+        onClick={onAfterClick}
+      >
+        {inner}
+      </NavLink>
+    );
+  }
+
+  // Locked and not yet unlocked — show the password modal instead of navigating.
+  return (
+    <button
+      type="button"
+      className="adm-nav-link"
+      onClick={() => {
+        onAfterClick?.();
+        requestUnlock(to);
+      }}
+    >
+      {inner}
+    </button>
+  );
+}
+
+const MoonIcon = () => (
+  <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+    <path d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z"/>
+  </svg>
+);
+
+const SunIcon = () => (
+  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+    <circle cx="12" cy="12" r="4"/>
+    <line x1="12" y1="2"  x2="12" y2="5"/>
+    <line x1="12" y1="19" x2="12" y2="22"/>
+    <line x1="4.22" y1="4.22"   x2="6.34" y2="6.34"/>
+    <line x1="17.66" y1="17.66" x2="19.78" y2="19.78"/>
+    <line x1="2"  y1="12" x2="5"  y2="12"/>
+    <line x1="19" y1="12" x2="22" y2="12"/>
+    <line x1="4.22" y1="19.78"  x2="6.34" y2="17.66"/>
+    <line x1="17.66" y1="6.34"  x2="19.78" y2="4.22"/>
+  </svg>
+);
+
+export default function AdminLayout() {
+  const [sidebarOpen,  setSidebarOpen]  = useState(false);
+  const [pendingCount, setPendingCount] = useState(0);
+  const [theme,        setTheme]        = useState(() => localStorage.getItem('adminTheme') ?? 'light');
+  const { currentUser } = useAuth();
+  const channelRef  = useRef(null);
+  const layoutRef   = useRef(null);
+  const mainRef     = useRef(null);
+
+  function toggleTheme() {
+    layoutRef.current?.classList.add('adm-theme-changing');
+    const next = theme === 'light' ? 'dark' : 'light';
+    setTheme(next);
+    localStorage.setItem('adminTheme', next);
+    setTimeout(() => layoutRef.current?.classList.remove('adm-theme-changing'), 400);
+  }
+
+  const initials = currentUser?.fullName
+    ? currentUser.fullName.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase()
+    : (currentUser?.email?.[0] ?? 'A').toUpperCase();
+
+  const displayName = currentUser?.fullName || currentUser?.email || 'Admin';
+
+  const close = () => setSidebarOpen(false);
+
+  /* Track actionable order count for sidebar badge (pending + waiting_confirmation) */
+  const NEEDS_ACTION = new Set(['pending', 'waiting_confirmation']);
+
+  /* Tag <body> so admin.css can drive the real background system.
+     On unmount (navigating away), clear the html inline style set
+     by the index.html anti-flash script so the main site background
+     is not blocked by the leftover dark html style. */
+  useEffect(() => {
+    document.body.dataset.context = 'admin';
+    return () => {
+      delete document.body.dataset.context;
+      document.documentElement.style.backgroundColor = '';
+      document.documentElement.style.backgroundImage  = '';
+    };
+  }, []);
+
+  /* Keep body data-admin-theme in sync */
+  useEffect(() => {
+    document.body.dataset.adminTheme = theme;
+    return () => { delete document.body.dataset.adminTheme; };
+  }, [theme]);
+
+  /* Global background — applies to every admin page via .adm-main */
+  useEffect(() => {
+    const el = mainRef.current;
+    if (!el) return;
+    const isLight = theme === 'light';
+    const img     = isLight ? dbgLight : dbgDark;
+    const overlay = isLight ? 'rgba(255,255,255,0.30)' : 'rgba(0,0,0,0.65)';
+    el.style.setProperty(
+      'background',
+      `linear-gradient(${overlay}, ${overlay}) center/cover fixed no-repeat, url(${img}) center/cover fixed no-repeat`,
+      'important'
+    );
+    return () => el.style.removeProperty('background');
+  }, [theme]);
+
+  useEffect(() => {
+    Promise.all([
+      fetchOrders({ status: 'pending', limit: 99 }),
+      fetchOrders({ status: 'waiting_confirmation', limit: 99 }),
+    ])
+      .then(([p, w]) => setPendingCount(p.length + w.length))
+      .catch(() => {});
+
+    channelRef.current = subscribeToOrders(({ eventType, new: row, old }) => {
+      if (eventType === 'INSERT' && NEEDS_ACTION.has(row?.status)) {
+        setPendingCount(c => c + 1);
+      } else if (eventType === 'UPDATE') {
+        const wasAction = NEEDS_ACTION.has(old?.status);
+        const isAction  = NEEDS_ACTION.has(row?.status);
+        if (wasAction && !isAction) setPendingCount(c => Math.max(0, c - 1));
+        else if (!wasAction && isAction) setPendingCount(c => c + 1);
+      } else if (eventType === 'DELETE' && NEEDS_ACTION.has(old?.status)) {
+        setPendingCount(c => Math.max(0, c - 1));
+      }
+    }, 'admin-orders-layout');
+    return () => { channelRef.current?.unsubscribe(); };
+  }, []);
+
+  return (
+    <StaffLockProvider>
+      <div className="adm-layout" ref={layoutRef} data-theme={theme}>
+
+      {/* ── Sidebar ── */}
+      <aside className={`adm-sidebar${sidebarOpen ? ' adm-sidebar--open' : ''}`}>
+
+        <div className="adm-brand">
+          <div className="adm-brand-icon">🍔</div>
+          <div className="adm-brand-text">
+            <div className="adm-brand-name">BURGER<span>IZZA</span></div>
+            <div className="adm-brand-sub">Management Suite</div>
+          </div>
+        </div>
+
+        <nav className="adm-nav">
+          {NAV.map(({ section, items }) => (
+            <div key={section} className="adm-nav-section">
+              <span className="adm-nav-section-label">{section}</span>
+              {items.map(({ to, end, label, icon, badgeKey, locked }) => (
+                <LockedNavLink
+                  key={to}
+                  to={to}
+                  end={end}
+                  locked={locked}
+                  onAfterClick={close}
+                  icon={icon}
+                  label={label}
+                  badge={badgeKey === 'pending' && pendingCount > 0
+                    ? <span className="adm-nav-badge">{pendingCount}</span>
+                    : null}
+                />
+              ))}
+            </div>
+          ))}
+        </nav>
+
+        <div className="adm-sidebar-footer">
+          <div className="adm-user-row">
+            <div className="adm-user-avatar">{initials}</div>
+            <div className="adm-user-info">
+              <div className="adm-user-name">{displayName}</div>
+              <div className="adm-user-email">{currentUser?.email ?? ''}</div>
+            </div>
+          </div>
+          <div style={{ marginBottom: 8 }}>
+            <LanguageSwitcher dark />
+          </div>
+          <div className="adm-theme-row">
+            <span className="adm-theme-label">{theme === 'dark' ? 'Dark mode' : 'Light mode'}</span>
+            <div
+              className={`adm-theme-switch${theme === 'dark' ? ' adm-theme-switch--on' : ''}`}
+              onClick={toggleTheme}
+              role="switch"
+              aria-checked={theme === 'dark'}
+              tabIndex={0}
+              onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && toggleTheme()}
+            >
+              <div className="adm-theme-switch-knob">
+                {theme === 'dark' ? <SunIcon /> : <MoonIcon />}
+              </div>
+            </div>
+          </div>
+          <Link to="/" className="adm-back-link" onClick={close}>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="15 18 9 12 15 6"/>
+            </svg>
+            Back to site
+          </Link>
+        </div>
+      </aside>
+
+      {/* ── Mobile overlay ── */}
+      <div
+        className={`adm-overlay${sidebarOpen ? ' adm-overlay--visible' : ''}`}
+        onClick={close}
+      />
+
+      {/* ── Main ── */}
+      <div className="adm-main" ref={mainRef}>
+
+        <header className="adm-topbar">
+          <button
+            className="adm-hamburger"
+            onClick={() => setSidebarOpen(s => !s)}
+            aria-label="Toggle navigation"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+              <line x1="3" y1="6"  x2="21" y2="6"/>
+              <line x1="3" y1="12" x2="21" y2="12"/>
+              <line x1="3" y1="18" x2="21" y2="18"/>
+            </svg>
+          </button>
+
+          <div className="adm-topbar-brand">
+            Burger<span>izza</span>
+            {pendingCount > 0 && (
+              <span style={{
+                display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                marginLeft: 8, minWidth: 20, height: 20, borderRadius: 10,
+                background: '#fbbf24', color: '#1A0A00',
+                fontSize: 10, fontWeight: 900, padding: '0 5px',
+                verticalAlign: 'middle',
+              }}>
+                {pendingCount}
+              </span>
+            )}
+          </div>
+
+          <div className="adm-topbar-actions">
+            <button
+              className="adm-topbar-theme-btn"
+              onClick={toggleTheme}
+              aria-label="Toggle theme"
+              title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+            >
+              {theme === 'dark' ? <SunIcon /> : <MoonIcon />}
+            </button>
+            <Link
+              to="/"
+              title="Back to site"
+              style={{
+                width: 40, height: 40, display: 'flex', alignItems: 'center',
+                justifyContent: 'center', borderRadius: 8,
+                border: '1px solid var(--adm-border)',
+                color: 'var(--adm-text-3)', textDecoration: 'none',
+                background: 'rgba(0,0,0,0.03)',
+                transition: 'background 0.14s ease, color 0.14s ease',
+              }}
+              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,213,74,0.18)'; e.currentTarget.style.color = 'var(--adm-text)'; }}
+              onMouseLeave={e => { e.currentTarget.style.background = 'rgba(0,0,0,0.03)'; e.currentTarget.style.color = 'var(--adm-text-3)'; }}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+                <polyline points="9 22 9 12 15 12 15 22"/>
+              </svg>
+            </Link>
+          </div>
+        </header>
+
+        <div className="adm-content">
+          <Outlet />
+        </div>
+      </div>
+
+      </div>
+    </StaffLockProvider>
+  );
+}

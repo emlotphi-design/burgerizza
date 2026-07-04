@@ -19,14 +19,18 @@ import OrderTracking from './pages/OrderTracking';
 import CategoryPage from './pages/CategoryPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import AuthCallback from './pages/AuthCallback';
-import AdminLayout from './admin/components/layout/AdminLayout';
-import AdminGuard from './admin/routes/AdminGuard';
+import AdminLayout from './admin/AdminLayout';
+import AdminRoute from './admin/AdminRoute';
+import { StaffLockedRoute } from './admin/context/StaffLockContext';
 import OrdersPage from './admin/pages/Orders';
 import DashboardPage from './admin/pages/Dashboard';
 import ProductsPage from './admin/pages/Products';
 import DriversPage from './admin/pages/Drivers';
 import SettingsPage from './admin/pages/Settings';
-import KitchenRoute from './admin/routes/KitchenRoute';
+import AdminUsers from './admin/pages/Users';
+import AdminPOS from './admin/pages/POS';
+import AdminDriverDetail from './admin/pages/DriverDetail';
+import AdminIngredients from './admin/pages/Ingredients';
 import KitchenDisplay from './kitchen/KitchenDisplay';
 import RestaurantModeBanner from './components/RestaurantModeBanner';
 import RestaurantModeCartBar from './components/RestaurantModeCartBar';
@@ -99,19 +103,23 @@ function AnimatedRoutes() {
         <Route path="/drinks" element={<CategoryPage />} />
 
         {/* Kitchen Display System — full-screen, admin-protected, no sidebar */}
-        <Route path="/kitchen" element={<KitchenRoute><KitchenDisplay /></KitchenRoute>} />
+        <Route path="/kitchen" element={<AdminRoute><KitchenDisplay /></AdminRoute>} />
 
         {/* Admin panel */}
         <Route
           path="/admin"
-          element={<AdminGuard><AdminLayout /></AdminGuard>}
+          element={<AdminRoute><AdminLayout /></AdminRoute>}
         >
           <Route index element={<Navigate to="/admin/orders" replace />} />
-          <Route path="orders"    element={<OrdersPage />} />
-          <Route path="dashboard" element={<DashboardPage />} />
-          <Route path="products"  element={<ProductsPage />} />
-          <Route path="drivers"   element={<DriversPage />} />
-          <Route path="settings"  element={<SettingsPage />} />
+          <Route path="orders"      element={<OrdersPage />} />
+          <Route path="dashboard"   element={<StaffLockedRoute><DashboardPage /></StaffLockedRoute>} />
+          <Route path="products"    element={<ProductsPage />} />
+          <Route path="users"       element={<StaffLockedRoute><AdminUsers /></StaffLockedRoute>} />
+          <Route path="settings"    element={<StaffLockedRoute><SettingsPage /></StaffLockedRoute>} />
+          <Route path="pos"         element={<AdminPOS />} />
+          <Route path="drivers"     element={<DriversPage />} />
+          <Route path="drivers/:id" element={<AdminDriverDetail />} />
+          <Route path="ingredients" element={<AdminIngredients />} />
         </Route>
       </Routes>
     </div>
