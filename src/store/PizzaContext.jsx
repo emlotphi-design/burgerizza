@@ -1,9 +1,11 @@
 import { createContext, useContext, useState, useRef, useCallback } from 'react';
 import { useCartStore } from './cartStore';
+import { DEFAULT_PIZZA_SIZE } from '../utils/pizzaSizes';
 
 export const DEFAULT_DRAFT = {
   activeCategory: 'dough',
   selectedDough: null,
+  selectedSize: DEFAULT_PIZZA_SIZE,
   selectedSauce: null,
   selectedCheese: null,
   selectedMeats: [],
@@ -70,6 +72,7 @@ export function PizzaProvider({ children }) {
     const base = {
       id,
       dough:      d.selectedDough,
+      size:       d.selectedSize,
       sauce:      d.selectedSauce,
       cheese:     d.selectedCheese,
       meats:      d.selectedMeats,
@@ -114,6 +117,7 @@ export function PizzaProvider({ children }) {
         id:         newId,
         name:       d.draftName.trim() || `Custom Pizza #${prev.length + 1}`,
         dough:      d.selectedDough,
+        size:       d.selectedSize,
         sauce:      d.selectedSauce,
         cheese:     d.selectedCheese,
         meats:      d.selectedMeats,
@@ -128,6 +132,7 @@ export function PizzaProvider({ children }) {
     const newDraft = {
       ...DEFAULT_DRAFT,
       selectedDough:      pizza.dough,
+      selectedSize:       pizza.size ?? DEFAULT_PIZZA_SIZE,
       selectedSauce:      pizza.sauce,
       selectedCheese:     pizza.cheese,
       selectedMeats:      pizza.meats ?? [],

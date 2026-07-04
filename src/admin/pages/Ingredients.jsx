@@ -1,8 +1,11 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useIngredientConfig } from '../../context/IngredientConfigContext';
+import { useNutritionConfig } from '../../context/NutritionConfigContext';
 import { PIZZA_DOUGHS } from '../../utils/pizzaDoughs';
 import { PIZZA_INGREDIENTS } from '../../utils/pizzaIngredients';
 import { ALL_BURGER_INGREDIENTS } from '../../features/burger/utils/burgerData';
+import { MENU_ITEMS } from '../../utils/menuData';
+import { PIZZA_SIZES } from '../../utils/pizzaSizes';
 import { PIZZA_PREVIEW_IMAGES, BURGER_PREVIEW_IMAGES } from '../utils/ingredientImages';
 import '../styles/ingredients.css';
 
@@ -63,18 +66,35 @@ function IngToggle({ on, onChange, label }) {
 /* ── Ingredient card ─────────────────────────────────────────────────────────── */
 function IngredientCard({ builder, ingredient, previewImg }) {
   const { isEnabled, getPrice, updateIngredient } = useIngredientConfig();
+  const { getNutrition, updateNutrition } = useNutritionConfig();
 
-  const enabled = isEnabled(builder, ingredient.id);
-  const price   = getPrice(builder, ingredient.id);
+  const enabled   = isEnabled(builder, ingredient.id);
+  const price     = getPrice(builder, ingredient.id);
+  const nutrition = getNutrition(builder, ingredient.id);
 
   const [localPrice, setLocalPrice] = useState(() => price.toFixed(2));
   const [focused,    setFocused]    = useState(false);
   const timerRef = useRef(null);
 
+  const [localWeight,   setLocalWeight]   = useState(() => nutrition.weight ?? '');
+  const [localCalories, setLocalCalories] = useState(() => String(nutrition.calories ?? 0));
+  const [weightFocused,   setWeightFocused]   = useState(false);
+  const [caloriesFocused, setCaloriesFocused] = useState(false);
+  const weightTimerRef   = useRef(null);
+  const caloriesTimerRef = useRef(null);
+
   // Keep display in sync with remote updates when not actively editing
   useEffect(() => {
     if (!focused) setLocalPrice(price.toFixed(2));
   }, [price, focused]);
+
+  useEffect(() => {
+    if (!weightFocused) setLocalWeight(nutrition.weight ?? '');
+  }, [nutrition.weight, weightFocused]);
+
+  useEffect(() => {
+    if (!caloriesFocused) setLocalCalories(String(nutrition.calories ?? 0));
+  }, [nutrition.calories, caloriesFocused]);
 
   const handlePriceChange = e => {
     setLocalPrice(e.target.value);
@@ -91,6 +111,43 @@ function IngredientCard({ builder, ingredient, previewImg }) {
     setFocused(false);
     const num = parseFloat(localPrice);
     if (isNaN(num) || num < 0) setLocalPrice(price.toFixed(2));
+  };
+
+  const handleWeightChange = e => {
+    setLocalWeight(e.target.value);
+    clearTimeout(weightTimerRef.current);
+    weightTimerRef.current = setTimeout(() => {
+      const raw = e.target.value;
+      const num = raw === '' ? null : parseFloat(raw);
+      if (raw === '' || (!isNaN(num) && num >= 0)) {
+        updateNutrition(builder, ingredient.id, { weight: num });
+      }
+    }, 600);
+  };
+
+  const handleWeightBlur = () => {
+    setWeightFocused(false);
+    if (localWeight !== '') {
+      const num = parseFloat(localWeight);
+      if (isNaN(num) || num < 0) setLocalWeight(nutrition.weight ?? '');
+    }
+  };
+
+  const handleCaloriesChange = e => {
+    setLocalCalories(e.target.value);
+    clearTimeout(caloriesTimerRef.current);
+    caloriesTimerRef.current = setTimeout(() => {
+      const num = parseFloat(e.target.value);
+      if (!isNaN(num) && num >= 0) {
+        updateNutrition(builder, ingredient.id, { calories: num });
+      }
+    }, 600);
+  };
+
+  const handleCaloriesBlur = () => {
+    setCaloriesFocused(false);
+    const num = parseFloat(localCalories);
+    if (isNaN(num) || num < 0) setLocalCalories(String(nutrition.calories ?? 0));
   };
 
   const handleToggle = useCallback(
@@ -146,6 +203,39 @@ function IngredientCard({ builder, ingredient, previewImg }) {
             className="ing-price-input"
             aria-label={`Price for ${ingredient.name}`}
           />
+        </div>
+
+        {/* Nutrition — weight (g) / calories (kcal) */}
+        <div className="ing-nutrition-row">
+          <div className="ing-nutrition-field">
+            <label className="ing-nutrition-label">Weight (g)</label>
+            <input
+              type="number"
+              min="0"
+              step="1"
+              value={localWeight}
+              onChange={handleWeightChange}
+              onFocus={() => setWeightFocused(true)}
+              onBlur={handleWeightBlur}
+              className="ing-nutrition-input"
+              placeholder="—"
+              aria-label={`Weight in grams for ${ingredient.name}`}
+            />
+          </div>
+          <div className="ing-nutrition-field">
+            <label className="ing-nutrition-label">Calories (kcal)</label>
+            <input
+              type="number"
+              min="0"
+              step="1"
+              value={localCalories}
+              onChange={handleCaloriesChange}
+              onFocus={() => setCaloriesFocused(true)}
+              onBlur={handleCaloriesBlur}
+              className="ing-nutrition-input"
+              aria-label={`Calories for ${ingredient.name}`}
+            />
+          </div>
         </div>
 
         {/* Availability toggle */}
@@ -236,10 +326,93 @@ function StatsBar({ builder, list }) {
   );
 }
 
+/* ── Nutrition-only card (menu items, pizza sizes) — no price/toggle ── */
+function NutritionOnlyCard({ scope, id, name, emoji }) {
+  const { getNutrition, updateNutrition } = useNutritionConfig();
+  const nutrition = getNutrition(scope, id);
+
+  const [localWeight,   setLocalWeight]   = useState(() => nutrition.weight ?? '');
+  const [localCalories, setLocalCalories] = useState(() => String(nutrition.calories ?? 0));
+  const [weightFocused,   setWeightFocused]   = useState(false);
+  const [caloriesFocused, setCaloriesFocused] = useState(false);
+  const weightTimerRef   = useRef(null);
+  const caloriesTimerRef = useRef(null);
+
+  useEffect(() => {
+    if (!weightFocused) setLocalWeight(nutrition.weight ?? '');
+  }, [nutrition.weight, weightFocused]);
+
+  useEffect(() => {
+    if (!caloriesFocused) setLocalCalories(String(nutrition.calories ?? 0));
+  }, [nutrition.calories, caloriesFocused]);
+
+  const handleWeightChange = e => {
+    setLocalWeight(e.target.value);
+    clearTimeout(weightTimerRef.current);
+    weightTimerRef.current = setTimeout(() => {
+      const raw = e.target.value;
+      const num = raw === '' ? null : parseFloat(raw);
+      if (raw === '' || (!isNaN(num) && num >= 0)) {
+        updateNutrition(scope, id, { weight: num });
+      }
+    }, 600);
+  };
+
+  const handleCaloriesChange = e => {
+    setLocalCalories(e.target.value);
+    clearTimeout(caloriesTimerRef.current);
+    caloriesTimerRef.current = setTimeout(() => {
+      const num = parseFloat(e.target.value);
+      if (!isNaN(num) && num >= 0) {
+        updateNutrition(scope, id, { calories: num });
+      }
+    }, 600);
+  };
+
+  return (
+    <div className="ing-card">
+      <div className="ing-card-img-wrap">
+        <div className="ing-card-placeholder"><span>{emoji}</span></div>
+      </div>
+      <div className="ing-card-body">
+        <div className="ing-card-name">{name}</div>
+        <div className="ing-nutrition-row">
+          <div className="ing-nutrition-field">
+            <label className="ing-nutrition-label">Weight (g)</label>
+            <input
+              type="number" min="0" step="1"
+              value={localWeight}
+              onChange={handleWeightChange}
+              onFocus={() => setWeightFocused(true)}
+              onBlur={() => setWeightFocused(false)}
+              className="ing-nutrition-input"
+              placeholder="—"
+              aria-label={`Weight in grams for ${name}`}
+            />
+          </div>
+          <div className="ing-nutrition-field">
+            <label className="ing-nutrition-label">Calories (kcal)</label>
+            <input
+              type="number" min="0" step="1"
+              value={localCalories}
+              onChange={handleCaloriesChange}
+              onFocus={() => setCaloriesFocused(true)}
+              onBlur={() => setCaloriesFocused(false)}
+              className="ing-nutrition-input"
+              aria-label={`Calories for ${name}`}
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ── Page ────────────────────────────────────────────────────────────────────── */
 export default function IngredientsPage() {
   const [tab, setTab] = useState('pizza');
   const { isLoading } = useIngredientConfig();
+  const isMenuTab = tab === 'dessert' || tab === 'drinks';
 
   const pizzaGroups  = groupByCategory(PIZZA_ADMIN_LIST);
   const burgerGroups = groupByCategory(ALL_BURGER_INGREDIENTS);
@@ -248,6 +421,7 @@ export default function IngredientsPage() {
   const currentGroups = tab === 'pizza' ? pizzaGroups : burgerGroups;
   const currentOrder  = tab === 'pizza' ? PIZZA_CAT_ORDER : BURGER_CAT_ORDER;
   const currentImages = tab === 'pizza' ? PIZZA_PREVIEW_IMAGES : BURGER_PREVIEW_IMAGES;
+  const currentMenuItems = isMenuTab ? MENU_ITEMS[tab] : [];
 
   return (
     <div className="ing-page">
@@ -279,11 +453,27 @@ export default function IngredientsPage() {
             <span>Burger</span>
             <span className="ing-tab-badge">{ALL_BURGER_INGREDIENTS.length}</span>
           </button>
+          <button
+            className={`ing-tab${tab === 'dessert' ? ' ing-tab--active' : ''}`}
+            onClick={() => setTab('dessert')}
+          >
+            <span className="ing-tab-icon">🍰</span>
+            <span>Desserts</span>
+            <span className="ing-tab-badge">{MENU_ITEMS.dessert.length}</span>
+          </button>
+          <button
+            className={`ing-tab${tab === 'drinks' ? ' ing-tab--active' : ''}`}
+            onClick={() => setTab('drinks')}
+          >
+            <span className="ing-tab-icon">🥤</span>
+            <span>Drinks</span>
+            <span className="ing-tab-badge">{MENU_ITEMS.drinks.length}</span>
+          </button>
         </div>
       </div>
 
       {/* ── Stats ── */}
-      {!isLoading && (
+      {!isLoading && !isMenuTab && (
         <StatsBar builder={tab} list={currentList} />
       )}
 
@@ -296,9 +486,50 @@ export default function IngredientsPage() {
         </div>
       )}
 
-      {/* ── Category sections ── */}
-      {!isLoading && (
+      {/* ── Menu item nutrition (desserts/drinks) ── */}
+      {!isLoading && isMenuTab && (
         <div className="ing-content">
+          <section className="ing-section">
+            <div className="ing-section-header">
+              <span className="ing-section-emoji">{tab === 'dessert' ? '🍰' : '🥤'}</span>
+              <h3 className="ing-section-title">{tab === 'dessert' ? 'Desserts' : 'Drinks'}</h3>
+              <div className="ing-section-stats">
+                <span className="ing-section-count">{currentMenuItems.length} total</span>
+              </div>
+            </div>
+            <div className="ing-grid">
+              {currentMenuItems.map(item => (
+                <NutritionOnlyCard key={item.id} scope="menu" id={item.id} name={item.name} emoji={item.emoji} />
+              ))}
+            </div>
+          </section>
+        </div>
+      )}
+
+      {/* ── Category sections ── */}
+      {!isLoading && !isMenuTab && (
+        <div className="ing-content">
+          {tab === 'pizza' && (
+            <section className="ing-section">
+              <div className="ing-section-header">
+                <span className="ing-section-emoji">📐</span>
+                <h3 className="ing-section-title">Pizza Sizes (Classic Thin Crust)</h3>
+                <div className="ing-section-stats">
+                  <span className="ing-section-count">{PIZZA_SIZES.length} total</span>
+                </div>
+              </div>
+              <p className="ing-desc" style={{ margin: '0 0 12px' }}>
+                The Classic Thin Crust dough uses one of these sizes for its live weight/calories —
+                the size the customer picks in the builder determines which row applies. Cheese Crust
+                and Sausage Crust are fixed-size and use their own dough card above instead.
+              </p>
+              <div className="ing-grid">
+                {PIZZA_SIZES.map(s => (
+                  <NutritionOnlyCard key={s.id} scope="pizza" id={s.id} name={`Thin Crust — ${s.label}`} emoji="📐" />
+                ))}
+              </div>
+            </section>
+          )}
           {currentOrder.map(cat =>
             currentGroups[cat] ? (
               <CategorySection

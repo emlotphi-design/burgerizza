@@ -5,6 +5,8 @@ import Socials from '../components/Socials';
 import { usePizzaStore } from '../store/PizzaContext';
 import { useAuth } from '../store/AuthContext';
 import { calcPrice } from '../utils/pizzaUtils';
+import { calculateCalories } from '../utils/nutritionUtils';
+import NutritionBadge from '../components/NutritionBadge';
 import GlassInput from '../components/GlassInput';
 import { api } from '../services/api';
 import { supabase } from '../services/supabase';
@@ -410,7 +412,7 @@ async function fetchLiveStatus() {
   }
 }
 
-function StepPayment({ grandTotal, paymentStep, onBack, onConfirm, submitError, onClearError }) {
+function StepPayment({ grandTotal, grandCalories, paymentStep, onBack, onConfirm, submitError, onClearError }) {
   const [selected, setSelected] = useState(null);
   const [confirming, setConfirming] = useState(false);
   const { isOrderingEnabled, isBusy, statusLoaded, setRestaurantStatus } = useOrdering();
@@ -449,7 +451,11 @@ function StepPayment({ grandTotal, paymentStep, onBack, onConfirm, submitError, 
       </div>
 
       <div className="co-total-pill">
-        Gesamtbetrag: <strong>€{grandTotal.toFixed(2)}</strong>
+        Gesamtbetrag:
+        <span className="nutrition-price-group">
+          <strong>€{grandTotal.toFixed(2)}</strong>
+          {grandCalories > 0 && <NutritionBadge calories={grandCalories} size="sm" />}
+        </span>
       </div>
 
       <div className="co-payment-methods">
@@ -487,10 +493,10 @@ function StepPayment({ grandTotal, paymentStep, onBack, onConfirm, submitError, 
         <div className="co-submit-error" role="alert">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
             {submitError === 'busy'
-              ? <><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></>
+              ? <><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></>
               : submitError === 'closed'
-                ? <><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></>
-                : <><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></>
+                ? <><rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></>
+                : <><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></>
             }
           </svg>
           <span style={{ whiteSpace: 'pre-line' }}>
@@ -532,7 +538,7 @@ function StepPayment({ grandTotal, paymentStep, onBack, onConfirm, submitError, 
 /* ═══════════════════════════════════════════════════════
    ORDER SUCCESS
 ═══════════════════════════════════════════════════════ */
-function OrderSuccess({ grandTotal, orderId, onHome, onTrack }) {
+function OrderSuccess({ grandTotal, grandCalories, orderId, onHome, onTrack }) {
   return (
     <div className="co-success">
       <div className="co-success-icon">
@@ -546,7 +552,10 @@ function OrderSuccess({ grandTotal, orderId, onHome, onTrack }) {
         Deine Pizza ist unterwegs. Wir bereiten alles frisch für dich vor.<br />
         Geschätzte Lieferzeit: <strong>25–40 Minuten</strong>
       </p>
-      <div className="co-success-total">€{(grandTotal ?? 0).toFixed(2)} bezahlt</div>
+      <div className="co-success-total">
+        €{(grandTotal ?? 0).toFixed(2)} bezahlt
+        {grandCalories > 0 && <NutritionBadge calories={grandCalories} size="sm" className="co-success-total-nutrition" />}
+      </div>
       {orderId && (
         <button className="co-next-btn" onClick={onTrack} style={{ marginBottom: 10 }}>
           🛵 Track My Order
@@ -911,6 +920,7 @@ function CheckoutNormal() {
   const [step, setStep] = useState(1);
   const [done, setDone] = useState(false);
   const [finalTotal, setFinalTotal] = useState(0);
+  const [finalCalories, setFinalCalories] = useState(0);
   const [savedOrderId, setSavedOrderId] = useState(null);
   /* Explicit flag: set when user confirms the saved address card. Prevents any
      re-render (auth refresh, Supabase fetch, context update) from flipping the
@@ -923,7 +933,8 @@ function CheckoutNormal() {
     : ['Lieferung', 'Konto', 'Zahlung'];
   const paymentStep = isLoggedIn ? 2 : 3;
 
-  const grandTotal = pizzas.reduce((sum, p) => sum + calcPrice(p) * (p.quantity || 1), 0);
+  const grandTotal    = pizzas.reduce((sum, p) => sum + calcPrice(p) * (p.quantity || 1), 0);
+  const grandCalories = pizzas.reduce((sum, p) => sum + calculateCalories(p) * (p.quantity || 1), 0);
 
   /* Clear cart AFTER done=true is committed to avoid a concurrent-render race
      where clearCart()'s cross-context propagation (cartStore → PizzaContext)
@@ -957,6 +968,7 @@ function CheckoutNormal() {
 
     const total = grandTotal;
     setFinalTotal(total);
+    setFinalCalories(grandCalories);
 
     /* Fire-and-forget to Express backend (informational only, not the real order) */
     api.orders.create({
@@ -1064,15 +1076,15 @@ function CheckoutNormal() {
         const { error: addrErr } = await supabase
           .from('profiles')
           .upsert({
-            id:           addrUid,
-            full_name:    profile.fullName     || '',
-            phone:        profile.phone        || '',
-            street:       profile.street       || '',
-            house_number: profile.houseNumber  || '',
-            postal_code:  profile.postalCode   || '',
-            city:         profile.city         || '',
-            floor:        profile.floor        || '',
-            bell_name:    profile.doorbellName || '',
+            id: addrUid,
+            full_name: profile.fullName || '',
+            phone: profile.phone || '',
+            street: profile.street || '',
+            house_number: profile.houseNumber || '',
+            postal_code: profile.postalCode || '',
+            city: profile.city || '',
+            floor: profile.floor || '',
+            bell_name: profile.doorbellName || '',
           }, { onConflict: 'id' });
         if (addrErr) {
           console.error('[checkout] profiles upsert failed:', addrErr.code, addrErr.message);
@@ -1110,13 +1122,13 @@ function CheckoutNormal() {
       // This fires earlier than payment, so currentUser and the Supabase JWT
       // are both settled by the time this runs on mobile.
       saveAddress({
-        fullName:     profile.fullName,
-        phone:        profile.phone,
-        street:       profile.street,
-        houseNumber:  profile.houseNumber,
-        postalCode:   profile.postalCode,
-        city:         profile.city,
-        floor:        profile.floor        || '',
+        fullName: profile.fullName,
+        phone: profile.phone,
+        street: profile.street,
+        houseNumber: profile.houseNumber,
+        postalCode: profile.postalCode,
+        city: profile.city,
+        floor: profile.floor || '',
         doorbellName: profile.doorbellName || '',
       });
     }
@@ -1143,6 +1155,7 @@ function CheckoutNormal() {
             {done ? (
               <OrderSuccess
                 grandTotal={finalTotal || grandTotal}
+                grandCalories={finalCalories || grandCalories}
                 orderId={savedOrderId}
                 onHome={() => navigate('/')}
                 onTrack={() => navigate(savedOrderId ? `/order-tracking/${savedOrderId}` : '/')}
@@ -1154,6 +1167,7 @@ function CheckoutNormal() {
             ) : (savedAddressConfirmed || step >= paymentStep) ? (
               <StepPayment
                 grandTotal={grandTotal}
+                grandCalories={grandCalories}
                 paymentStep={paymentStep}
                 onBack={handlePaymentBack}
                 onConfirm={handleConfirmed}
@@ -1166,15 +1180,15 @@ function CheckoutNormal() {
                 defaultAddress={defaultAddress}
                 onUseAddress={(addr) => {
                   setProfile({
-                    fullName:     currentUser?.fullName || '',
-                    email:        currentUser?.email    || '',
-                    phone:        addr.phone || currentUser?.phone || '',
-                    street:       addr.street        || '',
-                    houseNumber:  addr.house_number  || '',
-                    postalCode:   addr.postal_code   || '',
-                    city:         addr.city          || '',
-                    floor:        addr.floor         || '',
-                    doorbellName: addr.bell_name     || '',
+                    fullName: currentUser?.fullName || '',
+                    email: currentUser?.email || '',
+                    phone: addr.phone || currentUser?.phone || '',
+                    street: addr.street || '',
+                    houseNumber: addr.house_number || '',
+                    postalCode: addr.postal_code || '',
+                    city: addr.city || '',
+                    floor: addr.floor || '',
+                    doorbellName: addr.bell_name || '',
                   });
                   setSavedAddressConfirmed(true);
                   setStep(paymentStep);
@@ -1184,9 +1198,9 @@ function CheckoutNormal() {
                   setShowNewAddressForm(true);
                   setProfile({
                     ...EMPTY_PROFILE,
-                    email:    currentUser?.email    || '',
+                    email: currentUser?.email || '',
                     fullName: currentUser?.fullName || '',
-                    phone:    currentUser?.phone    || '',
+                    phone: currentUser?.phone || '',
                   });
                 }}
               />

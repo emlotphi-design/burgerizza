@@ -1,8 +1,11 @@
 import { calcBurgerPrice, BURGER_LABEL } from '../utils/burgerUtils';
+import { calculateBurgerCalories } from '../utils/burgerNutritionUtils';
 import SkeletonImage from '../../../components/SkeletonImage';
+import NutritionBadge from '../../../components/NutritionBadge';
 
 export default function BurgerPreviewCard({ burger, isExiting, onEdit, onRemove }) {
-  const price = calcBurgerPrice(burger);
+  const price    = calcBurgerPrice(burger);
+  const calories = calculateBurgerCalories(burger);
 
   const meatEntries = (() => {
     const m = burger.meats;
@@ -36,7 +39,10 @@ export default function BurgerPreviewCard({ burger, isExiting, onEdit, onRemove 
     <div className={`bpc-card preview-card${isExiting ? ' bpc-card--exit' : ''}`}>
       <div className="bpc-header">
         <span className="bpc-name">{burger.name}</span>
-        <span className="bpc-price">€{price.toFixed(2)}</span>
+        <span className="nutrition-price-group">
+          <span className="bpc-price">€{price.toFixed(2)}</span>
+          <NutritionBadge calories={calories} size="sm" />
+        </span>
       </div>
 
       {burger.image && (

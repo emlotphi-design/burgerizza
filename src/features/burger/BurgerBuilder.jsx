@@ -3,6 +3,8 @@ import Socials from '../../components/Socials';
 import { useIngredientConfig } from '../../context/IngredientConfigContext';
 import BurgerSidebar from './components/BurgerSidebar';
 import BurgerPreviewCard from './components/BurgerPreviewCard';
+import NutritionBadge from '../../components/NutritionBadge';
+import { calculateBurgerCalories } from './utils/burgerNutritionUtils';
 import { useBurgerBuilder } from './hooks/useBurgerBuilder';
 import { BURGER_BUNS, BURGER_MEATS, BURGER_CHEESES, BURGER_SAUCES, BURGER_VEGETABLES } from './utils/burgerData';
 import {
@@ -49,6 +51,12 @@ export default function BurgerBuilder() {
 
       <div className="bb-workspace">
         <div className="bb-builder-canvas">
+
+          {draft.bun && (
+            <div className="nutrition-live-float">
+              <NutritionBadge calories={calculateBurgerCalories(draft)} size="md" />
+            </div>
+          )}
 
           {/* Wrapper paper */}
           <img

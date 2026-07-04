@@ -1,0 +1,103 @@
+/* Nutrition & Calories system — additive, isolated styles.
+   New class names only; no existing rules are modified here. */
+
+.nutrition-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
+  white-space: nowrap;
+  color: rgba(255, 140, 40, 0.95);
+  background: rgba(255, 107, 26, 0.12);
+  border: 1px solid rgba(255, 107, 26, 0.25);
+  border-radius: 999px;
+  padding: 2px 8px;
+  line-height: 1.4;
+}
+
+.nutrition-badge--sm {
+  font-size: 10px;
+  padding: 1px 6px;
+}
+
+.nutrition-badge--md {
+  font-size: 12px;
+}
+
+.nutrition-badge--lg {
+  font-size: 14px;
+  padding: 4px 10px;
+}
+
+.nutrition-badge-icon {
+  font-size: 0.95em;
+  line-height: 1;
+}
+
+.nutrition-badge-value {
+  font-variant-numeric: tabular-nums;
+}
+
+.nutrition-badge-unit {
+  opacity: 0.85;
+  font-weight: 700;
+}
+
+/* Price + calorie badge sit side by side wherever a price is shown. */
+.nutrition-price-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+/* Floating live counter shown over the builder stage while the customer
+   is actively picking ingredients (no static price display exists there
+   today to anchor next to, so this sits as a small overlay instead). */
+.nutrition-live-float {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 40;
+  pointer-events: none;
+}
+
+.nutrition-live-float .nutrition-badge {
+  pointer-events: auto;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
+}
+
+/* Pizza size selector (thin-crust only) — compact pill row, nutrition-only,
+   does not touch the visual pizza canvas. */
+.nutrition-size-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.nutrition-size-btn {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.75);
+  background: rgba(20, 20, 20, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 999px;
+  padding: 4px 12px;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.nutrition-size-btn:hover {
+  background: rgba(255, 107, 26, 0.18);
+  border-color: rgba(255, 107, 26, 0.4);
+}
+
+.nutrition-size-btn--active {
+  color: #fff;
+  background: rgba(255, 107, 26, 0.9);
+  border-color: rgba(255, 107, 26, 0.9);
+}

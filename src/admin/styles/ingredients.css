@@ -1222,3 +1222,67 @@
   background: #FFFFFF;
   box-shadow: 0 1px 4px rgba(0,0,0,0.14), 0 2px 10px rgba(22,163,74,0.24);
 }
+
+/* ── Nutrition row (Weight / Calories) — Nutrition & Calories system ── */
+.ing-nutrition-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.ing-nutrition-field {
+  flex: 1;
+  min-width: 0;
+}
+
+.ing-nutrition-label {
+  display: block;
+  font-size: 0.66rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: rgba(255,140,40,0.75);
+  margin-bottom: 3px;
+}
+
+.ing-nutrition-input {
+  width: 100%;
+  box-sizing: border-box;
+  background: rgba(8,10,14,0.74);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 10px;
+  outline: none;
+  padding: 8px 10px;
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: rgba(255,255,255,0.88);
+  font-family: inherit;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.36);
+}
+
+.ing-nutrition-input:focus {
+  border-color: rgba(255,107,26,0.4);
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.30), 0 0 0 3px rgba(255,107,26,0.12);
+}
+
+.ing-nutrition-input::-webkit-inner-spin-button,
+.ing-nutrition-input::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.adm-layout[data-theme="light"] .ing-nutrition-input {
+  background: #F5F0E3;
+  border-color: rgba(255,107,26,0.22);
+  color: #111827;
+  box-shadow: inset 0 2px 5px rgba(0,0,0,0.07);
+}
+
+.adm-layout[data-theme="light"] .ing-nutrition-input:focus {
+  border-color: rgba(255,107,26,0.55);
+  box-shadow: inset 0 2px 5px rgba(0,0,0,0.06), 0 0 0 3px rgba(255,107,26,0.15);
+}
+
+.adm-layout[data-theme="light"] .ing-nutrition-label {
+  color: #B45300;
+}

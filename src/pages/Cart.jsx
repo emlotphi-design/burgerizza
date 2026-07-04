@@ -6,6 +6,8 @@ import PizzaCanvas from '../components/PizzaCanvas';
 import { usePizzaStore } from '../store/PizzaContext';
 import { useBurgerStore } from '../features/burger/store/burgerStore.jsx';
 import { LABEL, calcPrice } from '../utils/pizzaUtils';
+import { calculatePizzaCalories } from '../utils/pizzaNutritionUtils';
+import NutritionBadge from '../components/NutritionBadge';
 import BurgerCartCard from '../features/burger/components/BurgerCartCard';
 import { useRestaurantMode } from '../store/RestaurantModeContext';
 
@@ -34,6 +36,7 @@ function PizzaCartCard({ pizza, idx, visibleCount, isExiting, animDelay, onEdit,
   const qty       = pizza.quantity || 1;
   const unitPrice = calcPrice(pizza);
   const subtotal  = unitPrice * qty;
+  const calories  = calculatePizzaCalories(pizza);
 
   const rows = [
     { cat: 'Teig',    vals: [LABEL[pizza.dough]]                              },
@@ -85,6 +88,7 @@ function PizzaCartCard({ pizza, idx, visibleCount, isExiting, animDelay, onEdit,
           <div className="cart-price-compact">
             <span className="cart-price-compact__total">€{subtotal.toFixed(2)}</span>
             {qty > 1 && <span className="cart-price-compact__unit">€{unitPrice.toFixed(2)} / Stk.</span>}
+            <NutritionBadge calories={calories * qty} size="sm" />
           </div>
 
           {/* 3 — Ingredient toggle: accordion header at all breakpoints */}
@@ -139,7 +143,10 @@ function PizzaCartCard({ pizza, idx, visibleCount, isExiting, animDelay, onEdit,
             </div>
             <div className="cart-price-row cart-price-total">
               <span>Subtotal</span>
-              <span>€{subtotal.toFixed(2)}</span>
+              <span className="nutrition-price-group">
+                €{subtotal.toFixed(2)}
+                <NutritionBadge calories={calories * qty} size="sm" />
+              </span>
             </div>
           </div>
 

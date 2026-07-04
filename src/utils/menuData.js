@@ -29,6 +29,12 @@ export const CATEGORIES = [
   },
 ];
 
+/**
+ * Nutrition fields (weight/calories) — added for the Nutrition & Calories
+ * system. No verified nutrition spec has been provided for these prepared
+ * menu items yet, so `calories: 0` / `weight: null` means "not yet supplied"
+ * (never estimated). Editable from the admin Ingredients page.
+ */
 export const MENU_ITEMS = {
   burger: [
     {
@@ -37,6 +43,7 @@ export const MENU_ITEMS = {
       description: 'Double smash patty, American cheese, secret sauce, brioche bun',
       price: 8.90,
       emoji: '🍔',
+      weight: null, calories: 0, protein: null, carbs: null, fat: null,
     },
     {
       id: 'b2',
@@ -44,6 +51,7 @@ export const MENU_ITEMS = {
       description: 'Crispy smoked bacon, smoky BBQ glaze, caramelised onions',
       price: 10.50,
       emoji: '🥓',
+      weight: null, calories: 0, protein: null, carbs: null, fat: null,
     },
     {
       id: 'b3',
@@ -51,6 +59,7 @@ export const MENU_ITEMS = {
       description: 'Two juicy patties, double cheddar, pickles, special sauce',
       price: 12.90,
       emoji: '🍔',
+      weight: null, calories: 0, protein: null, carbs: null, fat: null,
     },
     {
       id: 'b4',
@@ -58,6 +67,7 @@ export const MENU_ITEMS = {
       description: 'Golden fried chicken thigh, ranch sauce, coleslaw, dill pickles',
       price: 9.50,
       emoji: '🐔',
+      weight: null, calories: 0, protein: null, carbs: null, fat: null,
     },
     {
       id: 'b5',
@@ -65,6 +75,7 @@ export const MENU_ITEMS = {
       description: 'Black bean & quinoa patty, avocado cream, fresh salsa',
       price: 8.20,
       emoji: '🥦',
+      weight: null, calories: 0, protein: null, carbs: null, fat: null,
     },
     {
       id: 'b6',
@@ -72,6 +83,7 @@ export const MENU_ITEMS = {
       description: 'Sautéed wild mushrooms, melted Swiss cheese, garlic aioli',
       price: 9.80,
       emoji: '🍄',
+      weight: null, calories: 0, protein: null, carbs: null, fat: null,
     },
   ],
   pizza: [
@@ -81,6 +93,7 @@ export const MENU_ITEMS = {
       description: 'San Marzano tomato, fresh buffalo mozzarella, basil, olive oil',
       price: 9.90,
       emoji: '🍕',
+      weight: null, calories: 0, protein: null, carbs: null, fat: null,
     },
     {
       id: 'p2',
@@ -88,6 +101,7 @@ export const MENU_ITEMS = {
       description: 'Double pepperoni, chilli oil, smoked mozzarella, oregano',
       price: 12.50,
       emoji: '🌶️',
+      weight: null, calories: 0, protein: null, carbs: null, fat: null,
     },
     {
       id: 'p3',
@@ -95,6 +109,7 @@ export const MENU_ITEMS = {
       description: 'Grilled chicken, smoky BBQ sauce, caramelised red onion, cheddar',
       price: 13.90,
       emoji: '🍗',
+      weight: null, calories: 0, protein: null, carbs: null, fat: null,
     },
     {
       id: 'p4',
@@ -102,6 +117,7 @@ export const MENU_ITEMS = {
       description: 'Seasonal roasted vegetables, pesto base, feta, sun-dried tomato',
       price: 11.50,
       emoji: '🥗',
+      weight: null, calories: 0, protein: null, carbs: null, fat: null,
     },
     {
       id: 'p5',
@@ -109,6 +125,7 @@ export const MENU_ITEMS = {
       description: 'Wild mushrooms, truffle cream, Parmesan shavings, thyme',
       price: 14.50,
       emoji: '🍄',
+      weight: null, calories: 0, protein: null, carbs: null, fat: null,
     },
     {
       id: 'p6',
@@ -116,6 +133,7 @@ export const MENU_ITEMS = {
       description: 'Nduja sausage, jalapeños, fresh chilli, honey drizzle',
       price: 12.90,
       emoji: '🔥',
+      weight: null, calories: 0, protein: null, carbs: null, fat: null,
     },
   ],
   dessert: [
@@ -125,6 +143,7 @@ export const MENU_ITEMS = {
       description: 'Warm cinnamon churros with rich dark chocolate dipping sauce',
       price: 5.50,
       emoji: '🍩',
+      weight: null, calories: 0, protein: null, carbs: null, fat: null,
     },
     {
       id: 'd2',
@@ -132,6 +151,7 @@ export const MENU_ITEMS = {
       description: 'Molten chocolate centre, vanilla bean ice cream, caramel drizzle',
       price: 6.90,
       emoji: '🍫',
+      weight: null, calories: 0, protein: null, carbs: null, fat: null,
     },
     {
       id: 'd3',
@@ -139,6 +159,7 @@ export const MENU_ITEMS = {
       description: 'Classic Italian, espresso soaked ladyfingers, mascarpone cream',
       price: 5.90,
       emoji: '☕',
+      weight: null, calories: 0, protein: null, carbs: null, fat: null,
     },
     {
       id: 'd4',
@@ -146,6 +167,7 @@ export const MENU_ITEMS = {
       description: 'Two scoops vanilla, root beer, crushed wafer, caramel sauce',
       price: 4.50,
       emoji: '🍦',
+      weight: null, calories: 0, protein: null, carbs: null, fat: null,
     },
     {
       id: 'd5',
@@ -153,6 +175,7 @@ export const MENU_ITEMS = {
       description: 'Fresh-glazed donuts with seasonal flavour rotation daily',
       price: 4.90,
       emoji: '🍩',
+      weight: null, calories: 0, protein: null, carbs: null, fat: null,
     },
     {
       id: 'd6',
@@ -160,6 +183,7 @@ export const MENU_ITEMS = {
       description: 'New York style baked, berry compote, butter biscuit base',
       price: 5.90,
       emoji: '🍰',
+      weight: null, calories: 0, protein: null, carbs: null, fat: null,
     },
   ],
   drinks: [
@@ -169,6 +193,7 @@ export const MENU_ITEMS = {
       description: 'Ice cold classic or zero sugar, served with fresh ice',
       price: 2.90,
       emoji: '🥤',
+      weight: null, calories: 0, protein: null, carbs: null, fat: null,
     },
     {
       id: 'dr2',
@@ -176,6 +201,7 @@ export const MENU_ITEMS = {
       description: 'Fresh-pressed lemon juice, real mango purée, mint sprig',
       price: 3.50,
       emoji: '🍋',
+      weight: null, calories: 0, protein: null, carbs: null, fat: null,
     },
     {
       id: 'dr3',
@@ -183,6 +209,7 @@ export const MENU_ITEMS = {
       description: 'Squeezed to order, zero added sugar, pulp on request',
       price: 3.90,
       emoji: '🍊',
+      weight: null, calories: 0, protein: null, carbs: null, fat: null,
     },
     {
       id: 'dr4',
@@ -190,6 +217,7 @@ export const MENU_ITEMS = {
       description: 'Blended fresh watermelon, mint leaves, fresh lime squeeze',
       price: 4.20,
       emoji: '🍉',
+      weight: null, calories: 0, protein: null, carbs: null, fat: null,
     },
     {
       id: 'dr5',
@@ -197,6 +225,7 @@ export const MENU_ITEMS = {
       description: 'Cold brew concentrate, oat milk, house vanilla syrup',
       price: 4.50,
       emoji: '☕',
+      weight: null, calories: 0, protein: null, carbs: null, fat: null,
     },
     {
       id: 'dr6',
@@ -204,6 +233,12 @@ export const MENU_ITEMS = {
       description: 'Choose: Vanilla · Chocolate · Strawberry · Salted Caramel',
       price: 5.50,
       emoji: '🥛',
+      weight: null, calories: 0, protein: null, carbs: null, fat: null,
     },
   ],
 };
+
+/** O(1) lookup: item id → menu item (across all categories) */
+export const MENU_ITEMS_BY_ID = Object.fromEntries(
+  Object.values(MENU_ITEMS).flat().map(item => [item.id, item])
+);

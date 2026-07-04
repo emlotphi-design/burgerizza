@@ -29,7 +29,7 @@ export function usePizzaBuilder() {
 
   const {
     activeCategory,
-    selectedDough, selectedSauce, selectedCheese,
+    selectedDough, selectedSize, selectedSauce, selectedCheese,
     selectedMeats, selectedVegetables,
     draftName, editingId, editingName,
   } = draft;
@@ -125,6 +125,7 @@ export function usePizzaBuilder() {
   }, [unlocked, selectedDough, selectedSauce, selectedCheese, setDraft]);
 
   const handleDoughSelect = useCallback((id) => setDraft({ selectedDough: id }), [setDraft]);
+  const handleSizeSelect  = useCallback((id) => setDraft({ selectedSize: id }), [setDraft]);
   const handleSauceSelect = useCallback((id) => setDraft({ selectedSauce: id }), [setDraft]);
   const handleCheeseSelect = useCallback((id) => setDraft({ selectedCheese: id }), [setDraft]);
 
@@ -164,6 +165,7 @@ export function usePizzaBuilder() {
     // Draft values (passed to canvas / toolbar as props)
     activeCategory,
     selectedDough,
+    selectedSize,
     selectedSauce,
     selectedCheese,
     selectedMeats,
@@ -180,6 +182,7 @@ export function usePizzaBuilder() {
     handleDeletePizza,
     handleCategoryChange,
     handleDoughSelect,
+    handleSizeSelect,
     handleSauceSelect,
     handleCheeseSelect,
     handleMeatToggle,

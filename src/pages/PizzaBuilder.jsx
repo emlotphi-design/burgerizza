@@ -5,6 +5,9 @@ import PizzaCanvas from '../components/PizzaCanvas';
 import CategoryToolbar from '../components/CategoryToolbar';
 import { usePizzaBuilder } from '../features/pizza-builder/hooks/usePizzaBuilder';
 import { LABEL, calcPrice } from '../utils/pizzaUtils';
+import { calculatePizzaCalories } from '../utils/pizzaNutritionUtils';
+import { PIZZA_SIZES } from '../utils/pizzaSizes';
+import NutritionBadge from '../components/NutritionBadge';
 
 // ── Saved-pizza card (presentational, no logic) ───────────────────────────────
 
@@ -20,6 +23,7 @@ function SavedPizzaCard({ pizza, onEdit, onDelete, onRename, exiting }) {
   }
 
   const price       = calcPrice(pizza);
+  const calories    = calculatePizzaCalories(pizza);
   const meats       = Array.isArray(pizza.meats) ? pizza.meats : [];
   const vegetables  = Array.isArray(pizza.vegetables) ? pizza.vegetables : [];
   const ingredients = [
@@ -53,7 +57,10 @@ function SavedPizzaCard({ pizza, onEdit, onDelete, onRename, exiting }) {
             {pizza.name}
           </span>
         )}
-        <span className="bpc-price">€{price.toFixed(2)}</span>
+        <span className="nutrition-price-group">
+          <span className="bpc-price">€{price.toFixed(2)}</span>
+          <NutritionBadge calories={calories} size="sm" />
+        </span>
       </div>
       <div className="bpc-image-wrap">
         <PizzaCanvas
@@ -98,16 +105,25 @@ export default function PizzaBuilder() {
   const {
     pizzaItems, canAddToCart, isEditing, nextPizzaNumber,
     lockMsg, exitingIds, toastVisible,
-    activeCategory, selectedDough, selectedSauce, selectedCheese,
+    activeCategory, selectedDough, selectedSize, selectedSauce, selectedCheese,
     selectedMeats, selectedVegetables,
     draftName, editingName,
     unlocked, completed,
     handleAddToCart, handleEditPizza, handleDeletePizza,
     handleCategoryChange,
-    handleDoughSelect, handleSauceSelect, handleCheeseSelect,
+    handleDoughSelect, handleSizeSelect, handleSauceSelect, handleCheeseSelect,
     handleMeatToggle, handleVegetableToggle,
     setDraftName, renamePizza,
   } = usePizzaBuilder();
+
+  const liveCalories = calculatePizzaCalories({
+    dough: selectedDough,
+    size: selectedSize,
+    sauce: selectedSauce,
+    cheese: selectedCheese,
+    meats: selectedMeats,
+    vegetables: selectedVegetables,
+  });
 
   return (
     <div className="page-enter" style={{ display: 'flex', flexDirection: 'column', height: '100svh', overflow: 'hidden', paddingTop: 'var(--nav-h, 74px)' }}>
@@ -117,6 +133,11 @@ export default function PizzaBuilder() {
           {isEditing && (
             <div className="builder-edit-banner">
               BEARBEITUNG: {editingName || 'Pizza'}
+            </div>
+          )}
+          {selectedDough && (
+            <div className="nutrition-live-float">
+              <NutritionBadge calories={liveCalories} size="md" />
             </div>
           )}
           <CategoryToolbar
@@ -153,6 +174,21 @@ export default function PizzaBuilder() {
                 spellCheck={false}
               />
             </div>
+            {selectedDough === 'thin' && (
+              <div className="nutrition-size-row">
+                {PIZZA_SIZES.map(s => (
+                  <button
+                    key={s.id}
+                    type="button"
+                    className={`nutrition-size-btn${selectedSize === s.id ? ' nutrition-size-btn--active' : ''}`}
+                    onClick={() => handleSizeSelect(s.id)}
+                    aria-pressed={selectedSize === s.id}
+                  >
+                    {s.label}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </main>

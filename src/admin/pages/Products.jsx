@@ -9,6 +9,7 @@ const CATEGORY_OPTIONS = ['burger', 'pizza', 'sides', 'drinks', 'desserts', 'oth
 const EMPTY_FORM = {
   name: '', description: '', price: '', category: 'burger',
   emoji: '🍔', active: true, sort_order: 0,
+  weight_g: '', calories: '',
 };
 
 function ProductModal({ product, onSave, onClose }) {
@@ -20,6 +21,8 @@ function ProductModal({ product, onSave, onClose }) {
     emoji: product.emoji,
     active: product.active,
     sort_order: product.sort_order ?? 0,
+    weight_g: product.weight_g != null ? String(product.weight_g) : '',
+    calories: product.calories != null ? String(product.calories) : '',
   } : { ...EMPTY_FORM });
   const [saving, setSaving] = useState(false);
   const [err, setErr] = useState('');
@@ -44,6 +47,8 @@ function ProductModal({ product, onSave, onClose }) {
         emoji: form.emoji.trim() || '🍔',
         active: form.active,
         sort_order: Number(form.sort_order) || 0,
+        weight_g: form.weight_g === '' ? null : Number(form.weight_g),
+        calories: form.calories === '' ? null : Number(form.calories),
       };
       await onSave(product?.id ?? null, payload);
       onClose();
@@ -90,6 +95,16 @@ function ProductModal({ product, onSave, onClose }) {
             <div className="adm-form-row">
               <label className="adm-form-label">Sort order</label>
               <input className="adm-input" type="number" min="0" value={form.sort_order} onChange={e => set('sort_order', e.target.value)} />
+            </div>
+          </div>
+          <div className="adm-form-2col">
+            <div className="adm-form-row">
+              <label className="adm-form-label">Weight (g)</label>
+              <input className="adm-input" type="number" step="1" min="0" value={form.weight_g} onChange={e => set('weight_g', e.target.value)} placeholder="—" />
+            </div>
+            <div className="adm-form-row">
+              <label className="adm-form-label">Calories (kcal)</label>
+              <input className="adm-input" type="number" step="1" min="0" value={form.calories} onChange={e => set('calories', e.target.value)} placeholder="—" />
             </div>
           </div>
           <div className="adm-form-row adm-form-row--inline">

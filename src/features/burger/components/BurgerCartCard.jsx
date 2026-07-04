@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { usePizzaStore } from '../../../store/PizzaContext';
 import { calcBurgerPrice, BURGER_LABEL } from '../utils/burgerUtils';
+import { calculateBurgerCalories } from '../utils/burgerNutritionUtils';
 import SkeletonImage from '../../../components/SkeletonImage';
+import NutritionBadge from '../../../components/NutritionBadge';
 
 /* Bun preview images — used as fallback when canvas capture image is absent
    (e.g. orders placed via Restaurant Mode sticky bar or admin POS) */
@@ -26,6 +28,7 @@ export default function BurgerCartCard({ burger, isExiting, animDelay, onRemove,
   const qty       = burger.quantity || 1;
   const unitPrice = calcBurgerPrice(burger);
   const subtotal  = unitPrice * qty;
+  const calories  = calculateBurgerCalories(burger);
 
   const meatEntries = (() => {
     const m = burger.meats;
@@ -137,6 +140,7 @@ export default function BurgerCartCard({ burger, isExiting, animDelay, onRemove,
           <div className="cart-price-compact">
             <span className="cart-price-compact__total">€{subtotal.toFixed(2)}</span>
             {qty > 1 && <span className="cart-price-compact__unit">€{unitPrice.toFixed(2)} / Stk.</span>}
+            <NutritionBadge calories={calories * qty} size="sm" />
           </div>
 
           {/* 3 — Ingredient toggle: accordion header at all breakpoints */}
@@ -191,7 +195,10 @@ export default function BurgerCartCard({ burger, isExiting, animDelay, onRemove,
             </div>
             <div className="cart-price-row cart-price-total">
               <span>Subtotal</span>
-              <span>€{subtotal.toFixed(2)}</span>
+              <span className="nutrition-price-group">
+                €{subtotal.toFixed(2)}
+                <NutritionBadge calories={calories * qty} size="sm" />
+              </span>
             </div>
           </div>
 

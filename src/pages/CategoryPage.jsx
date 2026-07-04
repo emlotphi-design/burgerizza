@@ -5,6 +5,7 @@ import Socials from '../components/Socials';
 import { CATEGORIES, MENU_ITEMS } from '../utils/menuData';
 import { usePizzaStore } from '../store/PizzaContext';
 import { useRestaurantMode } from '../store/RestaurantModeContext';
+import NutritionBadge from '../components/NutritionBadge';
 
 const BUILDER_ROUTES = { burger: '/build-burger', pizza: '/build-pizza' };
 
@@ -122,8 +123,11 @@ export default function CategoryPage() {
                 <p className="menu-product-desc">{product.description}</p>
 
                 <div className="menu-product-footer">
-                  <span className="menu-product-price">
-                    €{product.price.toFixed(2)}
+                  <span className="nutrition-price-group">
+                    <span className="menu-product-price">
+                      €{product.price.toFixed(2)}
+                    </span>
+                    <NutritionBadge calories={product.calories} size="sm" />
                   </span>
 
                   <button
