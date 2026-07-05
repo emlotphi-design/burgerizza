@@ -1,5 +1,6 @@
 import { INGREDIENTS_BY_ID } from './pizzaIngredients';
 import { DOUGHS_BY_ID, PIZZA_DOUGHS } from './pizzaDoughs';
+import { DOUGH_SIZES_BY_ID, DEFAULT_PIZZA_SIZE } from './pizzaSizes';
 
 /**
  * Fallback base price when dough ID is unknown.
@@ -13,6 +14,16 @@ const FALLBACK_DOUGH_PRICE = Math.min(...PIZZA_DOUGHS.map(d => d.price));
  */
 export function getDoughPrice(doughId) {
   return DOUGHS_BY_ID[doughId]?.price ?? FALLBACK_DOUGH_PRICE;
+}
+
+/**
+ * Size surcharge for a given (dough, size) pair — database-driven via
+ * PizzaSizeConfigContext (mutates DOUGH_SIZES_BY_ID in place). Defaults to
+ * 0 (no surcharge) for unknown pairs, so pizzas never throw or under/over
+ * charge unexpectedly.
+ */
+export function getSizePrice(doughId, size) {
+  return DOUGH_SIZES_BY_ID[doughId]?.[size ?? DEFAULT_PIZZA_SIZE]?.price ?? 0;
 }
 
 /**
@@ -32,12 +43,13 @@ export function calculateIngredientTotal(ingredientIds) {
 
 /**
  * Full price for a pizza object.
- * pizza: { dough, sauce, cheese, meats: [], vegetables: [] }
+ * pizza: { dough, size, sauce, cheese, meats: [], vegetables: [] }
  *
- * Price = dough base price + sauce + cheese + Σ meats + Σ vegetables
+ * Price = dough base price + size surcharge + sauce + cheese + Σ meats + Σ vegetables
  */
 export function calculatePizzaPrice(pizza) {
   const doughPrice = getDoughPrice(pizza.dough);
+  const sizePrice   = getSizePrice(pizza.dough, pizza.size);
 
   const toppingIds = [
     pizza.sauce,
@@ -46,7 +58,7 @@ export function calculatePizzaPrice(pizza) {
     ...(pizza.vegetables ?? []),
   ].filter(Boolean);
 
-  return doughPrice + calculateIngredientTotal(toppingIds);
+  return doughPrice + sizePrice + calculateIngredientTotal(toppingIds);
 }
 
 /**

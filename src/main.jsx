@@ -12,6 +12,7 @@ import { RestaurantModeProvider } from './store/RestaurantModeContext'
 import { OrderingProvider } from './store/OrderingContext'
 import { IngredientConfigProvider } from './context/IngredientConfigContext'
 import { NutritionConfigProvider } from './context/NutritionConfigContext'
+import { PizzaSizeConfigProvider } from './context/PizzaSizeConfigContext'
 
 class ErrorBoundary extends Component {
   state = { error: null };
@@ -66,17 +67,19 @@ createRoot(rootElement).render(
         <AuthProvider>
           <IngredientConfigProvider>
             <NutritionConfigProvider>
-              <CartProvider>
-                <PizzaProvider>
-                  <BurgerProvider>
-                    <RestaurantModeProvider>
-                      <OrderingProvider>
-                        <App />
-                      </OrderingProvider>
-                    </RestaurantModeProvider>
-                  </BurgerProvider>
-                </PizzaProvider>
-              </CartProvider>
+              <PizzaSizeConfigProvider>
+                <CartProvider>
+                  <PizzaProvider>
+                    <BurgerProvider>
+                      <RestaurantModeProvider>
+                        <OrderingProvider>
+                          <App />
+                        </OrderingProvider>
+                      </RestaurantModeProvider>
+                    </BurgerProvider>
+                  </PizzaProvider>
+                </CartProvider>
+              </PizzaSizeConfigProvider>
             </NutritionConfigProvider>
           </IngredientConfigProvider>
         </AuthProvider>

@@ -11,6 +11,7 @@ import {
   toggleMute,
   getMuted,
 } from '../../utils/playOrderNotification';
+import { SIZES_BY_ID } from '../../utils/pizzaSizes';
 
 /* ── Status config ─────────────────────────────────────────── */
 const STATUS_FLOW = [
@@ -98,6 +99,7 @@ function getCustomizations(item) {
       rows.push({ label: 'Toppings', value: item.vegetables.map(capitalize).join(', ') });
   } else {
     if (item.dough) rows.push({ label: 'Dough', value: capitalize(item.dough) });
+    if (item.size && SIZES_BY_ID[item.size]) rows.push({ label: 'Size', value: SIZES_BY_ID[item.size].label });
     if (item.sauce) rows.push({ label: 'Sauce', value: capitalize(item.sauce) });
     if (item.cheese) rows.push({ label: 'Cheese', value: capitalize(item.cheese) });
     if (Array.isArray(item.meats) && item.meats.length)

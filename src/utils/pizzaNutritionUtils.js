@@ -1,20 +1,21 @@
 import { INGREDIENTS_BY_ID } from './pizzaIngredients';
 import { DOUGHS_BY_ID } from './pizzaDoughs';
-import { SIZES_BY_ID, DEFAULT_PIZZA_SIZE } from './pizzaSizes';
+import { DOUGH_SIZES_BY_ID, DEFAULT_PIZZA_SIZE } from './pizzaSizes';
 
 /**
- * Calorie/weight for a given dough, honoring the size selector for the
- * 'thin' crust (the only dough with multiple sizes in the spec). Other
- * doughs ('americanp', 'american') are single-size and ignore `size`.
+ * Calorie/weight for a given dough, honoring the size selector. Looks up
+ * the (dough, size) pair in `DOUGH_SIZES_BY_ID` — database-driven per dough
+ * via PizzaSizeConfigContext, which mutates that object in place. Falls
+ * back to the dough's own fixed weight/calories only if the (dough, size)
+ * pair doesn't resolve (should not happen in practice, since every draft
+ * carries a valid default size).
  */
 export function getDoughNutrition(doughId, size) {
   const dough = DOUGHS_BY_ID[doughId];
   if (!dough) return { weight: null, calories: 0 };
 
-  if (doughId === 'thin') {
-    const sizeInfo = SIZES_BY_ID[size ?? DEFAULT_PIZZA_SIZE];
-    if (sizeInfo) return { weight: sizeInfo.weight, calories: sizeInfo.calories };
-  }
+  const sizeInfo = DOUGH_SIZES_BY_ID[doughId]?.[size ?? DEFAULT_PIZZA_SIZE];
+  if (sizeInfo) return { weight: sizeInfo.weight, calories: sizeInfo.calories };
 
   return { weight: dough.weight ?? null, calories: dough.calories ?? 0 };
 }

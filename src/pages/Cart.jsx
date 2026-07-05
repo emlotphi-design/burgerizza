@@ -7,6 +7,7 @@ import { usePizzaStore } from '../store/PizzaContext';
 import { useBurgerStore } from '../features/burger/store/burgerStore.jsx';
 import { LABEL, calcPrice } from '../utils/pizzaUtils';
 import { calculatePizzaCalories } from '../utils/pizzaNutritionUtils';
+import { SIZES_BY_ID } from '../utils/pizzaSizes';
 import NutritionBadge from '../components/NutritionBadge';
 import BurgerCartCard from '../features/burger/components/BurgerCartCard';
 import { useRestaurantMode } from '../store/RestaurantModeContext';
@@ -40,6 +41,7 @@ function PizzaCartCard({ pizza, idx, visibleCount, isExiting, animDelay, onEdit,
 
   const rows = [
     { cat: 'Teig',    vals: [LABEL[pizza.dough]]                              },
+    pizza.size && SIZES_BY_ID[pizza.size] && { cat: 'Größe', vals: [SIZES_BY_ID[pizza.size].label] },
     { cat: 'Sauce',   vals: [LABEL[pizza.sauce]]                              },
     { cat: 'Käse',    vals: [LABEL[pizza.cheese]]                             },
     pizza.meats.length      && { cat: 'Fleisch', vals: pizza.meats.map(id => LABEL[id])      },

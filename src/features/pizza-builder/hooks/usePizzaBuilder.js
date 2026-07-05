@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { usePizzaStore } from '../../../store/PizzaContext';
 import { useIngredientConfig } from '../../../context/IngredientConfigContext';
+import { usePizzaSizeConfig } from '../../../context/PizzaSizeConfigContext';
 
 const LOCK_MSG_DURATION = 2200;
 const TOAST_DURATION    = 2800;
@@ -35,6 +36,7 @@ export function usePizzaBuilder() {
   } = draft;
 
   const { isEnabled, config } = useIngredientConfig();
+  const { getAllSizesForDough } = usePizzaSizeConfig();
 
   const [lockMsg,     setLockMsg]     = useState('');
   const [exitingIds,  setExitingIds]  = useState([]);
@@ -72,6 +74,25 @@ export function usePizzaBuilder() {
       setDraft(updates);
     }
   }, [config]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Every size for the currently selected dough (enabled AND disabled) —
+  // database-driven, reacts live to admin changes just like isEnabled()
+  // above. The Builder renders all of these as buttons; disabled ones stay
+  // visible but greyed out and unselectable rather than being hidden.
+  const sizesForDough = selectedDough ? getAllSizesForDough(selectedDough) : [];
+  const enabledSizes  = sizesForDough.filter(s => s.enabled);
+
+  // Auto-fallback: if the selected size isn't enabled for the current dough
+  // (either because it was never valid for it, or an admin just disabled it),
+  // fall back to the first enabled size for that dough. Mirrors the
+  // auto-deselect effect above, extended to size.
+  useEffect(() => {
+    if (!selectedDough || enabledSizes.length === 0) return;
+    if (!enabledSizes.some(s => s.id === selectedSize)) {
+      setDraft({ selectedSize: enabledSizes[0].id });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedDough, selectedSize, enabledSizes]);
 
   useEffect(() => {
     document.body.classList.add('is-builder');
@@ -166,6 +187,7 @@ export function usePizzaBuilder() {
     activeCategory,
     selectedDough,
     selectedSize,
+    sizesForDough,
     selectedSauce,
     selectedCheese,
     selectedMeats,

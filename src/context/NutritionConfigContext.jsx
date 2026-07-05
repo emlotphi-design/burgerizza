@@ -2,7 +2,6 @@ import { createContext, useContext, useState, useEffect, useCallback, useRef } f
 import { supabase } from '../services/supabase';
 import { DOUGHS_BY_ID } from '../utils/pizzaDoughs';
 import { INGREDIENTS_BY_ID } from '../utils/pizzaIngredients';
-import { SIZES_BY_ID } from '../utils/pizzaSizes';
 import { BURGER_INGREDIENTS_BY_ID } from '../features/burger/utils/burgerData';
 import { MENU_ITEMS_BY_ID } from '../utils/menuData';
 
@@ -19,10 +18,13 @@ const LS_KEY = 'bz_nutrition_config';
 
 function staticTargets(scope, id) {
   if (scope === 'pizza') {
+    // Pizza sizes are NOT covered here — per-dough size calories/weight
+    // are managed by pizza_size_config / PizzaSizeConfigContext instead,
+    // since (unlike a dough or topping) a size's nutrition can differ
+    // per dough type.
     const targets = [];
     if (DOUGHS_BY_ID[id])      targets.push(DOUGHS_BY_ID[id]);
     if (INGREDIENTS_BY_ID[id]) targets.push(INGREDIENTS_BY_ID[id]);
-    if (SIZES_BY_ID[id])       targets.push(SIZES_BY_ID[id]);
     return targets;
   }
   if (scope === 'burger') {

@@ -205,6 +205,11 @@ body:not([data-context="kitchen"]) .kds-root {
   background: rgba(0, 0, 0, 0.06) !important;
   border-color: rgba(0, 0, 0, 0.10) !important;
 }
+.kds-root[data-theme="light"] .kds-exp-card .kds-item-size {
+  color: #374151 !important;
+  background: rgba(0, 0, 0, 0.06) !important;
+  border-color: rgba(0, 0, 0, 0.10) !important;
+}
 .kds-root[data-theme="light"] .kds-exp-card .kds-chip {
   background: rgba(0, 0, 0, 0.05) !important;
   border-color: rgba(0, 0, 0, 0.08) !important;
@@ -767,6 +772,10 @@ body:not([data-context="kitchen"]) .kds-root {
 .kds-composite--pizza {
   border-radius: 50%;
   background: none;
+  /* Visual-only 2x enlargement: transform doesn't affect layout/flex
+     sizing, so the card, grid, and sibling elements keep their exact
+     original size/position — only the painted pizza gets bigger. */
+  transform: scale(2);
 }
 
 .kds-composite--burger {
@@ -1679,6 +1688,17 @@ body:not([data-context="kitchen"]) .kds-root {
   color: rgba(255, 255, 255, 0.60) !important;
 }
 
+/* Size badge — same treatment as the qty badge */
+.kds-item-size {
+  font-size: 11px !important;
+  font-weight: 800 !important;
+  background: rgba(255, 255, 255, 0.09) !important;
+  border: 1px solid rgba(255, 255, 255, 0.10) !important;
+  border-radius: 6px !important;
+  padding: 1px 7px !important;
+  color: rgba(255, 255, 255, 0.60) !important;
+}
+
 /* Order notes */
 .kds-order-notes {
   padding: 8px 12px !important;
@@ -1862,6 +1882,7 @@ body:not([data-context="kitchen"]) .kds-root {
 
 /* Qty badge */
 .kds-exp-card .kds-item-qty { font-size: 13px !important; }
+.kds-exp-card .kds-item-size { font-size: 13px !important; }
 
 /* Ingredient chips in expanded popup */
 .kds-exp-item .kds-chip-img   { width: 34px !important; height: 34px !important; }

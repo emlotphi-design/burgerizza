@@ -6,7 +6,6 @@ import CategoryToolbar from '../components/CategoryToolbar';
 import { usePizzaBuilder } from '../features/pizza-builder/hooks/usePizzaBuilder';
 import { LABEL, calcPrice } from '../utils/pizzaUtils';
 import { calculatePizzaCalories } from '../utils/pizzaNutritionUtils';
-import { PIZZA_SIZES } from '../utils/pizzaSizes';
 import NutritionBadge from '../components/NutritionBadge';
 import { preloadImages } from '../utils/imagePreloadCache';
 
@@ -107,7 +106,7 @@ export default function PizzaBuilder() {
   const {
     pizzaItems, canAddToCart, isEditing, nextPizzaNumber,
     lockMsg, exitingIds, toastVisible,
-    activeCategory, selectedDough, selectedSize, selectedSauce, selectedCheese,
+    activeCategory, selectedDough, selectedSize, sizesForDough, selectedSauce, selectedCheese,
     selectedMeats, selectedVegetables,
     draftName, editingName,
     unlocked, completed,
@@ -185,14 +184,19 @@ export default function PizzaBuilder() {
                 spellCheck={false}
               />
             </div>
-            {selectedDough === 'thin' && (
+            {selectedDough && sizesForDough.length > 0 && (
               <div className="nutrition-size-row">
-                {PIZZA_SIZES.map(s => (
+                {sizesForDough.map(s => (
                   <button
                     key={s.id}
                     type="button"
-                    className={`nutrition-size-btn${selectedSize === s.id ? ' nutrition-size-btn--active' : ''}`}
-                    onClick={() => handleSizeSelect(s.id)}
+                    className={[
+                      'nutrition-size-btn',
+                      selectedSize === s.id ? 'nutrition-size-btn--active' : '',
+                      !s.enabled ? 'nutrition-size-btn--disabled' : '',
+                    ].filter(Boolean).join(' ')}
+                    onClick={() => s.enabled && handleSizeSelect(s.id)}
+                    disabled={!s.enabled}
                     aria-pressed={selectedSize === s.id}
                   >
                     {s.label}

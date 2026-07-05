@@ -25,6 +25,7 @@ import {
   PIZZA_MEATS,
   PIZZA_VEGETABLES,
 } from './kdsImages';
+import { SIZES_BY_ID } from '../utils/pizzaSizes';
 import './kitchen.css';
 
 /* ── Status constants ──────────────────────────────────────────── */
@@ -348,6 +349,9 @@ function OrderCard({ order, onAdvance, onCancel, flash, expandedId, setExpandedI
                     <div className="kds-tile-title">
                       <span className="kds-tile-emoji">{emoji}</span>
                       <strong>{name}</strong>
+                      {isPizza && SIZES_BY_ID[item.size] && (
+                        <span className="kds-item-size">{SIZES_BY_ID[item.size].label}</span>
+                      )}
                       {qty > 1 && <span className="kds-item-qty">×{qty}</span>}
                     </div>
                     <IngredientChips item={item} />
@@ -426,6 +430,9 @@ function OrderCard({ order, onAdvance, onCancel, flash, expandedId, setExpandedI
                     <div className="kds-exp-item-head">
                       <span className="kds-exp-item-emoji">{emoji}</span>
                       <strong className="kds-exp-item-name">{name}</strong>
+                      {isPizza && SIZES_BY_ID[item.size] && (
+                        <span className="kds-item-size">{SIZES_BY_ID[item.size].label}</span>
+                      )}
                       {qty > 1 && <span className="kds-item-qty">×{qty}</span>}
                     </div>
                     <div className="kds-exp-item-body">

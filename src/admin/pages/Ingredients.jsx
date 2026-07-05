@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useIngredientConfig } from '../../context/IngredientConfigContext';
 import { useNutritionConfig } from '../../context/NutritionConfigContext';
+import { usePizzaSizeConfig } from '../../context/PizzaSizeConfigContext';
 import { PIZZA_DOUGHS } from '../../utils/pizzaDoughs';
 import { PIZZA_INGREDIENTS } from '../../utils/pizzaIngredients';
 import { ALL_BURGER_INGREDIENTS } from '../../features/burger/utils/burgerData';
@@ -408,6 +409,194 @@ function NutritionOnlyCard({ scope, id, name, emoji }) {
   );
 }
 
+/* ── Pizza size card — price (surcharge) + calories/weight + enable + sort order,
+   independently per (dough, size) ─────────────────────────────────────────── */
+function SizeConfigCard({ dough, size }) {
+  const { getSizeConfig, updateSizeConfig } = usePizzaSizeConfig();
+  const conf = getSizeConfig(dough, size.id);
+
+  const [localPrice,    setLocalPrice]    = useState(() => conf.price.toFixed(2));
+  const [localWeight,   setLocalWeight]   = useState(() => conf.weight ?? '');
+  const [localCalories, setLocalCalories] = useState(() => String(conf.calories ?? 0));
+  const [localSort,     setLocalSort]     = useState(() => String(conf.sortOrder ?? 0));
+  const [priceFocused,    setPriceFocused]    = useState(false);
+  const [weightFocused,   setWeightFocused]   = useState(false);
+  const [caloriesFocused, setCaloriesFocused] = useState(false);
+  const [sortFocused,     setSortFocused]     = useState(false);
+  const priceTimerRef    = useRef(null);
+  const weightTimerRef   = useRef(null);
+  const caloriesTimerRef = useRef(null);
+  const sortTimerRef     = useRef(null);
+
+  useEffect(() => { if (!priceFocused)    setLocalPrice(conf.price.toFixed(2)); },       [conf.price, priceFocused]);
+  useEffect(() => { if (!weightFocused)   setLocalWeight(conf.weight ?? ''); },          [conf.weight, weightFocused]);
+  useEffect(() => { if (!caloriesFocused) setLocalCalories(String(conf.calories ?? 0)); }, [conf.calories, caloriesFocused]);
+  useEffect(() => { if (!sortFocused)     setLocalSort(String(conf.sortOrder ?? 0)); },  [conf.sortOrder, sortFocused]);
+
+  const handlePriceChange = e => {
+    setLocalPrice(e.target.value);
+    clearTimeout(priceTimerRef.current);
+    priceTimerRef.current = setTimeout(() => {
+      const num = parseFloat(e.target.value);
+      if (!isNaN(num) && num >= 0) updateSizeConfig(dough, size.id, { price: parseFloat(num.toFixed(2)) });
+    }, 600);
+  };
+  const handlePriceBlur = () => {
+    setPriceFocused(false);
+    const num = parseFloat(localPrice);
+    if (isNaN(num) || num < 0) setLocalPrice(conf.price.toFixed(2));
+  };
+
+  const handleWeightChange = e => {
+    setLocalWeight(e.target.value);
+    clearTimeout(weightTimerRef.current);
+    weightTimerRef.current = setTimeout(() => {
+      const raw = e.target.value;
+      const num = raw === '' ? null : parseFloat(raw);
+      if (raw === '' || (!isNaN(num) && num >= 0)) updateSizeConfig(dough, size.id, { weight: num });
+    }, 600);
+  };
+
+  const handleCaloriesChange = e => {
+    setLocalCalories(e.target.value);
+    clearTimeout(caloriesTimerRef.current);
+    caloriesTimerRef.current = setTimeout(() => {
+      const num = parseFloat(e.target.value);
+      if (!isNaN(num) && num >= 0) updateSizeConfig(dough, size.id, { calories: num });
+    }, 600);
+  };
+
+  const handleSortChange = e => {
+    setLocalSort(e.target.value);
+    clearTimeout(sortTimerRef.current);
+    sortTimerRef.current = setTimeout(() => {
+      const num = parseInt(e.target.value, 10);
+      if (!isNaN(num)) updateSizeConfig(dough, size.id, { sortOrder: num });
+    }, 600);
+  };
+  const handleSortBlur = () => {
+    setSortFocused(false);
+    if (localSort === '' || isNaN(parseInt(localSort, 10))) setLocalSort(String(conf.sortOrder ?? 0));
+  };
+
+  const handleToggle = useCallback(
+    () => updateSizeConfig(dough, size.id, { enabled: !conf.enabled }),
+    [dough, size.id, conf.enabled, updateSizeConfig],
+  );
+
+  return (
+    <div className={`ing-card${!conf.enabled ? ' ing-card--off' : ''}`}>
+      <div className="ing-card-img-wrap">
+        <div className="ing-card-placeholder"><span>📐</span></div>
+      </div>
+      <div className="ing-card-body">
+        <div className="ing-card-name">{size.label}</div>
+
+        {/* Price — surcharge added on top of the dough's base price */}
+        <div className="ing-price-row">
+          <span className="ing-price-sym">€</span>
+          <input
+            type="number" min="0" max="99.99" step="0.10"
+            value={localPrice}
+            onChange={handlePriceChange}
+            onFocus={() => setPriceFocused(true)}
+            onBlur={handlePriceBlur}
+            className="ing-price-input"
+            aria-label={`Size surcharge for ${size.label}`}
+          />
+        </div>
+
+        {/* Nutrition */}
+        <div className="ing-nutrition-row">
+          <div className="ing-nutrition-field">
+            <label className="ing-nutrition-label">Weight (g)</label>
+            <input
+              type="number" min="0" step="1"
+              value={localWeight}
+              onChange={handleWeightChange}
+              onFocus={() => setWeightFocused(true)}
+              onBlur={() => setWeightFocused(false)}
+              className="ing-nutrition-input"
+              placeholder="—"
+              aria-label={`Weight in grams for ${size.label}`}
+            />
+          </div>
+          <div className="ing-nutrition-field">
+            <label className="ing-nutrition-label">Calories (kcal)</label>
+            <input
+              type="number" min="0" step="1"
+              value={localCalories}
+              onChange={handleCaloriesChange}
+              onFocus={() => setCaloriesFocused(true)}
+              onBlur={() => setCaloriesFocused(false)}
+              className="ing-nutrition-input"
+              aria-label={`Calories for ${size.label}`}
+            />
+          </div>
+        </div>
+
+        {/* Sort order — plain numeric field, same pattern as admin/pages/Products.jsx */}
+        <div className="ing-nutrition-row">
+          <div className="ing-nutrition-field">
+            <label className="ing-nutrition-label">Sort order</label>
+            <input
+              type="number" step="1"
+              value={localSort}
+              onChange={handleSortChange}
+              onFocus={() => setSortFocused(true)}
+              onBlur={handleSortBlur}
+              className="ing-nutrition-input"
+              aria-label={`Sort order for ${size.label}`}
+            />
+          </div>
+        </div>
+
+        {/* Availability toggle */}
+        <div className="ing-avail-row">
+          <span className={`ing-avail-label${!conf.enabled ? ' ing-avail-label--off' : ''}`}>
+            {conf.enabled ? 'Available' : 'Disabled'}
+          </span>
+          <IngToggle
+            on={conf.enabled}
+            onChange={handleToggle}
+            label={`Toggle availability for ${size.label}`}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── Pizza sizes section — one group per dough, each with its own 3 size cards ── */
+function PizzaSizeSection() {
+  return (
+    <section className="ing-section">
+      <div className="ing-section-header">
+        <span className="ing-section-emoji">📐</span>
+        <h3 className="ing-section-title">Pizza Sizes (Per Dough)</h3>
+        <div className="ing-section-stats">
+          <span className="ing-section-count">{PIZZA_DOUGHS.length * PIZZA_SIZES.length} total</span>
+        </div>
+      </div>
+      <p className="ing-desc" style={{ margin: '0 0 12px' }}>
+        Every dough (Classic Thin Crust, Käserand, Würstchenrand) manages its own sizes
+        independently — enable/disable, a price surcharge added on top of the dough's
+        base price, weight/calories, and display order.
+      </p>
+      {PIZZA_DOUGHS.map(d => (
+        <div key={d.id} className="ing-subsection">
+          <h4 className="ing-subsection-title">{d.name}</h4>
+          <div className="ing-grid">
+            {PIZZA_SIZES.map(s => (
+              <SizeConfigCard key={`${d.id}-${s.id}`} dough={d.id} size={s} />
+            ))}
+          </div>
+        </div>
+      ))}
+    </section>
+  );
+}
+
 /* ── Page ────────────────────────────────────────────────────────────────────── */
 export default function IngredientsPage() {
   const [tab, setTab] = useState('pizza');
@@ -509,27 +698,7 @@ export default function IngredientsPage() {
       {/* ── Category sections ── */}
       {!isLoading && !isMenuTab && (
         <div className="ing-content">
-          {tab === 'pizza' && (
-            <section className="ing-section">
-              <div className="ing-section-header">
-                <span className="ing-section-emoji">📐</span>
-                <h3 className="ing-section-title">Pizza Sizes (Classic Thin Crust)</h3>
-                <div className="ing-section-stats">
-                  <span className="ing-section-count">{PIZZA_SIZES.length} total</span>
-                </div>
-              </div>
-              <p className="ing-desc" style={{ margin: '0 0 12px' }}>
-                The Classic Thin Crust dough uses one of these sizes for its live weight/calories —
-                the size the customer picks in the builder determines which row applies. Cheese Crust
-                and Sausage Crust are fixed-size and use their own dough card above instead.
-              </p>
-              <div className="ing-grid">
-                {PIZZA_SIZES.map(s => (
-                  <NutritionOnlyCard key={s.id} scope="pizza" id={s.id} name={`Thin Crust — ${s.label}`} emoji="📐" />
-                ))}
-              </div>
-            </section>
-          )}
+          {tab === 'pizza' && <PizzaSizeSection />}
           {currentOrder.map(cat =>
             currentGroups[cat] ? (
               <CategorySection

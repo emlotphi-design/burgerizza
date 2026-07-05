@@ -5,6 +5,7 @@ import Socials from '../components/Socials';
 import { usePizzaStore } from '../store/PizzaContext';
 import { useAuth } from '../store/AuthContext';
 import { calcPrice } from '../utils/pizzaUtils';
+import { SIZES_BY_ID } from '../utils/pizzaSizes';
 import { calculateCalories } from '../utils/nutritionUtils';
 import NutritionBadge from '../components/NutritionBadge';
 import GlassInput from '../components/GlassInput';
@@ -626,6 +627,7 @@ function RestaurantCheckout() {
         };
         // Pizza customizations
         if (p.dough) item.dough = p.dough;
+        if (p.size) item.size = p.size;
         if (p.sauce) item.sauce = p.sauce;
         if (p.cheese) item.cheese = p.cheese;
         if (p.meats?.length) item.meats = p.meats;
@@ -771,7 +773,7 @@ function RestaurantCheckout() {
                       {p.name || (p.type === 'burger' ? 'Custom Burger' : 'Custom Pizza')}
                       {(p.quantity ?? 1) > 1 && <span style={{ color: '#A09070', marginLeft: 6, fontWeight: 700 }}>×{p.quantity}</span>}
                     </div>
-                    {p.dough && <div style={{ fontSize: 11, color: '#A09070', fontWeight: 700, marginTop: 2 }}>{[p.dough, p.sauce, p.cheese].filter(Boolean).join(' · ')}</div>}
+                    {p.dough && <div style={{ fontSize: 11, color: '#A09070', fontWeight: 700, marginTop: 2 }}>{[p.dough, SIZES_BY_ID[p.size]?.label, p.sauce, p.cheese].filter(Boolean).join(' · ')}</div>}
                     {p.bun && <div style={{ fontSize: 11, color: '#A09070', fontWeight: 700, marginTop: 2 }}>{p.bun}</div>}
                   </div>
                   <div style={{ fontWeight: 900, fontSize: 15, color: '#8B6914' }}>€{price.toFixed(2)}</div>
@@ -1028,6 +1030,7 @@ function CheckoutNormal() {
             price: calcPrice(p),
           };
           if (p.dough) item.dough = p.dough;
+          if (p.size) item.size = p.size;
           if (p.sauce) item.sauce = p.sauce;
           if (p.cheese) item.cheese = p.cheese;
           if (p.meats?.length) item.meats = p.meats;
