@@ -1,4 +1,4 @@
-import React, { useEffect, useLayoutEffect, useRef } from 'react';
+import React, { useEffect } from 'react';
 import Navbar from '../components/Navbar';
 import Socials from '../components/Socials';
 import PizzaCanvas, { PIZZA_ASSET_URLS } from '../components/PizzaCanvas';
@@ -8,6 +8,7 @@ import { LABEL, calcPrice } from '../utils/pizzaUtils';
 import { calculatePizzaCalories } from '../utils/pizzaNutritionUtils';
 import NutritionBadge from '../components/NutritionBadge';
 import { preloadImages } from '../utils/imagePreloadCache';
+import { useCalorieBadgePosition } from '../hooks/useCalorieBadgePosition';
 
 // ── Saved-pizza card (presentational, no logic) ───────────────────────────────
 
@@ -125,92 +126,17 @@ export default function PizzaBuilder() {
     preloadImages(PIZZA_ASSET_URLS);
   }, []);
 
-  // Places the floating calorie badge just off the pizza's upper-right
-  // shoulder — close enough to read as "attached" to the pizza rather
-  // than orphaned in empty space, while staying fully outside the canvas
-  // (never over the pizza or any ingredient preview, all of which live
-  // inside the canvas's own bounds) and clear of the fixed category rail
-  // (left side) and the "Your Pizza" panel (right edge) once one exists.
-  // Falls back to centered-above-canvas — the same safe placement used
-  // before — whenever there isn't genuinely enough width for the diagonal
-  // position (narrow desktop, tablet, mobile), rather than guessing a
-  // fixed breakpoint. Reads the DOM directly (no ref threaded through
-  // PizzaCanvas) so that component stays untouched.
-  const badgeWrapRef = useRef(null);
-  useLayoutEffect(() => {
-    if (!selectedDough) return undefined;
-    const wrap = badgeWrapRef.current;
-    const canvasEl = document.querySelector('.pizza-canvas-wrap');
-    if (!wrap || !canvasEl) return undefined;
-
-    function reposition() {
-      const canvasRect = canvasEl.getBoundingClientRect();
-      const badgeWidth  = wrap.offsetWidth  || 140;
-      const badgeHeight = wrap.offsetHeight || 50;
-      const navH = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--nav-h')) || 74;
-      const minTop = navH + 12;
-      const gap = 32;
-      const margin = 20;
-
-      const panelEl = document.querySelector('.bpc-panel');
-      const rightLimit = panelEl
-        ? panelEl.getBoundingClientRect().left - margin
-        : window.innerWidth - margin;
-
-      const fitsDiagonally = (rightLimit - canvasRect.right) >= (gap + badgeWidth);
-
-      let top, left;
-      if (fitsDiagonally) {
-        // Upper-right shoulder of the pizza: vertically inside the
-        // canvas's top ~20%, which is otherwise empty (the triangle's own
-        // ingredient previews sit lower / center), so it visually reads
-        // as attached without any risk of overlapping them since the
-        // badge itself is entirely outside the canvas's horizontal span.
-        left = canvasRect.right + gap;
-        top = canvasRect.top + canvasRect.height * 0.20 - badgeHeight / 2;
-        top = Math.max(top, minTop);
-      } else {
-        const isNarrow = window.innerWidth <= 480;
-        const desiredGap = isNarrow ? 24 : 40;
-        top = canvasRect.top - desiredGap - badgeHeight;
-        top = Math.max(top, minTop);
-        // Never overlap the pizza itself, even if that means dipping
-        // below minTop in a window too short to fit both at once.
-        if (top + badgeHeight > canvasRect.top) {
-          top = canvasRect.top - badgeHeight;
-        }
-        left = canvasRect.left + canvasRect.width / 2 - badgeWidth / 2;
-      }
-
-      wrap.style.top = `${top}px`;
-      wrap.style.left = `${left}px`;
-    }
-
-    reposition();
-    // ResizeObserver only fires on size changes, not pure position drift —
-    // something in the first ~1s after mount (web font swap, async image
-    // loads elsewhere on the page, etc.) can still nudge the canvas's Y
-    // position by a few px without changing its size. A short bounded
-    // series of re-checks catches that settle regardless of its exact
-    // cause, without needing a permanent polling loop.
-    const settleTimers = [50, 150, 300, 600, 1000, 1500].map(delay => setTimeout(reposition, delay));
-    window.addEventListener('resize', reposition);
-    const ro = new ResizeObserver(reposition);
-    ro.observe(canvasEl);
-
-    return () => {
-      settleTimers.forEach(clearTimeout);
-      window.removeEventListener('resize', reposition);
-      ro.disconnect();
-    };
-    // sizesForDough.length: the size-selector row only mounts once sizes
-    // resolve for the selected dough, which changes .builder-center's
-    // height and re-centers the canvas. pizzaItems.length: the "Your
-    // Pizza" panel only mounts once an item exists, which can shrink the
-    // room available for the diagonal placement. Both must re-run
-    // reposition() when they change.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedDough, sizesForDough.length, pizzaItems.length]);
+  // Shared with Burger Builder — see useCalorieBadgePosition for the full
+  // placement rationale (upper-right shoulder of the product, falling
+  // back to centered-above-canvas when there isn't room). sizesForDough
+  // .length is an extra dependency here because the size-selector row
+  // only mounts once sizes resolve for the selected dough, which changes
+  // .builder-center's height and re-centers the canvas.
+  const badgeWrapRef = useCalorieBadgePosition(
+    !!selectedDough,
+    '.pizza-canvas-wrap',
+    [sizesForDough.length, pizzaItems.length],
+  );
 
   const liveCalories = calculatePizzaCalories({
     dough: selectedDough,

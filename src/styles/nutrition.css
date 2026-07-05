@@ -68,25 +68,27 @@
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
 }
 
-/* Pizza Builder's live floating badge only — premium glassmorphism
-   redesign. Driven entirely by the `premium` prop on NutritionBadge (which
-   also swaps the emoji for a real flame SVG), so every other usage of the
-   component (Cart, Checkout, Burger Builder, saved-pizza-card mini badges,
-   including the ones elsewhere on this very page) keeps its original
-   look untouched.
+/* Shared premium glassmorphism calorie badge — Pizza Builder AND Burger
+   Builder both opt in via the `premium` prop on NutritionBadge (which also
+   swaps the emoji for a real flame SVG), and both wrapper divs carry a
+   `--pizza` / `--burger` modifier class so this whole block styles and
+   positions them identically without any duplication. Every other usage
+   of NutritionBadge (Cart, Checkout, saved-item mini badges) keeps its
+   original look untouched, since those never pass `premium`.
    position:fixed here because top/left are computed in JS
-   (PizzaBuilder.jsx) from the pizza canvas's *real* rendered position, its
-   preferred spot being just off the pizza's upper-right shoulder rather
-   than floating disconnected above it — a plain CSS anchor can't safely
-   place it there since it also has to know the "Your Pizza" panel's and
-   the fixed category rail's real extents to never collide with either.
-   The JS never touches the canvas itself, so the pizza never moves; it
-   only measures it. `left`/`top` from JS are already the exact edge in
-   px (not a center point), so no centering transform is needed here —
-   `transform` is reserved for the idle float below. Default top/left are
-   just a same-corner fallback for the instant before the layout effect
-   runs; overwritten immediately via inline style. */
-.nutrition-live-float.nutrition-live-float--pizza {
+   (useCalorieBadgePosition, shared by both builders) from the product
+   canvas's *real* rendered position, its preferred spot being just off
+   the product's upper-right shoulder rather than floating disconnected
+   above it — a plain CSS anchor can't safely place it there since it also
+   has to know the "Your Pizza/Burgers" panel's real extent to never
+   collide with it. The JS never touches the canvas itself, so the product
+   never moves; it only measures it. `left`/`top` from JS are already the
+   exact edge in px (not a center point), so no centering transform is
+   needed here — `transform` is reserved for the idle float below.
+   Default top/left are just a same-corner fallback for the instant before
+   the layout effect runs; overwritten immediately via inline style. */
+.nutrition-live-float.nutrition-live-float--pizza,
+.nutrition-live-float.nutrition-live-float--burger {
   position: fixed;
   top: 90px;
   right: auto;
@@ -100,7 +102,7 @@
   to   { transform: translateY(-6px); }
 }
 
-.nutrition-live-float--pizza .nutrition-badge--premium {
+.nutrition-badge.nutrition-badge--premium {
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -124,7 +126,7 @@
   transition: transform 250ms ease, box-shadow 250ms ease;
 }
 
-.nutrition-live-float--pizza .nutrition-badge--premium:hover {
+.nutrition-badge.nutrition-badge--premium:hover {
   transform: translateY(-2px) scale(1.02);
   box-shadow: 0 11px 32px rgba(0, 0, 0, 0.20);
 }
@@ -134,7 +136,7 @@
   to   { opacity: 1; transform: translateY(0); }
 }
 
-.nutrition-live-float--pizza .nutrition-badge--premium .nutrition-badge-icon {
+.nutrition-badge.nutrition-badge--premium .nutrition-badge-icon {
   position: relative;
   width: 32px;
   height: 32px;
@@ -150,7 +152,7 @@
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 
-.nutrition-live-float--pizza .nutrition-badge--premium .nutrition-badge-icon-glow {
+.nutrition-badge.nutrition-badge--premium .nutrition-badge-icon-glow {
   position: absolute;
   inset: -5px;
   border-radius: 50%;
@@ -160,7 +162,7 @@
   pointer-events: none;
 }
 
-.nutrition-live-float--pizza .nutrition-badge--premium .nutrition-badge-flame {
+.nutrition-badge.nutrition-badge--premium .nutrition-badge-flame {
   position: relative;
   z-index: 1;
   width: 23px;
@@ -168,7 +170,7 @@
   filter: drop-shadow(0 1px 3px rgba(255, 110, 0, 0.4));
 }
 
-.nutrition-live-float--pizza .nutrition-badge--premium .nutrition-badge-value {
+.nutrition-badge.nutrition-badge--premium .nutrition-badge-value {
   font-family: 'Inter', -apple-system, 'SF Pro Display', 'Nunito', sans-serif;
   font-weight: 700;
   font-size: 23px;
@@ -176,7 +178,7 @@
   line-height: 1;
 }
 
-.nutrition-live-float--pizza .nutrition-badge--premium .nutrition-badge-unit {
+.nutrition-badge.nutrition-badge--premium .nutrition-badge-unit {
   font-family: 'Inter', -apple-system, 'SF Pro Display', 'Nunito', sans-serif;
   font-weight: 500;
   font-size: 13.5px;
@@ -186,23 +188,23 @@
 }
 
 @media (max-width: 480px) {
-  .nutrition-live-float--pizza .nutrition-badge--premium {
+  .nutrition-badge.nutrition-badge--premium {
     gap: 6px;
     min-height: 40px;
     padding: 6px 11px;
   }
-  .nutrition-live-float--pizza .nutrition-badge--premium .nutrition-badge-icon {
+  .nutrition-badge.nutrition-badge--premium .nutrition-badge-icon {
     width: 26px;
     height: 26px;
   }
-  .nutrition-live-float--pizza .nutrition-badge--premium .nutrition-badge-flame {
+  .nutrition-badge.nutrition-badge--premium .nutrition-badge-flame {
     width: 18px;
     height: 18px;
   }
-  .nutrition-live-float--pizza .nutrition-badge--premium .nutrition-badge-value {
+  .nutrition-badge.nutrition-badge--premium .nutrition-badge-value {
     font-size: 18px;
   }
-  .nutrition-live-float--pizza .nutrition-badge--premium .nutrition-badge-unit {
+  .nutrition-badge.nutrition-badge--premium .nutrition-badge-unit {
     font-size: 11px;
   }
 }

@@ -6,6 +6,7 @@ import BurgerPreviewCard from './components/BurgerPreviewCard';
 import NutritionBadge from '../../components/NutritionBadge';
 import { calculateBurgerCalories } from './utils/burgerNutritionUtils';
 import { useBurgerBuilder } from './hooks/useBurgerBuilder';
+import { useCalorieBadgePosition } from '../../hooks/useCalorieBadgePosition';
 import { BURGER_BUNS, BURGER_MEATS, BURGER_CHEESES, BURGER_SAUCES, BURGER_VEGETABLES } from './utils/burgerData';
 import {
   BUN_PREVIEWS, BUN_POSITIONS,
@@ -45,18 +46,31 @@ export default function BurgerBuilder() {
     MAX_MEAT_QTY, MAX_CHEESE_QTY, MAX_VEG_QTY, SAUCE_LIMIT,
   } = useBurgerBuilder();
 
+  // Shared with Pizza Builder — see useCalorieBadgePosition for the full
+  // placement rationale (upper-right shoulder of the product, falling
+  // back to centered-above-canvas when there isn't room).
+  const badgeWrapRef = useCalorieBadgePosition(
+    !!draft.bun,
+    '.bb-builder-canvas',
+    [burgerItems.length],
+  );
+
   return (
     <div className="bb-stage page-enter">
       <Navbar />
 
       <div className="bb-workspace">
+        {/* Sibling of .bb-builder-canvas, not a child: that element has
+            `contain: layout`, which per the CSS Containment spec makes it
+            a containing block for position:fixed descendants — a badge
+            nested inside it would resolve its "fixed" coordinates against
+            the canvas box instead of the viewport. */}
+        {draft.bun && (
+          <div ref={badgeWrapRef} className="nutrition-live-float nutrition-live-float--burger">
+            <NutritionBadge calories={calculateBurgerCalories(draft)} size="md" premium />
+          </div>
+        )}
         <div className="bb-builder-canvas">
-
-          {draft.bun && (
-            <div className="nutrition-live-float">
-              <NutritionBadge calories={calculateBurgerCalories(draft)} size="md" />
-            </div>
-          )}
 
           {/* Wrapper paper */}
           <img
