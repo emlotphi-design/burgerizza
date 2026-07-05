@@ -68,50 +68,143 @@
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
 }
 
-/* Pizza Builder's live floating badge only — redesigned for readability
-   against the yellow builder background. Scoped to this modifier class so
-   the Burger Builder's floating badge (same .nutrition-live-float wrapper,
-   different page) is completely unaffected. Position/behavior unchanged —
-   only the badge's own appearance changes. */
-.nutrition-live-float--pizza .nutrition-badge {
+/* Pizza Builder's live floating badge only — premium glassmorphism
+   redesign. Driven entirely by the `premium` prop on NutritionBadge (which
+   also swaps the emoji for a real flame SVG), so every other usage of the
+   component (Cart, Checkout, Burger Builder, saved-pizza-card mini badges,
+   including the ones elsewhere on this very page) keeps its original
+   look untouched.
+   position:fixed here because top/left are computed in JS
+   (PizzaBuilder.jsx) from the pizza canvas's *real* rendered position, its
+   preferred spot being just off the pizza's upper-right shoulder rather
+   than floating disconnected above it — a plain CSS anchor can't safely
+   place it there since it also has to know the "Your Pizza" panel's and
+   the fixed category rail's real extents to never collide with either.
+   The JS never touches the canvas itself, so the pizza never moves; it
+   only measures it. `left`/`top` from JS are already the exact edge in
+   px (not a center point), so no centering transform is needed here —
+   `transform` is reserved for the idle float below. Default top/left are
+   just a same-corner fallback for the instant before the layout effect
+   runs; overwritten immediately via inline style. */
+.nutrition-live-float.nutrition-live-float--pizza {
+  position: fixed;
+  top: 90px;
+  right: auto;
+  left: 50%;
+  bottom: auto;
+  animation: nutritionBadgeFloatIdle 3.6s ease-in-out infinite alternate;
+}
+
+@keyframes nutritionBadgeFloatIdle {
+  from { transform: translateY(0); }
+  to   { transform: translateY(-6px); }
+}
+
+.nutrition-live-float--pizza .nutrition-badge--premium {
+  display: inline-flex;
+  align-items: center;
   gap: 8px;
-  padding: 9px 16px;
-  border-radius: 20px;
-  background: rgba(255, 255, 255, 0.82);
-  border: 1px solid rgba(255, 255, 255, 0.55);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  box-shadow:
-    0 10px 26px rgba(0, 0, 0, 0.16),
-    0 2px 8px rgba(0, 0, 0, 0.08);
-  color: rgba(26, 10, 0, 0.92);
-}
-
-.nutrition-live-float--pizza .nutrition-badge-icon {
-  font-size: 22px;
-}
-
-.nutrition-live-float--pizza .nutrition-badge-value {
-  font-size: 20px;
-  font-weight: 900;
-  color: rgba(26, 10, 0, 0.92);
-}
-
-.nutrition-live-float--pizza .nutrition-badge-unit {
-  font-size: 12px;
-  font-weight: 700;
-  color: rgba(26, 10, 0, 0.6);
+  min-height: 48px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  backdrop-filter: blur(20px) saturate(1.3);
+  -webkit-backdrop-filter: blur(20px) saturate(1.3);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.16);
+  color: #FFFFFF;
+  /* Steady-state opacity/transform match the animation's end keyframe.
+     Deliberately no forwards/both fill-mode: that would pin `transform`
+     as a still-active animation effect forever, silently overriding the
+     :hover transform below (a real CSS gotcha) even after the entrance
+     animation has long finished. */
   opacity: 1;
+  transform: none;
+  animation: nutritionBadgePremiumIn 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: transform 250ms ease, box-shadow 250ms ease;
 }
 
-@media (max-width: 380px) {
-  .nutrition-live-float--pizza .nutrition-badge {
-    padding: 7px 13px;
+.nutrition-live-float--pizza .nutrition-badge--premium:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 11px 32px rgba(0, 0, 0, 0.20);
+}
+
+@keyframes nutritionBadgePremiumIn {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.nutrition-live-float--pizza .nutrition-badge--premium .nutrition-badge-icon {
+  position: relative;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(255, 255, 255, 0.32);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.nutrition-live-float--pizza .nutrition-badge--premium .nutrition-badge-icon-glow {
+  position: absolute;
+  inset: -5px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 140, 0, 0.44) 0%, rgba(255, 140, 0, 0) 70%);
+  filter: blur(5px);
+  z-index: 0;
+  pointer-events: none;
+}
+
+.nutrition-live-float--pizza .nutrition-badge--premium .nutrition-badge-flame {
+  position: relative;
+  z-index: 1;
+  width: 23px;
+  height: 23px;
+  filter: drop-shadow(0 1px 3px rgba(255, 110, 0, 0.4));
+}
+
+.nutrition-live-float--pizza .nutrition-badge--premium .nutrition-badge-value {
+  font-family: 'Inter', -apple-system, 'SF Pro Display', 'Nunito', sans-serif;
+  font-weight: 700;
+  font-size: 23px;
+  color: #FFFFFF;
+  line-height: 1;
+}
+
+.nutrition-live-float--pizza .nutrition-badge--premium .nutrition-badge-unit {
+  font-family: 'Inter', -apple-system, 'SF Pro Display', 'Nunito', sans-serif;
+  font-weight: 500;
+  font-size: 13.5px;
+  color: rgba(255, 255, 255, 0.9);
+  opacity: 1;
+  margin-left: 2px;
+}
+
+@media (max-width: 480px) {
+  .nutrition-live-float--pizza .nutrition-badge--premium {
     gap: 6px;
+    min-height: 40px;
+    padding: 6px 11px;
   }
-  .nutrition-live-float--pizza .nutrition-badge-icon { font-size: 19px; }
-  .nutrition-live-float--pizza .nutrition-badge-value { font-size: 17px; }
-  .nutrition-live-float--pizza .nutrition-badge-unit { font-size: 11px; }
+  .nutrition-live-float--pizza .nutrition-badge--premium .nutrition-badge-icon {
+    width: 26px;
+    height: 26px;
+  }
+  .nutrition-live-float--pizza .nutrition-badge--premium .nutrition-badge-flame {
+    width: 18px;
+    height: 18px;
+  }
+  .nutrition-live-float--pizza .nutrition-badge--premium .nutrition-badge-value {
+    font-size: 18px;
+  }
+  .nutrition-live-float--pizza .nutrition-badge--premium .nutrition-badge-unit {
+    font-size: 11px;
+  }
 }
 
 /* Pizza size selector (thin-crust only) — compact pill row, nutrition-only,

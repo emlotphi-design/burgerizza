@@ -38,6 +38,68 @@
   opacity: 1;
 }
 
+/* Dough-only positioning: to the side of its thumbnail instead of above
+   it, so it stays clear of the top toolbar/header/calorie badge at every
+   viewport size. Still a child of the same .preview-wrapper the thumbnail
+   lives in, so it moves together with it automatically. */
+.dough-label--left {
+  bottom: auto;
+  left: auto;
+  top: 50%;
+  right: calc(100% + 8px);
+  transform: translateY(-50%);
+}
+
+/* Bottom-left triangle point only: too close to the screen edge / fixed
+   category rail for a further-left offset to reliably fit, so this one
+   goes below-left instead. */
+.dough-label--below-left {
+  bottom: auto;
+  left: 0;
+  top: calc(100% + 8px);
+  transform: none;
+}
+
+/* Käserand only, and only once the viewport is wide enough that a
+   further-left offset has room before it would reach the fixed category
+   rail: overrides the below-left default back to a plain left placement,
+   vertically centered. Narrower desktop widths (901px up to this
+   breakpoint) keep the below-left fallback above, since there isn't
+   physically enough gap between the rail and the canvas for a left-side
+   label to avoid overlapping it. Mobile (<901px) is untouched. */
+@media (min-width: 1100px) {
+  .dough-label--left-desktop {
+    bottom: auto;
+    left: auto;
+    top: 50%;
+    right: calc(100% + 10px);
+    transform: translateY(-50%);
+  }
+}
+
+/* Bottom-right triangle point only, desktop widths only (mobile keeps its
+   existing "left" placement untouched below 901px): a further-left offset
+   would reach back over the center pizza tray, so this drops the label
+   below the thumbnail, centered, instead. Falls back to the right side on
+   short desktop windows where there isn't enough vertical room below. */
+@media (min-width: 901px) {
+  .dough-label--below-desktop {
+    bottom: auto;
+    right: auto;
+    top: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+  }
+}
+
+@media (min-width: 901px) and (max-height: 700px) {
+  .dough-label--below-desktop {
+    top: 50%;
+    left: calc(100% + 8px);
+    transform: translateY(-50%);
+  }
+}
+
 .dough-layer {
   background: transparent;
   animation: doughFadeIn 0.35s ease forwards;

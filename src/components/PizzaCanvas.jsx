@@ -404,6 +404,28 @@ function PizzaCanvas({
       {/* ── Dough previews (triangle) ── */}
       {activeCategory === 'dough' && DOUGHS.map(d => {
         const adminDisabled = !isEnabled('pizza', d.id);
+        /* Dough labels sit to the left of their own thumbnail instead of
+           above it, so they can never reach up into the top toolbar/
+           header/calorie badge. The triangle's bottom-left point (Käserand)
+           sits close to the screen edge / fixed category rail, so below-
+           left is still the default there — but on desktop widths wide
+           enough to have the room, it's overridden back to a plain left
+           placement, vertically centered, per the requested behaviour;
+           mobile keeps the untouched below-left placement it already had.
+           The bottom-right point sits close enough to canvas-center that a
+           plain "left" offset would reach back over the center pizza tray,
+           so on desktop it drops below the thumbnail instead (falling back
+           to the right side only if the viewport is too short for that);
+           mobile is untouched and keeps the same "left" placement it
+           already had. */
+        const isNearLeftEdge  = parseFloat(d.pos.left) < 25;
+        const isNearRightEdge = parseFloat(d.pos.left) > 75;
+        const doughLabelClass = [
+          'dough-label',
+          isNearLeftEdge ? 'dough-label--below-left' : 'dough-label--left',
+          isNearLeftEdge ? 'dough-label--left-desktop' : '',
+          isNearRightEdge ? 'dough-label--below-desktop' : '',
+        ].filter(Boolean).join(' ');
         return (
           <div
             key={d.id}
@@ -420,7 +442,7 @@ function PizzaCanvas({
               <img src={d.preview} alt={d.label}
                 style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} />
             </button>
-            <span className="dough-label">{d.label}</span>
+            <span className={doughLabelClass}>{d.label}</span>
           </div>
         );
       })}
