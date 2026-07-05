@@ -6,9 +6,16 @@
  */
 
 // Load every pizza PNG once; key = relative path from this file
+//
+// `as: 'url'` is deprecated — worse, in a production build it makes Rollup
+// store the whole module namespace object ({ default: [Getter] }) instead
+// of the URL string, so every <img src> here resolved to "[object Object]"
+// (broken icon) despite working fine against the dev server, which handles
+// the deprecated option differently. `query: '?url', import: 'default'` is
+// the modern equivalent and inlines the actual string in both modes.
 const PIZZA_ASSETS = import.meta.glob(
   '../assets/pizzas/**/*.png',
-  { eager: true, as: 'url' }
+  { eager: true, query: '?url', import: 'default' }
 );
 
 /** Safe asset lookup — returns null for any file that doesn't exist */
