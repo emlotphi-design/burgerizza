@@ -96,43 +96,6 @@ function cap(s) {
   return s ? String(s).charAt(0).toUpperCase() + String(s).slice(1) : '';
 }
 
-/* ── Layer image with graceful fallback ──────────────────────────
-   If a composite layer's image URL 404s (e.g. asset mismatch after a
-   deploy), showing the browser's default broken-image icon is both
-   ugly and undiagnosable at a glance on a kitchen screen. This shows
-   the failing ingredient id instead, so the problem is visible
-   without needing devtools. */
-function Layer({ src, label, style }) {
-  const [failed, setFailed] = useState(false);
-
-  if (!src || failed) {
-    return (
-      <div
-        style={{
-          ...style,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          textAlign: 'center',
-          fontSize: 8,
-          lineHeight: 1.2,
-          color: '#ff8080',
-          background: 'rgba(255, 0, 0, 0.08)',
-          border: '1px dashed rgba(255, 80, 80, 0.5)',
-          borderRadius: '50%',
-          overflow: 'hidden',
-          padding: 2,
-        }}
-        title={`Image failed to load: ${label}`}
-      >
-        {label}
-      </div>
-    );
-  }
-
-  return <img src={src} alt="" style={style} onError={() => setFailed(true)} />;
-}
-
 /* ── Pizza composite ────────────────────────────────────────────── */
 function PizzaComposite({ item, size }) {
   const s     = size;
@@ -165,15 +128,15 @@ function PizzaComposite({ item, size }) {
 
   return (
     <div className="kds-composite kds-composite--pizza" style={{ width: s, height: s }}>
-      <Layer src={trayImg} label="tray" style={centered(54, 1)} />
-      {dough && <Layer src={dough.full} label={`dough:${item.dough}`} style={centered(49, 2)} />}
-      {sauce && <Layer src={sauce.layer} label={`sauce:${item.sauce}`} style={centered(sauce.layerPct ?? 42, 3)} />}
-      {chz   && <Layer src={chz.layer}   label={`cheese:${item.cheese}`} style={centered(40, 4, chz.offsetPct ?? 0)} />}
+      <img src={trayImg}    alt="" style={centered(54, 1)} />
+      {dough && <img src={dough.full} alt="" style={centered(49, 2)} />}
+      {sauce && <img src={sauce.layer} alt="" style={centered(sauce.layerPct ?? 42, 3)} />}
+      {chz   && <img src={chz.layer}   alt="" style={centered(40, 4, chz.offsetPct ?? 0)} />}
       {meats.map((m, i) => (
-        <Layer key={m.id} src={m.layer} label={`meat:${m.id}`} style={centered(m.layerPct ?? 42, 5 + i)} />
+        <img key={m.id} src={m.layer} alt="" style={centered(m.layerPct ?? 42, 5 + i)} />
       ))}
       {vegs.map((v, i) => (
-        <Layer key={v.id} src={v.layer} label={`veg:${v.id}`}
+        <img key={v.id} src={v.layer} alt=""
           style={centered(v.layerPct ?? 42, 5 + meats.length + i, v.offsetPct ?? 0)} />
       ))}
     </div>
