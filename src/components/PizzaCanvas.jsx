@@ -1,5 +1,8 @@
 import React, { useMemo } from 'react';
 import { useIngredientConfig } from '../context/IngredientConfigContext';
+import { useCustomIngredients } from '../context/CustomIngredientsContext';
+import { forBuilder } from '../utils/customIngredients';
+import { nextRingSlots } from '../utils/ringLayout';
 
 import trayImg       from '../assets/pizzas/base/full/tray-full.png';
 import americanFull  from '../assets/pizzas/base/full/american-full.png';
@@ -250,6 +253,25 @@ const VEGETABLES = [
   { id: 'pestocheese',  label: 'Pesto Cheese',  preview: pestocheesePrev,  layer: pestocheeseLayer,  pos: { top: '16.7%', left: '34.0%', transform: 'translate(-50%, -50%)' } },
 ];
 
+const RING_RADIUS = 37;
+
+/** Appends admin-created custom ingredients into a static topping ring,
+ * slotting each into the largest remaining angular gap so none of the
+ * hand-placed static positions move. */
+function mergeWithCustom(staticList, customRows) {
+  if (customRows.length === 0) return staticList;
+  const positions = nextRingSlots(staticList.map(i => i.pos), customRows.length, RING_RADIUS);
+  const customMapped = customRows.map((row, i) => ({
+    id: row.id,
+    label: row.name,
+    preview: row.image_url,
+    layer: row.image_url,
+    full: row.image_url,
+    pos: positions[i],
+  }));
+  return [...staticList, ...customMapped];
+}
+
 /**
  * Every image PizzaCanvas can ever render, flattened into one array —
  * used to preload/cache them all up front instead of fetching each one
@@ -307,21 +329,37 @@ function PizzaCanvas({
   protectImages      = false,
 }) {
   const { isEnabled } = useIngredientConfig();
+  const { customIngredients } = useCustomIngredients();
+
+  const pizzaCustom = useMemo(() => forBuilder(customIngredients, 'pizza'), [customIngredients]);
+  const customByCategory = useMemo(() => ({
+    dough:     pizzaCustom.filter(r => r.category === 'dough'),
+    sauce:     pizzaCustom.filter(r => r.category === 'sauce'),
+    cheese:    pizzaCustom.filter(r => r.category === 'cheese'),
+    meat:      pizzaCustom.filter(r => r.category === 'meat'),
+    vegetable: pizzaCustom.filter(r => r.category === 'vegetable'),
+  }), [pizzaCustom]);
+
+  const mergedDoughs     = useMemo(() => mergeWithCustom(DOUGHS, customByCategory.dough),         [customByCategory.dough]);
+  const mergedSauces     = useMemo(() => mergeWithCustom(SAUCES, customByCategory.sauce),          [customByCategory.sauce]);
+  const mergedCheeses    = useMemo(() => mergeWithCustom(CHEESES, customByCategory.cheese),        [customByCategory.cheese]);
+  const mergedMeats      = useMemo(() => mergeWithCustom(MEATS, customByCategory.meat),            [customByCategory.meat]);
+  const mergedVegetables = useMemo(() => mergeWithCustom(VEGETABLES, customByCategory.vegetable),  [customByCategory.vegetable]);
 
   const handleContextMenu = protectImages ? (e) => e.preventDefault() : undefined;
   const handleDragStart   = protectImages ? (e) => e.preventDefault() : undefined;
 
-  const activeDough   = selectedDough  ? DOUGHS.find(d => d.id === selectedDough)   : null;
-  const activeSauce   = selectedSauce  ? SAUCES.find(s => s.id === selectedSauce)   : null;
-  const activeCheese  = selectedCheese ? CHEESES.find(c => c.id === selectedCheese) : null;
+  const activeDough   = selectedDough  ? mergedDoughs.find(d => d.id === selectedDough)   : null;
+  const activeSauce   = selectedSauce  ? mergedSauces.find(s => s.id === selectedSauce)   : null;
+  const activeCheese  = selectedCheese ? mergedCheeses.find(c => c.id === selectedCheese) : null;
 
   const activeMeats = useMemo(
-    () => selectedMeats.map(id => MEATS.find(m => m.id === id)).filter(Boolean),
-    [selectedMeats],
+    () => selectedMeats.map(id => mergedMeats.find(m => m.id === id)).filter(Boolean),
+    [selectedMeats, mergedMeats],
   );
   const activeVeggies = useMemo(
-    () => selectedVegetables.map(id => VEGETABLES.find(v => v.id === id)).filter(Boolean),
-    [selectedVegetables],
+    () => selectedVegetables.map(id => mergedVegetables.find(v => v.id === id)).filter(Boolean),
+    [selectedVegetables, mergedVegetables],
   );
 
   const atMeatLimit    = selectedMeats.length      >= 4;
@@ -402,7 +440,7 @@ function PizzaCanvas({
       ))}
 
       {/* ── Dough previews (triangle) ── */}
-      {activeCategory === 'dough' && DOUGHS.map(d => {
+      {activeCategory === 'dough' && mergedDoughs.map(d => {
         const adminDisabled = !isEnabled('pizza', d.id);
         /* Dough labels sit to the left of their own thumbnail instead of
            above it, so they can never reach up into the top toolbar/
@@ -448,7 +486,7 @@ function PizzaCanvas({
       })}
 
       {/* ── Sauce previews (pentagon) ── */}
-      {activeCategory === 'sauces' && SAUCES.map(s => {
+      {activeCategory === 'sauces' && mergedSauces.map(s => {
         const adminDisabled = !isEnabled('pizza', s.id);
         return (
           <div
@@ -472,7 +510,7 @@ function PizzaCanvas({
       })}
 
       {/* ── Cheese previews (triangle) ── */}
-      {activeCategory === 'cheese' && CHEESES.map(c => {
+      {activeCategory === 'cheese' && mergedCheeses.map(c => {
         const adminDisabled = !isEnabled('pizza', c.id);
         return (
           <div
@@ -496,7 +534,7 @@ function PizzaCanvas({
       })}
 
       {/* ── Meat previews (9-point circle) ── */}
-      {activeCategory === 'meat' && MEATS.map((m, i) => {
+      {activeCategory === 'meat' && mergedMeats.map((m, i) => {
         const isSelected    = selectedMeats.includes(m.id);
         const adminDisabled = !isEnabled('pizza', m.id);
         const isDisabled    = adminDisabled || (atMeatLimit && !isSelected);
@@ -531,7 +569,7 @@ function PizzaCanvas({
       })}
 
       {/* ── Vegetable previews (14-point circle) ── */}
-      {activeCategory === 'vegetables' && VEGETABLES.map((v, i) => {
+      {activeCategory === 'vegetables' && mergedVegetables.map((v, i) => {
         const isSelected    = selectedVegetables.includes(v.id);
         const adminDisabled = !isEnabled('pizza', v.id);
         const isDisabled    = adminDisabled || (atVeggieLimit && !isSelected);

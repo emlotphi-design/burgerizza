@@ -1,18 +1,23 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { flushSync } from 'react-dom';
 import { useIngredientConfig } from '../../../context/IngredientConfigContext';
+import { useCustomIngredients } from '../../../context/CustomIngredientsContext';
 import { useBurgerStore } from '../store/burgerStore.jsx';
 import { usePizzaStore } from '../../../store/PizzaContext';
 import { useAuth } from '../../../store/AuthContext';
 import { api } from '../../../services/api';
 import { captureBurgerImage } from '../utils/captureBurgerImage';
 import { calcBurgerPrice } from '../utils/burgerUtils';
+import { forBuilder } from '../../../utils/customIngredients';
+import { mergeBurgerCategory } from '../utils/burgerCustomMerge';
 import {
-  BUN_BASES, BUN_TOPS,
+  BUN_BASES, BUN_TOPS, BUN_PREVIEWS, BUN_POSITIONS,
   MEAT_BASES, CHEESE_BASES, SAUCE_BASES, VEGETABLE_BASES,
+  MEAT_PREVIEWS, CHEESE_PREVIEWS, SAUCE_PREVIEWS, VEGETABLE_PREVIEWS,
+  MEAT_POSITIONS, CHEESE_POSITIONS, SAUCE_POSITIONS, VEGETABLE_POSITIONS,
   wrappers,
 } from '../utils/burgerImages';
-import { BURGER_BUNS } from '../utils/burgerData';
+import { BURGER_BUNS, BURGER_MEATS, BURGER_CHEESES, BURGER_SAUCES, BURGER_VEGETABLES } from '../utils/burgerData';
 
 const MAX_MEAT_QTY   = 5;
 const MAX_CHEESE_QTY = 5;
@@ -41,6 +46,40 @@ export function useBurgerBuilder() {
   const { addBurger, pizzas, removePizza } = usePizzaStore();
   const { isLoggedIn } = useAuth();
   const { isEnabled, config } = useIngredientConfig();
+  const { customIngredients } = useCustomIngredients();
+
+  const burgerCustom = useMemo(() => forBuilder(customIngredients, 'burger'), [customIngredients]);
+  const customByCategory = useMemo(() => ({
+    bun:       burgerCustom.filter(r => r.category === 'bun'),
+    meat:      burgerCustom.filter(r => r.category === 'meat'),
+    cheese:    burgerCustom.filter(r => r.category === 'cheese'),
+    sauce:     burgerCustom.filter(r => r.category === 'sauce'),
+    vegetable: burgerCustom.filter(r => r.category === 'vegetable'),
+  }), [burgerCustom]);
+
+  const bunMerge       = useMemo(() => mergeBurgerCategory(BURGER_BUNS, BUN_POSITIONS, customByCategory.bun), [customByCategory.bun]);
+  const meatMerge       = useMemo(() => mergeBurgerCategory(BURGER_MEATS, MEAT_POSITIONS, customByCategory.meat), [customByCategory.meat]);
+  const cheeseMerge      = useMemo(() => mergeBurgerCategory(BURGER_CHEESES, CHEESE_POSITIONS, customByCategory.cheese), [customByCategory.cheese]);
+  const sauceMerge      = useMemo(() => mergeBurgerCategory(BURGER_SAUCES, SAUCE_POSITIONS, customByCategory.sauce), [customByCategory.sauce]);
+  const vegetableMerge = useMemo(() => mergeBurgerCategory(BURGER_VEGETABLES, VEGETABLE_POSITIONS, customByCategory.vegetable), [customByCategory.vegetable]);
+
+  const mergedBunPreviews       = { ...BUN_PREVIEWS, ...bunMerge.previews };
+  const mergedBunPositions      = bunMerge.positions;
+  const mergedBunBases          = { ...BUN_BASES, ...bunMerge.bases };
+  const mergedBunTops           = { ...BUN_TOPS, ...bunMerge.bases };
+  const mergedMeatPreviews      = { ...MEAT_PREVIEWS, ...meatMerge.previews };
+  const mergedMeatPositions     = meatMerge.positions;
+  const mergedCheesePreviews    = { ...CHEESE_PREVIEWS, ...cheeseMerge.previews };
+  const mergedCheesePositions   = cheeseMerge.positions;
+  const mergedSaucePreviews     = { ...SAUCE_PREVIEWS, ...sauceMerge.previews };
+  const mergedSaucePositions    = sauceMerge.positions;
+  const mergedVegetablePreviews  = { ...VEGETABLE_PREVIEWS, ...vegetableMerge.previews };
+  const mergedVegetablePositions = vegetableMerge.positions;
+
+  const mergedMeatBases      = { ...MEAT_BASES, ...meatMerge.bases };
+  const mergedCheeseBases    = { ...CHEESE_BASES, ...cheeseMerge.bases };
+  const mergedSauceBases     = { ...SAUCE_BASES, ...sauceMerge.bases };
+  const mergedVegetableBases = { ...VEGETABLE_BASES, ...vegetableMerge.bases };
 
   const orderSnapshotRef = useRef(null);
   const toastTimerRef    = useRef(null);
@@ -145,9 +184,9 @@ export function useBurgerBuilder() {
   const wrapperIndex    = draft.wrapper ?? initWrapperIdx.current;
   const selectedWrapper = wrappers[wrapperIndex] ?? wrappers[0];
 
-  const bunBase     = draft.bun ? BUN_BASES[draft.bun]  : null;
-  const topBunSrc   = draft.bun ? BUN_TOPS[draft.bun]   : null;
-  const selectedBun = draft.bun ? BURGER_BUNS.find(b => b.id === draft.bun) : null;
+  const bunBase     = draft.bun ? mergedBunBases[draft.bun]  : null;
+  const topBunSrc   = draft.bun ? mergedBunTops[draft.bun]   : null;
+  const selectedBun = draft.bun ? bunMerge.list.find(b => b.id === draft.bun) : null;
   const bunWidth    = selectedBun?.baseWidth ?? '36%';
 
   const selectedMeats   = draft.meats      ?? {};
@@ -164,10 +203,10 @@ export function useBurgerBuilder() {
       transform: 'translate(-50%, -50%)', zIndex: 5 + idx,
     };
     switch (type) {
-      case 'sauce':     return SAUCE_BASES[id]     ? { key: `s-${idx}`, cls: 'bb-sauce-img',     src: SAUCE_BASES[id],     style } : null;
-      case 'meat':      return MEAT_BASES[id]       ? { key: `m-${idx}`, cls: 'bb-meat-img',      src: MEAT_BASES[id],      style } : null;
-      case 'cheese':    return CHEESE_BASES[id]     ? { key: `c-${idx}`, cls: 'bb-cheese-img',    src: CHEESE_BASES[id],    style } : null;
-      case 'vegetable': return VEGETABLE_BASES[id]  ? { key: `v-${idx}`, cls: 'bb-vegetable-img', src: VEGETABLE_BASES[id], style } : null;
+      case 'sauce':     return mergedSauceBases[id]     ? { key: `s-${idx}`, cls: 'bb-sauce-img',     src: mergedSauceBases[id],     style } : null;
+      case 'meat':      return mergedMeatBases[id]       ? { key: `m-${idx}`, cls: 'bb-meat-img',      src: mergedMeatBases[id],      style } : null;
+      case 'cheese':    return mergedCheeseBases[id]     ? { key: `c-${idx}`, cls: 'bb-cheese-img',    src: mergedCheeseBases[id],    style } : null;
+      case 'vegetable': return mergedVegetableBases[id]  ? { key: `v-${idx}`, cls: 'bb-vegetable-img', src: mergedVegetableBases[id], style } : null;
       default: return null;
     }
   }).filter(Boolean);
@@ -407,6 +446,23 @@ export function useBurgerBuilder() {
     selectedSauces,
     hasMeat,
     ingredientLayers,
+    // Merged (static + admin-created custom) ingredient lists/maps for the
+    // preview wheels — see burgerCustomMerge.js
+    mergedBuns: bunMerge.list,
+    mergedBunPreviews,
+    mergedBunPositions,
+    mergedMeats: meatMerge.list,
+    mergedMeatPreviews,
+    mergedMeatPositions,
+    mergedCheeses: cheeseMerge.list,
+    mergedCheesePreviews,
+    mergedCheesePositions,
+    mergedSauces: sauceMerge.list,
+    mergedSaucePreviews,
+    mergedSaucePositions,
+    mergedVegetables: vegetableMerge.list,
+    mergedVegetablePreviews,
+    mergedVegetablePositions,
     // Order
     handleOrder,
     // Burger panel

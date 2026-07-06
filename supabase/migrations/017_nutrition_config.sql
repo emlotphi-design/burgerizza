@@ -104,4 +104,4 @@ end $$;
 -- ── 6. Nutrition columns on products (admin Products page only) ───────────────
 
 alter table public.products add column if not exists weight_g numeric(6, 1);
-alter table public.products add column if not exists calories numeric(6, 1);
+alter table public.products add column if not exists calories numeric(6,

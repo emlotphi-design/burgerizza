@@ -7,15 +7,7 @@ import NutritionBadge from '../../components/NutritionBadge';
 import { calculateBurgerCalories } from './utils/burgerNutritionUtils';
 import { useBurgerBuilder } from './hooks/useBurgerBuilder';
 import { useCalorieBadgePosition } from '../../hooks/useCalorieBadgePosition';
-import { BURGER_BUNS, BURGER_MEATS, BURGER_CHEESES, BURGER_SAUCES, BURGER_VEGETABLES } from './utils/burgerData';
-import {
-  BUN_PREVIEWS, BUN_POSITIONS,
-  MEAT_PREVIEWS, MEAT_POSITIONS,
-  CHEESE_PREVIEWS, CHEESE_POSITIONS,
-  SAUCE_PREVIEWS, SAUCE_POSITIONS,
-  VEGETABLE_PREVIEWS, VEGETABLE_POSITIONS,
-  DEFAULT_WRAPPER,
-} from './utils/burgerImages';
+import { DEFAULT_WRAPPER } from './utils/burgerImages';
 
 const previewBtn = {
   width: '100%', height: '100%', padding: 0,
@@ -35,6 +27,11 @@ export default function BurgerBuilder() {
     bunBase, bunWidth, topBunSrc,
     selectedMeats, selectedCheeses, selectedSauces,
     hasMeat, ingredientLayers,
+    mergedBuns, mergedBunPreviews, mergedBunPositions,
+    mergedMeats, mergedMeatPreviews, mergedMeatPositions,
+    mergedCheeses, mergedCheesePreviews, mergedCheesePositions,
+    mergedSauces, mergedSaucePreviews, mergedSaucePositions,
+    mergedVegetables, mergedVegetablePreviews, mergedVegetablePositions,
     handleOrder,
     handleEditBurger, handleRemoveBurger,
     handleSelectBun,
@@ -117,7 +114,7 @@ export default function BurgerBuilder() {
 
           {/* ── Orbital previews (hidden during ordering animation) ── */}
 
-          {!isOrdering && activeItem === 'bun' && BURGER_BUNS.map((bun, i) => {
+          {!isOrdering && activeItem === 'bun' && mergedBuns.map((bun, i) => {
             const isSelected    = draft.bun === bun.id;
             const adminDisabled = !ingEnabled('burger', bun.id);
             return (
@@ -127,7 +124,7 @@ export default function BurgerBuilder() {
                 style={{
                   position: 'absolute', width: '16%', height: '16%',
                   zIndex: 30, animationDelay: `${i * 55}ms`,
-                  ...BUN_POSITIONS[bun.id],
+                  ...mergedBunPositions[bun.id],
                 }}
               >
                 <button
@@ -138,14 +135,14 @@ export default function BurgerBuilder() {
                   aria-pressed={isSelected}
                   style={previewBtn}
                 >
-                  <img src={BUN_PREVIEWS[bun.id]} alt={bun.name} style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} />
+                  <img src={mergedBunPreviews[bun.id]} alt={bun.name} style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} />
                 </button>
                 <span className="bb-preview-label">{bun.name}</span>
               </div>
             );
           })}
 
-          {!isOrdering && activeItem === 'sauce' && BURGER_SAUCES.map((sauce, i) => {
+          {!isOrdering && activeItem === 'sauce' && mergedSauces.map((sauce, i) => {
             const isSelected    = selectedSauces.includes(sauce.id);
             const isDisabled    = !ingEnabled('burger', sauce.id) || (selectedSauces.length >= SAUCE_LIMIT && !isSelected);
             return (
@@ -155,7 +152,7 @@ export default function BurgerBuilder() {
                 style={{
                   position: 'absolute', width: '16%', height: '16%',
                   zIndex: 30, animationDelay: `${i * 55}ms`,
-                  ...SAUCE_POSITIONS[sauce.id],
+                  ...mergedSaucePositions[sauce.id],
                 }}
               >
                 <button
@@ -166,14 +163,14 @@ export default function BurgerBuilder() {
                   aria-pressed={isSelected}
                   style={previewBtn}
                 >
-                  <img src={SAUCE_PREVIEWS[sauce.id]} alt={sauce.name} style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} />
+                  <img src={mergedSaucePreviews[sauce.id]} alt={sauce.name} style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} />
                 </button>
                 <span className="bb-preview-label">{sauce.name}</span>
               </div>
             );
           })}
 
-          {!isOrdering && activeItem === 'meat' && BURGER_MEATS.map((meat, i) => {
+          {!isOrdering && activeItem === 'meat' && mergedMeats.map((meat, i) => {
             const qty           = selectedMeats[meat.id] ?? 0;
             const isSelected    = qty > 0;
             const adminDisabled = !ingEnabled('burger', meat.id);
@@ -184,7 +181,7 @@ export default function BurgerBuilder() {
                 style={{
                   position: 'absolute', width: '16%', height: '16%',
                   zIndex: 30, animationDelay: `${i * 55}ms`,
-                  ...MEAT_POSITIONS[meat.id],
+                  ...mergedMeatPositions[meat.id],
                 }}
               >
                 <button
@@ -195,7 +192,7 @@ export default function BurgerBuilder() {
                   aria-pressed={isSelected}
                   style={previewBtn}
                 >
-                  <img src={MEAT_PREVIEWS[meat.id]} alt={meat.name} style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} />
+                  <img src={mergedMeatPreviews[meat.id]} alt={meat.name} style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} />
                 </button>
 
                 {isSelected && meat.hasQty && (
@@ -214,7 +211,7 @@ export default function BurgerBuilder() {
             );
           })}
 
-          {!isOrdering && activeItem === 'cheese' && BURGER_CHEESES.map((cheese, i) => {
+          {!isOrdering && activeItem === 'cheese' && mergedCheeses.map((cheese, i) => {
             const qty           = (selectedCheeses)[cheese.id] ?? 0;
             const isSelected    = qty > 0;
             const adminDisabled = !ingEnabled('burger', cheese.id);
@@ -225,7 +222,7 @@ export default function BurgerBuilder() {
                 style={{
                   position: 'absolute', width: '16%', height: '16%',
                   zIndex: 30, animationDelay: `${i * 55}ms`,
-                  ...CHEESE_POSITIONS[cheese.id],
+                  ...mergedCheesePositions[cheese.id],
                 }}
               >
                 <button
@@ -236,8 +233,8 @@ export default function BurgerBuilder() {
                   aria-pressed={isSelected}
                   style={previewBtn}
                 >
-                  {CHEESE_PREVIEWS[cheese.id] && (
-                    <img src={CHEESE_PREVIEWS[cheese.id]} alt={cheese.name} style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} />
+                  {mergedCheesePreviews[cheese.id] && (
+                    <img src={mergedCheesePreviews[cheese.id]} alt={cheese.name} style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} />
                   )}
                 </button>
 
@@ -257,7 +254,7 @@ export default function BurgerBuilder() {
             );
           })}
 
-          {!isOrdering && activeItem === 'vegetables' && BURGER_VEGETABLES.map((veg, i) => {
+          {!isOrdering && activeItem === 'vegetables' && mergedVegetables.map((veg, i) => {
             const selectedVegetables = draft.vegetables ?? [];
             const isSelected    = selectedVegetables.includes(veg.id);
             const isDisabled    = !ingEnabled('burger', veg.id) || (selectedVegetables.length >= MAX_VEG_QTY && !isSelected);
@@ -268,7 +265,7 @@ export default function BurgerBuilder() {
                 style={{
                   position: 'absolute', width: '16%', height: '16%',
                   zIndex: 30, animationDelay: `${i * 55}ms`,
-                  ...VEGETABLE_POSITIONS[veg.id],
+                  ...mergedVegetablePositions[veg.id],
                 }}
               >
                 <button
@@ -279,8 +276,8 @@ export default function BurgerBuilder() {
                   aria-pressed={isSelected}
                   style={previewBtn}
                 >
-                  {VEGETABLE_PREVIEWS[veg.id] && (
-                    <img src={VEGETABLE_PREVIEWS[veg.id]} alt={veg.name} style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} />
+                  {mergedVegetablePreviews[veg.id] && (
+                    <img src={mergedVegetablePreviews[veg.id]} alt={veg.name} style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} />
                   )}
                 </button>
                 <span className="bb-preview-label">{veg.name}</span>

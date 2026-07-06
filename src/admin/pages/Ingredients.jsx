@@ -2,12 +2,16 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useIngredientConfig } from '../../context/IngredientConfigContext';
 import { useNutritionConfig } from '../../context/NutritionConfigContext';
 import { usePizzaSizeConfig } from '../../context/PizzaSizeConfigContext';
+import { useCustomIngredients } from '../../context/CustomIngredientsContext';
 import { PIZZA_DOUGHS } from '../../utils/pizzaDoughs';
 import { PIZZA_INGREDIENTS } from '../../utils/pizzaIngredients';
 import { ALL_BURGER_INGREDIENTS } from '../../features/burger/utils/burgerData';
 import { MENU_ITEMS } from '../../utils/menuData';
 import { PIZZA_SIZES } from '../../utils/pizzaSizes';
 import { PIZZA_PREVIEW_IMAGES, BURGER_PREVIEW_IMAGES } from '../utils/ingredientImages';
+import { forBuilder, toAdminIngredient } from '../../utils/customIngredients';
+import AddIngredientCard from '../components/ui/AddIngredientCard';
+import AddIngredientModal from '../components/ui/AddIngredientModal';
 import '../styles/ingredients.css';
 
 /* ── Category metadata ────────────────────────────────────────────────────── */
@@ -156,23 +160,12 @@ function IngredientCard({ builder, ingredient, previewImg }) {
     [builder, ingredient.id, enabled, updateIngredient],
   );
 
-  const hasAsset = Boolean(previewImg);
-
   return (
     <div className={`ing-card${!enabled ? ' ing-card--off' : ''}`}>
 
       {/* Image */}
       <div className="ing-card-img-wrap">
-        {hasAsset ? (
-          <img src={previewImg} alt={ingredient.name} className="ing-card-img" />
-        ) : (
-          <div className="ing-card-placeholder">
-            <span>{CAT[ingredient.category]?.emoji ?? '?'}</span>
-          </div>
-        )}
-        <span className={`ing-asset-dot${hasAsset ? ' ing-asset-dot--yes' : ''}`}>
-          {hasAsset ? 'Visual' : 'No Asset'}
-        </span>
+        <img src={previewImg} alt={ingredient.name} className="ing-card-img" />
       </div>
 
       {/* Body */}
@@ -258,6 +251,7 @@ function IngredientCard({ builder, ingredient, previewImg }) {
 /* ── Category section ────────────────────────────────────────────────────────── */
 function CategorySection({ builder, category, ingredients, previewImages }) {
   const { isEnabled } = useIngredientConfig();
+  const [showAddModal, setShowAddModal] = useState(false);
   const meta    = CAT[category];
   const enabled = ingredients.filter(i => isEnabled(builder, i.id)).length;
 
@@ -281,7 +275,12 @@ function CategorySection({ builder, category, ingredients, previewImages }) {
             previewImg={previewImages[ing.id]}
           />
         ))}
+        <AddIngredientCard onClick={() => setShowAddModal(true)} />
       </div>
+
+      {showAddModal && (
+        <AddIngredientModal category={category} onClose={() => setShowAddModal(false)} />
+      )}
     </section>
   );
 }
@@ -289,9 +288,6 @@ function CategorySection({ builder, category, ingredients, previewImages }) {
 /* ── Stats bar ───────────────────────────────────────────────────────────────── */
 function StatsBar({ builder, list }) {
   const { total, enabled, disabled } = useSummaryStats(builder, list);
-  const visual = list.filter(i =>
-    (builder === 'pizza' ? PIZZA_PREVIEW_IMAGES : BURGER_PREVIEW_IMAGES)[i.id],
-  ).length;
 
   return (
     <div className="ing-statsbar">
@@ -314,13 +310,6 @@ function StatsBar({ builder, list }) {
         <div className="ing-stat-body">
           <span className="ing-stat-value ing-stat-value--off">{disabled}</span>
           <span className="ing-stat-label">Disabled</span>
-        </div>
-      </div>
-      <div className="ing-stat">
-        <div className="ing-stat-icon-wrap ing-stat-icon-wrap--vis">🎨</div>
-        <div className="ing-stat-body">
-          <span className="ing-stat-value ing-stat-value--vis">{visual}</span>
-          <span className="ing-stat-label">Visual Assets</span>
         </div>
       </div>
     </div>
@@ -601,15 +590,32 @@ function PizzaSizeSection() {
 export default function IngredientsPage() {
   const [tab, setTab] = useState('pizza');
   const { isLoading } = useIngredientConfig();
+  const { customIngredients } = useCustomIngredients();
   const isMenuTab = tab === 'dessert' || tab === 'drinks';
 
-  const pizzaGroups  = groupByCategory(PIZZA_ADMIN_LIST);
-  const burgerGroups = groupByCategory(ALL_BURGER_INGREDIENTS);
+  const customPizzaImages  = Object.fromEntries(forBuilder(customIngredients, 'pizza').map(r => [r.id, r.image_url]));
+  const customBurgerImages = Object.fromEntries(forBuilder(customIngredients, 'burger').map(r => [r.id, r.image_url]));
+  const pizzaImages  = { ...PIZZA_PREVIEW_IMAGES,  ...customPizzaImages };
+  const burgerImages = { ...BURGER_PREVIEW_IMAGES, ...customBurgerImages };
 
-  const currentList   = tab === 'pizza' ? PIZZA_ADMIN_LIST : ALL_BURGER_INGREDIENTS;
+  // Drop the old asset-less catalog stubs ("No Asset" placeholders) — only
+  // ingredients with a resolved image are real, selectable ingredients now.
+  const pizzaList = [
+    ...PIZZA_ADMIN_LIST.filter(i => pizzaImages[i.id]),
+    ...forBuilder(customIngredients, 'pizza').map(toAdminIngredient),
+  ];
+  const burgerList = [
+    ...ALL_BURGER_INGREDIENTS.filter(i => burgerImages[i.id]),
+    ...forBuilder(customIngredients, 'burger').map(toAdminIngredient),
+  ];
+
+  const pizzaGroups  = groupByCategory(pizzaList);
+  const burgerGroups = groupByCategory(burgerList);
+
+  const currentList   = tab === 'pizza' ? pizzaList : burgerList;
   const currentGroups = tab === 'pizza' ? pizzaGroups : burgerGroups;
   const currentOrder  = tab === 'pizza' ? PIZZA_CAT_ORDER : BURGER_CAT_ORDER;
-  const currentImages = tab === 'pizza' ? PIZZA_PREVIEW_IMAGES : BURGER_PREVIEW_IMAGES;
+  const currentImages = tab === 'pizza' ? pizzaImages : burgerImages;
   const currentMenuItems = isMenuTab ? MENU_ITEMS[tab] : [];
 
   return (
@@ -632,7 +638,7 @@ export default function IngredientsPage() {
           >
             <span className="ing-tab-icon">🍕</span>
             <span>Pizza</span>
-            <span className="ing-tab-badge">{PIZZA_ADMIN_LIST.length}</span>
+            <span className="ing-tab-badge">{pizzaList.length}</span>
           </button>
           <button
             className={`ing-tab${tab === 'burger' ? ' ing-tab--active' : ''}`}
@@ -640,7 +646,7 @@ export default function IngredientsPage() {
           >
             <span className="ing-tab-icon">🍔</span>
             <span>Burger</span>
-            <span className="ing-tab-badge">{ALL_BURGER_INGREDIENTS.length}</span>
+            <span className="ing-tab-badge">{burgerList.length}</span>
           </button>
           <button
             className={`ing-tab${tab === 'dessert' ? ' ing-tab--active' : ''}`}
@@ -699,17 +705,15 @@ export default function IngredientsPage() {
       {!isLoading && !isMenuTab && (
         <div className="ing-content">
           {tab === 'pizza' && <PizzaSizeSection />}
-          {currentOrder.map(cat =>
-            currentGroups[cat] ? (
-              <CategorySection
-                key={`${tab}-${cat}`}
-                builder={tab}
-                category={cat}
-                ingredients={currentGroups[cat]}
-                previewImages={currentImages}
-              />
-            ) : null,
-          )}
+          {currentOrder.map(cat => (
+            <CategorySection
+              key={`${tab}-${cat}`}
+              builder={tab}
+              category={cat}
+              ingredients={currentGroups[cat] ?? []}
+              previewImages={currentImages}
+            />
+          ))}
         </div>
       )}
     </div>
