@@ -1,24 +1,35 @@
-﻿/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-   ORDER TRACKING â€” premium dark UI
-   Mobile-first, all breakpoints inside
-â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+/* ════════════════════════════════════════════════════════════════════════
+   ORDER TRACKING — premium 2026 delivery experience
+   Dark glassmorphism, mobile-first. Color tokens resolve to the site's real
+   design system (global.css --bz-*) instead of defining a parallel palette.
+════════════════════════════════════════════════════════════════════════ */
 
 :root {
-  --ot-accent:   #FF6B1A;
-  --ot-green:    #22c55e;
-  --ot-blue:     #3b82f6;
-  --ot-orange:   #FF6B1A;
-  --ot-amber:    #FFB730;
-  --ot-red:      #ef4444;
-  --ot-bg:       #0A0A0C;
-  --ot-card-bg:  rgba(255,255,255,0.045);
-  --ot-border:   rgba(255,255,255,0.08);
-  --ot-text:     #F0F0F5;
-  --ot-muted:    rgba(255,255,255,0.40);
-  --ot-dim:      rgba(255,255,255,0.22);
+  /* Surfaces / glass / elevation — sourced from global.css, not redefined */
+  --ot-bg:          var(--bz-bg, #080808);
+  --ot-card-bg:     var(--bz-surface-2, rgba(255,255,255,0.05));
+  --ot-card-border: var(--bz-border, rgba(255,255,255,0.08));
+  --ot-radius:      var(--bz-radius, 24px);
+  --ot-radius-sm:   var(--bz-radius-2, 16px);
+  --ot-shadow:      var(--bz-shadow-3, 0 20px 60px rgba(0,0,0,0.55));
+  --ot-shadow-sm:   var(--bz-shadow-2, 0 4px 16px rgba(0,0,0,0.30));
+  --ot-text:        var(--bz-text, rgba(255,255,255,0.92));
+  --ot-text-2:      var(--bz-text-2, rgba(255,255,255,0.50));
+  --ot-text-3:      var(--bz-text-3, rgba(255,255,255,0.28));
+  --ot-accent:      var(--bz-orange, #FF6B1A);
+  --ot-accent-2:    var(--bz-amber, #FFB730);
+
+  /* Status semantics — deliberately distinct hues (amber=waiting,
+     orange=cooking, blue=in-transit, green=success, red=cancelled),
+     not brand-color duplicates. */
+  --ot-amber:  #f59e0b;
+  --ot-orange: #f97316;
+  --ot-blue:   #3b82f6;
+  --ot-green:  #22c55e;
+  --ot-red:    #ef4444;
 }
 
-/* â”€â”€ Page shell â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ── Page shell ─────────────────────────────────────────────────────── */
 .ot-page {
   height: 100vh;
   height: 100dvh;
@@ -26,7 +37,8 @@
   display: flex;
   flex-direction: column;
   background:
-    radial-gradient(ellipse 90% 35% at 50% 0%, rgba(255, 107, 26, 0.09) 0%, transparent 65%),
+    radial-gradient(ellipse 90% 38% at 50% 0%, rgba(255,107,26,0.11) 0%, transparent 65%),
+    radial-gradient(ellipse 70% 30% at 100% 100%, rgba(59,130,246,0.05) 0%, transparent 60%),
     var(--ot-bg);
   font-family: 'Nunito', sans-serif;
 }
@@ -37,66 +49,94 @@
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  gap: 14px;
+  gap: 16px;
   width: 100%;
   max-width: 600px;
   margin: 0 auto;
-  padding: calc(var(--nav-safe, 86px) + 12px) 16px 80px;
+  /* Clears the fixed nav (--nav-safe) + iPhone notch/Dynamic Island inset,
+     additive so non-notch devices see the exact same spacing as before. */
+  padding:
+    calc(var(--nav-safe, 86px) + env(safe-area-inset-top, 0px) + 12px)
+    16px
+    calc(96px + env(safe-area-inset-bottom, 0px));
   box-sizing: border-box;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
 }
 
-.ot-wrap--center {
-  align-items: center;
-  justify-content: center;
-}
+.ot-wrap--center { align-items: center; justify-content: center; }
 
-/* â”€â”€ Entrance animation (applied to each card via nth-child) */
+/* Staggered entrance for every direct card */
+/* flex-shrink:0 is required here: .ot-card uses overflow:hidden, and per the
+   flexbox spec a shrinkable flex item's automatic minimum size collapses to
+   0 (instead of its content size) whenever overflow isn't visible — without
+   this, on any viewport short enough that the stacked cards exceed
+   .ot-wrap's height, cards get silently squashed/clipped instead of the
+   wrapper's overflow-y:auto scrolling to fit them. */
+.ot-wrap > * { flex-shrink: 0; animation: ot-fadein 0.6s cubic-bezier(0.22,1,0.36,1) both; }
+.ot-wrap > *:nth-child(1) { animation-delay: 0.02s; }
+.ot-wrap > *:nth-child(2) { animation-delay: 0.08s; }
+.ot-wrap > *:nth-child(3) { animation-delay: 0.14s; }
+.ot-wrap > *:nth-child(4) { animation-delay: 0.20s; }
+.ot-wrap > *:nth-child(5) { animation-delay: 0.26s; }
+.ot-wrap > *:nth-child(6) { animation-delay: 0.32s; }
+.ot-wrap > *:nth-child(7) { animation-delay: 0.38s; }
+
 @keyframes ot-fadein {
-  from { opacity: 0; transform: translateY(18px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; transform: translateY(18px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-   HERO
-â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
-.ot-hero {
+/* ── Shared glass card ──────────────────────────────────────────────── */
+.ot-card {
   position: relative;
+  border-radius: var(--ot-radius);
+  border: 1px solid var(--ot-card-border);
+  background: linear-gradient(160deg, rgba(255,255,255,0.07) 0%, rgba(255,255,255,0.025) 100%);
+  backdrop-filter: blur(22px) saturate(1.5);
+  -webkit-backdrop-filter: blur(22px) saturate(1.5);
+  box-shadow: var(--ot-shadow);
+  padding: 22px;
   overflow: hidden;
-  border-radius: 24px;
-  border: 1px solid rgba(255,255,255,0.10);
-  background:
-    linear-gradient(160deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%);
-  padding: 24px 22px 28px;
+}
+
+.ot-section-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12.5px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--ot-text-2);
+  margin-bottom: 16px;
+}
+
+.ot-section-label-count {
+  margin-left: auto;
+  font-size: 11.5px;
+  font-weight: 800;
+  color: var(--ot-text-3);
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   HERO STATUS CARD
+════════════════════════════════════════════════════════════════════ */
+.ot-hero {
+  padding: 26px 24px 30px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 20px;
-  animation: ot-fadein 0.5s cubic-bezier(0.22,1,0.36,1) both;
-  box-shadow:
-    0 0 0 1px rgba(255,255,255,0.06),
-    0 24px 60px rgba(0,0,0,0.45),
-    inset 0 1px 0 rgba(255,255,255,0.10);
+  gap: 22px;
+  text-align: center;
+  background:
+    radial-gradient(ellipse 120% 80% at 50% -20%, var(--hero-glow, rgba(245,158,11,0.16)) 0%, transparent 60%),
+    linear-gradient(160deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%);
 }
 
-/* top ambient glow from status color */
-.ot-hero-glow {
-  position: absolute;
-  top: -60px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 280px;
-  height: 200px;
-  background: radial-gradient(ellipse at center, var(--hero-glow, rgba(255,107,26,0.18)) 0%, transparent 70%);
-  pointer-events: none;
-  z-index: 0;
-}
-
-.ot-hero > * { position: relative; z-index: 1; }
-
-/* order id + badge row */
 .ot-hero-toprow {
   display: flex;
   align-items: center;
@@ -104,348 +144,230 @@
   width: 100%;
 }
 
-.ot-hero-oid {
-  font-family: 'Courier New', monospace;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 1.5px;
-  color: var(--ot-muted);
+.ot-hero-oid-group { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; }
+.ot-hero-kitchen {
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 1.2px;
   text-transform: uppercase;
+  color: var(--ot-text-3);
+}
+.ot-hero-oid {
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: 0.5px;
+  color: var(--ot-text-2);
+  font-family: 'Courier New', monospace;
 }
 
 .ot-hero-badge {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 5px 12px;
-  border-radius: 50px;
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 0.4px;
-  text-transform: uppercase;
-  border: 1px solid transparent;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 11.5px;
+  font-weight: 900;
+  min-width: 0;
+  max-width: 100%;
+  white-space: nowrap;
+  transition: color 0.4s ease, background 0.4s ease;
 }
 
 .ot-hero-badge-dot {
-  width: 6px;
-  height: 6px;
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
-  flex-shrink: 0;
-  animation: ot-dot-blink 1.8s ease-in-out infinite;
+  animation: ot-dot-blink 1.6s ease-in-out infinite;
 }
 
 @keyframes ot-dot-blink {
-  0%, 100% { opacity: 1; }
-  50%       { opacity: 0.4; }
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%      { opacity: 0.35; transform: scale(0.75); }
 }
 
-/* icon section */
 .ot-hero-icon-section {
   position: relative;
+  width: 128px;
+  height: 128px;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 120px;
-  height: 120px;
 }
 
-/* pulse rings */
 .ot-ring {
   position: absolute;
   inset: 0;
   border-radius: 50%;
-  border: 1.5px solid var(--hero-color, #FF6B1A);
+  border: 1.5px solid var(--hero-color, var(--ot-amber));
   opacity: 0;
-  animation: ot-ring-pulse 2.4s ease-out infinite;
+  animation: ot-ring-pulse 2.6s cubic-bezier(0.22,1,0.36,1) infinite;
 }
-
-.ot-ring--2 { animation-delay: 1.2s; }
+.ot-ring--2 { animation-delay: 1.3s; }
 
 @keyframes ot-ring-pulse {
-  0%   { transform: scale(0.7); opacity: 0.55; }
-  100% { transform: scale(1.55); opacity: 0; }
+  0%   { transform: scale(0.72); opacity: 0.55; }
+  100% { transform: scale(1.32); opacity: 0; }
 }
 
-/* icon circle */
 .ot-hero-circle {
-  width: 80px;
-  height: 80px;
+  position: relative;
+  z-index: 1;
+  width: 92px;
+  height: 92px;
   border-radius: 50%;
-  background: var(--circle-bg, rgba(255,107,26,0.12));
-  border: 1.5px solid var(--hero-color, #FF6B1A);
-  box-shadow:
-    0 0 32px var(--circle-shadow, rgba(255,107,26,0.28)),
-    inset 0 1px 0 rgba(255,255,255,0.15);
   display: flex;
   align-items: center;
   justify-content: center;
-  position: relative;
-  z-index: 2;
+  background: var(--circle-bg, rgba(245,158,11,0.12));
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,0.08) inset,
+    0 12px 32px var(--circle-shadow, rgba(245,158,11,0.28)),
+    0 0 48px var(--circle-shadow, rgba(245,158,11,0.20));
+  transition: background 0.5s ease, box-shadow 0.5s ease;
 }
 
-/* icon animations */
-.ot-hero-icon-inner { display: flex; align-items: center; justify-content: center; }
+.ot-hero-icon-inner { display: flex; transform-origin: center; }
 
-@keyframes ot-float {
-  0%, 100% { transform: translateY(0); }
-  50%       { transform: translateY(-6px); }
-}
-@keyframes ot-wobble {
-  0%, 100% { transform: rotate(-8deg); }
-  50%       { transform: rotate(8deg); }
-}
-@keyframes ot-slide {
-  0%   { transform: translateX(-10px); opacity: 0.7; }
-  50%  { transform: translateX(6px); opacity: 1; }
-  100% { transform: translateX(-10px); opacity: 0.7; }
-}
-@keyframes ot-pop {
-  0%   { transform: scale(0); opacity: 0; }
-  60%  { transform: scale(1.15); opacity: 1; }
-  100% { transform: scale(1); opacity: 1; }
-}
+.ot-hero-icon--float  { animation: ot-icon-float 2.6s ease-in-out infinite; }
+.ot-hero-icon--wobble { animation: ot-icon-wobble 1.7s ease-in-out infinite; }
+.ot-hero-icon--slide   { animation: ot-icon-slide 1.4s ease-in-out infinite; }
+.ot-hero-icon--pop     { animation: ot-icon-pop 0.6s cubic-bezier(0.34,1.56,0.64,1) both; }
 
-.ot-hero-icon--float   { animation: ot-float  2.4s ease-in-out infinite; }
-.ot-hero-icon--wobble  { animation: ot-wobble 1.6s ease-in-out infinite; }
-.ot-hero-icon--slide   { animation: ot-slide  2.2s ease-in-out infinite; }
-.ot-hero-icon--pop     { animation: ot-pop    0.55s cubic-bezier(0.34,1.56,0.64,1) both; }
+@keyframes ot-icon-float  { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+@keyframes ot-icon-wobble { 0%,100% { transform: rotate(-6deg); } 50% { transform: rotate(6deg); } }
+@keyframes ot-icon-slide  { 0%,100% { transform: translateX(0); } 50% { transform: translateX(5px); } }
+@keyframes ot-icon-pop    { 0% { transform: scale(0.5); opacity: 0; } 60% { transform: scale(1.15); } 100% { transform: scale(1); opacity: 1; } }
 
-/* text block */
-.ot-hero-texts { text-align: center; width: 100%; }
+.ot-hero-texts { display: flex; flex-direction: column; gap: 6px; animation: ot-hero-text-in 0.5s ease both; }
+@keyframes ot-hero-text-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 
 .ot-hero-headline {
-  font-size: clamp(18px, 4.5vw, 24px);
+  font-size: 23px;
   font-weight: 900;
   color: var(--ot-text);
-  margin: 0 0 6px;
-  letter-spacing: -0.3px;
-  line-height: 1.25;
+  letter-spacing: -0.4px;
+  line-height: 1.2;
+  margin: 0;
 }
 
 .ot-hero-sub {
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--ot-muted);
-  margin: 0;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--ot-text-2);
   line-height: 1.5;
-  max-width: 340px;
-  margin-inline: auto;
+  max-width: 320px;
+  margin: 0 auto;
 }
 
-/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-   SHARED CARD
-â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
-.ot-card {
-  background: var(--ot-card-bg);
-  border: 1px solid var(--ot-border);
-  border-radius: 20px;
-  padding: 20px;
-  animation: ot-fadein 0.5s cubic-bezier(0.22,1,0.36,1) both;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.07);
-}
-.ot-card:nth-child(2) { animation-delay: 0.06s; }
-.ot-card:nth-child(3) { animation-delay: 0.12s; }
-.ot-card:nth-child(4) { animation-delay: 0.18s; }
-.ot-card:nth-child(5) { animation-delay: 0.24s; }
+/* ════════════════════════════════════════════════════════════════════
+   DELIVERY TIMELINE
+════════════════════════════════════════════════════════════════════ */
+.ot-timeline-card { padding: 24px 22px 22px; }
 
-/* section label */
-.ot-section-label {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  font-size: 10.5px;
-  font-weight: 900;
-  text-transform: uppercase;
-  letter-spacing: 0.9px;
-  color: var(--ot-dim);
-  margin-bottom: 16px;
-}
-
-.ot-section-label-count {
-  margin-left: auto;
-  font-size: 10px;
-  font-weight: 700;
-  color: var(--ot-dim);
-  background: rgba(255,255,255,0.06);
-  padding: 2px 8px;
-  border-radius: 50px;
-}
-
-/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-   TIMELINE  â€” horizontal desktop / vertical mobile
-   Each .ot-tl-step contains: [dot] [label] [connectorâ†’next]
-   Connector is absolute-positioned to bridge the gap to the next dot.
-â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
-.ot-timeline-card { padding: 22px 16px 18px; }
-
-/* Desktop: horizontal row */
 .ot-timeline {
   display: flex;
-  flex-direction: row;
   align-items: flex-start;
   justify-content: space-between;
-  width: 100%;
-  position: relative;
+  gap: 4px;
 }
 
-/* Each step */
 .ot-tl-step {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   flex: 1;
-  position: relative;
-  z-index: 1;
+  min-width: 0;
 }
 
-/* Dot */
 .ot-tl-dot {
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  border: 1.5px solid rgba(255,255,255,0.12);
-  background: rgba(255,255,255,0.05);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: rgba(255,255,255,0.25);
+  background: rgba(255,255,255,0.05);
+  border: 1.5px solid var(--ot-card-border);
+  color: var(--ot-text-3);
   flex-shrink: 0;
-  transition: all 0.35s ease;
-  position: relative;
-  z-index: 2;
+  transition: background 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease, color 0.4s ease, transform 0.3s ease;
+  z-index: 1;
 }
 
 .ot-tl-step--done .ot-tl-dot {
-  background: var(--ot-green);
-  border-color: var(--ot-green);
+  background: var(--step-color, var(--ot-green));
+  border-color: var(--step-color, var(--ot-green));
   color: #fff;
-  box-shadow: 0 0 14px rgba(34,197,94,0.35);
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.15) inset, 0 4px 16px var(--step-glow, rgba(34,197,94,0.35));
 }
 
 .ot-tl-step--active .ot-tl-dot {
-  background: var(--ot-accent);
-  border-color: var(--ot-accent);
-  color: #fff;
-  box-shadow:
-    0 0 0 5px rgba(255,107,26,0.18),
-    0 0 0 10px rgba(255,107,26,0.07),
-    0 0 20px rgba(255,107,26,0.30);
-  animation: ot-tl-pulse 2s ease-in-out infinite;
+  background: var(--step-color-soft, rgba(245,158,11,0.14));
+  border-color: var(--step-color, var(--ot-amber));
+  color: var(--step-color, var(--ot-amber));
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.06) inset, 0 0 0 6px var(--step-color-soft, rgba(245,158,11,0.10));
+  transform: scale(1.08);
+  animation: ot-tl-pulse 1.8s ease-in-out infinite;
 }
 
 @keyframes ot-tl-pulse {
-  0%, 100% {
-    box-shadow:
-      0 0 0 5px rgba(255,107,26,0.18),
-      0 0 0 10px rgba(255,107,26,0.07),
-      0 0 20px rgba(255,107,26,0.30);
-  }
-  50% {
-    box-shadow:
-      0 0 0 7px rgba(255,107,26,0.24),
-      0 0 0 14px rgba(255,107,26,0.09),
-      0 0 28px rgba(255,107,26,0.38);
-  }
+  0%, 100% { box-shadow: 0 0 0 1px rgba(255,255,255,0.06) inset, 0 0 0 6px var(--step-color-soft, rgba(245,158,11,0.10)); }
+  50%      { box-shadow: 0 0 0 1px rgba(255,255,255,0.06) inset, 0 0 0 10px var(--step-color-soft, rgba(245,158,11,0.05)); }
 }
 
-/* Connector (horizontal: absolute line from this dot to next) */
-.ot-tl-connector {
-  position: absolute;
-  top: 20px; /* center of 40px dot */
-  left: calc(50% + 22px);
-  right: calc(-50% + 22px);
-  height: 2px;
-  background: rgba(255,255,255,0.10);
-  border-radius: 1px;
-  z-index: 0;
-  transition: background 0.4s ease, box-shadow 0.4s ease;
-}
-
-.ot-tl-connector--lit {
-  background: var(--ot-green);
-  box-shadow: 0 0 8px rgba(34,197,94,0.40);
-}
-
-/* Labels */
 .ot-tl-label {
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 800;
   text-align: center;
-  color: var(--ot-dim);
-  text-transform: uppercase;
-  letter-spacing: 0.3px;
+  color: var(--ot-text-3);
+  letter-spacing: 0.2px;
+  transition: color 0.4s ease;
   white-space: nowrap;
-  line-height: 1.2;
+}
+.ot-tl-step--done .ot-tl-label,
+.ot-tl-step--active .ot-tl-label { color: var(--ot-text); }
+
+.ot-tl-connector {
+  position: absolute;
+  top: 20px;
+  left: calc(50% + 26px);
+  right: calc(-50% + 26px);
+  height: 2px;
+  background: var(--ot-card-border);
+  z-index: 0;
 }
 
-.ot-tl-step--done   .ot-tl-label { color: var(--ot-green); }
-.ot-tl-step--active .ot-tl-label { color: var(--ot-accent); font-size: 10.5px; font-weight: 900; }
+.ot-tl-connector::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--ot-green);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.7s cubic-bezier(0.22,1,0.36,1);
+}
+.ot-tl-connector--lit::after { transform: scaleX(1); }
 
-/* â”€â”€ Mobile: vertical stack â”€â”€ */
-@media (max-width: 560px) {
-  .ot-timeline {
-    flex-direction: column;
-    gap: 0;
-    padding: 0 4px;
-    align-items: flex-start;
-  }
-
-  .ot-tl-step {
-    flex-direction: row;
-    align-items: center;
-    gap: 14px;
-    flex: none;
-    width: 100%;
-    padding: 4px 0;
-  }
-
-  /* vertical connector: from this dot down to the next */
-  .ot-tl-connector {
-    position: absolute;
-    top: auto;
-    left: 19px; /* center of 40px dot minus 1px */
-    bottom: -28px;
-    right: auto;
-    width: 2px;
-    height: 28px;
-  }
-
-  .ot-tl-step:last-child .ot-tl-connector { display: none; }
-
-  .ot-tl-label {
-    text-align: left;
-    font-size: 13px;
-    text-transform: none;
-    letter-spacing: 0;
-    font-weight: 800;
-    margin-top: 0;
-    white-space: normal;
-  }
-
-  .ot-tl-step--active .ot-tl-label { font-size: 13.5px; }
+@media (max-width: 420px) {
+  .ot-tl-label { font-size: 9.5px; }
+  .ot-tl-dot   { width: 34px; height: 34px; }
+  .ot-tl-connector { top: 17px; }
 }
 
-/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+/* ════════════════════════════════════════════════════════════════════
    ETA CARD
-â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
-.ot-eta {
-  animation-delay: 0.10s;
-}
-
-.ot-eta-top {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  margin-bottom: 16px;
-}
+════════════════════════════════════════════════════════════════════ */
+.ot-eta-top { display: flex; align-items: center; gap: 14px; margin-bottom: 18px; }
 
 .ot-eta-icon-wrap {
-  width: 44px;
-  height: 44px;
-  border-radius: 14px;
-  background: rgba(255,107,26,0.10);
-  border: 1px solid rgba(255,107,26,0.20);
+  width: 48px;
+  height: 48px;
+  border-radius: 16px;
+  background: rgba(255,213,74,0.12);
+  border: 1px solid rgba(255,213,74,0.22);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -453,40 +375,40 @@
 }
 
 .ot-eta-label {
-  font-size: 10.5px;
+  font-size: 11px;
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.7px;
-  color: var(--ot-dim);
-  margin-bottom: 3px;
+  color: var(--ot-text-3);
+  margin-bottom: 4px;
 }
 
 .ot-eta-time {
-  font-size: 22px;
+  font-size: 30px;
   font-weight: 900;
   color: var(--ot-text);
-  letter-spacing: -0.5px;
+  letter-spacing: -0.8px;
   line-height: 1;
 }
 
-/* progress bar */
 .ot-eta-track {
   position: relative;
-  height: 6px;
-  background: rgba(255,255,255,0.08);
+  height: 8px;
+  background: rgba(255,255,255,0.07);
   border-radius: 50px;
   overflow: visible;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
 }
 
 .ot-eta-fill {
   position: absolute;
   top: 0; left: 0; bottom: 0;
   border-radius: 50px;
-  background: linear-gradient(90deg, #22c55e 0%, #FF6B1A 100%);
-  transition: width 1s cubic-bezier(0.22,1,0.36,1);
-  box-shadow: 0 0 10px rgba(255,107,26,0.40);
+  background: linear-gradient(90deg, var(--ot-green) 0%, var(--ot-accent) 100%);
+  box-shadow: 0 0 14px rgba(255,107,26,0.45);
+  animation: ot-eta-grow 1.2s cubic-bezier(0.22,1,0.36,1) both;
 }
+@keyframes ot-eta-grow { from { width: 0%; } }
 
 .ot-eta-cursor {
   position: absolute;
@@ -498,47 +420,47 @@
 
 @keyframes ot-cursor-pulse {
   0%, 100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-  50%       { opacity: 0.7; transform: translate(-50%, -50%) scale(1.3); }
+  50%      { opacity: 0.7; transform: translate(-50%, -50%) scale(1.35); }
 }
 
 .ot-eta-scale {
   display: flex;
   justify-content: space-between;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 700;
-  color: var(--ot-dim);
+  color: var(--ot-text-3);
 }
 
-/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+/* ════════════════════════════════════════════════════════════════════
    DRIVER CARD
-â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
-.ot-driver {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  animation-delay: 0.14s;
-}
+════════════════════════════════════════════════════════════════════ */
+.ot-driver { display: flex; align-items: center; gap: 14px; }
 
 .ot-driver-avatar {
   width: 52px;
   height: 52px;
   border-radius: 50%;
-  background: rgba(59,130,246,0.12);
-  border: 1.5px solid rgba(59,130,246,0.28);
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
-  box-shadow: 0 0 16px rgba(59,130,246,0.18);
+  background: linear-gradient(160deg, var(--ot-accent) 0%, var(--ot-accent-2) 100%);
+  color: #fff;
+  font-weight: 900;
+  font-size: 17px;
+  letter-spacing: 0.5px;
+  box-shadow: 0 6px 18px rgba(255,107,26,0.35);
 }
 
-.ot-driver-body { flex: 1; }
+.ot-driver-body { flex: 1; min-width: 0; }
 
 .ot-driver-name {
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 900;
   color: var(--ot-text);
-  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .ot-driver-sub {
@@ -547,276 +469,289 @@
   gap: 5px;
   font-size: 12px;
   font-weight: 700;
-  color: var(--ot-muted);
+  color: var(--ot-text-2);
+  margin-top: 2px;
 }
 
 .ot-driver-live {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 6px;
-  font-size: 10px;
-  font-weight: 800;
+  gap: 4px;
+  font-size: 9.5px;
+  font-weight: 900;
   text-transform: uppercase;
-  letter-spacing: 0.8px;
+  letter-spacing: 0.5px;
   color: var(--ot-green);
+  flex-shrink: 0;
 }
 
 .ot-driver-pulse {
-  width: 8px;
-  height: 8px;
+  width: 9px;
+  height: 9px;
   border-radius: 50%;
   background: var(--ot-green);
-  animation: ot-live-pulse 1.2s ease-in-out infinite;
+  box-shadow: 0 0 0 0 rgba(34,197,94,0.6);
+  animation: ot-live-pulse 1.6s ease-out infinite;
 }
 
 @keyframes ot-live-pulse {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(34,197,94,0.60); }
-  50%       { box-shadow: 0 0 0 6px rgba(34,197,94,0); }
+  0%   { box-shadow: 0 0 0 0 rgba(34,197,94,0.55); }
+  70%  { box-shadow: 0 0 0 9px rgba(34,197,94,0); }
+  100% { box-shadow: 0 0 0 0 rgba(34,197,94,0); }
 }
 
-/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-   ORDER PREVIEW CARD
-â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
-.ot-preview { animation-delay: 0.18s; }
+.ot-driver-call {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: rgba(34,197,94,0.14);
+  border: 1px solid rgba(34,197,94,0.30);
+  color: var(--ot-green);
+  transition: transform 0.18s ease, background 0.18s ease;
+}
+.ot-driver-call:hover  { background: rgba(34,197,94,0.22); }
+.ot-driver-call:active { transform: scale(0.92); }
+
+/* ════════════════════════════════════════════════════════════════════
+   ORDER SUMMARY (expandable)
+════════════════════════════════════════════════════════════════════ */
+.ot-summary-collapsed {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  cursor: pointer;
+  background: none;
+  border: none;
+  width: 100%;
+  padding: 0;
+  text-align: left;
+  font-family: inherit;
+}
+
+.ot-summary-thumb {
+  width: 56px;
+  height: 56px;
+  border-radius: var(--ot-radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  flex-shrink: 0;
+  background: linear-gradient(160deg, rgba(255,107,26,0.18) 0%, rgba(255,183,48,0.08) 100%);
+  border: 1px solid rgba(255,107,26,0.20);
+}
+
+.ot-summary-info { flex: 1; min-width: 0; }
+.ot-summary-count { font-size: 14.5px; font-weight: 900; color: var(--ot-text); }
+.ot-summary-total { font-size: 12.5px; font-weight: 700; color: var(--ot-text-2); margin-top: 2px; }
+
+.ot-summary-chevron {
+  color: var(--ot-text-3);
+  transition: transform 0.3s cubic-bezier(0.22,1,0.36,1);
+  flex-shrink: 0;
+}
+.ot-summary-chevron--open { transform: rotate(180deg); }
+
+.ot-summary-body {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.35s cubic-bezier(0.22,1,0.36,1);
+}
+.ot-summary-body--open { grid-template-rows: 1fr; }
+.ot-summary-body-inner { overflow: hidden; }
 
 .ot-preview-list {
   display: flex;
   flex-direction: column;
-  gap: 1px;
-  margin-bottom: 14px;
-}
-
-.ot-preview-item {
-  display: flex;
-  align-items: center;
   gap: 12px;
-  padding: 10px 0;
-  border-bottom: 1px solid rgba(255,255,255,0.05);
+  padding-top: 18px;
+  margin-top: 18px;
+  border-top: 1px solid var(--ot-card-border);
 }
 
-.ot-preview-item:last-child { border-bottom: none; }
+.ot-preview-item { display: flex; align-items: center; gap: 12px; }
 
 .ot-preview-emoji {
-  font-size: 22px;
-  line-height: 1;
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 19px;
+  background: rgba(255,255,255,0.05);
   flex-shrink: 0;
 }
 
-.ot-preview-info {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-  min-width: 0;
-}
+.ot-preview-info { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.ot-preview-name { font-size: 13.5px; font-weight: 800; color: var(--ot-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ot-preview-mods { font-size: 11px; font-weight: 600; color: var(--ot-text-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 1px; }
 
-.ot-preview-name {
-  font-size: 13.5px;
-  font-weight: 800;
-  color: rgba(255,255,255,0.88);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.ot-preview-mods {
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--ot-dim);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.ot-preview-meta {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 2px;
-  flex-shrink: 0;
-}
-
-.ot-preview-qty {
-  font-size: 11px;
-  font-weight: 800;
-  color: var(--ot-dim);
-}
-
-.ot-preview-price {
-  font-size: 13px;
-  font-weight: 900;
-  color: rgba(255,255,255,0.70);
-}
+.ot-preview-meta { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.ot-preview-qty { font-size: 11.5px; font-weight: 800; color: var(--ot-text-3); }
+.ot-preview-price { font-size: 13px; font-weight: 900; color: var(--ot-text); }
 
 .ot-preview-footer {
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  padding-top: 12px;
-  border-top: 1px solid rgba(255,255,255,0.08);
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--ot-dim);
-}
-
-.ot-preview-total {
-  font-size: 19px;
-  font-weight: 900;
-  color: var(--ot-accent);
-}
-
-/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-   ADDRESS CARD
-â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
-.ot-addr-card { animation-delay: 0.22s; }
-
-.ot-addr-lines { display: flex; flex-direction: column; gap: 3px; }
-
-.ot-addr-main {
-  font-size: 14px;
+  align-items: center;
+  padding-top: 14px;
+  margin-top: 4px;
+  border-top: 1px solid var(--ot-card-border);
+  font-size: 13px;
   font-weight: 800;
-  color: rgba(255,255,255,0.80);
+  color: var(--ot-text-2);
+}
+.ot-preview-total { font-size: 17px; font-weight: 900; color: var(--ot-accent); }
+
+/* ════════════════════════════════════════════════════════════════════
+   ADDRESS CARD
+════════════════════════════════════════════════════════════════════ */
+.ot-addr-card { display: flex; align-items: flex-start; gap: 14px; }
+
+.ot-addr-pin {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: rgba(59,130,246,0.12);
+  border: 1px solid rgba(59,130,246,0.24);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ot-blue);
+  flex-shrink: 0;
 }
 
-.ot-addr-city {
-  font-size: 12.5px;
-  font-weight: 700;
-  color: var(--ot-muted);
-}
+.ot-addr-lines { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.ot-addr-label { font-size: 10.5px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.6px; color: var(--ot-text-3); margin-bottom: 2px; }
+.ot-addr-main { font-size: 14.5px; font-weight: 800; color: var(--ot-text); }
+.ot-addr-city { font-size: 12.5px; font-weight: 600; color: var(--ot-text-2); }
+.ot-addr-extra { font-size: 11.5px; font-weight: 600; color: var(--ot-text-3); }
 
-.ot-addr-extra {
-  font-size: 11.5px;
-  font-weight: 700;
-  color: var(--ot-dim);
-}
-
-/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-   CTA ROW
-â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+/* ════════════════════════════════════════════════════════════════════
+   BOTTOM ACTIONS
+════════════════════════════════════════════════════════════════════ */
 .ot-cta {
   display: flex;
   gap: 10px;
-  flex-wrap: wrap;
-  animation: ot-fadein 0.5s cubic-bezier(0.22,1,0.36,1) 0.28s both;
+  padding-top: 4px;
 }
 
 .ot-pill-btn {
+  flex: 1;
+  /* Flex items default to min-width:auto (their content's natural size) —
+     combined with nowrap text, two side-by-side buttons ("Back to Menu" +
+     "Contact Restaurant") can't shrink below that on narrow viewports and
+     force the row wider than the page, which is exactly what caused the
+     page-level horizontal scrollbar. min-width:0 lets flexbox actually
+     shrink the button; removing nowrap lets its label wrap onto a second
+     line as the fallback instead of ever pushing past the viewport edge. */
+  min-width: 0;
+  max-width: 100%;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  text-align: center;
   gap: 8px;
-  padding: 13px 22px;
-  border-radius: 50px;
-  border: none;
-  font-family: 'Nunito', sans-serif;
-  font-size: 13px;
+  padding: 15px 18px;
+  border-radius: 999px;
+  font-size: 13.5px;
   font-weight: 900;
-  letter-spacing: 0.3px;
-  cursor: pointer;
+  font-family: inherit;
   text-decoration: none;
-  transition: transform 0.22s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.22s ease, opacity 0.18s;
-  flex: 1;
-  min-width: 140px;
-  white-space: nowrap;
+  border: 1.5px solid transparent;
+  cursor: pointer;
+  box-sizing: border-box;
+  transition: transform 0.16s ease, box-shadow 0.16s ease, background 0.2s ease;
 }
+.ot-pill-btn:active { transform: scale(0.96); }
 
 .ot-pill-btn--primary {
-  background: linear-gradient(135deg, #E8002A 0%, #C8001E 55%, #A80019 100%);
-  color: #fff;
-  box-shadow: 0 6px 24px rgba(200,0,30,0.32), 0 2px 8px rgba(0,0,0,0.20);
+  background: linear-gradient(135deg, var(--ot-accent) 0%, var(--ot-accent-2) 100%);
+  color: #1A0A00;
+  box-shadow: 0 10px 28px rgba(255,107,26,0.38);
 }
-
-.ot-pill-btn--primary:hover {
-  transform: translateY(-3px) scale(1.02);
-  box-shadow: 0 12px 36px rgba(200,0,30,0.42), 0 4px 12px rgba(0,0,0,0.20);
-}
+.ot-pill-btn--primary:hover { box-shadow: 0 12px 34px rgba(255,107,26,0.48); }
 
 .ot-pill-btn--ghost {
-  background: rgba(255,255,255,0.07);
-  color: rgba(255,255,255,0.65);
-  border: 1px solid rgba(255,255,255,0.12);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.20);
+  background: rgba(255,255,255,0.05);
+  border-color: var(--ot-card-border);
+  color: var(--ot-text);
 }
+.ot-pill-btn--ghost:hover { background: rgba(255,255,255,0.09); }
 
-.ot-pill-btn--ghost:hover {
-  background: rgba(255,255,255,0.12);
-  color: rgba(255,255,255,0.90);
-  transform: translateY(-2px);
-}
-
-/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-   SKELETON LOADING
-â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
-@keyframes ot-shimmer {
-  0%   { background-position: 200% 50%; }
-  100% { background-position: -200% 50%; }
-}
-
+/* ════════════════════════════════════════════════════════════════════
+   SKELETON
+════════════════════════════════════════════════════════════════════ */
 .ot-skel {
-  border-radius: 20px;
-  background: linear-gradient(
-    90deg,
-    rgba(255,255,255,0.04) 0%,
-    rgba(255,255,255,0.09) 50%,
-    rgba(255,255,255,0.04) 100%
-  );
+  border-radius: var(--ot-radius);
+  background: linear-gradient(90deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.09) 50%, rgba(255,255,255,0.04) 100%);
   background-size: 400% 100%;
   animation: ot-shimmer 1.6s ease infinite;
 }
+@keyframes ot-shimmer { 0% { background-position: 100% 0; } 100% { background-position: -100% 0; } }
 
-.ot-skel--hero { height: 260px; }
-.ot-skel--bar  { height: 108px; }
-.ot-skel--card { height: 90px; }
+.ot-skel--hero { height: 280px; }
+.ot-skel--bar  { height: 118px; }
+.ot-skel--card { height: 96px; }
 
-/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-   NOT FOUND STATE
-â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+/* ════════════════════════════════════════════════════════════════════
+   NOT FOUND
+════════════════════════════════════════════════════════════════════ */
 .ot-notfound {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 14px;
+  gap: 16px;
   text-align: center;
-  padding: 40px 20px;
-  animation: ot-fadein 0.5s ease both;
+  padding: 48px 24px;
 }
 
-.ot-notfound-icon { font-size: 56px; }
+.ot-notfound-icon { font-size: 60px; }
+.ot-notfound-title { font-size: 21px; font-weight: 900; color: var(--ot-text); margin: 0; }
+.ot-notfound-sub { font-size: 13.5px; font-weight: 700; color: var(--ot-text-2); margin: 0; max-width: 280px; line-height: 1.55; }
 
-.ot-notfound-title {
-  font-size: 20px;
-  font-weight: 900;
-  color: rgba(255,255,255,0.75);
-  margin: 0;
-}
-
-.ot-notfound-sub {
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--ot-muted);
-  margin: 0;
-  max-width: 280px;
-  line-height: 1.5;
-}
-
-/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-   RESPONSIVE
-â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+/* ════════════════════════════════════════════════════════════════════
+   RESPONSIVE — wider screens (tablet/desktop viewport of this page)
+════════════════════════════════════════════════════════════════════ */
 @media (min-width: 560px) {
-  .ot-wrap { padding-top: calc(var(--nav-h, 64px) + 32px); gap: 16px; }
-  .ot-hero { padding: 28px 28px 32px; }
-  .ot-card { padding: 22px 24px; }
-  .ot-timeline-card { padding: 24px 20px 20px; }
+  .ot-wrap { gap: 18px; }
+  .ot-hero { padding: 32px 32px 36px; }
+  .ot-card { padding: 26px; }
+  .ot-timeline-card { padding: 28px 26px 24px; }
   .ot-tl-dot { width: 44px; height: 44px; }
-  .ot-pill-btn { flex: 0 0 auto; min-width: 0; }
+  .ot-pill-btn { flex: 0 0 auto; min-width: 180px; }
+  .ot-cta { justify-content: center; }
 }
 
 @media (max-width: 380px) {
-  .ot-hero-circle { width: 70px; height: 70px; }
-  .ot-hero-icon-section { width: 100px; height: 100px; }
-  .ot-hero-headline { font-size: 17px; }
-  .ot-eta-time { font-size: 19px; }
-  .ot-pill-btn { padding: 12px 16px; font-size: 12px; }
-  .ot-preview-name { font-size: 12.5px; }
+  .ot-hero-icon-section { width: 108px; height: 108px; }
+  .ot-hero-circle { width: 80px; height: 80px; }
+  .ot-hero-headline { font-size: 19px; }
+  .ot-eta-time { font-size: 25px; }
+  .ot-pill-btn { padding: 13px 14px; font-size: 12.5px; }
+  .ot-summary-thumb { width: 48px; height: 48px; font-size: 24px; }
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .ot-wrap > *,
+  .ot-hero-texts,
+  .ot-ring,
+  .ot-hero-icon--float,
+  .ot-hero-icon--wobble,
+  .ot-hero-icon--slide,
+  .ot-hero-icon--pop,
+  .ot-hero-badge-dot,
+  .ot-tl-step--active .ot-tl-dot,
+  .ot-eta-fill,
+  .ot-eta-cursor,
+  .ot-driver-pulse,
+  .ot-skel {
+    animation: none !important;
+  }
+}

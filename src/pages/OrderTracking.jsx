@@ -2,10 +2,11 @@ import { useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../services/supabase';
 import Navbar from '../components/Navbar';
-import TrackingHero from '../components/tracking/TrackingHero';
-import TrackingTimeline from '../components/tracking/TrackingTimeline';
-import OrderPreviewCard from '../components/tracking/OrderPreviewCard';
-import DeliveryStatusCard from '../components/tracking/DeliveryStatusCard';
+import HeroStatusCard from '../components/tracking/HeroStatusCard';
+import DeliveryTimeline from '../components/tracking/DeliveryTimeline';
+import ETACard from '../components/tracking/ETACard';
+import DriverCard from '../components/tracking/DriverCard';
+import OrderSummaryCard from '../components/tracking/OrderSummaryCard';
 import '../styles/order-tracking.css';
 
 const STEP_META = {
@@ -50,48 +51,64 @@ function NotFound({ onHome }) {
 }
 
 /* ── Delivery address card ─────────────────────────────── */
+function MapPinIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+      stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/>
+      <circle cx="12" cy="10" r="3"/>
+    </svg>
+  );
+}
+
 function AddressCard({ addr }) {
   if (!addr?.street && !addr?.city) return null;
   return (
     <div className="ot-card ot-addr-card">
-      <div className="ot-section-label">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
-          stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-          <circle cx="12" cy="10" r="3"/>
-        </svg>
-        Delivery address
-      </div>
+      <div className="ot-addr-pin"><MapPinIcon /></div>
       <div className="ot-addr-lines">
-        <div className="ot-addr-main">
+        <span className="ot-addr-label">Delivery address</span>
+        <span className="ot-addr-main">
           {[addr.street, addr.houseNumber].filter(Boolean).join(' ')}
-        </div>
-        <div className="ot-addr-city">
+        </span>
+        <span className="ot-addr-city">
           {[addr.postalCode, addr.city].filter(Boolean).join(' ')}
-        </div>
-        {addr.floor && <div className="ot-addr-extra">Floor: {addr.floor}</div>}
+        </span>
+        {addr.floor && <span className="ot-addr-extra">Floor: {addr.floor}</span>}
       </div>
     </div>
   );
 }
 
-/* ── CTA row ───────────────────────────────────────────── */
-function CTASection({ onHome }) {
+/* ── Bottom actions ────────────────────────────────────── */
+function BackIcon() {
+  return (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
+      stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+      <polyline points="9 22 9 12 15 12 15 22"/>
+    </svg>
+  );
+}
+
+function PhoneIcon() {
+  return (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
+      stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 8.81 19.79 19.79 0 01.01 2.18 2 2 0 012 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 14.92v2z"/>
+    </svg>
+  );
+}
+
+function BottomActions({ onHome }) {
   return (
     <div className="ot-cta">
       <button className="ot-pill-btn ot-pill-btn--primary" onClick={onHome}>
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
-          stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
-          <polyline points="9 22 9 12 15 12 15 22"/>
-        </svg>
+        <BackIcon />
         Back to Menu
       </button>
       <a className="ot-pill-btn ot-pill-btn--ghost" href="tel:+49123456789">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
-          stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 8.81 19.79 19.79 0 01.01 2.18 2 2 0 012 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 14.92v2z"/>
-        </svg>
+        <PhoneIcon />
         Contact Restaurant
       </a>
     </div>
@@ -147,7 +164,7 @@ export default function OrderTracking() {
       <Navbar />
       <div className="ot-wrap">
 
-        <TrackingHero
+        <HeroStatusCard
           status={status}
           headline={meta.headline}
           sub={meta.sub}
@@ -156,19 +173,19 @@ export default function OrderTracking() {
 
         {status !== 'cancelled' && (
           <div className="ot-card ot-timeline-card">
-            <TrackingTimeline status={status} />
+            <DeliveryTimeline status={status} />
           </div>
         )}
 
-        {status !== 'delivered' && status !== 'cancelled' && (
-          <DeliveryStatusCard status={status} />
-        )}
+        <ETACard status={status} />
 
-        <OrderPreviewCard items={items} total={order.total_price} />
+        {status === 'ready' && <DriverCard driverName={order.driver_name} />}
+
+        <OrderSummaryCard items={items} total={order.total_price} />
 
         <AddressCard addr={addr} />
 
-        <CTASection onHome={() => navigate('/')} />
+        <BottomActions onHome={() => navigate('/')} />
 
       </div>
     </div>

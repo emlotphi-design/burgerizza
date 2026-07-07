@@ -1,9 +1,12 @@
-/* Horizontal on desktop (>560px), vertical on mobile */
+/* Premium horizontal timeline — each step gets its own glow color once done/active. */
 
 const STEPS = [
   {
     key: 'pending',
     label: 'Received',
+    color: '#f59e0b',
+    glow: 'rgba(245,158,11,0.35)',
+    soft: 'rgba(245,158,11,0.10)',
     icon: (
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
         stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
@@ -17,6 +20,9 @@ const STEPS = [
   {
     key: 'preparing',
     label: 'Preparing',
+    color: '#f97316',
+    glow: 'rgba(249,115,22,0.35)',
+    soft: 'rgba(249,115,22,0.10)',
     icon: (
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
         stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
@@ -31,6 +37,9 @@ const STEPS = [
   {
     key: 'ready',
     label: 'On the Way',
+    color: '#3b82f6',
+    glow: 'rgba(59,130,246,0.35)',
+    soft: 'rgba(59,130,246,0.10)',
     icon: (
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
         stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
@@ -44,6 +53,9 @@ const STEPS = [
   {
     key: 'delivered',
     label: 'Delivered',
+    color: '#22c55e',
+    glow: 'rgba(34,197,94,0.35)',
+    soft: 'rgba(34,197,94,0.10)',
     icon: (
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
         stroke="currentColor" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round">
@@ -53,8 +65,8 @@ const STEPS = [
   },
 ];
 
-const STEP_KEYS  = STEPS.map(s => s.key);
-const NORMALISE  = { confirmed: 'pending' };
+const STEP_KEYS = STEPS.map(s => s.key);
+const NORMALISE = { confirmed: 'pending' };
 
 function CheckSVG() {
   return (
@@ -65,7 +77,7 @@ function CheckSVG() {
   );
 }
 
-export default function TrackingTimeline({ status }) {
+export default function DeliveryTimeline({ status }) {
   const norm         = NORMALISE[status] ?? status;
   const rawIdx       = STEP_KEYS.indexOf(norm);
   const effectiveIdx = rawIdx === -1 ? 0 : rawIdx;
@@ -78,13 +90,16 @@ export default function TrackingTimeline({ status }) {
         const cls    = done ? 'ot-tl-step--done' : active ? 'ot-tl-step--active' : 'ot-tl-step--upcoming';
 
         return (
-          <div key={step.key} className={`ot-tl-step ${cls}`}>
+          <div
+            key={step.key}
+            className={`ot-tl-step ${cls}`}
+            style={{ '--step-color': step.color, '--step-glow': step.glow, '--step-color-soft': step.soft }}
+          >
             <div className="ot-tl-dot">
               {done ? <CheckSVG /> : step.icon}
             </div>
             <span className="ot-tl-label">{step.label}</span>
 
-            {/* connector rendered as child — CSS positions it between this dot and next */}
             {i < STEPS.length - 1 && (
               <div className={`ot-tl-connector${done ? ' ot-tl-connector--lit' : ''}`} />
             )}

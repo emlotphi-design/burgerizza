@@ -83,41 +83,42 @@ const ICON_MAP = {
   cancelled: CrossSVG,
 };
 
-export default function TrackingHero({ status, headline, sub, orderId }) {
+export default function HeroStatusCard({ status, headline, sub, orderId }) {
   const cfg  = STATUS_CFG[status] ?? STATUS_CFG.pending;
   const anim = ANIM[status] ?? '';
   const Icon = ICON_MAP[status] ?? ReceiptSVG;
 
   return (
-    <div className="ot-hero" style={{ '--hero-color': cfg.color, '--hero-glow': cfg.glow, '--circle-bg': cfg.circleBg, '--circle-shadow': cfg.circleShadow }}>
-      <div className="ot-hero-glow" />
-
-      {/* top row: order id + badge */}
+    <div
+      className="ot-card ot-hero"
+      style={{ '--hero-color': cfg.color, '--hero-glow': cfg.glow, '--circle-bg': cfg.circleBg, '--circle-shadow': cfg.circleShadow }}
+    >
       <div className="ot-hero-toprow">
-        <span className="ot-hero-oid">#{orderId}</span>
+        <div className="ot-hero-oid-group">
+          <span className="ot-hero-kitchen">Burgerizza Kitchen</span>
+          <span className="ot-hero-oid">#{orderId}</span>
+        </div>
         <span className="ot-hero-badge" style={{ color: cfg.color, background: cfg.glow }}>
           <span className="ot-hero-badge-dot" style={{ background: cfg.color }} />
           {cfg.label}
         </span>
       </div>
 
-      {/* icon with pulse rings */}
       <div className="ot-hero-icon-section">
         {status !== 'cancelled' && (
           <>
-            <div className="ot-ring ot-ring--1" />
-            <div className="ot-ring ot-ring--2" />
+            <div className="ot-ring ot-ring--1" style={{ '--hero-color': cfg.color }} />
+            <div className="ot-ring ot-ring--2" style={{ '--hero-color': cfg.color }} />
           </>
         )}
-        <div className="ot-hero-circle" style={{ '--hero-color': cfg.color }}>
+        <div className="ot-hero-circle" style={{ '--circle-bg': cfg.circleBg, '--circle-shadow': cfg.circleShadow }}>
           <div className={`ot-hero-icon-inner ${anim}`} style={{ color: cfg.color }}>
             <Icon />
           </div>
         </div>
       </div>
 
-      {/* text */}
-      <div className="ot-hero-texts">
+      <div className="ot-hero-texts" key={status}>
         <h1 className="ot-hero-headline">{headline}</h1>
         {sub && <p className="ot-hero-sub">{sub}</p>}
       </div>

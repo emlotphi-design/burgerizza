@@ -270,3 +270,19 @@
     height: 14px;
   }
 }
+
+/* ── Root cause fix: below ~400px, .nav-icons (cart/language/menu buttons —
+   fixed circular widths, cannot shrink below their own size) plus .brand
+   (logo + "BURGERIZZA" wordmark) together need more width than the
+   viewport provides. .nav uses justify-content:space-between with no
+   flex-shrink override, so when both sides' combined natural width exceeds
+   the container, .nav-icons is pushed past the right edge of the screen —
+   confirmed via getBoundingClientRect() at 320px/375px widths. Dropping the
+   wordmark (keeping just the logo, which still links home) removes enough
+   width that .nav-icons fits without shrinking tap targets below an
+   accessible size. */
+@media (max-width: 400px) {
+  .brand-name {
+    display: none;
+  }
+}

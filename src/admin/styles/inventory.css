@@ -314,32 +314,46 @@
      tablet (768-1199px)    -> 3
      laptop (1200-1599px)   -> 4
      large desktop (1600+)  -> 5 */
+/* Responsive grid — auto-fit/minmax means the column count is however many
+   260px+ cards fit, never a fixed step that can divide unevenly and clip
+   the last card. Explicit 2/1-column overrides below take over once there
+   isn't room for the natural minmax flow to look right on tablet/mobile. */
 .inv-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 22px;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 24px;
+  align-items: stretch;
+  width: 100%;
+  min-width: 0;
 }
 
-@media (min-width: 768px) {
-  .inv-grid { grid-template-columns: repeat(3, 1fr); }
+/* Tablet */
+@media (max-width: 900px) {
+  .inv-grid { grid-template-columns: repeat(2, 1fr); }
 }
 
-@media (min-width: 1200px) {
-  .inv-grid { grid-template-columns: repeat(4, 1fr); }
+/* Mobile */
+@media (max-width: 560px) {
+  .inv-grid { grid-template-columns: 1fr; }
 }
 
-@media (min-width: 1600px) {
-  .inv-grid { grid-template-columns: repeat(5, 1fr); }
-}
-
-/* Item card — same padding/shadow/typography as before; width now comes
-   purely from the grid's explicit column count per breakpoint. */
+/* Item card — same padding/shadow/typography as before. min-width:0 is the
+   actual fix for the "last card cut off" bug: grid items, like flex items,
+   default to min-width:auto (their content's natural size), so any
+   unshrinkable child (the action-button row, below) could force this card
+   wider than its own grid column, pushing the grid's total width past the
+   panel and clipping whatever didn't fit. min-width:0 lets the card actually
+   shrink to its column, and height:100% + the grid's align-items:stretch
+   above is what makes every card in a row match the tallest one. */
 .inv-item-card {
   position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 12px;
+  min-width: 0;
+  height: 100%;
+  box-sizing: border-box;
   border-radius: 24px;
   padding: 30px 26px 26px;
   background: rgba(30,35,48,0.97);
@@ -429,8 +443,24 @@
   gap: 8px;
   margin-top: 4px;
   width: 100%;
+  min-width: 0;
 }
-.inv-item-edit-btn, .inv-item-waste-btn, .inv-item-delete-btn { flex: 1; }
+/* The shared .adm-btn class sets white-space:nowrap with no min-width — on
+   a 260px-minmax column three side-by-side buttons ("Edit"/"Waste"/"Delete")
+   need less width than their unwrapped text+padding demands, so the row
+   (and the whole card) refused to shrink below it. Override scoped to just
+   these three so no other admin page's buttons are affected: allow the
+   label to wrap as the absolute-worst-case fallback and let flex actually
+   shrink the button, instead of forcing the card wider than its column. */
+.inv-item-edit-btn, .inv-item-waste-btn, .inv-item-delete-btn {
+  flex: 1;
+  min-width: 0;
+  white-space: normal;
+  padding-left: 8px;
+  padding-right: 8px;
+  text-align: center;
+  justify-content: center;
+}
 
 .inv-item-delete-btn:hover {
   background: rgba(224,90,90,0.14);
