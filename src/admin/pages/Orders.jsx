@@ -1,6 +1,6 @@
 import { Fragment, useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { fetchOrders, updateOrderStatus, subscribeToOrders, assignDriverAndAdvance, getYesterdayStart, fetchActiveDrivers, createDriverAssignment } from '../services/adminService';
+import { fetchOrders, updateOrderStatus, subscribeToOrders, assignDriverAndAdvance, fetchActiveDrivers, createDriverAssignment } from '../services/adminService';
 import { useRestaurantMode } from '../../store/RestaurantModeContext';
 import { useOrdering } from '../../store/OrderingContext';
 import {
@@ -67,15 +67,36 @@ function itemsSummary(items) {
 function capitalize(s) {
   return s ? String(s).charAt(0).toUpperCase() + String(s).slice(1) : '';
 }
-// Returns true when an order's created_at falls within today or yesterday (local time).
-// Called both in the fetch and in the client-side filter so orders automatically
-// disappear when the day rolls over without requiring a manual refresh.
-function isInWindow(iso) {
-  if (!iso) return false;
-  const windowStart = new Date();
-  windowStart.setDate(windowStart.getDate() - 1);
-  windowStart.setHours(0, 0, 0, 0);
-  return new Date(iso) >= windowStart;
+// Lower bound (inclusive) for the selected date-filter dropdown value, in
+// local time. Returns null for 'all' (no date filter — fetchOrders skips
+// the .gte() clause entirely). No upper bound is needed for any option
+// since there are never future orders.
+function sinceForDateFilter(filter) {
+  const now = new Date();
+  switch (filter) {
+    case 'today': {
+      const d = new Date(now);
+      d.setHours(0, 0, 0, 0);
+      return d;
+    }
+    case 'last7': {
+      const d = new Date(now);
+      d.setDate(d.getDate() - 7);
+      return d;
+    }
+    case 'last30': {
+      const d = new Date(now);
+      d.setDate(d.getDate() - 30);
+      return d;
+    }
+    case 'thisMonth':
+      return new Date(now.getFullYear(), now.getMonth(), 1);
+    case 'thisYear':
+      return new Date(now.getFullYear(), 0, 1);
+    case 'all':
+    default:
+      return null;
+  }
 }
 function getCustomizations(item) {
   const rows = [];
@@ -646,7 +667,10 @@ export default function Orders() {
   }
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
-  const [dateFilter, setDateFilter] = useState('all');
+  // Always starts on "Today" — deliberately not persisted anywhere (no
+  // localStorage/URL sync), so plain component state already resets to this
+  // default on every mount: refresh, re-login, or navigating back to the page.
+  const [dateFilter, setDateFilter] = useState('today');
   const [expandedId, setExpandedId] = useState(null);
   const [toasts, setToasts] = useState([]);
   const [newIds, setNewIds] = useState(new Set());
@@ -702,23 +726,28 @@ export default function Orders() {
   async function load() {
     setLoading(true); setError(null);
     try {
-      // Fetch only today + yesterday using local restaurant time.
-      // limit:500 covers any realistic 2-day order volume.
-      setOrders(await fetchOrders({ since: getYesterdayStart(), limit: 500 }));
+      const since = sinceForDateFilter(dateFilter);
+      setOrders(await fetchOrders({ since: since ? since.toISOString() : null, limit: 500 }));
     }
     catch (e) { setError(e.message); }
     finally { setLoading(false); }
   }
 
+  // Refetch whenever the date-filter dropdown changes (also fires on mount).
   useEffect(() => {
     load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dateFilter]);
+
+  // Realtime subscription + drivers — set up once on mount only, so
+  // changing the date filter never tears down/recreates the channel.
+  useEffect(() => {
     fetchActiveDrivers().then(setActiveDrivers).catch(() => { });
     channelRef.current = subscribeToOrders(({ eventType, new: row, old }) => {
       if (eventType === 'INSERT') {
-        // Only surface orders within today + yesterday.
-        // New orders are virtually always "now", but this guards against
-        // clock-skew or backdated POS entries falling outside the window.
-        if (!isInWindow(row.created_at)) return;
+        // A newly-inserted order's created_at is always "now", which
+        // satisfies every date filter's lower bound (none has an upper
+        // bound), so it's always shown regardless of the selected range.
         setOrders(prev => [row, ...prev]);
         setNewIds(prev => new Set([...prev, row.id]));
         const notifBody = `${row.customer_name || 'Guest'} · ${fmtCurrency(row.total_price)}`;
@@ -807,13 +836,9 @@ export default function Orders() {
     }
   }, []);
 
-  /* Filters */
+  /* Filters — date range is already applied server-side by load() via the
+     dateFilter-driven `since` fetch; only search + status filter client-side. */
   const filtered = orders.filter(o => {
-    // Hard window: hide orders that have aged out of today + yesterday.
-    // This runs on every render so the list self-corrects at midnight without
-    // requiring a manual refresh.
-    if (!isInWindow(o.created_at)) return false;
-
     const q = search.toLowerCase();
     const matchSearch = !q ||
       o.id.toLowerCase().includes(q) ||
@@ -821,18 +846,7 @@ export default function Orders() {
       (o.customer_email || '').toLowerCase().includes(q) ||
       (o.customer_phone || '').includes(q);
     const matchStatus = statusFilter === 'all' || o.status === statusFilter;
-    let matchDate = true;
-    if (dateFilter !== 'all') {
-      const d = new Date(o.created_at);
-      const now = new Date();
-      if (dateFilter === 'today') {
-        matchDate = d.toDateString() === now.toDateString();
-      } else if (dateFilter === 'week') {
-        const weekAgo = new Date(now); weekAgo.setDate(now.getDate() - 7);
-        matchDate = d >= weekAgo;
-      }
-    }
-    return matchSearch && matchStatus && matchDate;
+    return matchSearch && matchStatus;
   });
 
   const pendingCount = orders.filter(o =>
@@ -959,7 +973,10 @@ export default function Orders() {
         <select className="adm-select" value={dateFilter} onChange={e => setDateFilter(e.target.value)}>
           <option value="all">All time</option>
           <option value="today">Today</option>
-          <option value="week">Last 7 days</option>
+          <option value="last7">Last 7 days</option>
+          <option value="last30">Last 30 days</option>
+          <option value="thisMonth">This month</option>
+          <option value="thisYear">This year</option>
         </select>
       </div>
 
@@ -987,8 +1004,26 @@ export default function Orders() {
         ) : filtered.length === 0 ? (
           <div className="adm-empty">
             <div className="adm-empty-emoji">📭</div>
-            <div className="adm-empty-title">No orders found</div>
-            <div className="adm-empty-sub">Try adjusting search or filters.</div>
+            {orders.length === 0 && dateFilter === 'all' && statusFilter === 'all' && !search ? (
+              <>
+                <div className="adm-empty-title">No orders returned</div>
+                <div className="adm-empty-sub">
+                  This is an unfiltered "All time" query with no search or status
+                  filter — if you know orders exist in Supabase, check the RLS
+                  policies on <code>orders</code> (Dashboard → Authentication →
+                  Policies) against migrations <code>002_products_orders.sql</code>
+                  {' '}and <code>014_orders_status_protection.sql</code>. A live
+                  insert test showed the deployed policies may not match those
+                  files, which would make this request succeed with no error
+                  while silently returning zero rows.
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="adm-empty-title">No orders found</div>
+                <div className="adm-empty-sub">Try adjusting search or filters.</div>
+              </>
+            )}
           </div>
         ) : (
           <div className="adm-orders-list" ref={listRef}>

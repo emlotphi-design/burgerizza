@@ -393,3 +393,228 @@ export async function fetchDriverById(id) {
   if (error) throw error;
   return data;
 }
+
+
+// ── Inventory ─────────────────────────────────────────────────
+
+export async function fetchInventoryCategories() {
+  const { data, error } = await supabase
+    .from('inventory_categories')
+    .select('*')
+    .order('sort_order', { ascending: true });
+  if (error) throw error;
+  return data ?? [];
+}
+
+export async function createInventoryCategory(name) {
+  const { data, error } = await supabase
+    .from('inventory_categories')
+    .insert({ name })
+    .select()
+    .single();
+  if (error) throw error;
+  return data;
+}
+
+export async function fetchInventoryItems() {
+  const { data, error } = await supabase
+    .from('inventory_items')
+    .select('*')
+    .eq('is_active', true)
+    .order('name', { ascending: true });
+  if (error) throw error;
+  return data ?? [];
+}
+
+export async function createInventoryItem(item) {
+  const { data, error } = await supabase
+    .from('inventory_items')
+    .insert(item)
+    .select()
+    .single();
+  if (error) throw error;
+  return data;
+}
+
+export async function updateInventoryItem(id, updates) {
+  const { data, error } = await supabase
+    .from('inventory_items')
+    .update(updates)
+    .eq('id', id)
+    .select()
+    .single();
+  if (error) throw error;
+  return data;
+}
+
+export async function deleteInventoryItem(id) {
+  const { error } = await supabase.from('inventory_items').delete().eq('id', id);
+  if (error) throw error;
+}
+
+// Archives (soft-deletes) an item instead of hard-deleting it, so its
+// inventory_transactions history survives — see migration 024.
+export async function archiveInventoryItem(itemId) {
+  const { error } = await supabase.rpc('archive_inventory_item', { p_item_id: itemId });
+  if (error) throw error;
+}
+
+// Manual stock edit (Inventory.jsx Edit modal, Current Stock field) — takes
+// the new absolute value; the DB computes+logs the delta as a transaction.
+export async function setInventoryStock(itemId, newStock, note = null) {
+  const { error } = await supabase.rpc('set_inventory_stock', {
+    p_item_id: itemId,
+    p_new_stock: newStock,
+    p_note: note,
+  });
+  if (error) throw error;
+}
+
+// Record Waste — relative amount wasted, not an absolute new stock value.
+export async function recordInventoryWaste(itemId, amount, note = null) {
+  const { error } = await supabase.rpc('record_inventory_waste', {
+    p_item_id: itemId,
+    p_amount: amount,
+    p_note: note,
+  });
+  if (error) throw error;
+}
+
+export async function fetchConsumptionRules() {
+  const { data, error } = await supabase
+    .from('inventory_consumption_rules')
+    .select('*');
+  if (error) throw error;
+  return data ?? [];
+}
+
+export async function upsertConsumptionRule(rule) {
+  const { data, error } = await supabase
+    .from('inventory_consumption_rules')
+    .upsert(rule, { onConflict: 'ingredient_id' })
+    .select()
+    .single();
+  if (error) throw error;
+  return data;
+}
+
+export async function removeConsumptionRule(ingredientId) {
+  const { error } = await supabase
+    .from('inventory_consumption_rules')
+    .delete()
+    .eq('ingredient_id', ingredientId);
+  if (error) throw error;
+}
+
+export async function receiveStock(itemId, amount, note = null) {
+  const { error } = await supabase.rpc('receive_inventory_stock', {
+    p_item_id: itemId,
+    p_amount: amount,
+    p_note: note,
+  });
+  if (error) throw error;
+}
+
+export async function fetchRecentReceipts(limit = 20) {
+  const { data, error } = await supabase
+    .from('purchase_receipts')
+    .select('id, inventory_item_id, amount, note, created_at, inventory_items(name, unit)')
+    .order('created_at', { ascending: false })
+    .limit(limit);
+  if (error) throw error;
+  return data ?? [];
+}
+
+// ── Analytics ─────────────────────────────────────────────────
+// All backed by security-definer RPCs (migration 024) that aggregate
+// directly in Postgres over [from, to) — see src/admin/utils/dateRanges.js
+// for how callers build the from/to pair for each time filter.
+
+export async function fetchAnalyticsOverview(from, to) {
+  const { data, error } = await supabase.rpc('analytics_overview', {
+    p_from: from.toISOString(),
+    p_to: to.toISOString(),
+  });
+  if (error) throw error;
+  return data?.[0] ?? null;
+}
+
+export async function fetchSalesTimeseries(from, to, granularity = 'day') {
+  const { data, error } = await supabase.rpc('analytics_sales_timeseries', {
+    p_from: from.toISOString(),
+    p_to: to.toISOString(),
+    p_granularity: granularity,
+  });
+  if (error) throw error;
+  return data ?? [];
+}
+
+export async function fetchBestSellers(from, to, limit = 10) {
+  const [productsRes, categoriesRes] = await Promise.all([
+    supabase.rpc('analytics_best_sellers', {
+      p_from: from.toISOString(), p_to: to.toISOString(), p_limit: limit,
+    }),
+    supabase.rpc('analytics_best_categories', {
+      p_from: from.toISOString(), p_to: to.toISOString(),
+    }),
+  ]);
+  if (productsRes.error) throw productsRes.error;
+  if (categoriesRes.error) throw categoriesRes.error;
+  return { products: productsRes.data ?? [], categories: categoriesRes.data ?? [] };
+}
+
+export async function fetchTopCustomers(from, to, limit = 20) {
+  const { data, error } = await supabase.rpc('analytics_top_customers', {
+    p_from: from.toISOString(), p_to: to.toISOString(), p_limit: limit,
+  });
+  if (error) throw error;
+  return data ?? [];
+}
+
+export async function fetchInventoryAnalytics(from, to) {
+  const { data, error } = await supabase.rpc('analytics_inventory', {
+    p_from: from.toISOString(), p_to: to.toISOString(),
+  });
+  if (error) throw error;
+  return data ?? [];
+}
+
+export async function fetchStockHistory(itemId, from, to) {
+  const { data, error } = await supabase.rpc('analytics_stock_history', {
+    p_item_id: itemId, p_from: from.toISOString(), p_to: to.toISOString(),
+  });
+  if (error) throw error;
+  return data ?? [];
+}
+
+export async function fetchLowStockEvents(from, to) {
+  const { data, error } = await supabase.rpc('analytics_low_stock_events', {
+    p_from: from.toISOString(), p_to: to.toISOString(),
+  });
+  if (error) throw error;
+  return data ?? [];
+}
+
+
+export async function fetchTodayConsumptionValue() {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const [itemsRes, txnRes] = await Promise.all([
+    supabase.from('inventory_items').select('id, purchase_price'),
+    supabase.from('inventory_transactions')
+      .select('inventory_item_id, change_amount')
+      .eq('reason', 'order_consumption')
+      .gte('created_at', today.toISOString()),
+  ]);
+  if (itemsRes.error) throw itemsRes.error;
+  if (txnRes.error) throw txnRes.error;
+
+  const priceById = Object.fromEntries(
+    (itemsRes.data ?? []).map(i => [i.id, Number(i.purchase_price ?? 0)]),
+  );
+  return (txnRes.data ?? []).reduce(
+    (sum, t) => sum + Math.abs(Number(t.change_amount)) * (priceById[t.inventory_item_id] ?? 0),
+    0,
+  );
+}

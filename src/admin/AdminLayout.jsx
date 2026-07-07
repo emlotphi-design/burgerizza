@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { NavLink, Outlet, Link } from 'react-router-dom';
 import { useAuth } from '../store/AuthContext';
 import { subscribeToOrders, fetchOrders } from './services/adminService';
@@ -99,6 +100,28 @@ const NAV = [
             <polygon points="12 2 2 7 12 12 22 7 12 2"/>
             <polyline points="2 17 12 22 22 17"/>
             <polyline points="2 12 12 17 22 12"/>
+          </svg>
+        ),
+      },
+      {
+        to: '/admin/inventory',
+        label: 'Inventory',
+        icon: (
+          <svg className="adm-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M3 7l9-4 9 4-9 4-9-4z"/>
+            <path d="M3 7v10l9 4 9-4V7"/>
+            <path d="M12 11v10"/>
+          </svg>
+        ),
+      },
+      {
+        to: '/admin/analytics',
+        label: 'Analytics',
+        icon: (
+          <svg className="adm-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="18" y1="20" x2="18" y2="10"/>
+            <line x1="12" y1="20" x2="12" y2="4"/>
+            <line x1="6" y1="20" x2="6" y2="14"/>
           </svg>
         ),
       },
@@ -212,6 +235,7 @@ export default function AdminLayout() {
   const [pendingCount, setPendingCount] = useState(0);
   const [theme,        setTheme]        = useState(() => localStorage.getItem('adminTheme') ?? 'light');
   const { currentUser } = useAuth();
+  const { t } = useTranslation();
   const channelRef  = useRef(null);
   const layoutRef   = useRef(null);
   const mainRef     = useRef(null);
@@ -319,7 +343,7 @@ export default function AdminLayout() {
                   locked={locked}
                   onAfterClick={close}
                   icon={icon}
-                  label={label}
+                  label={to === '/admin/inventory' ? t('admin.inventory', 'Inventory') : label}
                   badge={badgeKey === 'pending' && pendingCount > 0
                     ? <span className="adm-nav-badge">{pendingCount}</span>
                     : null}

@@ -1,0 +1,58 @@
+/* Analytics — time-filter bar. Reuses .adm-card/.adm-stats-grid/.adm-table
+   etc. from dashboard-shared.css; this file only covers what's unique to
+   the filter bar and custom range picker. */
+
+.ana-filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.ana-filter-chip {
+  padding: 7px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--adm-border, rgba(255,255,255,0.10));
+  background: var(--adm-card-bg, rgba(255,255,255,0.03));
+  color: var(--adm-text-2, rgba(255,255,255,0.70));
+  font-size: 0.80rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  white-space: nowrap;
+}
+
+.ana-filter-chip:hover {
+  background: rgba(255,255,255,0.06);
+}
+
+.ana-filter-chip--active {
+  background: var(--adm-accent, #D4A017);
+  color: #1a1200;
+  border-color: var(--adm-accent, #D4A017);
+}
+
+.ana-custom-range {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  margin-bottom: 16px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--adm-text-2, rgba(255,255,255,0.70));
+}
+
+.ana-custom-range label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.adm-layout[data-theme="light"] .ana-filter-chip {
+  background: rgba(0,0,0,0.02);
+  border-color: rgba(0,0,0,0.08);
+  color: rgba(28,16,0,0.65);
+}
+.adm-layout[data-theme="light"] .ana-filter-chip--active {
+  color: #1a1200;
+}

@@ -2,14 +2,10 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useIngredientConfig } from '../../context/IngredientConfigContext';
 import { useNutritionConfig } from '../../context/NutritionConfigContext';
 import { usePizzaSizeConfig } from '../../context/PizzaSizeConfigContext';
-import { useCustomIngredients } from '../../context/CustomIngredientsContext';
 import { PIZZA_DOUGHS } from '../../utils/pizzaDoughs';
-import { PIZZA_INGREDIENTS } from '../../utils/pizzaIngredients';
-import { ALL_BURGER_INGREDIENTS } from '../../features/burger/utils/burgerData';
 import { MENU_ITEMS } from '../../utils/menuData';
 import { PIZZA_SIZES } from '../../utils/pizzaSizes';
-import { PIZZA_PREVIEW_IMAGES, BURGER_PREVIEW_IMAGES } from '../utils/ingredientImages';
-import { forBuilder, toAdminIngredient } from '../../utils/customIngredients';
+import { useAllIngredients } from '../utils/useAllIngredients';
 import AddIngredientCard from '../components/ui/AddIngredientCard';
 import AddIngredientModal from '../components/ui/AddIngredientModal';
 import '../styles/ingredients.css';
@@ -26,15 +22,6 @@ const CAT = {
 
 const PIZZA_CAT_ORDER  = ['dough', 'sauce', 'cheese', 'meat', 'vegetable'];
 const BURGER_CAT_ORDER = ['bun', 'meat', 'cheese', 'sauce', 'vegetable'];
-
-/* ── Normalise pizza data — use real dough prices from PIZZA_DOUGHS ─────── */
-const PIZZA_ADMIN_LIST = [
-  ...PIZZA_DOUGHS.map(d => ({
-    id: d.id, name: d.name, category: 'dough',
-    price: d.price, isVegan: false, isSpicy: false, tags: [],
-  })),
-  ...PIZZA_INGREDIENTS.filter(i => i.category !== 'dough'),
-];
 
 function groupByCategory(list) {
   return list.reduce((acc, ing) => {
@@ -590,24 +577,9 @@ function PizzaSizeSection() {
 export default function IngredientsPage() {
   const [tab, setTab] = useState('pizza');
   const { isLoading } = useIngredientConfig();
-  const { customIngredients } = useCustomIngredients();
   const isMenuTab = tab === 'dessert' || tab === 'drinks';
 
-  const customPizzaImages  = Object.fromEntries(forBuilder(customIngredients, 'pizza').map(r => [r.id, r.image_url]));
-  const customBurgerImages = Object.fromEntries(forBuilder(customIngredients, 'burger').map(r => [r.id, r.image_url]));
-  const pizzaImages  = { ...PIZZA_PREVIEW_IMAGES,  ...customPizzaImages };
-  const burgerImages = { ...BURGER_PREVIEW_IMAGES, ...customBurgerImages };
-
-  // Drop the old asset-less catalog stubs ("No Asset" placeholders) — only
-  // ingredients with a resolved image are real, selectable ingredients now.
-  const pizzaList = [
-    ...PIZZA_ADMIN_LIST.filter(i => pizzaImages[i.id]),
-    ...forBuilder(customIngredients, 'pizza').map(toAdminIngredient),
-  ];
-  const burgerList = [
-    ...ALL_BURGER_INGREDIENTS.filter(i => burgerImages[i.id]),
-    ...forBuilder(customIngredients, 'burger').map(toAdminIngredient),
-  ];
+  const { pizzaList, burgerList, pizzaImages, burgerImages } = useAllIngredients();
 
   const pizzaGroups  = groupByCategory(pizzaList);
   const burgerGroups = groupByCategory(burgerList);

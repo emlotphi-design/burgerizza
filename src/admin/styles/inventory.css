@@ -1,0 +1,556 @@
+/* ══════════════════════════════════════════════════════════════════
+   INVENTORY PAGE — category-first visual browser. Home = 4 large
+   gradient category tiles (color per category, hover lift + press-down
+   click feedback); clicking one opens a detail view with a smooth
+   entrance animation and a grid of real ingredient cards. Same glassy
+   dark-panel / floating-card language as ingredients.css so it reads as
+   part of the same dashboard.
+══════════════════════════════════════════════════════════════════ */
+
+.inv-page {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* ── Read-only image/name hero inside the Edit Inventory Item modal ── */
+.inv-edit-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding-bottom: 20px;
+  margin-bottom: 6px;
+  border-bottom: 1px solid var(--adm-border, rgba(255,255,255,0.08));
+}
+
+.inv-edit-header-image {
+  width: 128px;
+  height: 128px;
+  border-radius: 24px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(250,204,21,0.08);
+  border: 1px solid rgba(250,204,21,0.18);
+  color: rgba(250,204,21,0.70);
+}
+.inv-edit-header-image img { width: 100%; height: 100%; object-fit: contain; padding: 14px; filter: drop-shadow(0 6px 14px rgba(0,0,0,0.45)); }
+.inv-edit-header-image svg { width: 52px; height: 52px; }
+
+.inv-edit-header-name {
+  font-size: 1.15rem;
+  font-weight: 900;
+  color: var(--adm-text, rgba(255,255,255,0.92));
+  text-align: center;
+}
+
+/* ── Glassmorphism popup: fade+scale in/out, ~220ms, distinct from the
+   default adm-modal-card slide-up used elsewhere in the admin ── */
+.adm-modal-card.inv-modal-card {
+  background: rgba(20,22,28,0.72);
+  backdrop-filter: blur(28px) saturate(1.7);
+  -webkit-backdrop-filter: blur(28px) saturate(1.7);
+  border: 1px solid rgba(255,255,255,0.14);
+  animation: inv-modal-in 0.22s cubic-bezier(0.22,1,0.36,1);
+}
+
+@keyframes inv-modal-in {
+  from { opacity: 0; transform: scale(0.94); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+.adm-modal-card.inv-modal-card.adm-modal-card--closing {
+  animation: inv-modal-out 0.2s ease forwards;
+}
+
+@keyframes inv-modal-out {
+  from { opacity: 1; transform: scale(1); }
+  to   { opacity: 0; transform: scale(0.95); }
+}
+
+.adm-modal-overlay--closing { animation: adm-fade-out 0.2s ease forwards; }
+
+@keyframes adm-fade-out {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+
+.adm-layout[data-theme="light"] .adm-modal-card.inv-modal-card {
+  background: rgba(255,255,255,0.72);
+  border-color: rgba(160,120,0,0.20);
+}
+
+/* ── Home — category tiles ──────────────────────────────────────────────── */
+.inv-home-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 20px;
+}
+
+.inv-home-card {
+  --inv-accent: 250,204,21;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 28px 24px;
+  border-radius: 24px;
+  border: 1px solid rgba(var(--inv-accent), 0.28);
+  background:
+    radial-gradient(ellipse 120% 100% at 0% 0%, rgba(var(--inv-accent), 0.28) 0%, transparent 60%),
+    linear-gradient(155deg, rgba(var(--inv-accent), 0.14) 0%, rgba(20,22,28,0.92) 55%);
+  color: rgba(255,255,255,0.92);
+  text-align: left;
+  font-family: inherit;
+  cursor: pointer;
+  box-shadow: 0 6px 24px rgba(0,0,0,0.30);
+  transition: transform 0.26s cubic-bezier(0.22,1,0.36,1), box-shadow 0.26s ease, border-color 0.26s ease;
+}
+
+.inv-home-card:hover {
+  transform: translateY(-6px) scale(1.015);
+  border-color: rgba(var(--inv-accent), 0.55);
+  box-shadow: 0 16px 36px rgba(0,0,0,0.40), 0 0 0 1px rgba(var(--inv-accent), 0.20);
+}
+
+.inv-home-card:active {
+  transform: translateY(-2px) scale(0.98);
+  transition-duration: 0.1s;
+}
+
+.inv-home-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(var(--inv-accent), 0.20);
+  color: rgb(var(--inv-accent));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.12);
+}
+.inv-home-icon svg { width: 28px; height: 28px; }
+
+.inv-home-name {
+  font-size: 1.1rem;
+  font-weight: 900;
+  letter-spacing: -0.01em;
+}
+
+.inv-home-count {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: rgba(255,255,255,0.50);
+}
+
+/* ── Detail view — vector illustration used as the panel background
+   (not a glass effect: no backdrop-filter, no blurred transparency). The
+   fill/gradient, corner blobs, thin curves and geometric lines all live in
+   InventoryPanelArt.jsx as real SVG; these custom properties just feed it
+   the right colors per theme, and the category accent color it already
+   receives (--inv-accent) tints the corner blobs. This element only
+   supplies the "chrome": rounded corners, a hairline border and a soft
+   shadow — the cards stay the visual focus, the center stays empty. ── */
+.inv-detail {
+  --inv-panel-fill-a: rgba(255,255,255,0.05);
+  --inv-panel-fill-b: rgba(255,255,255,0.014);
+  --inv-panel-fill-c: rgba(255,255,255,0.03);
+  --inv-panel-line:   rgba(255,255,255,0.55);
+  position: relative;
+  border-radius: 32px;
+  padding: 26px 26px 30px;
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.12);
+  overflow: hidden;
+  animation: inv-detail-in 0.32s cubic-bezier(0.22,1,0.36,1);
+}
+
+.inv-panel-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  pointer-events: none;
+  display: block;
+}
+
+.inv-panel-fill-rect {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: inv-panel-drift 70s ease-in-out infinite alternate;
+}
+
+/* Extremely slow, barely-perceptible drift — just enough to feel alive,
+   never enough to distract. */
+@keyframes inv-panel-drift {
+  from { transform: translate(0%, 0%)     scale(1); }
+  to   { transform: translate(1.4%, -1.2%) scale(1.025); }
+}
+
+/* Each depth layer (far/mid/near blobs, planes, lines) gets its transform
+   set imperatively on mousemove (see InventoryPanelArt.jsx) for a cheap,
+   compositor-only 60fps parallax — this transition is what turns those
+   discrete updates into one continuous, smooth motion. */
+.inv-panel-layer {
+  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .inv-panel-fill-rect { animation: none; }
+  .inv-panel-layer { transition: none; }
+}
+
+@keyframes inv-detail-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.inv-back-btn { margin-bottom: 18px; }
+
+.inv-detail-header {
+  --inv-accent: 250,204,21;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 22px;
+  padding-bottom: 18px;
+  padding-left: 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  border-left: 3px solid rgb(var(--inv-accent));
+}
+
+.inv-detail-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(var(--inv-accent), 0.20);
+  color: rgb(var(--inv-accent));
+  flex-shrink: 0;
+}
+.inv-detail-icon svg { width: 22px; height: 22px; }
+
+.inv-detail-title {
+  font-size: 0.85rem;
+  font-weight: 900;
+  color: rgba(255,255,255,0.86);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin: 0;
+  flex: 1;
+}
+
+.inv-detail-count {
+  font-size: 0.72rem;
+  color: rgba(255,255,255,0.30);
+  font-weight: 700;
+}
+
+.inv-empty-hint {
+  margin: 0;
+  font-size: 0.83rem;
+  color: rgba(255,255,255,0.30);
+}
+
+/* Search / quick filters / Add Inventory Item — sits above the grid */
+.inv-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.inv-search-input {
+  flex: 1 1 220px;
+  min-width: 180px;
+}
+
+.inv-filter-chips {
+  display: flex;
+  gap: 6px;
+  background: rgba(0,0,0,0.25);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  padding: 4px;
+}
+
+.inv-filter-chip {
+  padding: 7px 14px;
+  border-radius: 9px;
+  border: none;
+  background: transparent;
+  color: rgba(255,255,255,0.44);
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+.inv-filter-chip:hover { color: rgba(255,255,255,0.72); }
+.inv-filter-chip--active {
+  background: rgba(var(--inv-accent), 0.22);
+  color: rgb(var(--inv-accent));
+}
+
+.inv-add-item-btn {
+  margin-left: auto;
+  font-size: 0.85rem;
+  padding: 11px 20px;
+  font-weight: 800;
+}
+
+/* Explicit per-breakpoint column counts (not content-driven auto-fill) so
+   the card count per row is predictable and widescreen monitors are put to
+   use instead of capping out at 3-4 columns:
+     mobile (<768px)        -> 2
+     tablet (768-1199px)    -> 3
+     laptop (1200-1599px)   -> 4
+     large desktop (1600+)  -> 5 */
+.inv-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 22px;
+}
+
+@media (min-width: 768px) {
+  .inv-grid { grid-template-columns: repeat(3, 1fr); }
+}
+
+@media (min-width: 1200px) {
+  .inv-grid { grid-template-columns: repeat(4, 1fr); }
+}
+
+@media (min-width: 1600px) {
+  .inv-grid { grid-template-columns: repeat(5, 1fr); }
+}
+
+/* Item card — same padding/shadow/typography as before; width now comes
+   purely from the grid's explicit column count per breakpoint. */
+.inv-item-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  border-radius: 24px;
+  padding: 30px 26px 26px;
+  background: rgba(30,35,48,0.97);
+  border: 1px solid rgba(255,255,255,0.14);
+  border-top-color: rgba(255,255,255,0.22);
+  box-shadow: 0 4px 18px rgba(0,0,0,0.30);
+  transition: transform 0.28s cubic-bezier(0.22,1,0.36,1), box-shadow 0.28s ease;
+}
+
+.inv-item-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 32px rgba(0,0,0,0.40);
+}
+
+.inv-item-image-wrap {
+  width: 124px;
+  height: 124px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.inv-item-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 10px rgba(0,0,0,0.45));
+}
+
+.inv-item-image-fallback {
+  width: 92px;
+  height: 92px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(250,204,21,0.08);
+  border: 1px dashed rgba(250,204,21,0.24);
+  color: rgba(250,204,21,0.65);
+}
+.inv-item-image-fallback svg { width: 40px; height: 40px; }
+
+.inv-item-badge { align-self: flex-start; }
+
+.inv-item-name {
+  font-size: 1.02rem;
+  font-weight: 800;
+  color: rgba(255,255,255,0.92);
+  text-align: center;
+}
+
+/* The dominant element on the card, per requirement */
+.inv-item-stock-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 10px 20px;
+  border-radius: 14px;
+  background: rgba(250,204,21,0.08);
+  border: 1px solid rgba(250,204,21,0.18);
+}
+
+.inv-item-stock-label {
+  font-size: 0.62rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.10em;
+  color: rgba(250,204,21,0.70);
+}
+
+.inv-item-stock-value {
+  font-size: 1.75rem;
+  font-weight: 900;
+  line-height: 1.1;
+  color: #FACC15;
+  text-shadow: 0 0 26px rgba(250,204,21,0.20);
+}
+
+.inv-item-meta {
+  font-size: 0.75rem;
+  color: rgba(255,255,255,0.40);
+}
+
+.inv-item-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+  width: 100%;
+}
+.inv-item-edit-btn, .inv-item-waste-btn, .inv-item-delete-btn { flex: 1; }
+
+.inv-item-delete-btn:hover {
+  background: rgba(224,90,90,0.14);
+  color: #f5b0b0;
+  border-color: rgba(224,90,90,0.30);
+}
+
+.inv-item-waste-btn:hover {
+  background: rgba(217,119,6,0.14);
+  color: #fbbf24;
+  border-color: rgba(217,119,6,0.30);
+}
+
+@media (max-width: 640px) {
+  .inv-home-grid { grid-template-columns: repeat(2, 1fr); gap: 14px; }
+  .inv-home-card { padding: 20px 18px; }
+  .inv-toolbar   { flex-direction: column; align-items: stretch; }
+  .inv-add-item-btn { margin-left: 0; }
+  .inv-item-actions { flex-wrap: wrap; }
+}
+
+/* ── Consumption Mapping ── */
+.inv-mapping-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.inv-mapping-row {
+  display: grid;
+  grid-template-columns: 1.4fr 1.6fr 0.8fr 0.6fr auto;
+  gap: 10px;
+  align-items: center;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.06);
+}
+
+.inv-mapping-name {
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: rgba(255,255,255,0.90);
+}
+
+@media (max-width: 900px) {
+  .inv-mapping-row { grid-template-columns: 1fr; }
+}
+
+.adm-layout[data-theme="light"] .inv-mapping-row {
+  background: rgba(0,0,0,0.02);
+  border-color: rgba(0,0,0,0.06);
+}
+.adm-layout[data-theme="light"] .inv-mapping-name { color: rgba(28,16,0,0.90); }
+
+/* ══════════════════════════════════════════════════════════════════
+   LIGHT THEME
+══════════════════════════════════════════════════════════════════ */
+
+.adm-layout[data-theme="light"] .inv-home-card {
+  background:
+    radial-gradient(ellipse 120% 100% at 0% 0%, rgba(var(--inv-accent), 0.20) 0%, transparent 60%),
+    linear-gradient(155deg, rgba(var(--inv-accent), 0.10) 0%, #FFFFFF 55%);
+  border-color: rgba(var(--inv-accent), 0.30);
+  color: #111827;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+}
+.adm-layout[data-theme="light"] .inv-home-card:hover {
+  box-shadow: 0 14px 30px rgba(0,0,0,0.12), 0 0 0 1px rgba(var(--inv-accent), 0.30);
+}
+.adm-layout[data-theme="light"] .inv-home-count { color: #6B7280; }
+
+.adm-layout[data-theme="light"] .inv-detail {
+  --inv-panel-fill-a: rgba(0,0,0,0.032);
+  --inv-panel-fill-b: rgba(0,0,0,0.007);
+  --inv-panel-fill-c: rgba(160,120,40,0.03);
+  --inv-panel-line:   rgba(0,0,0,0.30);
+  border-color: rgba(0,0,0,0.06);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+.adm-layout[data-theme="light"] .inv-detail-header { border-bottom-color: rgba(160,120,40,0.18); }
+.adm-layout[data-theme="light"] .inv-detail-title   { color: #1C1000; }
+.adm-layout[data-theme="light"] .inv-detail-count   { color: #7A6A50; }
+.adm-layout[data-theme="light"] .inv-empty-hint     { color: #7A6A50; }
+
+.adm-layout[data-theme="light"] .inv-item-card {
+  background: #FFFFFF;
+  border-color: rgba(160,120,0,0.28);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+}
+.adm-layout[data-theme="light"] .inv-item-name { color: #111827; }
+.adm-layout[data-theme="light"] .inv-item-meta { color: #6B7280; }
+
+.adm-layout[data-theme="light"] .inv-item-image-fallback {
+  background: rgba(250,204,21,0.10);
+  border-color: rgba(200,160,50,0.30);
+  color: #92620A;
+}
+
+.adm-layout[data-theme="light"] .inv-item-delete-btn:hover {
+  background: rgba(224,90,90,0.10);
+  color: #b91c1c;
+  border-color: rgba(224,90,90,0.30);
+}
+
+.adm-layout[data-theme="light"] .inv-item-stock-block {
+  background: rgba(250,204,21,0.10);
+  border-color: rgba(200,160,50,0.30);
+}
+.adm-layout[data-theme="light"] .inv-item-stock-label { color: #92620A; }
+.adm-layout[data-theme="light"] .inv-item-stock-value { color: #92620A; text-shadow: none; }
+
+.adm-layout[data-theme="light"] .inv-filter-chips {
+  background: rgba(0,0,0,0.04);
+  border-color: rgba(0,0,0,0.08);
+}
+.adm-layout[data-theme="light"] .inv-filter-chip { color: #6B7280; }
+.adm-layout[data-theme="light"] .inv-filter-chip:hover { color: #111827; }
+.adm-layout[data-theme="light"] .inv-filter-chip--active {
+  background: rgba(var(--inv-accent), 0.16);
+  color: rgb(var(--inv-accent));
+}

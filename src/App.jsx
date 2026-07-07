@@ -31,6 +31,8 @@ import AdminUsers from './admin/pages/Users';
 import AdminPOS from './admin/pages/POS';
 import AdminDriverDetail from './admin/pages/DriverDetail';
 import AdminIngredients from './admin/pages/Ingredients';
+import AdminInventory from './admin/pages/Inventory';
+import AdminAnalytics from './admin/pages/Analytics';
 import KitchenDisplay from './kitchen/KitchenDisplay';
 import RestaurantModeBanner from './components/RestaurantModeBanner';
 import RestaurantModeCartBar from './components/RestaurantModeCartBar';
@@ -120,6 +122,8 @@ function AnimatedRoutes() {
           <Route path="drivers"     element={<DriversPage />} />
           <Route path="drivers/:id" element={<AdminDriverDetail />} />
           <Route path="ingredients" element={<AdminIngredients />} />
+          <Route path="inventory"   element={<AdminInventory />} />
+          <Route path="analytics"   element={<AdminAnalytics />} />
         </Route>
       </Routes>
     </div>

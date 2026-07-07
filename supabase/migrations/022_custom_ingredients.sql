@@ -1,26 +1,17 @@
 /*
-  Migration 020 — custom_ingredients (create + realtime + storage)
+  Migration 022 — custom_ingredients
 
-  Backs the new admin "Add Ingredient" flow (replaces the old "No Asset"
-  placeholder cards in src/admin/pages/Ingredients.jsx). Admins can now
-  create brand-new ingredients with an uploaded image, which are merged at
-  render time into the existing hardcoded PIZZA_INGREDIENTS/BURGER_* catalogs
-  — this table only holds the additive, admin-created rows, so nothing about
-  the existing static catalogs changes.
+  Backs the admin "Add Ingredient" flow (src/admin/pages/Ingredients.jsx,
+  src/admin/components/ui/AddIngredientModal.jsx) and is read by
+  CustomIngredientsContext.jsx on every page load (mounted app-wide in
+  main.jsx) — this table is required for checkout to load cleanly, even
+  though checkout itself never queries it directly.
 
-  category determines which builder(s) an ingredient appears in:
-    dough                         -> Pizza only
-    bun                           -> Burger only
-    sauce/cheese/meat/vegetable   -> Pizza + Burger
+  Column set matches CustomIngredientsContext.jsx / customIngredients.js
+  exactly: id, name, category, price, calories, weight_g, image_url,
+  enabled, created_at.
 
-  price/calories/weight_g here are the values shown at creation time. The
-  live, editable price/nutrition source of truth stays ingredient_config /
-  nutrition_config (migrations 016/017) exactly like every existing
-  ingredient — the admin modal upserts into those tables immediately after
-  inserting here, so this table is not re-read for pricing after creation.
-
-  Modeled directly on 019_pizza_size_config.sql's table/RLS/realtime/grants
-  conventions.
+  Idempotent: safe to run multiple times.
 */
 
 
@@ -47,7 +38,7 @@ create table if not exists public.custom_ingredients (
 
 alter table public.custom_ingredients enable row level security;
 
--- Customer builders (anonymous) need to read newly-created ingredients
+-- Customer builders (anonymous) need to read admin-created ingredients
 drop policy if exists "custom_ingredients: public read" on public.custom_ingredients;
 create policy "custom_ingredients: public read"
   on public.custom_ingredients for select
@@ -57,38 +48,24 @@ create policy "custom_ingredients: public read"
 drop policy if exists "custom_ingredients: admin write" on public.custom_ingredients;
 create policy "custom_ingredients: admin write"
   on public.custom_ingredients for all
-  using (
-    exists (
-      select 1 from public.profiles
-      where id = auth.uid()
-        and role in ('admin', 'staff')
-    )
-  )
-  with check (
-    exists (
-      select 1 from public.profiles
-      where id = auth.uid()
-        and role in ('admin', 'staff')
-    )
-  );
+  using (exists (select 1 from public.profiles where id = auth.uid() and role in ('admin', 'staff')))
+  with check (exists (select 1 from public.profiles where id = auth.uid() and role in ('admin', 'staff')));
 
 
--- ── 3. Table-level grants ─────────────────────────────────────────────────────
+-- ── 3. Grants ─────────────────────────────────────────────────────────────────
 
 grant select on public.custom_ingredients to anon;
 grant select, insert, update, delete on public.custom_ingredients to authenticated;
 
 
--- ── 4. Supabase Realtime ──────────────────────────────────────────────────────
+-- ── 4. Realtime ───────────────────────────────────────────────────────────────
 
 alter table public.custom_ingredients replica identity full;
 
 do $$ begin
   if not exists (
     select 1 from pg_publication_tables
-    where pubname    = 'supabase_realtime'
-      and schemaname = 'public'
-      and tablename  = 'custom_ingredients'
+    where pubname = 'supabase_realtime' and schemaname = 'public' and tablename = 'custom_ingredients'
   ) then
     execute 'alter publication supabase_realtime add table public.custom_ingredients';
   end if;
@@ -111,9 +88,5 @@ create policy "ingredient-images: admin write"
   on storage.objects for insert
   with check (
     bucket_id = 'ingredient-images'
-    and exists (
-      select 1 from public.profiles
-      where id = auth.uid()
-        and role in ('admin', 'staff')
-    )
+    and exists (select 1 from public.profiles where id = auth.uid() and role in ('admin', 'staff'))
   );

@@ -4,7 +4,12 @@ import LanguageDetector from 'i18next-browser-languagedetector';
 
 import de from './locales/de/common.json';
 import en from './locales/en/common.json';
+import fa from './locales/fa/common.json';
 
+// `fa` is registered here so translation keys resolve to real Persian text
+// (e.g. admin.inventory) if it's ever activated, but it is intentionally
+// left out of `supportedLngs`/`LANGUAGES` below — Persian is not yet
+// selectable in the UI and the rest of the app has no RTL support wired up.
 i18n
   .use(LanguageDetector)
   .use(initReactI18next)
@@ -12,6 +17,7 @@ i18n
     resources: {
       de: { common: de },
       en: { common: en },
+      fa: { common: fa },
     },
     defaultNS: 'common',
     fallbackLng: 'de',

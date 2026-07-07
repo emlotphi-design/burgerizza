@@ -667,6 +667,9 @@ function RestaurantCheckout() {
         },
         items,
         total_price: +grandTotal.toFixed(2),
+        subtotal: +grandTotal.toFixed(2),
+        discount_amount: 0,
+        tax_amount: 0,
         status: 'pending',            // no migration needed for this
         payment_method: rmConfig.payment,
       };
@@ -1045,6 +1048,9 @@ function CheckoutNormal() {
           return item;
         }),
         total_price: total,
+        subtotal: total,
+        discount_amount: 0,
+        tax_amount: 0,
         status: 'pending',
         payment_method: paymentMethod,
       }).select('id').single();
