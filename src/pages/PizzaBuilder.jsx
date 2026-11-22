@@ -2,7 +2,8 @@ import React, { useEffect } from 'react';
 import Navbar from '../components/Navbar';
 import Socials from '../components/Socials';
 import PizzaCanvas, { PIZZA_ASSET_URLS } from '../components/PizzaCanvas';
-import CategoryToolbar from '../components/CategoryToolbar';
+import BainMarieCounter from '../features/pizza-builder/components/BainMarieCounter';
+import '../features/pizza-builder/styles/bain-marie.css';
 import { usePizzaBuilder } from '../features/pizza-builder/hooks/usePizzaBuilder';
 import { LABEL, calcPrice } from '../utils/pizzaUtils';
 import { calculatePizzaCalories } from '../utils/pizzaNutritionUtils';
@@ -134,7 +135,7 @@ export default function PizzaBuilder() {
   // .builder-center's height and re-centers the canvas.
   const badgeWrapRef = useCalorieBadgePosition(
     !!selectedDough,
-    '.pizza-canvas-wrap',
+    '.pb-plate',
     [sizesForDough.length, pizzaItems.length],
   );
 
@@ -150,19 +151,29 @@ export default function PizzaBuilder() {
   return (
     <div className="page-enter" style={{ display: 'flex', flexDirection: 'column', height: '100svh', overflow: 'hidden', paddingTop: 'var(--nav-h, 74px)' }}>
       <Navbar />
-      <main className="pb-main">
+      <main className="pb-main pb-main--counter">
         <div className="builder-stage">
           {isEditing && (
             <div className="builder-edit-banner">
               BEARBEITUNG: {editingName || 'Pizza'}
             </div>
           )}
-          <CategoryToolbar
+          <BainMarieCounter
             activeCategory={activeCategory}
             onCategoryChange={handleCategoryChange}
             unlocked={unlocked}
             completed={completed}
             lockMsg={lockMsg}
+            selectedDough={selectedDough}
+            selectedSauce={selectedSauce}
+            selectedCheese={selectedCheese}
+            selectedMeats={selectedMeats}
+            selectedVegetables={selectedVegetables}
+            onDoughSelect={handleDoughSelect}
+            onSauceSelect={handleSauceSelect}
+            onCheeseSelect={handleCheeseSelect}
+            onMeatToggle={handleMeatToggle}
+            onVegetableToggle={handleVegetableToggle}
           />
           <div className="builder-center">
             {selectedDough && (
@@ -170,21 +181,24 @@ export default function PizzaBuilder() {
                 <NutritionBadge calories={liveCalories} size="md" premium />
               </div>
             )}
-            <PizzaCanvas
-              activeCategory={activeCategory}
-              selectedDough={selectedDough}
-              selectedSauce={selectedSauce}
-              selectedCheese={selectedCheese}
-              selectedMeats={selectedMeats}
-              selectedVegetables={selectedVegetables}
-              onDoughSelect={handleDoughSelect}
-              onSauceSelect={handleSauceSelect}
-              onCheeseSelect={handleCheeseSelect}
-              onMeatToggle={handleMeatToggle}
-              onVegetableToggle={handleVegetableToggle}
-              size="min(540px, 88vw, calc(100vh - 232px))"
-              protectImages
-            />
+            <div className="pb-plate">
+              <PizzaCanvas
+                activeCategory={activeCategory}
+                selectedDough={selectedDough}
+                selectedSauce={selectedSauce}
+                selectedCheese={selectedCheese}
+                selectedMeats={selectedMeats}
+                selectedVegetables={selectedVegetables}
+                onDoughSelect={handleDoughSelect}
+                onSauceSelect={handleSauceSelect}
+                onCheeseSelect={handleCheeseSelect}
+                onMeatToggle={handleMeatToggle}
+                onVegetableToggle={handleVegetableToggle}
+                size="calc(var(--pb-plate) / 0.56)"
+                showPreviews={false}
+                protectImages
+              />
+            </div>
             {selectedDough && sizesForDough.length > 0 && (
               <div className="nutrition-size-row">
                 {sizesForDough.map(s => (

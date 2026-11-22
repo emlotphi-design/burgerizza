@@ -310,6 +310,32 @@ const previewBtn = {
 
 const preloadedLayers = new Set();
 
+/**
+ * Merged (static + admin-created) ingredient lists for every pizza category.
+ * Shared by PizzaCanvas and the bain-marie ingredient counter.
+ */
+export function usePizzaIngredients() {
+  const { customIngredients } = useCustomIngredients();
+
+  const pizzaCustom = useMemo(() => forBuilder(customIngredients, 'pizza'), [customIngredients]);
+  const customByCategory = useMemo(() => ({
+    dough:     pizzaCustom.filter(r => r.category === 'dough'),
+    sauce:     pizzaCustom.filter(r => r.category === 'sauce'),
+    cheese:    pizzaCustom.filter(r => r.category === 'cheese'),
+    meat:      pizzaCustom.filter(r => r.category === 'meat'),
+    vegetable: pizzaCustom.filter(r => r.category === 'vegetable'),
+  }), [pizzaCustom]);
+
+  const mergedDoughs     = useMemo(() => mergeWithCustom(DOUGHS, customByCategory.dough),         [customByCategory.dough]);
+  const mergedSauces     = useMemo(() => mergeWithCustom(SAUCES, customByCategory.sauce),          [customByCategory.sauce]);
+  const mergedCheeses    = useMemo(() => mergeWithCustom(CHEESES, customByCategory.cheese),        [customByCategory.cheese]);
+  const mergedMeats      = useMemo(() => mergeWithCustom(MEATS, customByCategory.meat),            [customByCategory.meat]);
+  const mergedVegetables = useMemo(() => mergeWithCustom(VEGETABLES, customByCategory.vegetable),  [customByCategory.vegetable]);
+
+
+  return { mergedDoughs, mergedSauces, mergedCheeses, mergedMeats, mergedVegetables };
+}
+
 function PizzaCanvas({
   activeCategory     = 'dough',
   selectedDough      = null,
@@ -329,24 +355,12 @@ function PizzaCanvas({
      default so other pages reusing this component (e.g. Cart) are
      unaffected. */
   protectImages      = false,
+  /* false = ingredients are picked elsewhere (bain-marie counter), so the
+     ring of preview items around the plate is not rendered. */
+  showPreviews       = true,
 }) {
   const { isEnabled } = useIngredientConfig();
-  const { customIngredients } = useCustomIngredients();
-
-  const pizzaCustom = useMemo(() => forBuilder(customIngredients, 'pizza'), [customIngredients]);
-  const customByCategory = useMemo(() => ({
-    dough:     pizzaCustom.filter(r => r.category === 'dough'),
-    sauce:     pizzaCustom.filter(r => r.category === 'sauce'),
-    cheese:    pizzaCustom.filter(r => r.category === 'cheese'),
-    meat:      pizzaCustom.filter(r => r.category === 'meat'),
-    vegetable: pizzaCustom.filter(r => r.category === 'vegetable'),
-  }), [pizzaCustom]);
-
-  const mergedDoughs     = useMemo(() => mergeWithCustom(DOUGHS, customByCategory.dough),         [customByCategory.dough]);
-  const mergedSauces     = useMemo(() => mergeWithCustom(SAUCES, customByCategory.sauce),          [customByCategory.sauce]);
-  const mergedCheeses    = useMemo(() => mergeWithCustom(CHEESES, customByCategory.cheese),        [customByCategory.cheese]);
-  const mergedMeats      = useMemo(() => mergeWithCustom(MEATS, customByCategory.meat),            [customByCategory.meat]);
-  const mergedVegetables = useMemo(() => mergeWithCustom(VEGETABLES, customByCategory.vegetable),  [customByCategory.vegetable]);
+  const { mergedDoughs, mergedSauces, mergedCheeses, mergedMeats, mergedVegetables } = usePizzaIngredients();
 
   const handleContextMenu = protectImages ? (e) => e.preventDefault() : undefined;
   const handleDragStart   = protectImages ? (e) => e.preventDefault() : undefined;
@@ -463,7 +477,7 @@ function PizzaCanvas({
       ))}
 
       {/* ── Dough previews (triangle) ── */}
-      {activeCategory === 'dough' && mergedDoughs.map(d => {
+      {showPreviews && activeCategory === 'dough' && mergedDoughs.map(d => {
         const adminDisabled = !isEnabled('pizza', d.id);
         /* Dough labels sit to the left of their own thumbnail instead of
            above it, so they can never reach up into the top toolbar/
@@ -509,7 +523,7 @@ function PizzaCanvas({
       })}
 
       {/* ── Sauce previews (pentagon) ── */}
-      {activeCategory === 'sauces' && mergedSauces.map(s => {
+      {showPreviews && activeCategory === 'sauces' && mergedSauces.map(s => {
         const adminDisabled = !isEnabled('pizza', s.id);
         return (
           <div
@@ -533,7 +547,7 @@ function PizzaCanvas({
       })}
 
       {/* ── Cheese previews (triangle) ── */}
-      {activeCategory === 'cheese' && mergedCheeses.map(c => {
+      {showPreviews && activeCategory === 'cheese' && mergedCheeses.map(c => {
         const adminDisabled = !isEnabled('pizza', c.id);
         return (
           <div
@@ -557,7 +571,7 @@ function PizzaCanvas({
       })}
 
       {/* ── Meat previews (9-point circle) ── */}
-      {activeCategory === 'meat' && mergedMeats.map((m, i) => {
+      {showPreviews && activeCategory === 'meat' && mergedMeats.map((m, i) => {
         const isSelected    = selectedMeats.includes(m.id);
         const adminDisabled = !isEnabled('pizza', m.id);
         const isDisabled    = adminDisabled || (atMeatLimit && !isSelected);
@@ -592,7 +606,7 @@ function PizzaCanvas({
       })}
 
       {/* ── Vegetable previews (14-point circle) ── */}
-      {activeCategory === 'vegetables' && mergedVegetables.map((v, i) => {
+      {showPreviews && activeCategory === 'vegetables' && mergedVegetables.map((v, i) => {
         const isSelected    = selectedVegetables.includes(v.id);
         const adminDisabled = !isEnabled('pizza', v.id);
         const isDisabled    = adminDisabled || (atVeggieLimit && !isSelected);
@@ -627,9 +641,9 @@ function PizzaCanvas({
       })}
 
       {/* ── Per-category topping limit message ── */}
-      <div className={`topping-limit-msg${(atMeatLimit && activeCategory === 'meat') || (atVeggieLimit && activeCategory === 'vegetables') ? ' topping-limit-msg--visible' : ''}`}>
+      {showPreviews && <div className={`topping-limit-msg${(atMeatLimit && activeCategory === 'meat') || (atVeggieLimit && activeCategory === 'vegetables') ? ' topping-limit-msg--visible' : ''}`}>
         {activeCategory === 'meat' ? 'Maximum 4 meat toppings' : 'Maximum 6 vegetable toppings'}
-      </div>
+      </div>}
 
     </div>
   );
