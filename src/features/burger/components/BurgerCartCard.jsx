@@ -7,11 +7,11 @@ import NutritionBadge from '../../../components/NutritionBadge';
 
 /* Bun preview images — used as fallback when canvas capture image is absent
    (e.g. orders placed via Restaurant Mode sticky bar or admin POS) */
-import classicPreview  from '../../../assets/burgers/buns/buns-preview.png/classicbun-preview.png';
-import classic2Preview from '../../../assets/burgers/buns/buns-preview.png/classicbun-preview2.png';
-import charcoalPreview from '../../../assets/burgers/buns/buns-preview.png/charcoalbun-preview.png';
-import beetrootPreview from '../../../assets/burgers/buns/buns-preview.png/beetrootbun-preview.png';
-import parsleyPreview  from '../../../assets/burgers/buns/buns-preview.png/parsleybun-preview.png';
+import classicPreview  from '../../../assets/burgers/buns/buns-preview.png/classicbun-preview.webp';
+import classic2Preview from '../../../assets/burgers/buns/buns-preview.png/classicbun-preview2.webp';
+import charcoalPreview from '../../../assets/burgers/buns/buns-preview.png/charcoalbun-preview.webp';
+import beetrootPreview from '../../../assets/burgers/buns/buns-preview.png/beetrootbun-preview.webp';
+import parsleyPreview  from '../../../assets/burgers/buns/buns-preview.png/parsleybun-preview.webp';
 
 const BUN_PREVIEWS = {
   classicbun:  classicPreview,

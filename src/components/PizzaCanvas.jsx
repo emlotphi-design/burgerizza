@@ -1,88 +1,88 @@
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useIngredientConfig } from '../context/IngredientConfigContext';
 import { useCustomIngredients } from '../context/CustomIngredientsContext';
 import { forBuilder } from '../utils/customIngredients';
 import { nextRingSlots } from '../utils/ringLayout';
 
-import trayImg       from '../assets/pizzas/base/full/tray-full.png';
-import americanFull  from '../assets/pizzas/base/full/american-full.png';
-import americanPrev  from '../assets/pizzas/base/preview/american-preview.png';
-import americanpFull from '../assets/pizzas/base/full/americanp-full.png';
-import americanpPrev from '../assets/pizzas/base/preview/americanp-preview.png';
-import thinFull      from '../assets/pizzas/base/full/thin-full.png';
-import thinPrev      from '../assets/pizzas/base/preview/thin-preview.png';
+import trayImg       from '../assets/pizzas/base/full/tray-full.webp';
+import americanFull  from '../assets/pizzas/base/full/american-full.webp';
+import americanPrev  from '../assets/pizzas/base/preview/american-preview.webp';
+import americanpFull from '../assets/pizzas/base/full/americanp-full.webp';
+import americanpPrev from '../assets/pizzas/base/preview/americanp-preview.webp';
+import thinFull      from '../assets/pizzas/base/full/thin-full.webp';
+import thinPrev      from '../assets/pizzas/base/preview/thin-preview.webp';
 
-import baconPrev         from '../assets/pizzas/toppings/meat/bacon-preview.png';
-import beefhumPrev       from '../assets/pizzas/toppings/meat/beefhum-preview.png';
-import cheesesausagePrev from '../assets/pizzas/toppings/meat/cheesesausage-preview.png';
-import chickenPrev       from '../assets/pizzas/toppings/meat/chicken-preview.png';
-import fleischPrev       from '../assets/pizzas/toppings/meat/fleisch-preview.png';
-import meatballPrev      from '../assets/pizzas/toppings/meat/meatball-preview.png';
-import pepperoniPrev     from '../assets/pizzas/toppings/meat/pepperoni-preview.png';
-import salamiPrev        from '../assets/pizzas/toppings/meat/salami-preview.png';
-import turkeyhumprev     from '../assets/pizzas/toppings/meat/turkeyhum-preview.png';
+import baconPrev         from '../assets/pizzas/toppings/meat/bacon-preview.webp';
+import beefhumPrev       from '../assets/pizzas/toppings/meat/beefhum-preview.webp';
+import cheesesausagePrev from '../assets/pizzas/toppings/meat/cheesesausage-preview.webp';
+import chickenPrev       from '../assets/pizzas/toppings/meat/chicken-preview.webp';
+import fleischPrev       from '../assets/pizzas/toppings/meat/fleisch-preview.webp';
+import meatballPrev      from '../assets/pizzas/toppings/meat/meatball-preview.webp';
+import pepperoniPrev     from '../assets/pizzas/toppings/meat/pepperoni-preview.webp';
+import salamiPrev        from '../assets/pizzas/toppings/meat/salami-preview.webp';
+import turkeyhumprev     from '../assets/pizzas/toppings/meat/turkeyhum-preview.webp';
 
-import baconLayer         from '../assets/pizzas/toppings/meatlayers/bacon-layer.png';
-import beefhumLayer       from '../assets/pizzas/toppings/meatlayers/beefhum-layer.png';
-import cheesesausageLayer from '../assets/pizzas/toppings/meatlayers/cheesesausage-layer.png';
-import chickenLayer       from '../assets/pizzas/toppings/meatlayers/chicken-layer.png';
-import fleischLayer       from '../assets/pizzas/toppings/meatlayers/fleisch-layer.png';
-import meatballLayer      from '../assets/pizzas/toppings/meatlayers/meatball-layer.png';
-import pepperoniLayer     from '../assets/pizzas/toppings/meatlayers/pepperoni-layer.png';
-import salamiLayer        from '../assets/pizzas/toppings/meatlayers/salami-layer.png';
-import turkeyhumLayer     from '../assets/pizzas/toppings/meatlayers/turkeyhum-layer.png';
+import baconLayer         from '../assets/pizzas/toppings/meatlayers/bacon-layer.webp';
+import beefhumLayer       from '../assets/pizzas/toppings/meatlayers/beefhum-layer.webp';
+import cheesesausageLayer from '../assets/pizzas/toppings/meatlayers/cheesesausage-layer.webp';
+import chickenLayer       from '../assets/pizzas/toppings/meatlayers/chicken-layer.webp';
+import fleischLayer       from '../assets/pizzas/toppings/meatlayers/fleisch-layer.webp';
+import meatballLayer      from '../assets/pizzas/toppings/meatlayers/meatball-layer.webp';
+import pepperoniLayer     from '../assets/pizzas/toppings/meatlayers/pepperoni-layer.webp';
+import salamiLayer        from '../assets/pizzas/toppings/meatlayers/salami-layer.webp';
+import turkeyhumLayer     from '../assets/pizzas/toppings/meatlayers/turkeyhum-layer.webp';
 
-import chedarPrev     from '../assets/pizzas/cheese/cheesepreview/chedar-preview.png';
-import goudaPrev      from '../assets/pizzas/cheese/cheesepreview/gouda-preview.png';
-import mozzarellaPrev from '../assets/pizzas/cheese/cheesepreview/mozzarella-preview.png';
+import chedarPrev     from '../assets/pizzas/cheese/cheesepreview/chedar-preview.webp';
+import goudaPrev      from '../assets/pizzas/cheese/cheesepreview/gouda-preview.webp';
+import mozzarellaPrev from '../assets/pizzas/cheese/cheesepreview/mozzarella-preview.webp';
 
-import chedarLayer     from '../assets/pizzas/cheese/cheeselayers/chedar-layer.png';
-import goudaLayer      from '../assets/pizzas/cheese/cheeselayers/gouda-layer.png';
-import mozzarellaLayer from '../assets/pizzas/cheese/cheeselayers/mozzarella-layer.png';
+import chedarLayer     from '../assets/pizzas/cheese/cheeselayers/chedar-layer.webp';
+import goudaLayer      from '../assets/pizzas/cheese/cheeselayers/gouda-layer.webp';
+import mozzarellaLayer from '../assets/pizzas/cheese/cheeselayers/mozzarella-layer.webp';
 
-import bbqPrev     from '../assets/pizzas/sauces/saucespreview/bbq-preview.png';
-import garlicPrev  from '../assets/pizzas/sauces/saucespreview/garlic-preview.png';
-import ketchupPrev from '../assets/pizzas/sauces/saucespreview/ketchup-preview.png';
-import pestosPrev  from '../assets/pizzas/sauces/saucespreview/pestos-preview.png';
-import spicyPrev   from '../assets/pizzas/sauces/saucespreview/spicy-preview.png';
+import bbqPrev     from '../assets/pizzas/sauces/saucespreview/bbq-preview.webp';
+import garlicPrev  from '../assets/pizzas/sauces/saucespreview/garlic-preview.webp';
+import ketchupPrev from '../assets/pizzas/sauces/saucespreview/ketchup-preview.webp';
+import pestosPrev  from '../assets/pizzas/sauces/saucespreview/pestos-preview.webp';
+import spicyPrev   from '../assets/pizzas/sauces/saucespreview/spicy-preview.webp';
 
-import bbqLayer     from '../assets/pizzas/sauces/saucelayers/bbq-layer.png';
-import garlicLayer  from '../assets/pizzas/sauces/saucelayers/garlic-layer.png';
-import ketchupLayer from '../assets/pizzas/sauces/saucelayers/ketchup-layer.png';
-import pestosLayer  from '../assets/pizzas/sauces/saucelayers/pestos-layer.png';
-import spicyLayer   from '../assets/pizzas/sauces/saucelayers/spicy-layer.png';
+import bbqLayer     from '../assets/pizzas/sauces/saucelayers/bbq-layer.webp';
+import garlicLayer  from '../assets/pizzas/sauces/saucelayers/garlic-layer.webp';
+import ketchupLayer from '../assets/pizzas/sauces/saucelayers/ketchup-layer.webp';
+import pestosLayer  from '../assets/pizzas/sauces/saucelayers/pestos-layer.webp';
+import spicyLayer   from '../assets/pizzas/sauces/saucelayers/spicy-layer.webp';
 
 /* ── Vegetable previews ── */
-import mushroomPrev     from '../assets/pizzas/toppings/vegetabales/mushroom-preview.png';
-import bellpepperPrev   from '../assets/pizzas/toppings/vegetabales/bellpepper-preview.png';
-import sweetcornPrev    from '../assets/pizzas/toppings/vegetabales/sweetcorn-preview.png';
-import cherrytomatoPrev from '../assets/pizzas/toppings/vegetabales/cherrytomato-preview.png';
-import redonionPrev     from '../assets/pizzas/toppings/vegetabales/redonion-preview.png';
-import broccoliPrev     from '../assets/pizzas/toppings/vegetabales/broccoli-preview.png';
-import eggplantPrev     from '../assets/pizzas/toppings/vegetabales/eggplant-preview.png';
-import zucchiniPrev     from '../assets/pizzas/toppings/vegetabales/zucchini-preview.png';
-import dicedtomatoPrev  from '../assets/pizzas/toppings/vegetabales/dicedtomato-preview.png';
-import greenolivesPrev  from '../assets/pizzas/toppings/vegetabales/greenolives-preview.png';
-import blackolivePrev   from '../assets/pizzas/toppings/vegetabales/blackolive-preview.png';
-import babyspinachPrev  from '../assets/pizzas/toppings/vegetabales/babyspinach-preview.png';
-import bluecheesePrev   from '../assets/pizzas/toppings/vegetabales/bluecheese-preview.png';
-import pestocheesePrev  from '../assets/pizzas/toppings/vegetabales/pestocheese-preview.png';
+import mushroomPrev     from '../assets/pizzas/toppings/vegetabales/mushroom-preview.webp';
+import bellpepperPrev   from '../assets/pizzas/toppings/vegetabales/bellpepper-preview.webp';
+import sweetcornPrev    from '../assets/pizzas/toppings/vegetabales/sweetcorn-preview.webp';
+import cherrytomatoPrev from '../assets/pizzas/toppings/vegetabales/cherrytomato-preview.webp';
+import redonionPrev     from '../assets/pizzas/toppings/vegetabales/redonion-preview.webp';
+import broccoliPrev     from '../assets/pizzas/toppings/vegetabales/broccoli-preview.webp';
+import eggplantPrev     from '../assets/pizzas/toppings/vegetabales/eggplant-preview.webp';
+import zucchiniPrev     from '../assets/pizzas/toppings/vegetabales/zucchini-preview.webp';
+import dicedtomatoPrev  from '../assets/pizzas/toppings/vegetabales/dicedtomato-preview.webp';
+import greenolivesPrev  from '../assets/pizzas/toppings/vegetabales/greenolives-preview.webp';
+import blackolivePrev   from '../assets/pizzas/toppings/vegetabales/blackolive-preview.webp';
+import babyspinachPrev  from '../assets/pizzas/toppings/vegetabales/babyspinach-preview.webp';
+import bluecheesePrev   from '../assets/pizzas/toppings/vegetabales/bluecheese-preview.webp';
+import pestocheesePrev  from '../assets/pizzas/toppings/vegetabales/pestocheese-preview.webp';
 
 /* ── Vegetable layers ── */
-import mushroomLayer     from '../assets/pizzas/toppings/vegetabalelayers/mushroom-layer.png';
-import bellpepperLayer   from '../assets/pizzas/toppings/vegetabalelayers/bellpepper-layer.png';
-import sweetcornLayer    from '../assets/pizzas/toppings/vegetabalelayers/sweetcorn-layer.png';
-import cherrytomatoLayer from '../assets/pizzas/toppings/vegetabalelayers/cherrytomato-layer.png';
-import redonionLayer     from '../assets/pizzas/toppings/vegetabalelayers/red-onion-layer.png';
-import broccoliLayer     from '../assets/pizzas/toppings/vegetabalelayers/broccoli-layer.png';
-import eggplantLayer     from '../assets/pizzas/toppings/vegetabalelayers/eggplant-layer.png';
-import zucchiniLayer     from '../assets/pizzas/toppings/vegetabalelayers/zucchini-layer.png';
-import dicedtomatoLayer  from '../assets/pizzas/toppings/vegetabalelayers/dicedtomato-layer.png';
-import greenolivesLayer  from '../assets/pizzas/toppings/vegetabalelayers/green-olives-layer.png';
-import blackoliveLayer   from '../assets/pizzas/toppings/vegetabalelayers/blackolives-layer.png';
-import babyspinachLayer  from '../assets/pizzas/toppings/vegetabalelayers/babyspinach-layer.png';
-import bluecheeseLayer   from '../assets/pizzas/toppings/vegetabalelayers/bluecheese-layer.png';
-import pestocheeseLayer  from '../assets/pizzas/toppings/vegetabalelayers/pestocheese-layer.png';
+import mushroomLayer     from '../assets/pizzas/toppings/vegetabalelayers/mushroom-layer.webp';
+import bellpepperLayer   from '../assets/pizzas/toppings/vegetabalelayers/bellpepper-layer.webp';
+import sweetcornLayer    from '../assets/pizzas/toppings/vegetabalelayers/sweetcorn-layer.webp';
+import cherrytomatoLayer from '../assets/pizzas/toppings/vegetabalelayers/cherrytomato-layer.webp';
+import redonionLayer     from '../assets/pizzas/toppings/vegetabalelayers/red-onion-layer.webp';
+import broccoliLayer     from '../assets/pizzas/toppings/vegetabalelayers/broccoli-layer.webp';
+import eggplantLayer     from '../assets/pizzas/toppings/vegetabalelayers/eggplant-layer.webp';
+import zucchiniLayer     from '../assets/pizzas/toppings/vegetabalelayers/zucchini-layer.webp';
+import dicedtomatoLayer  from '../assets/pizzas/toppings/vegetabalelayers/dicedtomato-layer.webp';
+import greenolivesLayer  from '../assets/pizzas/toppings/vegetabalelayers/green-olives-layer.webp';
+import blackoliveLayer   from '../assets/pizzas/toppings/vegetabalelayers/blackolives-layer.webp';
+import babyspinachLayer  from '../assets/pizzas/toppings/vegetabalelayers/babyspinach-layer.webp';
+import bluecheeseLayer   from '../assets/pizzas/toppings/vegetabalelayers/bluecheese-layer.webp';
+import pestocheeseLayer  from '../assets/pizzas/toppings/vegetabalelayers/pestocheese-layer.webp';
 
 /*
   Stage: min(620px, 92vw) — square via aspectRatio:1
@@ -308,6 +308,8 @@ const previewBtn = {
   overflow: 'visible',
 };
 
+const preloadedLayers = new Set();
+
 function PizzaCanvas({
   activeCategory     = 'dough',
   selectedDough      = null,
@@ -361,6 +363,27 @@ function PizzaCanvas({
     () => selectedVegetables.map(id => mergedVegetables.find(v => v.id === id)).filter(Boolean),
     [selectedVegetables, mergedVegetables],
   );
+
+  /* Preload + decode the full-size layer images of the category the customer
+     is looking at, so a click shows the layer instantly instead of the
+     browser painting it in strips while it downloads. */
+  useEffect(() => {
+    const byCategory = {
+      dough:      mergedDoughs.map(d => d.full),
+      sauces:     mergedSauces.map(s => s.layer),
+      cheese:     mergedCheeses.map(c => c.layer),
+      meat:       mergedMeats.map(m => m.layer),
+      vegetables: mergedVegetables.map(v => v.layer),
+    };
+    (byCategory[activeCategory] || []).filter(Boolean).forEach(src => {
+      if (preloadedLayers.has(src)) return;
+      preloadedLayers.add(src);
+      const img = new Image();
+      img.decoding = 'async';
+      img.src = src;
+      img.decode?.().catch(() => {});
+    });
+  }, [activeCategory, mergedDoughs, mergedSauces, mergedCheeses, mergedMeats, mergedVegetables]);
 
   const atMeatLimit    = selectedMeats.length      >= 4;
   const atVeggieLimit  = selectedVegetables.length >= 6;

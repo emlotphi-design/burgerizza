@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import heroImg from '../assets/icons/hero.png';
+import heroImg from '../assets/icons/hero.webp';
 import { Link } from 'react-router-dom';
 import MenuModal from './MenuModal';
 

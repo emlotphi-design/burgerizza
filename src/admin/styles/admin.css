@@ -55,7 +55,7 @@ body[data-context="admin"][data-admin-theme="light"] {
   background-color: #F5C518 !important;
   background-image:
     linear-gradient(rgba(255,255,255,0.42), rgba(255,255,255,0.42)),
-    url('/background.png') !important;
+    url('/background.webp') !important;
   background-size: cover, 420px auto !important;
   background-repeat: no-repeat, repeat !important;
   background-position: center, center !important;

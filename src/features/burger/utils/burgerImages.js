@@ -9,19 +9,19 @@
  */
 
 // ── Wrappers ─────────────────────────────────────────────────────────────────
-import blackWrapper from '../../../assets/burgers/wrappers/black-wrapper.png';
-import classicPaper from '../../../assets/burgers/wrappers/classic-paper.png';
-import kraftPaper   from '../../../assets/burgers/wrappers/kraft-paper.png';
+import blackWrapper from '../../../assets/burgers/wrappers/black-wrapper.webp';
+import classicPaper from '../../../assets/burgers/wrappers/classic-paper.webp';
+import kraftPaper   from '../../../assets/burgers/wrappers/kraft-paper.webp';
 
 export const wrappers = [blackWrapper, classicPaper, kraftPaper];
 export const DEFAULT_WRAPPER = classicPaper;
 
 // ── Bun bases (builder stage + canvas) ───────────────────────────────────────
-import classicBase   from '../../../assets/burgers/buns/buns-base.png/classicbun-base.png';
-import classic2Base  from '../../../assets/burgers/buns/buns-base.png/classicbun-base2.png';
-import charcoalBase  from '../../../assets/burgers/buns/buns-base.png/charcoalbun-base.png';
-import beetrootBase  from '../../../assets/burgers/buns/buns-base.png/beetrootbun-base.png';
-import parsleyBase   from '../../../assets/burgers/buns/buns-base.png/parsleybun-base.png';
+import classicBase   from '../../../assets/burgers/buns/buns-base.png/classicbun-base.webp';
+import classic2Base  from '../../../assets/burgers/buns/buns-base.png/classicbun-base2.webp';
+import charcoalBase  from '../../../assets/burgers/buns/buns-base.png/charcoalbun-base.webp';
+import beetrootBase  from '../../../assets/burgers/buns/buns-base.png/beetrootbun-base.webp';
+import parsleyBase   from '../../../assets/burgers/buns/buns-base.png/parsleybun-base.webp';
 
 export const BUN_BASES = {
   classicbun:  classicBase,
@@ -32,11 +32,11 @@ export const BUN_BASES = {
 };
 
 // ── Bun tops (ordering animation + canvas) ────────────────────────────────────
-import classicTop   from '../../../assets/burgers/buns/top-buns/classicbun-top..png';
-import classic2Top  from '../../../assets/burgers/buns/top-buns/classicbuntop2..png';
-import charcoalTop  from '../../../assets/burgers/buns/top-buns/charcoalbun-top.png';
-import beetrootTop  from '../../../assets/burgers/buns/top-buns/beetrootbun-top.png';
-import parsleyTop   from '../../../assets/burgers/buns/top-buns/parsleybun-top.png';
+import classicTop   from '../../../assets/burgers/buns/top-buns/classicbun-top..webp';
+import classic2Top  from '../../../assets/burgers/buns/top-buns/classicbuntop2..webp';
+import charcoalTop  from '../../../assets/burgers/buns/top-buns/charcoalbun-top.webp';
+import beetrootTop  from '../../../assets/burgers/buns/top-buns/beetrootbun-top.webp';
+import parsleyTop   from '../../../assets/burgers/buns/top-buns/parsleybun-top.webp';
 
 export const BUN_TOPS = {
   classicbun:  classicTop,
@@ -47,11 +47,11 @@ export const BUN_TOPS = {
 };
 
 // ── Bun previews (orbital selection UI) ──────────────────────────────────────
-import classicPreview  from '../../../assets/burgers/buns/buns-preview.png/classicbun-preview.png';
-import classic2Preview from '../../../assets/burgers/buns/buns-preview.png/classicbun-preview2.png';
-import charcoalPreview from '../../../assets/burgers/buns/buns-preview.png/charcoalbun-preview.png';
-import beetrootPreview from '../../../assets/burgers/buns/buns-preview.png/beetrootbun-preview.png';
-import parsleyPreview  from '../../../assets/burgers/buns/buns-preview.png/parsleybun-preview.png';
+import classicPreview  from '../../../assets/burgers/buns/buns-preview.png/classicbun-preview.webp';
+import classic2Preview from '../../../assets/burgers/buns/buns-preview.png/classicbun-preview2.webp';
+import charcoalPreview from '../../../assets/burgers/buns/buns-preview.png/charcoalbun-preview.webp';
+import beetrootPreview from '../../../assets/burgers/buns/buns-preview.png/beetrootbun-preview.webp';
+import parsleyPreview  from '../../../assets/burgers/buns/buns-preview.png/parsleybun-preview.webp';
 
 export const BUN_PREVIEWS = {
   classicbun:  classicPreview,
@@ -80,12 +80,12 @@ export const BUN_BASE_WIDTH = {
 };
 
 // ── Meat bases (builder stage + canvas) ──────────────────────────────────────
-import chickenBase      from '../../../assets/burgers/meats/meat-base/chicken-base.png';
-import baconBase        from '../../../assets/burgers/meats/meat-base/bacon-base.png';
-import friedchickenBase from '../../../assets/burgers/meats/meat-base/friedchicken-base.png';
-import beefBase         from '../../../assets/burgers/meats/meat-base/beef-base.png';
-import beefpattyBase    from '../../../assets/burgers/meats/meat-base/beefpatty-base.png';
-import eggBase          from '../../../assets/burgers/meats/meat-base/egg-base.png';
+import chickenBase      from '../../../assets/burgers/meats/meat-base/chicken-base.webp';
+import baconBase        from '../../../assets/burgers/meats/meat-base/bacon-base.webp';
+import friedchickenBase from '../../../assets/burgers/meats/meat-base/friedchicken-base.webp';
+import beefBase         from '../../../assets/burgers/meats/meat-base/beef-base.webp';
+import beefpattyBase    from '../../../assets/burgers/meats/meat-base/beefpatty-base.webp';
+import eggBase          from '../../../assets/burgers/meats/meat-base/egg-base.webp';
 
 export const MEAT_BASES = {
   chicken:      chickenBase,
@@ -97,12 +97,12 @@ export const MEAT_BASES = {
 };
 
 // ── Meat previews (orbital selection UI) ─────────────────────────────────────
-import chickenPreview      from '../../../assets/burgers/meats/meat-preview/chicken-preview.png';
-import baconPreview        from '../../../assets/burgers/meats/meat-preview/bacon-preview.png';
-import friedchickenPreview from '../../../assets/burgers/meats/meat-preview/friedchicken-preview.png';
-import beefPreview         from '../../../assets/burgers/meats/meat-preview/beef-preview.png';
-import beefpattyPreview    from '../../../assets/burgers/meats/meat-preview/beefpatty-preview.png';
-import eggPreview          from '../../../assets/burgers/meats/meat-preview/egg-preview.png';
+import chickenPreview      from '../../../assets/burgers/meats/meat-preview/chicken-preview.webp';
+import baconPreview        from '../../../assets/burgers/meats/meat-preview/bacon-preview.webp';
+import friedchickenPreview from '../../../assets/burgers/meats/meat-preview/friedchicken-preview.webp';
+import beefPreview         from '../../../assets/burgers/meats/meat-preview/beef-preview.webp';
+import beefpattyPreview    from '../../../assets/burgers/meats/meat-preview/beefpatty-preview.webp';
+import eggPreview          from '../../../assets/burgers/meats/meat-preview/egg-preview.webp';
 
 export const MEAT_PREVIEWS = {
   chicken:      chickenPreview,
@@ -124,9 +124,9 @@ export const MEAT_POSITIONS = {
 };
 
 // ── Cheese bases (builder stage + canvas) ────────────────────────────────────
-import cheddarBase from '../../../assets/burgers/cheeses/cheese-base/cheddar-base.png';
-import edamBase    from '../../../assets/burgers/cheeses/cheese-base/edam-base.png';
-import goudaBase   from '../../../assets/burgers/cheeses/cheese-base/gouda-base.png';
+import cheddarBase from '../../../assets/burgers/cheeses/cheese-base/cheddar-base.webp';
+import edamBase    from '../../../assets/burgers/cheeses/cheese-base/edam-base.webp';
+import goudaBase   from '../../../assets/burgers/cheeses/cheese-base/gouda-base.webp';
 
 export const CHEESE_BASES = {
   cheddar: cheddarBase,
@@ -135,9 +135,9 @@ export const CHEESE_BASES = {
 };
 
 // ── Cheese previews (orbital selection UI) ───────────────────────────────────
-import cheddarPreview from '../../../assets/burgers/cheeses/cheese-preview/cheddar-preview.png';
-import edamPreview    from '../../../assets/burgers/cheeses/cheese-preview/edam-preview.png';
-import goudaPreview   from '../../../assets/burgers/cheeses/cheese-preview/gouda-preview.png';
+import cheddarPreview from '../../../assets/burgers/cheeses/cheese-preview/cheddar-preview.webp';
+import edamPreview    from '../../../assets/burgers/cheeses/cheese-preview/edam-preview.webp';
+import goudaPreview   from '../../../assets/burgers/cheeses/cheese-preview/gouda-preview.webp';
 
 export const CHEESE_PREVIEWS = {
   cheddar: cheddarPreview,
@@ -153,11 +153,11 @@ export const CHEESE_POSITIONS = {
 };
 
 // ── Sauce bases (builder stage + canvas) ─────────────────────────────────────
-import ketchupBase        from '../../../assets/burgers/sauces/sauce-base/ketchup-base.png';
-import mayonnaiseBase     from '../../../assets/burgers/sauces/sauce-base/mayonnaise-base.png';
-import mustardBase        from '../../../assets/burgers/sauces/sauce-base/mustard-base.png';
-import picklesauceBase    from '../../../assets/burgers/sauces/sauce-base/picklesauce-base.png';
-import mushroomsauceBase  from '../../../assets/burgers/sauces/sauce-base/mushroomsauce-base.png';
+import ketchupBase        from '../../../assets/burgers/sauces/sauce-base/ketchup-base.webp';
+import mayonnaiseBase     from '../../../assets/burgers/sauces/sauce-base/mayonnaise-base.webp';
+import mustardBase        from '../../../assets/burgers/sauces/sauce-base/mustard-base.webp';
+import picklesauceBase    from '../../../assets/burgers/sauces/sauce-base/picklesauce-base.webp';
+import mushroomsauceBase  from '../../../assets/burgers/sauces/sauce-base/mushroomsauce-base.webp';
 
 export const SAUCE_BASES = {
   ketchup:       ketchupBase,
@@ -168,11 +168,11 @@ export const SAUCE_BASES = {
 };
 
 // ── Sauce previews (orbital selection UI) ────────────────────────────────────
-import ketchupPreview       from '../../../assets/burgers/sauces/sauce-preview/ketchup-preview.png';
-import mayonnaisePreview    from '../../../assets/burgers/sauces/sauce-preview/mayonnaise-preview.png';
-import mustardPreview       from '../../../assets/burgers/sauces/sauce-preview/mustard-preview.png';
-import picklesaucePreview   from '../../../assets/burgers/sauces/sauce-preview/picklesauce-preview.png';
-import mushroomsaucePreview from '../../../assets/burgers/sauces/sauce-preview/mushroom-sauce-preview.png';
+import ketchupPreview       from '../../../assets/burgers/sauces/sauce-preview/ketchup-preview.webp';
+import mayonnaisePreview    from '../../../assets/burgers/sauces/sauce-preview/mayonnaise-preview.webp';
+import mustardPreview       from '../../../assets/burgers/sauces/sauce-preview/mustard-preview.webp';
+import picklesaucePreview   from '../../../assets/burgers/sauces/sauce-preview/picklesauce-preview.webp';
+import mushroomsaucePreview from '../../../assets/burgers/sauces/sauce-preview/mushroom-sauce-preview.webp';
 
 export const SAUCE_PREVIEWS = {
   ketchup:       ketchupPreview,
@@ -192,11 +192,11 @@ export const SAUCE_POSITIONS = {
 };
 
 // ── Vegetable bases (builder stage + canvas) ──────────────────────────────────
-import tomatoBase      from '../../../assets/burgers/vegetables/vegetable-base/tomato-base.png';
-import onionBase       from '../../../assets/burgers/vegetables/vegetable-base/onion-base.png';
-import lettuceBase     from '../../../assets/burgers/vegetables/vegetable-base/lettuce-base.png';
-import mushroomVegBase from '../../../assets/burgers/vegetables/vegetable-base/mushroom-base..png';
-import pickleBase      from '../../../assets/burgers/vegetables/vegetable-base/pickle-base.png';
+import tomatoBase      from '../../../assets/burgers/vegetables/vegetable-base/tomato-base.webp';
+import onionBase       from '../../../assets/burgers/vegetables/vegetable-base/onion-base.webp';
+import lettuceBase     from '../../../assets/burgers/vegetables/vegetable-base/lettuce-base.webp';
+import mushroomVegBase from '../../../assets/burgers/vegetables/vegetable-base/mushroom-base..webp';
+import pickleBase      from '../../../assets/burgers/vegetables/vegetable-base/pickle-base.webp';
 
 export const VEGETABLE_BASES = {
   tomato:   tomatoBase,
@@ -207,11 +207,11 @@ export const VEGETABLE_BASES = {
 };
 
 // ── Vegetable previews (orbital selection UI) ─────────────────────────────────
-import tomatoPreview      from '../../../assets/burgers/vegetables/vegetable-preview/tomato-preview.png';
-import onionPreview       from '../../../assets/burgers/vegetables/vegetable-preview/onion-preview.png';
-import lettucePreview     from '../../../assets/burgers/vegetables/vegetable-preview/lettuce-preview.png';
-import mushroomVegPreview from '../../../assets/burgers/vegetables/vegetable-preview/mushroom-preview.png';
-import picklePreview      from '../../../assets/burgers/vegetables/vegetable-preview/pickle-preview.png';
+import tomatoPreview      from '../../../assets/burgers/vegetables/vegetable-preview/tomato-preview.webp';
+import onionPreview       from '../../../assets/burgers/vegetables/vegetable-preview/onion-preview.webp';
+import lettucePreview     from '../../../assets/burgers/vegetables/vegetable-preview/lettuce-preview.webp';
+import mushroomVegPreview from '../../../assets/burgers/vegetables/vegetable-preview/mushroom-preview.webp';
+import picklePreview      from '../../../assets/burgers/vegetables/vegetable-preview/pickle-preview.webp';
 
 export const VEGETABLE_PREVIEWS = {
   tomato:   tomatoPreview,

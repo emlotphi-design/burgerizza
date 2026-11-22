@@ -1,7 +1,7 @@
 ﻿import { useCallback, useEffect, useRef, useState } from 'react';
 import { supabase } from '../services/supabase';
-import dbgLight from '../assets/backgrounds/dbg.png';
-import dbgDark  from '../assets/backgrounds/dbgn.png';
+import dbgLight from '../assets/backgrounds/dbg.webp';
+import dbgDark  from '../assets/backgrounds/dbgn.webp';
 import { fetchOrders, getYesterdayStart, updateOrderStatus } from '../admin/services/adminService';
 import {
   getMuted,

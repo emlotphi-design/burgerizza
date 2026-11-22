@@ -1,9 +1,9 @@
 import '../styles/burger-sidebar.css';
-import bunIcon        from '../../../assets/icons/burger/bun-icon.png';
-import sauceIcon      from '../../../assets/icons/burger/sauce-icon.png';
-import meatIcon       from '../../../assets/icons/burger/meat-icon.png';
-import cheeseIcon     from '../../../assets/icons/burger/cheese-icon.png';
-import vegetablesIcon from '../../../assets/icons/burger/vegetables-icon.png';
+import bunIcon        from '../../../assets/icons/burger/bun-icon.webp';
+import sauceIcon      from '../../../assets/icons/burger/sauce-icon.webp';
+import meatIcon       from '../../../assets/icons/burger/meat-icon.webp';
+import cheeseIcon     from '../../../assets/icons/burger/cheese-icon.webp';
+import vegetablesIcon from '../../../assets/icons/burger/vegetables-icon.webp';
 
 const SIDEBAR_ITEMS = [
   { id: 'bun',        label: 'BUN',        icon: bunIcon        },

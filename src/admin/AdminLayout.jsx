@@ -6,8 +6,8 @@ import { subscribeToOrders, fetchOrders } from './services/adminService';
 import { StaffLockProvider, useStaffLock } from './context/StaffLockContext';
 import LanguageSwitcher from '../components/LanguageSwitcher.jsx';
 import './styles/admin.css';
-import dbgLight from '../assets/backgrounds/dbg.png';
-import dbgDark  from '../assets/backgrounds/dbgn.png';
+import dbgLight from '../assets/backgrounds/dbg.webp';
+import dbgDark  from '../assets/backgrounds/dbgn.webp';
 
 const NAV = [
   {

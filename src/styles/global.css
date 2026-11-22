@@ -240,7 +240,7 @@ html {
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
 
-  background-image: url('../assets/backgrounds/bg.png');
+  background-image: url('../assets/backgrounds/bg.webp');
   background-size: cover;
   background-repeat: no-repeat;
   background-position: center;

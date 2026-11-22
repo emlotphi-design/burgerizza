@@ -1,8 +1,8 @@
-import doughIcon      from '../assets/icons/pizza/dough-icon.png';
-import sauceIcon      from '../assets/icons/pizza/sauce-icon.png';
-import cheeseIcon     from '../assets/icons/pizza/cheese-icon.png';
-import meatIcon       from '../assets/icons/pizza/meat-icon.png';
-import vegetablesIcon from '../assets/icons/pizza/vegetables-icon.png';
+import doughIcon      from '../assets/icons/pizza/dough-icon.webp';
+import sauceIcon      from '../assets/icons/pizza/sauce-icon.webp';
+import cheeseIcon     from '../assets/icons/pizza/cheese-icon.webp';
+import meatIcon       from '../assets/icons/pizza/meat-icon.webp';
+import vegetablesIcon from '../assets/icons/pizza/vegetables-icon.webp';
 
 const CATEGORIES = [
   { id: 'dough',      label: 'Dough',   icon: doughIcon      },
