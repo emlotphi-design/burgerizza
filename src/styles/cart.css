@@ -1127,3 +1127,40 @@
   color: rgba(255, 140, 58, 0.90);
 }
 .cart-closed-banner--busy svg { color: #FF8C3A; }
+
+/* ── Tap-to-rename cart item title ── */
+.cart-name-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  text-align: left;
+}
+.cart-name-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.cart-name-pencil {
+  flex-shrink: 0;
+  opacity: 0.35;
+  transition: opacity 0.15s ease;
+}
+.cart-name-btn:hover .cart-name-pencil,
+.cart-name-btn:focus-visible .cart-name-pencil { opacity: 0.7; }
+.cart-name-input {
+  min-width: 0;
+  width: 100%;
+  margin-right: 8px;
+  padding: 2px 8px;
+  border: 1.5px solid rgba(26, 10, 0, 0.18);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.7);
+  outline: none;
+  font-size: 16px; /* ≥16px stops iOS zooming in on focus */
+}
+.cart-name-input:focus { border-color: rgba(26, 10, 0, 0.4); }

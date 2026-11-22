@@ -185,18 +185,6 @@ export default function PizzaBuilder() {
               size="min(540px, 88vw, calc(100vh - 232px))"
               protectImages
             />
-            <div className="builder-name-wrap">
-              <input
-                className="builder-name-input"
-                type="text"
-                value={draftName}
-                onChange={e => setDraftName(e.target.value)}
-                placeholder={`Custom Pizza #${nextPizzaNumber}`}
-                maxLength={32}
-                aria-label="Pizza name"
-                spellCheck={false}
-              />
-            </div>
             {selectedDough && sizesForDough.length > 0 && (
               <div className="nutrition-size-row">
                 {sizesForDough.map(s => (

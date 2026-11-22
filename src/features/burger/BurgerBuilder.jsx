@@ -287,19 +287,6 @@ export default function BurgerBuilder() {
 
         </div>
 
-        <div className="builder-name-wrap">
-          <input
-            className="builder-name-input"
-            type="text"
-            value={draft.name}
-            onChange={e => setName(e.target.value)}
-            placeholder={`Custom Burger #${burgerItems.length + 1}`}
-            maxLength={32}
-            aria-label="Burger name"
-            spellCheck={false}
-          />
-        </div>
-
         <BurgerSidebar activeItem={activeItem} onSelect={setActiveItem} bunSelected={!!draft.bun} />
       </div>
 

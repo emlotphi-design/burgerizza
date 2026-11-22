@@ -10,6 +10,7 @@ import { calculatePizzaCalories } from '../utils/pizzaNutritionUtils';
 import { SIZES_BY_ID } from '../utils/pizzaSizes';
 import NutritionBadge from '../components/NutritionBadge';
 import BurgerCartCard from '../features/burger/components/BurgerCartCard';
+import CartItemName from '../components/CartItemName';
 import { useRestaurantMode } from '../store/RestaurantModeContext';
 
 // Correct unit price for all item types
@@ -82,7 +83,7 @@ function PizzaCartCard({ pizza, idx, visibleCount, isExiting, animDelay, onEdit,
         <div className="cart-details">
           {/* 1 — Name */}
           <div className="cart-pizza-name-row">
-            <span className="cart-pizza-name">{pizza.name}</span>
+            <CartItemName item={pizza} />
             {visibleCount > 1 && <span className="cart-pizza-num">#{idx + 1}</span>}
           </div>
 

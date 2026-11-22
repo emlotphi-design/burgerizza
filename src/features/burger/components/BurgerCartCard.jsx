@@ -4,6 +4,7 @@ import { calcBurgerPrice, BURGER_LABEL } from '../utils/burgerUtils';
 import { calculateBurgerCalories } from '../utils/burgerNutritionUtils';
 import SkeletonImage from '../../../components/SkeletonImage';
 import NutritionBadge from '../../../components/NutritionBadge';
+import CartItemName from '../../../components/CartItemName';
 
 /* Bun preview images — used as fallback when canvas capture image is absent
    (e.g. orders placed via Restaurant Mode sticky bar or admin POS) */
@@ -130,7 +131,7 @@ export default function BurgerCartCard({ burger, isExiting, animDelay, onRemove,
         <div className="cart-details">
           {/* 1 — Name */}
           <div className="cart-pizza-name-row">
-            <span className="cart-pizza-name">{burger.name}</span>
+            <CartItemName item={burger} />
             {visibleCount > 1 && idx != null && (
               <span className="cart-pizza-num">#{idx + 1}</span>
             )}
