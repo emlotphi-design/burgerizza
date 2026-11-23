@@ -8,6 +8,7 @@ import { calculateBurgerCalories } from './utils/burgerNutritionUtils';
 import { useBurgerBuilder } from './hooks/useBurgerBuilder';
 import { useCalorieBadgePosition } from '../../hooks/useCalorieBadgePosition';
 import { DEFAULT_WRAPPER } from './utils/burgerImages';
+import '../../styles/order-button.css';
 
 const previewBtn = {
   width: '100%', height: '100%', padding: 0,
